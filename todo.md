@@ -93,3 +93,12 @@
 - [x] Fix getLoginUrl to redirect to /login (local) instead of Manus OAuth
 - [x] Fix AppLayout.tsx OAuth redirect to use /login
 - [ ] Save checkpoint with working build
+
+## Phase 12 - Fix DB Errors (Missing Columns)
+- [x] Add missing columns to sites table (domain, siteName, sectorType, classification, siteStatus, etc.)
+- [x] Add 'link' column to notifications table
+- [x] Add missing columns to scheduled_reports table
+- [x] Update migration journal
+- [x] Verify all dashboard queries work (stats, clauseStats, sectorCompliance, etc.)
+- [x] Verify no new errors after server restart
+- [ ] Save checkpoint

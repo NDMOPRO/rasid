@@ -1,0 +1,9 @@
+{
+  "query": "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sites' AND COLUMN_NAME IN ('siteStatus', 'site_status', 'sectorType', 'sector_type', 'classification');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sites' AND COLUMN_NAME IN ('siteStatus', 'site_status', 'sectorType', 'sector_type', 'classification');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1527
+}

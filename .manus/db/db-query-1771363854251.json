@@ -1,0 +1,22 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('sites', 'scans', 'notifications', 'scheduled_reports') ORDER BY TABLE_NAME;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('sites', 'scans', 'notifications', 'scheduled_reports') ORDER BY TABLE_NAME;",
+  "rows": [
+    {
+      "TABLE_NAME": "notifications"
+    },
+    {
+      "TABLE_NAME": "scans"
+    },
+    {
+      "TABLE_NAME": "scheduled_reports"
+    },
+    {
+      "TABLE_NAME": "sites"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\nnotifications\nscans\nscheduled_reports\nsites\n",
+  "stderr": "",
+  "execution_time_ms": 1516
+}
