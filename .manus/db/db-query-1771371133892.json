@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `alert_rules` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ruleName` varchar(255) NOT NULL,\n\t`ruleNameAr` varchar(255),\n\t`conditionType` enum('compliance_drop','new_non_compliant','scan_failure','threshold','custom') NOT NULL,\n\t`conditionValue` json,\n\t`severity` enum('low','medium','high','critical') NOT NULL DEFAULT 'medium',\n\t`notifyContacts` json,\n\t`deliveryChannels` json,\n\t`isActive` tinyint NOT NULL DEFAULT 1,\n\t`createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\t`updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n\tPRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute CREATE TABLE IF NOT EXISTS `alert_rules` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ruleName` varchar(255) NOT NULL,\n\t`ruleNameAr` varchar(255),\n\t`conditionType` enum('compliance_drop','new_non_compliant','scan_failure','threshold','custom') NOT NULL,\n\t`conditionValue` json,\n\t`severity` enum('low','medium','high','critical') NOT NULL DEFAULT 'medium',\n\t`notifyContacts` json,\n\t`deliveryChannels` json,\n\t`isActive` tinyint NOT NULL DEFAULT 1,\n\t`createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n\t`updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n\tPRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2001
+}

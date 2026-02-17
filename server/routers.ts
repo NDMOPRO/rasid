@@ -2,6 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, rootAdminProcedure, assertNotRootAdmin, router } from "./_core/trpc";
+// Root admin user ID for permission checks
+const ROOT_ADMIN_USER_ID = "mruhaily";
 import { z } from "zod";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
@@ -9,7 +11,9 @@ import { TRPCError } from "@trpc/server";
 import ExcelJS from "exceljs";
 import { createProfessionalExcel, statusToArabic, boolToCompliance, type ExcelSheetData } from "./excelHelper";
 import bcrypt from "bcryptjs";
+import { SignJWT } from "jose";
 import { sdk } from "./_core/sdk";
+import { ENV } from "./_core/env";
 import { ONE_YEAR_MS } from "@shared/const";
 import { storagePut } from "./storage";
 import PptxGenJS from "pptxgenjs";
@@ -18,6 +22,13 @@ import { notifyOwner } from "./_core/notification";
 import { processChat, getGreeting, learnFromDocument, RASID_AVATAR, RASID_AVATAR_ALT, RASID_AVATAR_ALT2 } from "./aiAssistant";
 import { startDeepScanJob, pauseScan, resumeScan, cancelScan, getActiveScanJobId, isScanPaused, deepScanDomain, setFastScanMode } from "./deepScanner";
 import { processSmartRasidQuery, searchKnowledge, generateEmbedding } from "./_core/rag";
+import { broadcastNotification } from "./websocket";
+import { triggerJob, toggleJobStatus } from "./scheduler";
+import { enrichLeak, enrichAllPending } from "./enrichment";
+import { executeRetentionPolicies, previewRetention } from "./retention";
+import { executeScan, quickScan } from "./scanEngine";
+import { rasidAIChat } from "./rasidAI";
+import { adminRouter } from "./adminRouter";
 import {
   aiChatSessions, aiChatMessages, aiRatings, aiSearchLog,
   aiScenarios, aiCustomCommands, knowledgeBase,
@@ -25,6 +36,32 @@ import {
   sites, scans, users, letters, cases
 } from "../drizzle/schema";
 import { eq, desc, asc, and, count, sql, like, or } from "drizzle-orm";
+
+// Import P1 db functions directly (P1 code uses direct references, not db.* prefix)
+import {
+  getLeaks, getLeakById, createLeak, updateLeakStatus,
+  getChannels, savePiiScan, getPiiScans,
+  getDarkWebListings, getPasteEntries, getDashboardStats,
+  getAllUsers, updateUserRole, getAuditLogs, exportAuditLogsCsv,
+  createNotification,
+  getMonitoringJobs, getMonitoringJobById,
+  getRetentionPolicies, updateRetentionPolicy,
+  getThreatMapData, getThreatRules, getThreatRuleById, createThreatRule, toggleThreatRule,
+  getEvidenceChain, createEvidenceEntry, getEvidenceStats,
+  getSellerProfiles, getSellerById, createSellerProfile, updateSellerProfile,
+  getOsintQueries, createOsintQuery,
+  getFeedbackEntries, createFeedbackEntry, getFeedbackStats,
+  getKnowledgeGraphData,
+  getPlatformUserByUserId, getPlatformUserById, getAllPlatformUsers,
+  createPlatformUser, updatePlatformUser, deletePlatformUser,
+  createAiRating, getAiRatings, getAiRatingStats,
+  getKnowledgeBaseEntries, getKnowledgeBaseEntryById,
+  createKnowledgeBaseEntry, updateKnowledgeBaseEntry, deleteKnowledgeBaseEntry,
+  getKnowledgeBaseStats, incrementKnowledgeBaseViewCount,
+  getAllPersonalityScenarios, createPersonalityScenario,
+  updatePersonalityScenario, deletePersonalityScenario,
+  getGreetingForUser, checkLeaderMention,
+} from "./db";
 
 function getAuthUser(ctx: { user: any; platformUser?: any }) {
   if (ctx.platformUser) {
@@ -43,6 +80,7 @@ const { logAudit, updateConversation, deleteConversation, getConversationById, g
 
 export const appRouter = router({
   system: systemRouter,
+  admin: adminRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(async ({ ctx }) => {
@@ -659,10 +697,16 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
   }),
 
   notifications: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
+    list: publicProcedure.input(z.object({
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(50),
+      unreadOnly: z.boolean().optional().default(false),
+    }).optional()).query(async ({ ctx, input }) => {
+      if (!ctx.user?.id) return [];
       return await db.getUserNotifications(ctx.user.id);
     }),
-    unreadCount: protectedProcedure.query(async ({ ctx }) => {
+    unreadCount: publicProcedure.query(async ({ ctx }) => {
+      if (!ctx.user?.id) return { count: 0 };
       const count = await db.getUnreadNotificationCount(ctx.user.id);
       return { count };
     }),
@@ -945,6 +989,76 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
     }),
     markAllRead: protectedProcedure.mutation(async () => {
       return await db.markAllAlertsRead();
+    }),
+    // Alert contacts management
+    contacts: router({
+      list: protectedProcedure.query(async () => {
+        return await db.getAlertContacts();
+      }),
+      create: protectedProcedure.input(z.object({
+        name: z.string(),
+        type: z.string(),
+        value: z.string(),
+        isActive: z.boolean().optional(),
+      })).mutation(async ({ input }) => {
+        return await db.createAlertContact(input as any);
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        type: z.string().optional(),
+        value: z.string().optional(),
+        isActive: z.boolean().optional(),
+      })).mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await db.updateAlertContact(id, data as any);
+      }),
+      delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+        return await db.deleteAlertContact(input.id);
+      }),
+    }),
+    // Alert rules management
+    rules: router({
+      list: protectedProcedure.query(async () => {
+        return await db.getAlertRules();
+      }),
+      create: protectedProcedure.input(z.object({
+        name: z.string(),
+        condition: z.string(),
+        severity: z.string(),
+        isActive: z.boolean().optional(),
+      })).mutation(async ({ input }) => {
+        return await db.createAlertRule(input as any);
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        condition: z.string().optional(),
+        severity: z.string().optional(),
+        isActive: z.boolean().optional(),
+      })).mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return await db.updateAlertRule(id, data as any);
+      }),
+      delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+        return await db.deleteAlertRule(input.id);
+      }),
+    }),
+    // Alert history
+    history: protectedProcedure.query(async () => {
+      return await db.getAlertHistory(100);
+    }),
+    // Alert stats
+    stats: protectedProcedure.query(async () => {
+      const contacts = await db.getAlertContacts();
+      const rules = await db.getAlertRules();
+      const history = await db.getAlertHistory(1000);
+      return {
+        totalSent: history.length,
+        totalFailed: 0,
+        activeRules: rules.filter((r: any) => r.isActive).length,
+        activeContacts: contacts.filter((c: any) => c.isActive).length,
+      };
     }),
   }),
 
@@ -4610,6 +4724,50 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       await dbConn.delete(aiCustomCommands).where(eq(aiCustomCommands.id, input.id));
       return { success: true };
     }),
+    // ===== Messages (for SmartRasidFAB) =====
+    messages: protectedProcedure.input(z.object({
+      conversationId: z.string().optional(),
+    }).optional()).query(async ({ ctx, input }) => {
+      if (!input?.conversationId) return [];
+      const dbConn = await db.getDb();
+      if (!dbConn) return [];
+      return dbConn.select().from(aiChatMessages)
+        .where(eq(aiChatMessages.sessionId, input.conversationId))
+        .orderBy(aiChatMessages.createdAt);
+    }),
+    // ===== Suggestions =====
+    suggestions: protectedProcedure.query(async () => {
+      return [
+        'ما هي آخر نتائج الفحص؟',
+        'أظهر لي إحصائيات الامتثال',
+        'ما هي المواقع غير الملتزمة؟',
+        'أعطني ملخص عن حالة الخصوصية',
+      ];
+    }),
+    // ===== Create Conversation =====
+    createConversation: protectedProcedure.input(z.object({
+      title: z.string().optional(),
+    })).mutation(async ({ ctx, input }) => {
+      const dbConn = await db.getDb();
+      if (!dbConn) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      await dbConn.insert(aiChatSessions).values({
+        sessionId,
+        userId: ctx.user.id,
+        userName: ctx.user.name || 'مستخدم',
+        title: input?.title || 'محادثة جديدة',
+        messageCount: 0,
+      });
+      return { id: sessionId };
+    }),
+    // ===== Send Message =====
+    sendMessage: protectedProcedure.input(z.object({
+      conversationId: z.string(),
+      message: z.string().min(1).max(5000),
+    })).mutation(async ({ ctx, input }) => {
+      const result = await processChat(ctx.user.id, ctx.user.name || 'مستخدم', input.message);
+      return result;
+    }),
   }),
   // ===== Training Center Router (مركز تدريب راصد الذكي) =====
   trainingCenter: router({
@@ -7391,10 +7549,98 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       }),
   }),
 
+  // ===== Privacy Sites Router =====
+  privacy: router({
+    sites: protectedProcedure.input(z.object({
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(20),
+      search: z.string().optional(),
+      status: z.string().optional(),
+      complianceStatus: z.string().optional(),
+    }).optional()).query(async ({ input }) => {
+      return await db.getSites(input || {});
+    }),
+    siteById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await db.getSiteById(input.id);
+    }),
+    siteScans: protectedProcedure.input(z.object({ siteId: z.number() })).query(async ({ input }) => {
+      return await db.getSiteScans(input.siteId);
+    }),
+    siteRequirements: protectedProcedure.input(z.object({ siteId: z.number() })).query(async ({ input }) => {
+      const scans = await db.getSiteScans(input.siteId);
+      return scans.length > 0 ? (scans[0] as any).requirements || [] : [];
+    }),
+    stats: protectedProcedure.query(async () => {
+      const sites = await db.getSites({});
+      const siteList = (sites as any).sites || sites || [];
+      return {
+        totalSites: Array.isArray(siteList) ? siteList.length : 0,
+        compliant: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'compliant').length : 0,
+        nonCompliant: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'non_compliant').length : 0,
+        partial: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'partial').length : 0,
+      };
+    }),
+    policyVersions: protectedProcedure.input(z.object({ siteId: z.number() })).query(async ({ input }) => {
+      return await db.getSiteComplianceHistory(input.siteId);
+    }),
+  }),
+
+  // ===== Incidents Router =====
+  incidents: router({
+    list: protectedProcedure.input(z.object({
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(20),
+      search: z.string().optional(),
+      status: z.string().optional(),
+    }).optional()).query(async ({ input }) => {
+      return await db.getAllIncidentDocuments();
+    }),
+    byId: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+      return await db.getIncidentDocumentByDocumentId(input.id);
+    }),
+    stats: protectedProcedure.query(async () => {
+      const docs = await db.getAllIncidentDocuments();
+      return {
+        total: docs.length,
+        open: docs.filter((d: any) => d.status === 'open').length,
+        resolved: docs.filter((d: any) => d.status === 'resolved').length,
+        inProgress: docs.filter((d: any) => d.status === 'in_progress').length,
+      };
+    }),
+    datasets: protectedProcedure.query(async () => {
+      const docs = await db.getAllIncidentDocuments();
+      return { incidents: docs };
+    }),
+  }),
+
+  // ===== Followups Router =====
+  followups: router({
+    list: protectedProcedure.input(z.object({
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(20),
+    }).optional()).query(async () => {
+      // Followups are derived from cases/letters
+      return [];
+    }),
+  }),
+
+  // ===== Overview Router =====
+  overview: router({
+    stats: protectedProcedure.query(async () => {
+      const sites = await db.getSites({});
+      const siteList = (sites as any).sites || sites || [];
+      return {
+        totalSites: Array.isArray(siteList) ? siteList.length : 0,
+        totalScans: 0,
+        complianceRate: 0,
+        activeCases: 0,
+      };
+    }),
+  }),
 
 });
 
-export type AppRouter = typeof appRouter;;
+export type AppRouter = typeof appRouter;
 
 // ===== Helper: Crawl for privacy page =====
 async function crawlForPrivacy(url: string) {

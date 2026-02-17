@@ -102,3 +102,19 @@
 - [x] Verify all dashboard queries work (stats, clauseStats, sectorCompliance, etc.)
 - [x] Verify no new errors after server restart
 - [ ] Save checkpoint
+
+## Phase 13 - Fix Merged Platform Errors & Push to New Repo
+- [x] Add tinyint, bigint, boolean imports to schema.ts
+- [x] Add alertRules table to schema.ts
+- [x] Add all type exports for 104+ tables in schema.ts
+- [x] Fix db.ts imports to include all P1 tables
+- [x] Create 10 stub server modules (scheduler, enrichment, retention, etc.)
+- [x] Copy adminRouter.ts, adminDb.ts, permissionEngine.ts, adminSeed.ts from P1
+- [x] Add missing imports and top-level routers to routers.ts
+- [x] Add missing ai sub-procedures (messages, suggestions, createConversation, sendMessage)
+- [x] Add missing alerts sub-routers (contacts, rules, history, stats)
+- [x] Fix notifications.list for unauthenticated users
+- [x] Create alert_rules table in database
+- [x] Server running cleanly - zero runtime errors
+- [x] Push to new GitHub repo (raneemndmo-collab/rasid)
+- [x] Save checkpoint

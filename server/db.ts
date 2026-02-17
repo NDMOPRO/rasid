@@ -1,7 +1,65 @@
-import { eq, sql, desc, asc, like, and, or, count, avg, lte, gte, isNotNull } from "drizzle-orm";
+import { eq, sql, desc, asc, like, and, or, count, avg, lte, gte, isNotNull, type SQL, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, sites, scans, letters, notifications, activityLogs, siteWatchers, complianceAlerts, mobileApps, appScans, messageTemplates, cases, caseHistory, batchScanJobs, scanSchedules, scheduleExecutions, caseComments, escalationRules, escalationLogs, changeDetectionLogs, systemSettings, passwordResetTokens, apiKeys, scheduledReports, reportExecutions, kpiTargets, smartAlerts, dashboardSnapshots, executiveAlerts, executiveReports, savedFilters, userSessions, complianceChangeNotifications, userDashboardWidgets, visualAlerts, emailNotificationPrefs, pdfReportHistory, documents, reportAudit, knowledgeBase, personalityScenarios, aiUserSessions, chatHistory, customActions, trainingDocuments, aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue, platformAnalytics, platformSettings, pageConfigs, themeSettings, contentBlocks, dataTransferLogs, settingsAuditLog, presentationTemplates, presentations , alertContacts, alertHistory, alertRules, evidenceChain, feedbackEntries, incidentDocuments, knowledgeGraphEdges, knowledgeGraphNodes, osintQueries, retentionPolicies, sellerProfiles, threatRules, type IncidentDocument, type InsertAlertContact, type InsertAlertRule, type InsertApiKey, type InsertEvidenceChainEntry, type InsertFeedbackEntry, type InsertIncidentDocument, type InsertOsintQuery, type InsertPersonalityScenario, type InsertReportAudit, type InsertScheduledReport, type InsertSellerProfile, type InsertThreatRule, type ReportAudit } from "../drizzle/schema";
-import type { Site, InsertSite, Scan, InsertScan, Letter, InsertLetter, Notification, InsertNotification, InsertActivityLog, InsertSiteWatcher, InsertComplianceAlert, InsertMobileApp, MobileApp, InsertAppScan, AppScan, InsertMessageTemplate, MessageTemplate, InsertCase, InsertCaseHistoryEntry, InsertBatchScanJob, InsertScanSchedule, InsertCaseComment, InsertEscalationRule, InsertEscalationLog, InsertChangeDetectionLog, InsertPasswordResetToken, InsertScheduledReport, InsertReportExecution, InsertApiKey, InsertKpiTarget, InsertSmartAlert, InsertDashboardSnapshot, InsertExecutiveAlert, InsertExecutiveReport, InsertSavedFilter, InsertUserSession, InsertComplianceChangeNotification, InsertUserDashboardWidget, InsertVisualAlert, InsertEmailNotificationPref, InsertPdfReportHistory, InsertDocument, InsertReportAudit, InsertKnowledgeEntry, InsertPersonalityScenario, InsertChatHistoryEntry, InsertCustomAction, InsertTrainingDocument, InsertAiFeedback, InsertAiTrainingLog, CustomAction, TrainingDocument, AiFeedback, AiTrainingLog, InsertBulkAnalysisJob, InsertBulkAnalysisResult, BulkAnalysisJob, BulkAnalysisResult, InsertDeepScanQueueItem, DeepScanQueueItem, InsertPlatformSetting, InsertPageConfig, InsertThemeSetting, InsertContentBlock, InsertDataTransferLog , type IncidentDocument, type InsertAlertContact, type InsertAlertRule, type InsertApiKey, type InsertEvidenceChainEntry, type InsertFeedbackEntry, type InsertIncidentDocument, type InsertOsintQuery, type InsertPersonalityScenario, type InsertReportAudit, type InsertScheduledReport, type InsertSellerProfile, type InsertThreatRule, type ReportAudit } from "../drizzle/schema";
+import {
+  users, sites, scans, letters, notifications, activityLogs, siteWatchers,
+  complianceAlerts, mobileApps, appScans, messageTemplates, cases, caseHistory,
+  batchScanJobs, scanSchedules, scheduleExecutions, caseComments, escalationRules,
+  escalationLogs, changeDetectionLogs, systemSettings, passwordResetTokens, apiKeys,
+  scheduledReports, reportExecutions, kpiTargets, smartAlerts, dashboardSnapshots,
+  executiveAlerts, executiveReports, savedFilters, userSessions,
+  complianceChangeNotifications, userDashboardWidgets, visualAlerts,
+  emailNotificationPrefs, pdfReportHistory, documents, reportAudit, knowledgeBase,
+  personalityScenarios, aiUserSessions, chatHistory, customActions, trainingDocuments,
+  aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue,
+  platformAnalytics, platformSettings, pageConfigs, themeSettings, contentBlocks,
+  dataTransferLogs, settingsAuditLog, presentationTemplates, presentations,
+  alertContacts, alertHistory, alertRules, evidenceChain, feedbackEntries,
+  incidentDocuments, knowledgeGraphEdges, knowledgeGraphNodes, osintQueries,
+  retentionPolicies, sellerProfiles, threatRules,
+  // P1 tables
+  leaks, channels, piiScans, reports, darkWebListings, pasteEntries, auditLog,
+  monitoringJobs, platformUsers, chatConversations, chatMessages, aiResponseRatings,
+  incidentCertifications, kbSearchLog,
+  // Admin tables
+  adminRoles, adminPermissions, adminRolePermissions, adminGroups,
+  adminGroupMemberships, adminGroupPermissions, adminUserOverrides,
+  adminFeatureFlags, adminAuditLogs, adminThemeSettings, adminMenus,
+  adminMenuItems, adminUserRoles,
+} from "../drizzle/schema";
+import type {
+  InsertUser, Site, InsertSite, Scan, InsertScan, Letter, InsertLetter,
+  Notification, InsertNotification, InsertActivityLog, InsertSiteWatcher,
+  InsertComplianceAlert, InsertMobileApp, MobileApp, InsertAppScan, AppScan,
+  InsertMessageTemplate, MessageTemplate, InsertCase, InsertCaseHistoryEntry,
+  InsertBatchScanJob, InsertScanSchedule, InsertCaseComment, InsertEscalationRule,
+  InsertEscalationLog, InsertChangeDetectionLog, InsertPasswordResetToken,
+  InsertScheduledReport, InsertReportExecution, InsertApiKey, InsertKpiTarget,
+  InsertSmartAlert, InsertDashboardSnapshot, InsertExecutiveAlert,
+  InsertExecutiveReport, InsertSavedFilter, InsertUserSession,
+  InsertComplianceChangeNotification, InsertUserDashboardWidget, InsertVisualAlert,
+  InsertEmailNotificationPref, InsertPdfReportHistory, InsertDocument,
+  InsertReportAudit, InsertKnowledgeBaseEntry as InsertKnowledgeEntry, InsertPersonalityScenario,
+  InsertChatHistoryEntry, InsertCustomAction, InsertTrainingDocument, InsertAiFeedback,
+  InsertAiTrainingLog, CustomAction, TrainingDocument, AiFeedback, AiTrainingLog,
+  InsertBulkAnalysisJob, InsertBulkAnalysisResult, BulkAnalysisJob, BulkAnalysisResult,
+  InsertDeepScanQueueItem, DeepScanQueueItem, InsertPlatformSetting, InsertPageConfig,
+  InsertThemeSetting, InsertContentBlock, InsertDataTransferLog,
+  IncidentDocument, InsertAlertContact, InsertAlertRule,
+  InsertEvidenceChainEntry, InsertFeedbackEntry, InsertIncidentDocument,
+  InsertOsintQuery, InsertSellerProfile, InsertThreatRule, ReportAudit,
+  // P1 types
+  InsertLeak, InsertChannel, InsertPiiScan, InsertReport, InsertDarkWebListing,
+  InsertPasteEntry, InsertAuditLogEntry, InsertMonitoringJob,
+  PlatformUser, InsertPlatformUser,
+  InsertChatConversation, InsertChatMessage,
+  AiResponseRating, InsertAiResponseRating,
+  KnowledgeBaseEntry, InsertKnowledgeBaseEntry,
+  // Admin types
+  AdminRole, InsertAdminRole, AdminPermission, InsertAdminPermission,
+  AdminGroup, InsertAdminGroup, AdminFeatureFlag, InsertAdminFeatureFlag,
+  AdminAuditLog, InsertAdminAuditLog, AdminThemeSetting, InsertAdminThemeSetting,
+  AdminMenu, InsertAdminMenu, AdminMenuItem, InsertAdminMenuItem,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
