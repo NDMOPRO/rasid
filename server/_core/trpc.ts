@@ -43,3 +43,32 @@ export const adminProcedure = t.procedure.use(
     });
   }),
 );
+
+const ROOT_ADMIN_USERNAME = "MRUHAILY";
+
+export const rootAdminProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+    if (!ctx.user || ctx.user.role !== 'admin') {
+      throw new TRPCError({ code: "FORBIDDEN", message: "صلاحيات غير كافية" });
+    }
+    if (ctx.user.name?.toUpperCase() !== ROOT_ADMIN_USERNAME) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "هذا القسم متاح فقط لمشرف النظام الرئيسي" });
+    }
+    return next({
+      ctx: {
+        ...ctx,
+        user: ctx.user,
+      },
+    });
+  }),
+);
+
+export function assertNotRootAdmin(targetUsername: string | null | undefined) {
+  if (targetUsername?.toUpperCase() === ROOT_ADMIN_USERNAME) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "لا يمكن تعديل أو حذف حساب المشرف الرئيسي",
+    });
+  }
+}

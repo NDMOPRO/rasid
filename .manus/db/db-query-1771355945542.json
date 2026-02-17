@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE users \nADD COLUMN IF NOT EXISTS rasidRole ENUM('root','admin','smart_monitor_manager','monitoring_director','monitoring_specialist','monitoring_officer','requester','respondent','ndmo_desk','legal_advisor','director','board_secretary','auditor') DEFAULT 'monitoring_officer',\nADD COLUMN IF NOT EXISTS username VARCHAR(64),\nADD COLUMN IF NOT EXISTS passwordHash VARCHAR(255),\nADD COLUMN IF NOT EXISTS displayName VARCHAR(255),\nADD COLUMN IF NOT EXISTS mobile VARCHAR(20),\nADD COLUMN IF NOT EXISTS failedLoginAttempts INT DEFAULT 0 NOT NULL,\nADD COLUMN IF NOT EXISTS lockedUntil TIMESTAMP NULL,\nADD COLUMN IF NOT EXISTS emailNotifications TINYINT DEFAULT 1 NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute ALTER TABLE users \nADD COLUMN IF NOT EXISTS rasidRole ENUM('root','admin','smart_monitor_manager','monitoring_director','monitoring_specialist','monitoring_officer','requester','respondent','ndmo_desk','legal_advisor','director','board_secretary','auditor') DEFAULT 'monitoring_officer',\nADD COLUMN IF NOT EXISTS username VARCHAR(64),\nADD COLUMN IF NOT EXISTS passwordHash VARCHAR(255),\nADD COLUMN IF NOT EXISTS displayName VARCHAR(255),\nADD COLUMN IF NOT EXISTS mobile VARCHAR(20),\nADD COLUMN IF NOT EXISTS failedLoginAttempts INT DEFAULT 0 NOT NULL,\nADD COLUMN IF NOT EXISTS lockedUntil TIMESTAMP NULL,\nADD COLUMN IF NOT EXISTS emailNotifications TINYINT DEFAULT 1 NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 5991
+}

@@ -330,3 +330,29 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   return (await response.json()) as InvokeResult;
 }
+
+export async function generateEmbedding(text: string): Promise<number[]> {
+  const apiUrl = ENV.forgeApiUrl?.replace(/\/$/, "") || "https://forge.manus.im";
+  try {
+    const response = await fetch(`${apiUrl}/v1/embeddings`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${ENV.forgeApiKey}`,
+      },
+      body: JSON.stringify({
+        model: "text-embedding-3-small",
+        input: text.substring(0, 8000),
+      }),
+    });
+    if (!response.ok) {
+      console.error("[LLM] Embedding generation failed:", await response.text());
+      return [];
+    }
+    const data = await response.json();
+    return data.data?.[0]?.embedding || [];
+  } catch (error) {
+    console.error("[LLM] Embedding generation error:", (error as Error).message);
+    return [];
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "ai_conversations"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "ai_messages"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "ai_task_state"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "approvals"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "audit_log"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "backups"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "breach_sources"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "catalogs"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "compliance_clauses"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "dashboard_layouts"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "feature_flags"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "followup_tasks"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "followups"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "glossary_terms"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "group_members"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "groups"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "guide_catalog"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "incident_attachments"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "incident_datasets"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "incident_timeline"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "incidents"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "letters"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "menus"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "message_templates_catalog"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "notifications"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "page_descriptors"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "pages"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "platform_settings"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "privacy_policy_versions"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "report_templates"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "reports"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "roles"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "scheduled_reports"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "site_requirements"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "site_scans"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "sites"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "system_events"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "threat_actors"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "ui_policies"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "user_roles"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "users"
+    },
+    {
+      "Tables_in_HncdBnCn7T8RAKFc6RDhtp": "verification_records"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_HncdBnCn7T8RAKFc6RDhtp\n__drizzle_migrations\nai_conversations\nai_messages\nai_task_state\napprovals\naudit_log\nbackups\nbreach_sources\ncatalogs\ncompliance_clauses\ndashboard_layouts\nfeature_flags\nfollowup_tasks\nfollowups\nglossary_terms\ngroup_members\ngroups\nguide_catalog\nincident_attachments\nincident_datasets\nincident_timeline\nincidents\nletters\nmenus\nmessage_templates_catalog\nnotifications\npage_descriptors\npages\nplatform_settings\nprivacy_policy_versions\nreport_templates\nreports\nroles\nscheduled_reports\nsite_requirements\nsite_scans\nsites\nsystem_events\nthreat_actors\nui_policies\nuser_roles\nusers\nverification_records\n",
+  "stderr": "",
+  "execution_time_ms": 1557
+}

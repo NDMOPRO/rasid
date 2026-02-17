@@ -55,3 +55,34 @@
 - [x] Check RTL consistency
 - [x] 0 TypeScript errors
 - [x] Save checkpoint
+
+## Phase 9 - ACTUAL MERGE from Existing Platforms (Priority)
+- [x] Copy schema.ts from Platform 1 (1108 lines - the complete one)
+- [x] Merge unique tables from Platform 2 schema into merged schema (39 unique tables added, total 1710 lines)
+- [x] Copy db.ts from Platform 1 (5843 lines) and merge Platform 2 db.ts (94 unique functions added, total 6868 lines)
+- [x] Copy routers.ts from Platform 1 (7431 lines) and merge Platform 2 routers.ts (25 unique routers added, total 8749 lines)
+- [ ] Copy all 69 pages from Platform 1
+- [ ] Copy unique pages from Platform 2 (52 pages, merge non-duplicates)
+- [ ] Copy all 30+ components from Platform 1
+- [ ] Copy unique components from Platform 2
+- [ ] Copy index.css theme from Platform 1 (royal blue dark theme)
+- [ ] Copy App.tsx routes and navigation from Platform 1
+- [ ] Merge Platform 2 unique routes into App.tsx
+- [ ] Fix all imports and paths after merge
+- [ ] Apply local auth system (already exists in both platforms)
+- [ ] Verify royal blue background (not black)
+- [ ] Use Rasid character for Smart AI icon
+- [ ] Professional logo animation
+- [ ] Article 12 compliance with 8 clauses evaluation
+- [ ] Dashboard with dual indicator groups (general + 8 clauses)
+- [ ] Import 24,983 Saudi domains from CSV
+- [ ] Verify all features work end-to-end
+- [ ] Write/update tests
+- [ ] Save checkpoint
+
+## Phase 10 - Apply Platform 2 Design (User Request)
+- [ ] Review Platform 2 CSS theme and design (the correct design)
+- [ ] Copy Platform 2 index.css theme to merged platform
+- [ ] Apply Platform 2 design patterns to layout/navigation
+- [ ] Fix all build errors (missing packages, imports)
+- [ ] Save checkpoint with working build
