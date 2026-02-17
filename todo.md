@@ -86,3 +86,10 @@
 - [ ] Apply Platform 2 design patterns to layout/navigation
 - [ ] Fix all build errors (missing packages, imports)
 - [ ] Save checkpoint with working build
+
+## Phase 11 - GitHub & Auth Fix
+- [x] Create private GitHub repo (raneemndmo-collab/rasid-national-platform)
+- [x] Push all code to GitHub
+- [x] Fix getLoginUrl to redirect to /login (local) instead of Manus OAuth
+- [x] Fix AppLayout.tsx OAuth redirect to use /login
+- [ ] Save checkpoint with working build

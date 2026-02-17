@@ -119,3 +119,5 @@ export function ParticleField({ count = 40, className = "" }: ParticleFieldProps
     />
   );
 }
+
+export default ParticleField;

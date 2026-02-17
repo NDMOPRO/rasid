@@ -154,7 +154,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </p>
           </div>
           <Button
-            onClick={() => { window.location.href = getLoginUrl(); }}
+            onClick={() => { window.location.href = "/login"; }}
             size="lg"
             className="w-full bg-gold text-gold-foreground hover:bg-gold/90 shadow-lg"
           >
