@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO users (openId, name, email, phone, role, department, organization, isActive) VALUES\n('MRUHAILY', 'Muhammed ALRuhaily', 'prog.muhammed@gmail.com', '+966553445533', 'superadmin', 'IT', 'NDMO', true),\n('aalrebdi', 'Alrebdi Fahad Alrebdi', 'aalrebdi@ndmo.gov.sa', NULL, 'admin', 'Presidency', 'NDMO', true),\n('msarhan', 'Mashal Abdullah Alsarhan', 'msarhan@nic.gov.sa', '0555113675', 'admin', 'Vice Presidency', 'NDMO', true),\n('malmoutaz', 'Manal Mohammed Almoutaz', 'malmoutaz@ndmo.gov.sa', '0542087872', 'admin', 'Smart Rasid Platform', 'NDMO', true)\nON DUPLICATE KEY UPDATE name=VALUES(name), email=VALUES(email), phone=VALUES(phone), role=VALUES(role), department=VALUES(department), organization=VALUES(organization);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute INSERT INTO users (openId, name, email, phone, role, department, organization, isActive) VALUES\n('MRUHAILY', 'Muhammed ALRuhaily', 'prog.muhammed@gmail.com', '+966553445533', 'superadmin', 'IT', 'NDMO', true),\n('aalrebdi', 'Alrebdi Fahad Alrebdi', 'aalrebdi@ndmo.gov.sa', NULL, 'admin', 'Presidency', 'NDMO', true),\n('msarhan', 'Mashal Abdullah Alsarhan', 'msarhan@nic.gov.sa', '0555113675', 'admin', 'Vice Presidency', 'NDMO', true),\n('malmoutaz', 'Manal Mohammed Almoutaz', 'malmoutaz@ndmo.gov.sa', '0542087872', 'admin', 'Smart Rasid Platform', 'NDMO', true)\nON DUPLICATE KEY UPDATE name=VALUES(name), email=VALUES(email), phone=VALUES(phone), role=VALUES(role), department=VALUES(department), organization=VALUES(organization);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1573
+}

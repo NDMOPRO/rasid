@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, openId, name, role, email FROM users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute SELECT id, openId, name, role, email FROM users;",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "PnwcCkcjA7o8PKfEtmMJvR",
+      "name": "Moe",
+      "role": "user",
+      "email": "raneemndmo@gmail.com"
+    },
+    {
+      "id": "2",
+      "openId": "MRUHAILY",
+      "name": "Muhammed ALRuhaily",
+      "role": "superadmin",
+      "email": "prog.muhammed@gmail.com"
+    },
+    {
+      "id": "3",
+      "openId": "aalrebdi",
+      "name": "Alrebdi Fahad Alrebdi",
+      "role": "admin",
+      "email": "aalrebdi@ndmo.gov.sa"
+    },
+    {
+      "id": "4",
+      "openId": "msarhan",
+      "name": "Mashal Abdullah Alsarhan",
+      "role": "admin",
+      "email": "msarhan@nic.gov.sa"
+    },
+    {
+      "id": "5",
+      "openId": "malmoutaz",
+      "name": "Manal Mohammed Almoutaz",
+      "role": "admin",
+      "email": "malmoutaz@ndmo.gov.sa"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\trole\temail\n1\tPnwcCkcjA7o8PKfEtmMJvR\tMoe\tuser\traneemndmo@gmail.com\n2\tMRUHAILY\tMuhammed ALRuhaily\tsuperadmin\tprog.muhammed@gmail.com\n3\taalrebdi\tAlrebdi Fahad Alrebdi\tadmin\taalrebdi@ndmo.gov.sa\n4\tmsarhan\tMashal Abdullah Alsarhan\tadmin\tmsarhan@nic.gov.sa\n5\tmalmoutaz\tManal Mohammed Almoutaz\tadmin\tmalmoutaz@ndmo.gov.sa\n",
+  "stderr": "",
+  "execution_time_ms": 1492
+}
