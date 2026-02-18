@@ -1,9 +1,0 @@
-{
-  "query": "INSERT INTO platform_settings (settingKey, settingValue, settingType, category, label, labelEn, description, isEditable, sortOrder) VALUES\n('platform_name', 'منصة راصد الذكية', 'string', 'branding', 'اسم المنصة', 'Platform Name', 'اسم المنصة الرئيسي', 1, 1),\n('platform_name_en', 'Smart Rasid Platform', 'string', 'branding', 'اسم المنصة بالإنجليزية', 'Platform Name EN', 'English platform name', 1, 2),\n('organization_name', 'مكتب إدارة البيانات الوطنية', 'string', 'branding', 'اسم الجهة', 'Organization Name', 'اسم الجهة المالكة', 1, 3),\n('default_theme', 'dark', 'string', 'theme', 'السمة الافتراضية', 'Default Theme', 'السمة الافتراضية للمنصة', 1, 10),\n('maintenance_mode', 'false', 'boolean', 'advanced', 'وضع الصيانة', 'Maintenance Mode', 'تفعيل وضع الصيانة', 1, 20);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user ndEWEi7NTAqVxkH.88bfec644707 --database HncdBnCn7T8RAKFc6RDhtp --execute INSERT INTO platform_settings (settingKey, settingValue, settingType, category, label, labelEn, description, isEditable, sortOrder) VALUES\n('platform_name', 'منصة راصد الذكية', 'string', 'branding', 'اسم المنصة', 'Platform Name', 'اسم المنصة الرئيسي', 1, 1),\n('platform_name_en', 'Smart Rasid Platform', 'string', 'branding', 'اسم المنصة بالإنجليزية', 'Platform Name EN', 'English platform name', 1, 2),\n('organization_name', 'مكتب إدارة البيانات الوطنية', 'string', 'branding', 'اسم الجهة', 'Organization Name', 'اسم الجهة المالكة', 1, 3),\n('default_theme', 'dark', 'string', 'theme', 'السمة الافتراضية', 'Default Theme', 'السمة الافتراضية للمنصة', 1, 10),\n('maintenance_mode', 'false', 'boolean', 'advanced', 'وضع الصيانة', 'Maintenance Mode', 'تفعيل وضع الصيانة', 1, 20);",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 1533
-}
