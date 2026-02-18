@@ -43,8 +43,13 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       fetch(input, init) {
+        // Remove trpc-accept: application/jsonl header to disable streaming
+        // Streaming breaks cookie setting during login (Cannot set headers after they are sent)
+        const headers = new Headers(init?.headers);
+        headers.delete("trpc-accept");
         return globalThis.fetch(input, {
           ...(init ?? {}),
+          headers,
           credentials: "include",
         });
       },
