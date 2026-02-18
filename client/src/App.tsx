@@ -141,7 +141,10 @@ const Overview = lazy(() => import("./pages/Overview"));
 const ReportsList = lazy(() => import("./pages/ReportsList"));
 const SiteDetails = lazy(() => import("./pages/SiteDetails"));
 
-// Pages from rasid-platform
+// Dynamic custom pages
+const DynamicDashboard = lazy(() => import("./pages/DynamicDashboard"));
+const DynamicTable = lazy(() => import("./pages/DynamicTable"));
+const DynamicReport = lazy(() => import("./pages/DynamicReport"));
 
 function Router() {
   return (
@@ -270,6 +273,10 @@ function Router() {
           <Route path="/app/reports" component={ReportsList} />
           <Route path="/recommendations-hub" component={RecommendationsHub} />
           {/* Rasid Platform Routes */}
+          {/* Dynamic Custom Pages */}
+          <Route path="/custom/dashboard/:id" component={DynamicDashboard} />
+          <Route path="/custom/table/:id" component={DynamicTable} />
+          <Route path="/custom/report/:id" component={DynamicReport} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>

@@ -2412,3 +2412,21 @@ export type InsertAdminUserRole = typeof adminUserRoles.$inferInsert;
 
 export type AlertRule = typeof alertRules.$inferSelect;
 export type InsertAlertRule = typeof alertRules.$inferInsert;
+
+/* ═══ Custom Pages — user-created dynamic pages ═══ */
+export const customPages = mysqlTable("custom_pages", {
+id: int().autoincrement().primaryKey().notNull(),
+userId: int().notNull(),
+workspace: varchar({ length: 20 }).notNull(),
+pageType: varchar({ length: 20 }).notNull(),
+title: varchar({ length: 255 }).notNull(),
+icon: varchar({ length: 50 }).default("LayoutDashboard"),
+sortOrder: int().default(0).notNull(),
+config: json(),
+isDefault: tinyint().default(0),
+createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomPage = typeof customPages.$inferSelect;
+export type InsertCustomPage = typeof customPages.$inferInsert;

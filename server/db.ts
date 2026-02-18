@@ -25,6 +25,7 @@ import {
   adminGroupMemberships, adminGroupPermissions, adminUserOverrides,
   adminFeatureFlags, adminAuditLogs, adminThemeSettings, adminMenus,
   adminMenuItems, adminUserRoles,
+  customPages,
 } from "../drizzle/schema";
 import type {
   InsertUser, Site, InsertSite, Scan, InsertScan, Letter, InsertLetter,
@@ -59,6 +60,7 @@ import type {
   AdminGroup, InsertAdminGroup, AdminFeatureFlag, InsertAdminFeatureFlag,
   AdminAuditLog, InsertAdminAuditLog, AdminThemeSetting, InsertAdminThemeSetting,
   AdminMenu, InsertAdminMenu, AdminMenuItem, InsertAdminMenuItem,
+  CustomPage, InsertCustomPage,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -7127,4 +7129,43 @@ export async function clearAllScans() {
   const db = await getDb();
   if (!db) return;
   await db.delete(scans);
+}
+
+
+// ===== Custom Pages =====
+export async function getCustomPages(userId: number, workspace?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(customPages.userId, userId)];
+  if (workspace) conditions.push(eq(customPages.workspace, workspace));
+  return db.select().from(customPages).where(and(...conditions)).orderBy(asc(customPages.sortOrder));
+}
+
+export async function getCustomPageById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [page] = await db.select().from(customPages).where(eq(customPages.id, id)).limit(1);
+  return page || null;
+}
+
+export async function createCustomPage(data: InsertCustomPage) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(customPages).values(data);
+  const insertId = (result as any)[0]?.insertId;
+  if (insertId) return getCustomPageById(insertId);
+  return null;
+}
+
+export async function updateCustomPage(id: number, data: Partial<InsertCustomPage>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(customPages).set(data).where(eq(customPages.id, id));
+  return getCustomPageById(id);
+}
+
+export async function deleteCustomPage(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(customPages).where(eq(customPages.id, id));
 }

@@ -7707,7 +7707,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
   }),
 
   // ===== Overview Router =====
-  overview: router({
+   overview: router({
     stats: protectedProcedure.query(async () => {
       const sites = await db.getSites({});
       const siteList = (sites as any).sites || sites || [];
@@ -7720,6 +7720,51 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
     }),
   }),
 
+  // ===== Custom Pages =====
+  customPages: router({
+    list: protectedProcedure.input(z.object({
+      workspace: z.string().optional(),
+    }).optional()).query(async ({ ctx, input }) => {
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+      return db.getCustomPages(ctx.user.id, input?.workspace);
+    }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return db.getCustomPageById(input.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      workspace: z.string(),
+      pageType: z.enum(['dashboard', 'table', 'report']),
+      title: z.string().min(1),
+      icon: z.string().optional(),
+      sortOrder: z.number().optional(),
+      config: z.any().optional(),
+    })).mutation(async ({ ctx, input }) => {
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+      return db.createCustomPage({
+        userId: ctx.user.id,
+        workspace: input.workspace,
+        pageType: input.pageType,
+        title: input.title,
+        icon: input.icon || 'LayoutDashboard',
+        sortOrder: input.sortOrder || 0,
+        config: input.config || {},
+      });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().optional(),
+      icon: z.string().optional(),
+      sortOrder: z.number().optional(),
+      config: z.any().optional(),
+    })).mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      return db.updateCustomPage(id, data);
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      await db.deleteCustomPage(input.id);
+      return { success: true };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -31,6 +31,9 @@ import { ParticleField } from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import CinematicMode, { CinematicButton } from "@/components/CinematicMode";
 import RasidCharacterWidget from "@/components/RasidCharacterWidget";
+import AddPageButton from "@/components/AddPageButton";
+import CustomPagesList from "@/components/CustomPagesList";
+import { useCustomPages } from "@/hooks/useCustomPages";
 
 /* SDAIA Official FULL Logo URLs */
 const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
@@ -260,7 +263,7 @@ function getWorkspaceForRoute(path: string): WorkspaceId {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const prevLocationRef = useRef(location);
 
   const autoScrollPages = ["/smart-rasid", "/live-scan"];
@@ -344,6 +347,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const logoSrc = isDark ? FULL_LOGO_LIGHT : FULL_LOGO_DARK;
   const { playClick, playHover } = useSoundEffects();
   const accent = isDark ? ws.accent : ws.accentLight;
+
+  /* ═══ CUSTOM PAGES ═══ */
+  const {
+    pages: customPages,
+    createPage: createCustomPage,
+    updatePage: updateCustomPage,
+    deletePage: deleteCustomPage,
+    isDeleting: isDeletingPage,
+  } = useCustomPages(activeWorkspace);
+
+  const handleCreatePage = async (pageType: "dashboard" | "table" | "report", title: string) => {
+    try {
+      const result = await createCustomPage(pageType, title);
+      if (result) {
+        toast.success(`تم إنشاء "${title}" بنجاح`);
+        playClick();
+        // Navigate to the new page
+        setLocation(`/custom/${pageType}/${(result as any).id}`);
+      }
+    } catch (e) {
+      toast.error("فشل إنشاء الصفحة");
+    }
+  };
+
+  const handleDeletePage = async (id: number) => {
+    try {
+      await deleteCustomPage(id);
+      toast.success("تم حذف الصفحة");
+    } catch (e) {
+      toast.error("فشل حذف الصفحة");
+    }
+  };
+
+  const handleRenamePage = async (id: number, newTitle: string) => {
+    try {
+      await updateCustomPage(id, { title: newTitle });
+      toast.success("تم تحديث الاسم");
+    } catch (e) {
+      toast.error("فشل تحديث الاسم");
+    }
+  };
 
   if (!loading && !isAuthenticated) {
     return <Redirect to="/login" />;
@@ -522,6 +566,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
           {/* الرئيسية — fixed at top */}
           {renderNavItem({ label: "الرئيسية", labelEn: "Home", icon: Home, path: "/" })}
+
+          {/* ═══ USER CUSTOM PAGES ═══ */}
+          {isAuthenticated && (
+            <>
+              <CustomPagesList
+                pages={customPages}
+                collapsed={collapsed}
+                accent={accent}
+                accentBg={isDark ? ws.accentBg : ws.accentBgLight}
+                accentBorder={isDark ? ws.accentBorder : ws.accentBorderLight}
+                onDeletePage={handleDeletePage}
+                onRenamePage={handleRenamePage}
+                onNavClick={handleNavClick}
+                isDeleting={isDeletingPage}
+              />
+              <div className="mt-1">
+                <AddPageButton
+                  collapsed={collapsed}
+                  onCreatePage={handleCreatePage}
+                  accent={accent}
+                />
+              </div>
+            </>
+          )}
 
           {/* Separator */}
           <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.08)]' : 'bg-[#edf0f7]'} mx-2 my-2`} />
