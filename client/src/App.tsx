@@ -119,6 +119,26 @@ const ExecutiveBrief = lazy(() => import("./pages/ExecutiveBrief"));
 const IncidentsRegistry = lazy(() => import("./pages/IncidentsRegistry"));
 const PlatformLogin = lazy(() => import("./pages/PlatformLogin"));
 
+// Admin sub-pages
+const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
+const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
+const AdminGroups = lazy(() => import("./pages/admin/AdminGroups"));
+const AdminFeatureFlags = lazy(() => import("./pages/admin/AdminFeatureFlags"));
+const AdminTheme = lazy(() => import("./pages/admin/AdminTheme"));
+const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+
+// Additional missing pages
+const PrivacyDashboard = lazy(() => import("./pages/PrivacyDashboard"));
+const PrivacySites = lazy(() => import("./pages/PrivacySites"));
+const IncidentsDashboard = lazy(() => import("./pages/IncidentsDashboard"));
+const IncidentsList = lazy(() => import("./pages/IncidentsList"));
+const IncidentDetails = lazy(() => import("./pages/IncidentDetails"));
+const FollowupsList = lazy(() => import("./pages/FollowupsList"));
+const Overview = lazy(() => import("./pages/Overview"));
+const ReportsList = lazy(() => import("./pages/ReportsList"));
+const SiteDetails = lazy(() => import("./pages/SiteDetails"));
+
 // Pages from rasid-platform
 
 function Router() {
@@ -227,6 +247,26 @@ function Router() {
           <Route path="/recommendations" component={RecommendationsHub} />
           <Route path="/executive-brief" component={ExecutiveBrief} />
           <Route path="/incidents-registry" component={IncidentsRegistry} />
+          {/* Admin sub-routes */}
+          <Route path="/admin" component={AdminOverview} />
+          <Route path="/admin/roles" component={AdminRoles} />
+          <Route path="/admin/groups" component={AdminGroups} />
+          <Route path="/admin/feature-flags" component={AdminFeatureFlags} />
+          <Route path="/admin/theme" component={AdminTheme} />
+          <Route path="/admin/menus" component={AdminMenus} />
+          <Route path="/admin/audit-log" component={AdminAuditLog} />
+          {/* New structured routes per spec */}
+          <Route path="/app/overview" component={Overview} />
+          <Route path="/app/privacy" component={PrivacyDashboard} />
+          <Route path="/app/privacy/sites" component={PrivacySites} />
+          <Route path="/app/privacy/sites/:siteId" component={SiteDetails} />
+          <Route path="/app/incidents" component={IncidentsDashboard} />
+          <Route path="/app/incidents/list" component={IncidentsList} />
+          <Route path="/app/incidents/:incidentId" component={IncidentDetails} />
+          <Route path="/app/my" component={MyCustomDashboard} />
+          <Route path="/app/followups" component={FollowupsList} />
+          <Route path="/app/reports" component={ReportsList} />
+          <Route path="/recommendations-hub" component={RecommendationsHub} />
           {/* Rasid Platform Routes */}
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
