@@ -115,7 +115,7 @@ export default function ActivityFeed({ leaks, maxItems = 15 }: ActivityFeedProps
               className={`px-2 py-1 rounded-md text-[9px] font-medium transition-all ${filter === f
                 ? isDark ? "bg-[#3DB1AC]/20 text-[#3DB1AC]" : "bg-blue-100 text-blue-700"
                 : isDark ? "text-slate-400 hover:bg-white/5" : "text-slate-500 hover:bg-slate-100"}`}>
-              {f === "all" ? "الكل" : f === "leak_detected" ? "تسريبات" : f === "alert_triggered" ? "تنبيهات" : "فحوصات"}
+              {f === "all" ? "الكل" : f === "leak_detected" ? "حالات رصد" : f === "alert_triggered" ? "تنبيهات" : "فحوصات"}
             </button>
           ))}
         </div>

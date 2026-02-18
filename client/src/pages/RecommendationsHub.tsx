@@ -30,14 +30,14 @@ const RecommendationsHub = () => {
 
   const recommendationsByCategory = useMemo(() => {
     const categories = {
-      'الأمن السيبراني': [],
+      'الأمن الحماية بيانات': [],
       'الامتثال والحوكمة': [],
       'تقني': [],
     };
     // This is a mock categorization. In a real scenario, you'd have a mapping.
     recommendationFrequency.forEach(rec => {
       if (rec.name.toLowerCase().includes('security') || rec.name.toLowerCase().includes('encryption') || rec.name.toLowerCase().includes('access control')) {
-        categories['الأمن السيبراني'].push(rec);
+        categories['الأمن الحماية بيانات'].push(rec);
       } else if (rec.name.toLowerCase().includes('pdpl') || rec.name.toLowerCase().includes('compliance') || rec.name.toLowerCase().includes('policy')) {
         categories['الامتثال والحوكمة'].push(rec);
       } else {
@@ -138,7 +138,7 @@ const RecommendationsHub = () => {
               {Object.entries(recommendationsByCategory).map(([category, recs]) => (
                 <div key={category}>
                   <h3 className="text-xl font-semibold text-cyan-400 mb-3 flex items-center">
-                    {category === 'الأمن السيبراني' && <Shield className="w-6 h-6 ml-2 text-red-500" />}
+                    {category === 'الأمن الحماية بيانات' && <Shield className="w-6 h-6 ml-2 text-red-500" />}
                     {category === 'الامتثال والحوكمة' && <FileText className="w-6 h-6 ml-2 text-amber-500" />}
                     {category === 'تقني' && <Layers className="w-6 h-6 ml-2 text-blue-500" />}
                     {category}

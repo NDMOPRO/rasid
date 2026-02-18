@@ -207,9 +207,9 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
 
   const tabs = [
     { id: "overview" as TabId, label: "نظرة عامة", icon: Eye },
-    { id: "sample" as TabId, label: `عينات البيانات (${sampleData.length})`, icon: Table },
+    { id: "sample" as TabId, label: `البيانات الشخصية المرصودة (${sampleData.length})`, icon: Table },
     { id: "evidence" as TabId, label: `الأدلة (${screenshotUrls.length + evidence.length})`, icon: Shield },
-    { id: "ai" as TabId, label: "تحليل AI", icon: Brain },
+    { id: "ai" as TabId, label: "تحليل راصد", icon: Brain },
   ];
 
   return (
@@ -362,7 +362,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Zap className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">طريقة الاختراق</p>
+                              <p className="text-[10px] text-muted-foreground">طريقة الحالة رصد</p>
                             </div>
                             <p className="text-sm text-foreground font-medium">{detail.breachMethodAr || "غير محدد"}</p>
                           </div>
@@ -473,7 +473,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه عينات توضيحية من حالة الرصد لأغراض التوثيق فقط</p>
+                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه بيانات توضيحية من حالة الرصد لأغراض التوثيق فقط</p>
                             </div>
                             <div className="overflow-x-auto rounded-lg border border-border">
                               <table className="w-full text-xs">
@@ -506,7 +506,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         ) : (
                           <div className="text-center py-12 text-muted-foreground">
                             <Database className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لا توجد عينات بيانات متاحة لحالة الرصد هذه</p>
+                            <p className="text-sm">لا توجد بيانات شخصية مرصودة متاحة لحالة الرصد هذه</p>
                           </div>
                         )}
                       </div>

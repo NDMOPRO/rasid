@@ -104,7 +104,7 @@ export default function LeakTimeline() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KpiCard title="أقدم حالة رصد" value={kpiData.earliest} icon={Calendar} subtext="Earliest Leak" />
-        <KpiCard title="أحدث تسريب" value={kpiData.latest} icon={Clock} subtext="Latest Leak" />
+        <KpiCard title="أحدث حالة رصد" value={kpiData.latest} icon={Clock} subtext="Latest Leak" />
         <KpiCard title="شهر الذروة" value={kpiData.peak} icon={TrendingUp} subtext="Peak Month" />
         <KpiCard title="متوسط الحوادث شهرياً" value={kpiData.avg} icon={BarChart3} subtext="Avg. Incidents / Month" />
       </div>

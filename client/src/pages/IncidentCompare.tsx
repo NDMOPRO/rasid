@@ -128,7 +128,7 @@ export default function IncidentCompare() {
         </div>
 
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white">مقارنة أنواع البيانات الشخصية المسربة</h2>
+          <h2 className="text-xl font-semibold mb-4 text-white">مقارنة أنواع البيانات الشخصية المرصودة</h2>
           <div className="overflow-auto max-h-[300px]">
             <table className="w-full text-sm text-left text-slate-300">
               <thead className="text-xs text-cyan-300 uppercase bg-slate-900/50">

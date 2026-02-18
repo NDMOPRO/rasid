@@ -22,7 +22,7 @@ interface ReportCustomizerProps {
 
 const REPORT_TYPES = [
   { value: "compliance_report", label: "تقرير امتثال", icon: "✅", desc: "تقرير شامل عن حالة الامتثال لنظام حماية البيانات" },
-  { value: "incident_report", label: "توثيق حادثة", icon: "🔴", desc: "توثيق رسمي لحادثة تسريب أو انتهاك بيانات" },
+  { value: "incident_report", label: "توثيق حادثة", icon: "🔴", desc: "توثيق رسمي لحالة رصد أو انتهاك بيانات" },
   { value: "executive_summary", label: "ملخص تنفيذي", icon: "📊", desc: "ملخص مختصر للإدارة العليا" },
   { value: "sector_report", label: "تقرير قطاعي", icon: "🏢", desc: "تقرير شامل عن قطاع محدد" },
   { value: "custom_report", label: "تقرير مخصص", icon: "📋", desc: "تقرير بتنسيق مخصص حسب الحاجة" },

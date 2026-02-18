@@ -128,7 +128,7 @@ export default function NationalOverview() {
     { label: "الخط الزمني", labelEn: "Timeline", icon: CalendarClock, path: "/leak-timeline", color: "#f59e0b" },
     { label: "مصادر حالة الرصد", labelEn: "Threat Actors", icon: UserX, path: "/threat-actors-analysis", color: "#ef4444" },
     { label: "التحليل الجغرافي", labelEn: "Geo Analysis", icon: Map, path: "/geo-analysis", color: "#3b82f6" },
-    { label: "سجل الحوادث", labelEn: "Registry", icon: ScrollText, path: "/incidents-registry", color: "#22c55e" },
+    { label: "سجل الحالات", labelEn: "Registry", icon: ScrollText, path: "/incidents-registry", color: "#22c55e" },
   ];
 
   const mainKpis = [

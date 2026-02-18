@@ -92,7 +92,7 @@ const SCAN_SOURCES = [
   { id: "googledork", name: "Google Dorking", desc: "استعلامات بحث ذكية", icon: Search, color: "text-green-400" },
   { id: "breachdirectory", name: "BreachDirectory", desc: "قاعدة بيانات حالات الرصد العامة", icon: Database, color: "text-purple-400" },
   { id: "github", name: "GitHub Code", desc: "فحص مستودعات الكود العامة", icon: Code, color: "text-gray-400" },
-  { id: "dehashed", name: "Dehashed", desc: "قواعد بيانات الاختراقات المجمعة", icon: Eye, color: "text-orange-400" },
+  { id: "dehashed", name: "Dehashed", desc: "قواعد بيانات الحالة رصدات المجمعة", icon: Eye, color: "text-orange-400" },
   { id: "intelx", name: "IntelX", desc: "استخبارات التهديدات", icon: Radar, color: "text-cyan-400" },
 ];
 
@@ -825,7 +825,7 @@ export default function LiveScan() {
             <div className="glass-card rounded-2xl p-12 text-center">
               <ShieldCheck className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white">لم يتم اكتشاف أي حالات رصد</h3>
-              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مسربة مرتبطة بالهدف المحدد</p>
+              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مرصودة مرتبطة بالهدف المحدد</p>
             </div>
           )}
 

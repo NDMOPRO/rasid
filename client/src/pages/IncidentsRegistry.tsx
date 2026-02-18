@@ -81,7 +81,7 @@ const IncidentsRegistry = () => {
     <div dir="rtl" className="min-h-screen bg-slate-900 text-white p-8 font-sans">
       <div className="mb-4"><GlobalFilterBar /></div>
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">سجل الحوادث المتقدم</h1>
+        <h1 className="text-4xl font-bold text-cyan-400">سجل الحالات المتقدم</h1>
         <p className="text-slate-400">Advanced Incidents Registry</p>
       </header>
 

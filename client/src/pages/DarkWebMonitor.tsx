@@ -88,7 +88,7 @@ export default function DarkWebMonitor() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground max-w-lg">
-            مراقبة منتديات بيع البيانات وأسواق البيانات المسربة عبر شبكة Tor
+            مراقبة منتديات بيع البيانات وأسواق البيانات المرصودة عبر شبكة Tor
           </p>
         </div>
       </motion.div>

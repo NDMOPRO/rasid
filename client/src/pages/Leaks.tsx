@@ -568,9 +568,9 @@ export default function Leaks() {
                     <div className="flex gap-1 mt-4 bg-secondary/50 rounded-lg p-1">
                       {[
                         { key: "overview" as const, label: "نظرة عامة", icon: Eye },
-                        { key: "samples" as const, label: `عينات البيانات (${((leakDetail as any).sampleData as any[] || []).length})`, icon: Table },
+                        { key: "samples" as const, label: `البيانات الشخصية المرصودة (${((leakDetail as any).sampleData as any[] || []).length})`, icon: Table },
                         { key: "evidence" as const, label: `الأدلة (${(leakDetail.evidence?.length ?? 0) + ((leakDetail as any).screenshotUrls as any[] || []).length})`, icon: Shield },
-                        { key: "ai" as const, label: "تحليل AI", icon: Brain },
+                        { key: "ai" as const, label: "تحليل راصد", icon: Brain },
                       ].map((tab) => {
                         const TabIcon = tab.icon;
                         return (
@@ -620,7 +620,7 @@ export default function Leaks() {
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Zap className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">طريقة الاختراق</p>
+                              <p className="text-[10px] text-muted-foreground">طريقة الحالة رصد</p>
                             </div>
                             <p className="text-sm text-foreground font-medium">{(leakDetail as any).breachMethodAr || "غير محدد"}</p>
                             {(leakDetail as any).breachMethod && (
@@ -762,7 +762,7 @@ export default function Leaks() {
                             return (
                               <div className="text-center py-12">
                                 <Table className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                                <p className="text-sm text-muted-foreground">لا توجد عينات بيانات مسجلة لحالة الرصد هذه</p>
+                                <p className="text-sm text-muted-foreground">لا توجد بيانات شخصية مرصودة مسجلة لحالة الرصد هذه</p>
                               </div>
                             );
                           }

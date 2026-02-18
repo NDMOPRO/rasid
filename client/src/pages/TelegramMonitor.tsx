@@ -320,7 +320,7 @@ export default function TelegramMonitor() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {["بيانات سعودية", "قاعدة بيانات", "KSA data", "Saudi database", "تسريب بيانات", "Saudi leak", "هوية وطنية", "أرقام جوال", "سجلات صحية", "بيانات بنكية", "Saudi PII", "KSA dump"].map((keyword) => (
+            {["بيانات سعودية", "قاعدة بيانات", "KSA data", "Saudi database", "حالة رصد بيانات", "Saudi leak", "هوية وطنية", "أرقام جوال", "سجلات صحية", "بيانات بنكية", "Saudi PII", "KSA dump"].map((keyword) => (
               <Badge key={keyword} variant="outline" className="bg-primary/5 border-primary/20 text-primary text-xs">
                 {keyword}
               </Badge>
@@ -373,7 +373,7 @@ export default function TelegramMonitor() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} تسريب مكتشف</p>
+                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد مكتشفة</p>
               </div>
               <span className={`text-[10px] px-2 py-0.5 rounded border ${riskColor(ch.riskLevel)}`}>{riskLabel(ch.riskLevel)}</span>
             </div>
@@ -382,9 +382,9 @@ export default function TelegramMonitor() {
       </DetailModal>
 
       {/* Detected Leaks Modal */}
-      <DetailModal open={activeModal === "detectedLeaks"} onClose={() => setActiveModal(null)} title="التسريبات المكتشفة من تليجرام" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
+      <DetailModal open={activeModal === "detectedLeaks"} onClose={() => setActiveModal(null)} title="حالات الرصد المكتشفة من تليجرام" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">{telegramLeaks.length} تسريب</p>
+          <p className="text-xs text-muted-foreground">{telegramLeaks.length} حالة رصد</p>
           {telegramLeaks.map(leak => (
             <div
               key={leak.id}
@@ -422,7 +422,7 @@ export default function TelegramMonitor() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{(ch.subscribers ?? 0).toLocaleString()} مشترك • {ch.leaksDetected ?? 0} تسريب</p>
+                    <p className="text-[10px] text-muted-foreground">{(ch.subscribers ?? 0).toLocaleString()} مشترك • {ch.leaksDetected ?? 0} حالة رصد</p>
                   </div>
                 </div>
               ))}

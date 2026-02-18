@@ -123,7 +123,7 @@ export default function ThreatActorsAnalysis() {
                 <tr>
                   <th className="p-4">اسم المهاجم (Actor)</th>
                   <th className="p-4">الحوادث (Incidents)</th>
-                  <th className="p-4">السجلات المسربة (Records)</th>
+                  <th className="p-4">السجلات المرصودة (Records)</th>
                   <th className="p-4">القطاعات المستهدفة (Sectors)</th>
                   <th className="p-4">الأساليب المستخدمة (Methods)</th>
                 </tr>

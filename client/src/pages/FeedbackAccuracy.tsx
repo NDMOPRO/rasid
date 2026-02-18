@@ -20,7 +20,7 @@ import { trpc } from "@/lib/trpc";
 
 const classLabels: Record<string, { label: string; color: string }> = {
   personal_data: { label: "بيانات شخصية", color: "text-red-400" },
-  cybersecurity: { label: "أمن سيبراني", color: "text-amber-400" },
+  cybersecurity: { label: "حماية البيانات", color: "text-amber-400" },
   clean: { label: "نظيف", color: "text-emerald-400" },
   unknown: { label: "غير محدد", color: "text-muted-foreground" },
 };

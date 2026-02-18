@@ -54,7 +54,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-01-13T14:30:00",
     status: "reported",
     description: "Massive breach of Saudi Ministry of Foreign Affairs employee database posted on BreachForums by threat actor 'IntelBroker'. Contains 1.4M records including diplomatic credentials, national IDs, and personal contact information.",
-    descriptionAr: "اختراق ضخم لقاعدة بيانات موظفي وزارة الخارجية السعودية نُشر على BreachForums بواسطة مهاجم 'IntelBroker'. يحتوي على 1.4 مليون سجل تشمل بيانات اعتماد دبلوماسية وأرقام هوية ومعلومات اتصال شخصية.",
+    descriptionAr: "حالة رصد ضخم لقاعدة بيانات موظفي وزارة الخارجية السعودية نُشر على BreachForums بواسطة مهاجم 'IntelBroker'. يحتوي على 1.4 مليون سجل تشمل بيانات اعتماد دبلوماسية وأرقام هوية ومعلومات اتصال شخصية.",
   },
   {
     id: "LK-2024-0003",
@@ -164,7 +164,7 @@ export const leakRecords: LeakRecord[] = [
 ];
 
 export const telegramChannels: MonitoringChannel[] = [
-  { id: "CH-TG-001", name: "Saudi Leaks تسريبات سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
+  { id: "CH-TG-001", name: "Saudi Leaks حالات رصد سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
   { id: "CH-TG-002", name: "KSA Data Dumps", platform: "Telegram", subscribers: 28000, status: "active", lastActivity: "2026-02-09T14:00:00", leaksDetected: 12, riskLevel: "high" },
   { id: "CH-TG-003", name: "Gulf Hackers الخليج", platform: "Telegram", subscribers: 67000, status: "flagged", lastActivity: "2026-02-10T10:00:00", leaksDetected: 24, riskLevel: "high" },
   { id: "CH-TG-004", name: "InfoStealer Logs SA", platform: "Telegram", subscribers: 15000, status: "active", lastActivity: "2026-02-08T18:00:00", leaksDetected: 8, riskLevel: "medium" },
