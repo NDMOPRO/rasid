@@ -6291,6 +6291,27 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
   // ========== Platform 2 Unique Routers ==========
 
   platformAuth: router({
+    seedUsers: publicProcedure.mutation(async () => {
+      const defaultUsers = [
+        { userId: "mruhaily", name: "Muhammed ALRuhaily", email: "prog.muhammed@gmail.com", mobile: "+966553445533", displayName: "Admin Rasid System", platformRole: "root_admin" as const },
+        { userId: "aalrebdi", name: "Alrebdi Fahad Alrebdi", email: "aalrebdi@ndmo.gov.sa", mobile: "", displayName: "NDMO's president/director", platformRole: "director" as const },
+        { userId: "msarhan", name: "Mashal Abdullah Alsarhan", email: "msarhan@nic.gov.sa", mobile: "0555113675", displayName: "Vice President of NDMO", platformRole: "vice_president" as const },
+        { userId: "malmoutaz", name: "Manal Mohammed Almoutaz", email: "malmoutaz@ndmo.gov.sa", mobile: "0542087872", displayName: "Manager of Smart Rasid Platform", platformRole: "manager" as const },
+      ];
+      const passwordHash = await bcrypt.hash("15001500", 12);
+      const results: string[] = [];
+      for (const u of defaultUsers) {
+        const existing = await getPlatformUserByUserId(u.userId);
+        if (existing) {
+          await updatePlatformUser(existing.id, { passwordHash, status: "active" });
+          results.push(`Updated: ${u.userId}`);
+        } else {
+          await createPlatformUser({ ...u, passwordHash });
+          results.push(`Created: ${u.userId}`);
+        }
+      }
+      return { success: true, results };
+    }),
     login: publicProcedure
       .input(z.object({
         userId: z.string().min(1),
