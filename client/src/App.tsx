@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
@@ -8,6 +8,7 @@ import { FilterProvider } from "./contexts/FilterContext";
 import { PlatformSettingsProvider } from "./contexts/PlatformSettingsContext";
 import DashboardLayout from "./components/DashboardLayout";
 import TopProgressBar from "./components/TopProgressBar";
+import RasidLoadingScreen from "./components/RasidLoadingScreen";
 import { PageSkeleton } from "./components/Skeletons";
 
 // Lazy-loaded pages
@@ -277,12 +278,17 @@ function Router() {
 }
 
 function App() {
+  const [appReady, setAppReady] = useState(false);
+  const handleLoadingFinish = useCallback(() => setAppReady(true), []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable={true}>
         <FilterProvider>
         <PlatformSettingsProvider>
         <TooltipProvider>
+          {/* Premium Loading Screen with Rasid Character */}
+          <RasidLoadingScreen show={!appReady} onFinish={handleLoadingFinish} minDuration={2200} />
           <TopProgressBar />
           <Toaster />
           <Switch>

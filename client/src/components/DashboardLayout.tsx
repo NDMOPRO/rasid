@@ -84,6 +84,7 @@ import { Redirect } from "wouter";
 import { ParticleField } from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import CinematicMode, { CinematicButton } from "@/components/CinematicMode";
+import RasidCharacterWidget from "@/components/RasidCharacterWidget";
 import WorkspaceSwitcher, {
   type WorkspaceId,
   getWorkspaceForRoute,
@@ -91,9 +92,9 @@ import WorkspaceSwitcher, {
 } from "./WorkspaceSwitcher";
 
 /* SDAIA Official FULL Logo URLs (with "منصة راصد" + "مكتب إدارة البيانات الوطنية") */
-const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
-const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
-const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ziWPuMClYqvYmkJG.png";
+const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/rnrmkZWzwqxCCISu.png"; // Navy+Gold for light bg
+const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/hcjCfBRgGfXAVgzK.png"; // Cream+Gold for dark bg
+const RASID_LOGO_COLLAPSED = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/qJkWJtLPpgEYdrpF.png"; // Gold calligraphy only
 
 /** Root Admin userId — protected from any modifications */
 const ROOT_ADMIN_USER_ID = "mruhaily";
@@ -633,9 +634,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ${collapsed ? "w-[72px]" : "w-[270px]"}
           ${mobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
           right-0 lg:right-auto
-          bg-sidebar
-          backdrop-blur-2xl
-          ${isDark ? 'border-l border-[rgba(61,177,172,0.08)]' : 'border-l border-[#e2e5ef]'}
+          bg-sidebar lux-sidebar
+          ${isDark ? '' : ''}
         `}
       >
         {/* Logo area — Full Brand Logo with Creative Effects */}
@@ -652,27 +652,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               style={{
                 width: collapsed ? '60px' : 'calc(100% + 16px)',
                 height: collapsed ? '60px' : '130px',
-                border: isDark ? '1px solid rgba(61, 177, 172, 0.12)' : '1px solid rgba(30, 58, 138, 0.06)',
+                border: isDark ? '1px solid rgba(197, 165, 90, 0.15)' : '1px solid rgba(30, 58, 138, 0.06)',
                 animation: 'breathing-glow 4s ease-in-out infinite',
-                boxShadow: isDark ? '0 0 30px rgba(61, 177, 172, 0.1), inset 0 0 30px rgba(100, 89, 167, 0.06)' : '0 0 20px rgba(30, 58, 138, 0.04)',
+                boxShadow: isDark ? '0 0 30px rgba(197, 165, 90, 0.08), inset 0 0 30px rgba(100, 89, 167, 0.06)' : '0 0 20px rgba(30, 58, 138, 0.04)',
               }}
             />
-            {/* Floating particles around logo */}
+            {/* Floating particles around logo — Gold + Teal */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#3b82f6]'}`} style={{ top: '8%', right: '12%', opacity: isDark ? 0.5 : 0.25, animation: 'orbit 6s linear infinite' }} />
-              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#6459A7]' : 'bg-[#1e3a8a]'}`} style={{ bottom: '15%', left: '8%', opacity: isDark ? 0.4 : 0.2, animation: 'orbit 8s linear infinite reverse' }} />
-              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#3b82f6]'}`} style={{ top: '50%', left: '3%', opacity: isDark ? 0.3 : 0.15, animation: 'orbit 10s linear infinite' }} />
+              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#C5A55A]' : 'bg-[#3b82f6]'}`} style={{ top: '8%', right: '12%', opacity: isDark ? 0.6 : 0.25, animation: 'orbit 6s linear infinite' }} />
+              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#1e3a8a]'}`} style={{ bottom: '15%', left: '8%', opacity: isDark ? 0.5 : 0.2, animation: 'orbit 8s linear infinite reverse' }} />
+              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#C5A55A]' : 'bg-[#3b82f6]'}`} style={{ top: '50%', left: '3%', opacity: isDark ? 0.4 : 0.15, animation: 'orbit 10s linear infinite' }} />
+              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#6459A7]' : 'bg-[#6366f1]'}`} style={{ top: '25%', left: '15%', opacity: isDark ? 0.35 : 0.15, animation: 'orbit 12s linear infinite' }} />
             </div>
             {/* Logo image */}
             <img
-              src={logoSrc}
+              src={collapsed ? RASID_LOGO_COLLAPSED : logoSrc}
               alt="منصة راصد - مكتب إدارة البيانات الوطنية"
               className="relative z-10 object-contain"
               style={{
                 width: collapsed ? '44px' : '100%',
                 height: collapsed ? '44px' : '110px',
                 maxWidth: '260px',
-                filter: isDark ? 'drop-shadow(0 0 15px rgba(61, 177, 172, 0.25)) drop-shadow(0 0 40px rgba(100, 89, 167, 0.12))' : 'drop-shadow(0 0 8px rgba(30, 58, 138, 0.08))',
+                filter: isDark ? 'drop-shadow(0 0 15px rgba(197, 165, 90, 0.3)) drop-shadow(0 0 40px rgba(100, 89, 167, 0.12))' : 'drop-shadow(0 0 8px rgba(30, 58, 138, 0.08))',
                 animation: 'logo-float 5s ease-in-out infinite',
               }}
             />
@@ -688,8 +689,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           />
         </div>
 
-        {/* Data flow line */}
-        <div className="data-flow-line mx-4 opacity-50" />
+        {/* Gold accent divider */}
+        <div className="gold-divider mx-4" />
 
         {/* Navigation with groups — filtered by active workspace */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
@@ -868,7 +869,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ═══ MAIN CONTENT AREA ═══ */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* Top header — SDAIA frosted glass */}
-        <header className={`h-16 flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 ${isDark ? 'border-b border-[rgba(61,177,172,0.08)] bg-[rgba(13,21,41,0.7)]' : 'border-b border-[#e2e5ef] bg-white/90'}`}>
+        <header className={`h-16 flex items-center justify-between px-4 lg:px-6 lux-navbar sticky top-0 z-30`}>
           <div className="flex items-center gap-4">
             <button
               className="lg:hidden text-muted-foreground hover:text-foreground"
@@ -934,7 +935,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content with particle background */}
-        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 lg:p-6 relative">
+        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 lg:p-6 relative lux-page-bg">
           <ParticleField count={30} className="z-0" />
           <motion.div
             key={location}
@@ -956,6 +957,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {children}
       </CinematicMode>
+
+      {/* Rasid Smart Character Widget — floating on all pages */}
+      <RasidCharacterWidget />
     </div>
   );
 }
