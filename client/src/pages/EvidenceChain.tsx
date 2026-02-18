@@ -267,7 +267,7 @@ export default function EvidenceChain() {
             })}
           </div>
           <p className="text-xs text-muted-foreground">
-            الأدلة الرقمية تشمل لقطات شاشة، ملفات نصية، بيانات وصفية، وملفات مرفقة. كل دليل مرتبط بحالة رصد محددة ومحمي بتشفير SHA-256.
+            الأدلة الرقمية تشمل لقطات شاشة، ملفات نصية، بيانات وصفية، وملفات مرفقة. كل دليل مرتبط بتسريب محدد ومحمي بتشفير SHA-256.
           </p>
         </div>
       </DetailModal>
@@ -330,9 +330,9 @@ export default function EvidenceChain() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {type === "text" && "أدلة نصية تتضمن محتوى الرسائل والمنشورات المرتبطة بحالة الرصد"}
+                  {type === "text" && "أدلة نصية تتضمن محتوى الرسائل والمنشورات المرتبطة بالتسريب"}
                   {type === "screenshot" && "لقطات شاشة توثق عروض البيع والمحادثات على المنصات"}
-                  {type === "file" && "ملفات مرفقة تحتوي على نماذج من البيانات المرصودة"}
+                  {type === "file" && "ملفات مرفقة تحتوي على عينات من البيانات المسربة"}
                   {type === "metadata" && "بيانات وصفية تشمل معلومات المصدر والتوقيت والموقع"}
                 </p>
               </div>
@@ -412,7 +412,7 @@ export default function EvidenceChain() {
                 </div>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground">حالة الرصد</p>
+                <p className="text-xs text-muted-foreground">التسريب</p>
                 <p className="text-sm font-bold text-primary font-mono">{selectedEvidence.leakId}</p>
               </div>
             </div>
@@ -468,7 +468,7 @@ export default function EvidenceChain() {
               onClick={() => setDrillLeakId(selectedEvidence.leakId)}
               className="w-full p-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors text-center"
             >
-              <span className="text-xs text-primary font-medium">عرض ادعاءات البائع الكاملة ({selectedEvidence.leakId}) ←</span>
+              <span className="text-xs text-primary font-medium">عرض تفاصيل التسريب الكاملة ({selectedEvidence.leakId}) ←</span>
             </button>
           </div>
         )}

@@ -54,7 +54,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-01-13T14:30:00",
     status: "reported",
     description: "Massive breach of Saudi Ministry of Foreign Affairs employee database posted on BreachForums by threat actor 'IntelBroker'. Contains 1.4M records including diplomatic credentials, national IDs, and personal contact information.",
-    descriptionAr: "حالة رصد ضخم لقاعدة بيانات موظفي وزارة الخارجية السعودية نُشر على BreachForums بواسطة مهاجم 'IntelBroker'. يحتوي على 1.4 مليون سجل تشمل بيانات اعتماد دبلوماسية وأرقام هوية ومعلومات اتصال شخصية.",
+    descriptionAr: "اختراق ضخم لقاعدة بيانات موظفي وزارة الخارجية السعودية نُشر على BreachForums بواسطة مهاجم 'IntelBroker'. يحتوي على 1.4 مليون سجل تشمل بيانات اعتماد دبلوماسية وأرقام هوية ومعلومات اتصال شخصية.",
   },
   {
     id: "LK-2024-0003",
@@ -69,7 +69,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-03-15T09:00:00",
     status: "documented",
     description: "Contractor and employee data from Saudi Aramco's third-party vendor system exposed on XSS.is forum. Includes security clearance levels and access credentials.",
-    descriptionAr: "بيانات مقاولين وموظفين من نظام مورد خارجي لأرامكو السعودية تم كشفها على منتدى XSS.is. تشمل مستويات التصريح وبيانات الوصول.",
+    descriptionAr: "بيانات مقاولين وموظفين من نظام مورد خارجي لأرامكو السعودية تم كشفها على منتدى XSS.is. تشمل مستويات التصريح الأمني وبيانات الوصول.",
   },
   {
     id: "LK-2024-0005",
@@ -99,7 +99,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-03-15T12:15:00",
     status: "documented",
     description: "Massive STC customer database leaked on Telegram channel 'KSA Data Dumps'. Contains 2.3M records with national IDs, phone numbers, IMEI numbers, and billing addresses.",
-    descriptionAr: "رصد ضخم لقاعدة بيانات عملاء STC على قناة تيليجرام 'KSA Data Dumps'. يحتوي على 2.3 مليون سجل مع أرقام هوية وأرقام هواتف وأرقام IMEI وعناوين الفوترة.",
+    descriptionAr: "تسريب ضخم لقاعدة بيانات عملاء STC على قناة تيليجرام 'KSA Data Dumps'. يحتوي على 2.3 مليون سجل مع أرقام هوية وأرقام هواتف وأرقام IMEI وعناوين الفوترة.",
   },
   {
     id: "LK-2025-0010",
@@ -164,7 +164,7 @@ export const leakRecords: LeakRecord[] = [
 ];
 
 export const telegramChannels: MonitoringChannel[] = [
-  { id: "CH-TG-001", name: "Saudi Leaks حالات رصد سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
+  { id: "CH-TG-001", name: "Saudi Leaks تسريبات سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
   { id: "CH-TG-002", name: "KSA Data Dumps", platform: "Telegram", subscribers: 28000, status: "active", lastActivity: "2026-02-09T14:00:00", leaksDetected: 12, riskLevel: "high" },
   { id: "CH-TG-003", name: "Gulf Hackers الخليج", platform: "Telegram", subscribers: 67000, status: "flagged", lastActivity: "2026-02-10T10:00:00", leaksDetected: 24, riskLevel: "high" },
   { id: "CH-TG-004", name: "InfoStealer Logs SA", platform: "Telegram", subscribers: 15000, status: "active", lastActivity: "2026-02-08T18:00:00", leaksDetected: 8, riskLevel: "medium" },

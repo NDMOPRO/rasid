@@ -20,7 +20,7 @@ interface ParticleFieldProps {
   className?: string;
 }
 
-export function ParticleField({ count = 40, className = "" }: ParticleFieldProps) {
+export default function ParticleField({ count = 40, className = "" }: ParticleFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -119,5 +119,3 @@ export function ParticleField({ count = 40, className = "" }: ParticleFieldProps
     />
   );
 }
-
-export default ParticleField;

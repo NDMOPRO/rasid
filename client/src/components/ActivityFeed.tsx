@@ -25,7 +25,7 @@ interface FeedEvent {
 }
 
 const eventConfig: Record<EventType, { icon: any; color: string; bg: string; label: string }> = {
-  leak_detected: { icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10", label: "رصد جديد" },
+  leak_detected: { icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10", label: "تسريب مكتشف" },
   scan_completed: { icon: ScanSearch, color: "text-blue-400", bg: "bg-blue-500/10", label: "فحص مكتمل" },
   alert_triggered: { icon: Bell, color: "text-amber-400", bg: "bg-amber-500/10", label: "تنبيه" },
   status_changed: { icon: FileCheck, color: "text-emerald-400", bg: "bg-emerald-500/10", label: "تحديث حالة" },
@@ -57,7 +57,7 @@ export default function ActivityFeed({ leaks, maxItems = 15 }: ActivityFeedProps
       items.push({
         id: `leak-${leak.leakId || i}`,
         type: "leak_detected",
-        title: leak.titleAr || leak.title || "رصد بيانات",
+        title: leak.titleAr || leak.title || "تسريب بيانات",
         description: `${leak.sectorAr || leak.sector || "غير محدد"} · ${(leak.recordCount || 0).toLocaleString()} سجل`,
         severity: leak.severity || "medium",
         timestamp: new Date(leak.detectedAt || Date.now() - i * 3600000),
@@ -76,8 +76,8 @@ export default function ActivityFeed({ leaks, maxItems = 15 }: ActivityFeedProps
         items.push({
           id: `alert-${i}`,
           type: "alert_triggered",
-          title: `تنبيه: ${leak.titleAr || leak.title || "حالة رصد"}`,
-          description: `مستوى التأثير: ${leak.severity === "critical" ? "عالي الأهمية" : "مرتفع"}`,
+          title: `تنبيه: ${leak.titleAr || leak.title || "حادثة"}`,
+          description: `مستوى الخطورة: ${leak.severity === "critical" ? "حرج" : "مرتفع"}`,
           severity: leak.severity,
           timestamp: new Date(leak.detectedAt ? new Date(leak.detectedAt).getTime() + 300000 : Date.now() - i * 3600000 + 300000),
         });
@@ -115,7 +115,7 @@ export default function ActivityFeed({ leaks, maxItems = 15 }: ActivityFeedProps
               className={`px-2 py-1 rounded-md text-[9px] font-medium transition-all ${filter === f
                 ? isDark ? "bg-[#3DB1AC]/20 text-[#3DB1AC]" : "bg-blue-100 text-blue-700"
                 : isDark ? "text-slate-400 hover:bg-white/5" : "text-slate-500 hover:bg-slate-100"}`}>
-              {f === "all" ? "الكل" : f === "leak_detected" ? "حالات رصد" : f === "alert_triggered" ? "تنبيهات" : "فحوصات"}
+              {f === "all" ? "الكل" : f === "leak_detected" ? "تسريبات" : f === "alert_triggered" ? "تنبيهات" : "فحوصات"}
             </button>
           ))}
         </div>

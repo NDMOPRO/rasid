@@ -307,7 +307,7 @@ export default function ComplianceWarningDialog({
                       <Fingerprint className="w-3.5 h-3.5 text-violet-400" style={{ animation: "compliance-icon-pulse 2.5s ease-in-out infinite" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[9px] text-violet-300/70 font-medium">سجل التدقيق — Audit Trail</p>
+                      <p className="text-[9px] text-violet-300/70 font-medium">سجل التدقيق الأمني — Audit Trail</p>
                       <p className="text-[8px] text-violet-200/40 truncate">هوية المستخدم • التاريخ • نوع {reportType} • IP</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

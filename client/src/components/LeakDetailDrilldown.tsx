@@ -119,7 +119,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
     onSuccess: (data) => {
       setGeneratedDoc(data);
       setIsGeneratingDoc(false);
-      toast.success("تم توثيق حالة الرصد بنجاح", {
+      toast.success("تم توثيق الحادثة بنجاح", {
         description: `رقم التحقق: ${data.verificationCode}`,
       });
     },
@@ -168,7 +168,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
             </button>
             <span style="color:rgba(255,255,255,0.5);font-size:12px;">اختر \"حفظ كـ PDF\" من نافذة الطباعة</span>
           </div>
-          <span style="color:rgba(255,255,255,0.4);font-size:11px;">منصة راصد — توثيق حالة رصد</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:11px;">منصة راصد — توثيق حادثة تسريب</span>
         </div>
         <div style="height:56px;"></div>
       `;
@@ -183,7 +183,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `توثيق-حالة-رصد-${leakId}-${generatedDoc.verificationCode}.html`;
+      a.download = `توثيق-حادثة-${leakId}-${generatedDoc.verificationCode}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -207,9 +207,9 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
 
   const tabs = [
     { id: "overview" as TabId, label: "نظرة عامة", icon: Eye },
-    { id: "sample" as TabId, label: `البيانات الشخصية المرصودة (${sampleData.length})`, icon: Table },
+    { id: "sample" as TabId, label: `عينات البيانات (${sampleData.length})`, icon: Table },
     { id: "evidence" as TabId, label: `الأدلة (${screenshotUrls.length + evidence.length})`, icon: Shield },
-    { id: "ai" as TabId, label: "تحليل راصد", icon: Brain },
+    { id: "ai" as TabId, label: "تحليل AI", icon: Brain },
   ];
 
   return (
@@ -284,7 +284,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                             ) : (
                               <FileText className="w-3.5 h-3.5" />
                             )}
-                            توثيق حالة الرصد
+                            توثيق حادثة التسرب
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1.5">
@@ -355,14 +355,14 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Database className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">ادعاء البائع</p>
+                              <p className="text-[10px] text-muted-foreground">السجلات المكشوفة</p>
                             </div>
                             <p className="text-sm font-bold text-red-400">{detail.recordCount?.toLocaleString()}</p>
                           </div>
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Zap className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">طريقة الحالة رصد</p>
+                              <p className="text-[10px] text-muted-foreground">طريقة الاختراق</p>
                             </div>
                             <p className="text-sm text-foreground font-medium">{detail.breachMethodAr || "غير محدد"}</p>
                           </div>
@@ -401,7 +401,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-gradient-to-br from-violet-500/5 to-violet-500/10 rounded-xl p-4 border border-violet-500/20">
                             <h4 className="text-xs font-semibold text-violet-400 mb-3 flex items-center gap-1.5">
                               <Link2 className="w-3.5 h-3.5" />
-                              مصدر البيع
+                              مصدر التسريب
                             </h4>
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
@@ -435,7 +435,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                           <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
                             <FileText className="w-3.5 h-3.5" />
-                            وصف الحالة
+                            وصف الحادثة
                           </h4>
                           <p className="text-sm text-foreground leading-relaxed">{detail.descriptionAr || "لا يوجد وصف متاح"}</p>
                           {detail.description && detail.description !== detail.descriptionAr && (
@@ -451,7 +451,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                             <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                               <Fingerprint className="w-3.5 h-3.5" />
-                              أنواع البيانات الشخصية المعروضة ({piiTypes.length} نوع)
+                              أنواع البيانات الشخصية المكشوفة ({piiTypes.length} نوع)
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                               {piiTypes.map((type, i) => (
@@ -473,7 +473,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه بيانات توضيحية من حالة الرصد لأغراض التوثيق فقط</p>
+                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه عينات توضيحية من التسريب لأغراض التوثيق فقط</p>
                             </div>
                             <div className="overflow-x-auto rounded-lg border border-border">
                               <table className="w-full text-xs">
@@ -500,13 +500,13 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                               </table>
                             </div>
                             <p className="text-[10px] text-muted-foreground text-center">
-                              عرض {sampleData.length} عينة من أصل {detail.recordCount?.toLocaleString()} سجل (ادعاء البائع)
+                              عرض {sampleData.length} عينة من أصل {detail.recordCount?.toLocaleString()} سجل مسرب
                             </p>
                           </>
                         ) : (
                           <div className="text-center py-12 text-muted-foreground">
                             <Database className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لا توجد بيانات شخصية مرصودة متاحة لحالة الرصد هذه</p>
+                            <p className="text-sm">لا توجد عينات بيانات متاحة لهذا التسريب</p>
                           </div>
                         )}
                       </div>
@@ -583,7 +583,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         {screenshotUrls.length === 0 && evidence.length === 0 && (
                           <div className="text-center py-12 text-muted-foreground">
                             <Shield className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لا توجد أدلة متاحة لحالة الرصد هذه</p>
+                            <p className="text-sm">لا توجد أدلة متاحة لهذا التسريب</p>
                           </div>
                         )}
                       </div>
@@ -630,7 +630,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         ) : (
                           <div className="text-center py-12 text-muted-foreground">
                             <Brain className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لم يتم إثراء حالة الرصد هذه بالذكاء الاصطناعي بعد</p>
+                            <p className="text-sm">لم يتم إثراء هذا التسريب بالذكاء الاصطناعي بعد</p>
                           </div>
                         )}
                       </div>
@@ -648,7 +648,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
         open={showComplianceWarning}
         onConfirm={handleConfirmGenerate}
         onCancel={() => setShowComplianceWarning(false)}
-        reportType="توثيق الحالة"
+        reportType="توثيق الحادثة"
       />
 
       {/* Screenshot Lightbox */}

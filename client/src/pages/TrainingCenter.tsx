@@ -1,723 +1,878 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
-  Plus, Trash2, Edit2, Brain, Sparkles, BookOpen, MessageSquare,
-  FileText, ThumbsUp, ThumbsDown, Search, RefreshCw, Upload,
-  Zap, Settings, BarChart3, Clock, CheckCircle2, XCircle,
-  AlertCircle, Loader2, Play, Eye, ChevronDown, Activity,
-  Bot, Users, Database, Shield
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  BookOpen,
+  Zap,
+  FileText,
+  MessageSquare,
+  Star,
+  Plus,
+  Trash2,
+  Edit,
+  Upload,
+  Brain,
+  RefreshCw,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Bot,
+  Settings2,
+  BarChart3,
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Eye,
 } from "lucide-react";
-import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
-import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 
-// ===== Types =====
-const SCENARIO_TYPES = [
-  { value: "welcome_first", label: "ترحيب أول زيارة", icon: "👋", color: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
-  { value: "welcome_return", label: "ترحيب عودة", icon: "🔄", color: "bg-blue-500/10 text-blue-600 border-blue-200" },
-  { value: "leader_respect", label: "احترام القادة", icon: "👑", color: "bg-primary/10 text-primary border-primary/20" },
-  { value: "farewell", label: "وداع", icon: "👋", color: "bg-amber-500/10 text-amber-600 border-amber-200" },
-  { value: "encouragement", label: "تشجيع", icon: "💪", color: "bg-green-500/10 text-green-600 border-green-200" },
-  { value: "occasion", label: "مناسبات", icon: "🎉", color: "bg-pink-500/10 text-pink-600 border-pink-200" },
-] as const;
+// ─── Tab Types ──────────────────────────────────────────────────
+type TabId = "knowledge" | "actions" | "documents" | "feedback" | "personality";
 
-const ACTION_TYPES = [
-  { value: "call_function", label: "استدعاء وظيفة" },
-  { value: "custom_code", label: "كود مخصص" },
-  { value: "redirect", label: "إعادة توجيه" },
-  { value: "api_call", label: "استدعاء API" },
-] as const;
+const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  { id: "knowledge", label: "قاعدة المعرفة", icon: <BookOpen className="w-4 h-4" /> },
+  { id: "actions", label: "الإجراءات المخصصة", icon: <Zap className="w-4 h-4" /> },
+  { id: "documents", label: "مستندات التدريب", icon: <FileText className="w-4 h-4" /> },
+  { id: "feedback", label: "تقييمات المستخدمين", icon: <Star className="w-4 h-4" /> },
+  { id: "personality", label: "سيناريوهات الشخصية", icon: <MessageSquare className="w-4 h-4" /> },
+];
 
-const KNOWLEDGE_TYPES = [
-  { value: "qa", label: "سؤال وجواب" },
-  { value: "document", label: "مستند" },
-  { value: "feedback", label: "ملاحظات" },
-] as const;
-
-// ===== Stats Card Component =====
-function StatCard({ title, value, icon: Icon, color, subtitle }: { title: string; value: number | string; icon: any; color: string; subtitle?: string }) {
-  return (
-    <Card className="relative overflow-hidden glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold mt-1 gradient-text">{value}</p>
-            {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
-          </div>
-          <div className={`p-3 rounded-xl ${color}`}>
-            <Icon className="h-5 w-5" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ===== Knowledge Base Tab =====
-function KnowledgeBaseTab() {
-  const utils = trpc.useUtils();
+// ─── Knowledge Base Tab ─────────────────────────────────────────
+function KnowledgeTab() {
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [form, setForm] = useState({ type: "qa" as string, question: "", answer: "", content: "", source: "" });
-
-  const knowledgeQuery = trpc.trainingCenter.listKnowledge.useQuery();
-  const createMutation = trpc.trainingCenter.createKnowledge.useMutation({
-    onSuccess: () => { utils.trainingCenter.listKnowledge.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تمت الإضافة بنجاح"); setShowAddDialog(false); resetForm(); },
-    onError: () => toast.error("حدث خطأ أثناء الإضافة"),
-  });
-  const updateMutation = trpc.trainingCenter.updateKnowledge.useMutation({
-    onSuccess: () => { utils.trainingCenter.listKnowledge.invalidate(); toast.success("تم التحديث بنجاح"); setEditItem(null); resetForm(); },
-    onError: () => toast.error("حدث خطأ أثناء التحديث"),
-  });
-  const deleteMutation = trpc.trainingCenter.deleteKnowledge.useMutation({
-    onSuccess: () => { utils.trainingCenter.listKnowledge.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم الحذف"); },
+  const [category, setCategory] = useState("all");
+  const [showAdd, setShowAdd] = useState(false);
+  const [editEntry, setEditEntry] = useState<any>(null);
+  const [form, setForm] = useState({
+    title: "", titleAr: "", content: "", contentAr: "",
+    category: "article" as "article" | "faq" | "glossary" | "instruction" | "policy" | "regulation", tags: "",
   });
 
-  function resetForm() { setForm({ type: "qa", question: "", answer: "", content: "", source: "" }); }
-
-  const filteredItems = useMemo(() => {
-    let items = knowledgeQuery.data || [];
-    if (filterType !== "all") items = items.filter((i: any) => i.type === filterType);
-    if (search) items = items.filter((i: any) => (i.question || "").includes(search) || (i.answer || "").includes(search) || (i.content || "").includes(search));
-    return items;
-  }, [knowledgeQuery.data, filterType, search]);
-
-  return (
-    <div
-      className="space-y-4">
-      <WatermarkLogo />
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex gap-2 items-center flex-1 min-w-[200px]">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="بحث في قاعدة المعرفة..." value={search} onChange={e => setSearch(e.target.value)} className="pe-10" />
-          </div>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">الكل</SelectItem>
-              {KNOWLEDGE_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={() => { resetForm(); setShowAddDialog(true); }}><Plus className="h-4 w-4 ms-2" />إضافة معرفة</Button>
-      </div>
-
-      {knowledgeQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : filteredItems.length === 0 ? (
-        <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <Brain className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد عناصر في قاعدة المعرفة</p>
-          <Button variant="outline" className="mt-3" onClick={() => { resetForm(); setShowAddDialog(true); }}><Plus className="h-4 w-4 ms-2" />إضافة أول عنصر</Button>
-        </CardContent></Card>
-      ) : (
-        <div className="grid gap-3">
-          {filteredItems.map((item: any) => (
-            <Card key={item.id} className="group hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs">{KNOWLEDGE_TYPES.find(t => t.value === item.type)?.label || item.type}</Badge>
-                      {item.source && <Badge variant="secondary" className="text-xs">{item.source}</Badge>}
-                    </div>
-                    {item.question && <p className="font-medium text-sm mb-1">{item.question}</p>}
-                    {item.answer && <p className="text-sm text-muted-foreground line-clamp-2">{item.answer}</p>}
-                    {item.content && !item.question && <p className="text-sm text-muted-foreground line-clamp-2">{item.content}</p>}
-                  </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                      setEditItem(item);
-                      setForm({ type: item.type, question: item.question || "", answer: item.answer || "", content: item.content || "", source: item.source || "" });
-                    }}><Edit2 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => {
-                      if (confirm("هل أنت متأكد من الحذف؟")) deleteMutation.mutate({ id: item.id });
-                    }}><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Add Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>إضافة معرفة جديدة</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>النوع</Label>
-              <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {KNOWLEDGE_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            {form.type === "qa" && (
-              <>
-                <div><Label>السؤال</Label><Input value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))} placeholder="اكتب السؤال..." /></div>
-                <div><Label>الإجابة</Label><Textarea value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} placeholder="اكتب الإجابة..." rows={4} /></div>
-              </>
-            )}
-            {(form.type === "document" || form.type === "feedback") && (
-              <div><Label>المحتوى</Label><Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="اكتب المحتوى..." rows={6} /></div>
-            )}
-            <div><Label>المصدر (اختياري)</Label><Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} placeholder="مثال: نظام حماية البيانات الشخصية" /></div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">إلغاء</Button></DialogClose>
-            <Button onClick={() => createMutation.mutate(form as any)} disabled={createMutation.isPending}>
-              {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : <Plus className="h-4 w-4 ms-2" />}إضافة
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog open={!!editItem} onOpenChange={v => { if (!v) setEditItem(null); }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>تعديل المعرفة</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            {form.type === "qa" && (
-              <>
-                <div><Label>السؤال</Label><Input value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))} /></div>
-                <div><Label>الإجابة</Label><Textarea value={form.answer} onChange={e => setForm(f => ({ ...f, answer: e.target.value }))} rows={4} /></div>
-              </>
-            )}
-            {(form.type === "document" || form.type === "feedback") && (
-              <div><Label>المحتوى</Label><Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={6} /></div>
-            )}
-            <div><Label>المصدر</Label><Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} /></div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">إلغاء</Button></DialogClose>
-            <Button onClick={() => editItem && updateMutation.mutate({ id: editItem.id, ...form })} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : null}حفظ التعديلات
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ===== Custom Actions Tab =====
-function CustomActionsTab() {
-  const utils = trpc.useUtils();
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [form, setForm] = useState({ triggerPhrase: "", actionType: "call_function" as string, actionTarget: "", description: "", aliases: "" });
-
-  const actionsQuery = trpc.trainingCenter.listActions.useQuery();
-  const createMutation = trpc.trainingCenter.createAction.useMutation({
-    onSuccess: () => { utils.trainingCenter.listActions.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تمت الإضافة"); setShowAddDialog(false); resetForm(); },
+  const { data: entries = [], refetch } = trpc.knowledgeBaseAdmin.list.useQuery({
+    category: category !== "all" ? category : undefined,
+    search: search || undefined,
   });
-  const updateMutation = trpc.trainingCenter.updateAction.useMutation({
-    onSuccess: () => { utils.trainingCenter.listActions.invalidate(); toast.success("تم التحديث"); setEditItem(null); },
+  const { data: stats } = trpc.knowledgeBaseAdmin.stats.useQuery();
+
+  const createMut = trpc.knowledgeBaseAdmin.create.useMutation({
+    onSuccess: () => { refetch(); setShowAdd(false); resetForm(); toast.success("تم إضافة المعرفة بنجاح"); },
   });
-  const deleteMutation = trpc.trainingCenter.deleteAction.useMutation({
-    onSuccess: () => { utils.trainingCenter.listActions.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم الحذف"); },
+  const updateMut = trpc.knowledgeBaseAdmin.update.useMutation({
+    onSuccess: () => { refetch(); setEditEntry(null); resetForm(); toast.success("تم تحديث المعرفة بنجاح"); },
   });
-  const toggleMutation = trpc.trainingCenter.toggleAction.useMutation({
-    onSuccess: () => { utils.trainingCenter.listActions.invalidate(); toast.success("تم التبديل"); },
+  const deleteMut = trpc.knowledgeBaseAdmin.delete.useMutation({
+    onSuccess: () => { refetch(); toast.success("تم حذف المعرفة"); },
   });
 
-  function resetForm() { setForm({ triggerPhrase: "", actionType: "call_function", actionTarget: "", description: "", aliases: "" }); }
+  function resetForm() {
+    setForm({ title: "", titleAr: "", content: "", contentAr: "", category: "article", tags: "" });
+  }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">الأوامر المخصصة التي يمكن لراصد الذكي تنفيذها عند التعرف على عبارات معينة</p>
-        <Button onClick={() => { resetForm(); setShowAddDialog(true); }}><Plus className="h-4 w-4 ms-2" />إضافة أمر</Button>
-      </div>
+  function openEdit(entry: any) {
+    setEditEntry(entry);
+    setForm({
+      title: entry.title || "",
+      titleAr: entry.titleAr || "",
+      content: entry.content || "",
+      contentAr: entry.contentAr || "",
+      category: entry.category || "article",
+      tags: (entry.tags || []).join(", "),
+    });
+  }
 
-      {actionsQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : (actionsQuery.data || []).length === 0 ? (
-        <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <Zap className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد أوامر مخصصة</p>
-        </CardContent></Card>
-      ) : (
-        <div className="grid gap-3">
-          {(actionsQuery.data || []).map((action: any) => (
-            <Card key={action.id} className="group hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Zap className="h-4 w-4 text-amber-500" />
-                      <span className="font-medium text-sm">{action.triggerPhrase}</span>
-                      <Badge variant="outline" className="text-xs">{ACTION_TYPES.find(t => t.value === action.actionType)?.label}</Badge>
-                    </div>
-                    {action.description && <p className="text-xs text-muted-foreground me-6">{action.description}</p>}
-                    {action.actionTarget && <p className="text-xs text-muted-foreground me-6 font-mono mt-1">{action.actionTarget}</p>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch checked={action.isActive} onCheckedChange={() => toggleMutation.mutate({ id: action.id })} />
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100" onClick={() => {
-                      setEditItem(action);
-                      setForm({ triggerPhrase: action.triggerPhrase, actionType: action.actionType, actionTarget: action.actionTarget || "", description: action.description || "", aliases: (action.aliases || []).join(", ") });
-                    }}><Edit2 className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100" onClick={() => {
-                      if (confirm("هل أنت متأكد؟")) deleteMutation.mutate({ id: action.id });
-                    }}><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={showAddDialog || !!editItem} onOpenChange={v => { if (!v) { setShowAddDialog(false); setEditItem(null); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editItem ? "تعديل الأمر" : "إضافة أمر جديد"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>عبارة التفعيل</Label><Input value={form.triggerPhrase} onChange={e => setForm(f => ({ ...f, triggerPhrase: e.target.value }))} placeholder="مثال: أرسل تقرير الامتثال" /></div>
-            <div><Label>عبارات بديلة (مفصولة بفاصلة)</Label><Input value={form.aliases} onChange={e => setForm(f => ({ ...f, aliases: e.target.value }))} placeholder="مثال: تقرير الامتثال, إرسال التقرير" /></div>
-            <div>
-              <Label>نوع الإجراء</Label>
-              <Select value={form.actionType} onValueChange={v => setForm(f => ({ ...f, actionType: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {ACTION_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div><Label>الهدف</Label><Textarea value={form.actionTarget} onChange={e => setForm(f => ({ ...f, actionTarget: e.target.value }))} placeholder="اسم الوظيفة أو الكود أو الرابط" rows={3} /></div>
-            <div><Label>الوصف</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="وصف مختصر للأمر" /></div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">إلغاء</Button></DialogClose>
-            <Button onClick={() => {
-              const payload = { ...form, aliases: form.aliases ? form.aliases.split(",").map(s => s.trim()).filter(Boolean) : [] };
-              if (editItem) updateMutation.mutate({ id: editItem.id, ...payload } as any);
-              else createMutation.mutate(payload as any);
-            }} disabled={createMutation.isPending || updateMutation.isPending}>
-              {(createMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : null}
-              {editItem ? "حفظ" : "إضافة"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ===== Training Documents Tab =====
-function TrainingDocumentsTab() {
-  const utils = trpc.useUtils();
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [uploadForm, setUploadForm] = useState({ fileName: "", fileUrl: "", mimeType: "text/plain" });
-
-  const docsQuery = trpc.trainingCenter.listDocuments.useQuery();
-  const uploadMutation = trpc.trainingCenter.uploadDocument.useMutation({
-    onSuccess: () => { utils.trainingCenter.listDocuments.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم رفع المستند"); setShowUploadDialog(false); },
-  });
-  const processMutation = trpc.trainingCenter.processDocument.useMutation({
-    onSuccess: () => { utils.trainingCenter.listDocuments.invalidate(); toast.success("بدأت المعالجة"); },
-  });
-  const deleteMutation = trpc.trainingCenter.deleteDocument.useMutation({
-    onSuccess: () => { utils.trainingCenter.listDocuments.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم الحذف"); },
-  });
-
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-    pending: { label: "في الانتظار", color: "bg-yellow-500/10 text-yellow-600", icon: Clock },
-    processing: { label: "قيد المعالجة", color: "bg-blue-500/10 text-blue-600", icon: Loader2 },
-    completed: { label: "مكتمل", color: "bg-green-500/10 text-green-600", icon: CheckCircle2 },
-    failed: { label: "فشل", color: "bg-red-500/10 text-red-600", icon: XCircle },
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">المستندات التي يتم تدريب راصد الذكي عليها لتحسين إجاباته</p>
-        <Button onClick={() => setShowUploadDialog(true)}><Upload className="h-4 w-4 ms-2" />رفع مستند</Button>
-      </div>
-
-      {docsQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : (docsQuery.data || []).length === 0 ? (
-        <Card className="glass-card gold-sweep"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <FileText className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد مستندات تدريب</p>
-        </CardContent></Card>
-      ) : (
-        <div className="grid gap-3">
-          {(docsQuery.data || []).map((doc: any) => {
-            const status = statusConfig[doc.status] || statusConfig.pending;
-            const StatusIcon = status.icon;
-            return (
-              <Card key={doc.id} className="group hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-1">
-                      <FileText className="h-8 w-8 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{doc.fileName}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={`text-xs ${status.color}`}>
-                            <StatusIcon className={`h-3 w-3 ms-1 ${doc.status === 'processing' ? 'animate-spin' : ''}`} />
-                            {status.label}
-                          </Badge>
-                          {doc.fileSize && <span className="text-xs text-muted-foreground">{(doc.fileSize / 1024).toFixed(1)} KB</span>}
-                          {doc.chunksCount > 0 && <span className="text-xs text-muted-foreground">{doc.chunksCount} أجزاء</span>}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {doc.status === "pending" && (
-                        <Button variant="outline" size="sm" onClick={() => processMutation.mutate({ id: doc.id })} disabled={processMutation.isPending}>
-                          <Play className="h-3 w-3 ms-1" />معالجة
-                        </Button>
-                      )}
-                      {doc.fileUrl && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(doc.fileUrl, '_blank')}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100" onClick={() => {
-                        if (confirm("هل أنت متأكد؟")) deleteMutation.mutate({ id: doc.id });
-                      }}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>رفع مستند تدريب</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>اسم الملف</Label><Input value={uploadForm.fileName} onChange={e => setUploadForm(f => ({ ...f, fileName: e.target.value }))} placeholder="مثال: نظام حماية البيانات الشخصية.pdf" /></div>
-            <div><Label>رابط الملف</Label><Input value={uploadForm.fileUrl} onChange={e => setUploadForm(f => ({ ...f, fileUrl: e.target.value }))} placeholder="https://..." /></div>
-            <div>
-              <Label>نوع الملف</Label>
-              <Select value={uploadForm.mimeType} onValueChange={v => setUploadForm(f => ({ ...f, mimeType: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text/plain">نص عادي</SelectItem>
-                  <SelectItem value="application/pdf">PDF</SelectItem>
-                  <SelectItem value="text/markdown">Markdown</SelectItem>
-                  <SelectItem value="application/json">JSON</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">إلغاء</Button></DialogClose>
-            <Button onClick={() => uploadMutation.mutate(uploadForm)} disabled={uploadMutation.isPending || !uploadForm.fileName || !uploadForm.fileUrl}>
-              {uploadMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : <Upload className="h-4 w-4 ms-2" />}رفع
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ===== Feedback Tab =====
-function FeedbackTab() {
-  const feedbackQuery = trpc.trainingCenter.listFeedback.useQuery({ limit: 100 });
-  const statsQuery = trpc.trainingCenter.feedbackStats.useQuery();
-
-  return (
-    <div className="space-y-4">
-      {statsQuery.data && (
-        <div className="grid grid-cols-3 gap-3 stagger-children">
-          <StatCard title="إجمالي التقييمات" value={statsQuery.data.total} icon={BarChart3} color="bg-blue-500/10 text-blue-600" />
-          <StatCard title="تقييمات إيجابية" value={statsQuery.data.good} icon={ThumbsUp} color="bg-green-500/10 text-green-600" subtitle={statsQuery.data.total > 0 ? `${((statsQuery.data.good / statsQuery.data.total) * 100).toFixed(0)}%` : undefined} />
-          <StatCard title="تقييمات سلبية" value={statsQuery.data.bad} icon={ThumbsDown} color="bg-red-500/10 text-red-600" subtitle={statsQuery.data.total > 0 ? `${((statsQuery.data.bad / statsQuery.data.total) * 100).toFixed(0)}%` : undefined} />
-        </div>
-      )}
-
-      {feedbackQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : (feedbackQuery.data || []).length === 0 ? (
-        <Card className="glass-card gold-sweep"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <MessageSquare className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد تقييمات بعد</p>
-        </CardContent></Card>
-      ) : (
-        <div className="grid gap-2">
-          {(feedbackQuery.data || []).map((fb: any) => (
-            <Card key={fb.id}>
-              <CardContent className="p-3 flex items-center gap-3">
-                {fb.rating === "good" ? <ThumbsUp className="h-4 w-4 text-green-500 shrink-0" /> : <ThumbsDown className="h-4 w-4 text-red-500 shrink-0" />}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {fb.category && <Badge variant="outline" className="text-xs">{fb.category}</Badge>}
-                    <span className="text-xs text-muted-foreground">{new Date(fb.createdAt).toLocaleDateString('ar-SA')}</span>
-                  </div>
-                  {fb.notes && <p className="text-sm text-muted-foreground mt-1 truncate">{fb.notes}</p>}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ===== Personality Scenarios Tab =====
-function PersonalityScenariosTab() {
-  const utils = trpc.useUtils();
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [filterType, setFilterType] = useState<string>("all");
-  const [form, setForm] = useState({ type: "welcome_first" as string, triggerKeyword: "", textAr: "" });
-
-  const scenariosQuery = trpc.trainingCenter.listScenarios.useQuery();
-  const createMutation = trpc.trainingCenter.createScenario.useMutation({
-    onSuccess: () => { utils.trainingCenter.listScenarios.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تمت الإضافة"); setShowAddDialog(false); resetForm(); },
-  });
-  const updateMutation = trpc.trainingCenter.updateScenario.useMutation({
-    onSuccess: () => { utils.trainingCenter.listScenarios.invalidate(); toast.success("تم التحديث"); setEditItem(null); },
-  });
-  const deleteMutation = trpc.trainingCenter.deleteScenario.useMutation({
-    onSuccess: () => { utils.trainingCenter.listScenarios.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم الحذف"); },
-  });
-  const toggleMutation = trpc.trainingCenter.toggleScenario.useMutation({
-    onSuccess: () => { utils.trainingCenter.listScenarios.invalidate(); toast.success("تم التبديل"); },
-  });
-  const seedMutation = trpc.trainingCenter.seedScenarios.useMutation({
-    onSuccess: () => { utils.trainingCenter.listScenarios.invalidate(); utils.trainingCenter.getStats.invalidate(); toast.success("تم إضافة البيانات الأولية"); },
-  });
-
-  function resetForm() { setForm({ type: "welcome_first", triggerKeyword: "", textAr: "" }); }
-
-  const filteredScenarios = useMemo(() => {
-    let items = scenariosQuery.data || [];
-    if (filterType !== "all") items = items.filter((s: any) => s.type === filterType);
-    return items;
-  }, [scenariosQuery.data, filterType]);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">جميع الأنواع</SelectItem>
-            {SCENARIO_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.icon} {t.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <div className="flex gap-2">
-          {(scenariosQuery.data || []).length === 0 && (
-            <Button variant="outline" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}>
-              {seedMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : <Database className="h-4 w-4 ms-2" />}تحميل بيانات أولية
-            </Button>
-          )}
-          <Button onClick={() => { resetForm(); setShowAddDialog(true); }}><Plus className="h-4 w-4 ms-2" />إضافة سيناريو</Button>
-        </div>
-      </div>
-
-      {scenariosQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : filteredScenarios.length === 0 ? (
-        <Card className="glass-card gold-sweep"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <Sparkles className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد سيناريوهات</p>
-        </CardContent></Card>
-      ) : (
-        <div className="grid gap-3">
-          {filteredScenarios.map((scenario: any) => {
-            const typeConfig = SCENARIO_TYPES.find(t => t.value === scenario.type);
-            return (
-              <Card key={scenario.id} className="group hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={`text-xs border ${typeConfig?.color || ''}`}>{typeConfig?.icon} {typeConfig?.label}</Badge>
-                        {scenario.triggerKeyword && <Badge variant="secondary" className="text-xs">{scenario.triggerKeyword}</Badge>}
-                        {!scenario.isActive && <Badge variant="destructive" className="text-xs">معطل</Badge>}
-                      </div>
-                      <p className="text-sm">{scenario.textAr}</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Switch checked={scenario.isActive} onCheckedChange={() => toggleMutation.mutate({ id: scenario.id })} />
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100" onClick={() => {
-                        setEditItem(scenario);
-                        setForm({ type: scenario.type, triggerKeyword: scenario.triggerKeyword || "", textAr: scenario.textAr });
-                      }}><Edit2 className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100" onClick={() => {
-                        if (confirm("هل أنت متأكد؟")) deleteMutation.mutate({ id: scenario.id });
-                      }}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      <Dialog open={showAddDialog || !!editItem} onOpenChange={v => { if (!v) { setShowAddDialog(false); setEditItem(null); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editItem ? "تعديل السيناريو" : "إضافة سيناريو جديد"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>النوع</Label>
-              <Select value={form.type} onValueChange={v => setForm(f => ({ ...f, type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {SCENARIO_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.icon} {t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            {(form.type === "leader_respect" || form.type === "occasion") && (
-              <div><Label>الكلمة المفتاحية</Label><Input value={form.triggerKeyword} onChange={e => setForm(f => ({ ...f, triggerKeyword: e.target.value }))} placeholder={form.type === "leader_respect" ? "مثال: المعالي" : "مثال: اليوم الوطني"} /></div>
-            )}
-            <div><Label>النص</Label><Textarea value={form.textAr} onChange={e => setForm(f => ({ ...f, textAr: e.target.value }))} placeholder="اكتب نص السيناريو..." rows={4} /></div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">إلغاء</Button></DialogClose>
-            <Button onClick={() => {
-              if (editItem) updateMutation.mutate({ id: editItem.id, ...form } as any);
-              else createMutation.mutate(form as any);
-            }} disabled={createMutation.isPending || updateMutation.isPending || !form.textAr}>
-              {(createMutation.isPending || updateMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin ms-2" /> : null}
-              {editItem ? "حفظ" : "إضافة"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ===== Training Logs Tab =====
-function TrainingLogsTab() {
-  const logsQuery = trpc.trainingCenter.listLogs.useQuery({ limit: 100 });
-
-  const actionLabels: Record<string, string> = {
-    knowledge_added: "إضافة معرفة",
-    knowledge_updated: "تحديث معرفة",
-    knowledge_deleted: "حذف معرفة",
-    document_uploaded: "رفع مستند",
-    document_processed: "معالجة مستند",
-    scenario_added: "إضافة سيناريو",
-    scenario_updated: "تحديث سيناريو",
-    action_added: "إضافة أمر",
-    action_updated: "تحديث أمر",
-    feedback_received: "تقييم مستلم",
-  };
-
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">سجل جميع عمليات التدريب والتعديل على راصد الذكي</p>
-      {logsQuery.isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
-      ) : (logsQuery.data || []).length === 0 ? (
-        <Card className="glass-card gold-sweep"><CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <Activity className="h-12 w-12 mb-3 opacity-50" />
-          <p>لا توجد سجلات بعد</p>
-        </CardContent></Card>
-      ) : (
-        <ScrollArea className="h-[500px]">
-          <div className="space-y-2">
-            {(logsQuery.data || []).map((log: any) => (
-              <Card key={log.id}>
-                <CardContent className="p-3 flex items-center gap-3">
-                  <Activity className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">{actionLabels[log.action] || log.action}</Badge>
-                      <span className="text-xs text-muted-foreground">{log.entityType}</span>
-                    </div>
-                    {log.details && <p className="text-xs text-muted-foreground mt-1 truncate">{log.details}</p>}
-                  </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{new Date(log.createdAt).toLocaleDateString('ar-SA')}</span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
-    </div>
-  );
-}
-
-// ===== Main Training Center Page =====
-export default function TrainingCenter() {
-  const { playClick, playHover } = useSoundEffects();
-  const statsQuery = trpc.trainingCenter.getStats.useQuery();
-  const stats = statsQuery.data;
+  function handleSubmit() {
+    const tags = form.tags.split(",").map(t => t.trim()).filter(Boolean);
+    if (editEntry) {
+      updateMut.mutate({ entryId: editEntry.entryId, category: form.category, title: form.title, titleAr: form.titleAr, content: form.content, contentAr: form.contentAr, tags });
+    } else {
+      createMut.mutate({ category: form.category, title: form.title, titleAr: form.titleAr, content: form.content, contentAr: form.contentAr, tags });
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-cyan-400">{stats?.total ?? 0}</div>
+            <div className="text-xs text-slate-400">إجمالي المعارف</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-400">{stats?.published ?? 0}</div>
+            <div className="text-xs text-slate-400">منشورة</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-400">{(stats?.total ?? 0) - (stats?.published ?? 0)}</div>
+            <div className="text-xs text-slate-400">مسودة</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-purple-400">{Object.values(stats?.byCategory ?? {}).reduce((a: number, b: any) => a + Number(b), 0)}</div>
+            <div className="text-xs text-slate-400">التصنيفات</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="بحث في قاعدة المعرفة..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pr-10 bg-slate-800/50 border-slate-700 text-white"
+          />
+        </div>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger className="w-[180px] bg-slate-800/50 border-slate-700 text-white">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">جميع التصنيفات</SelectItem>
+            <SelectItem value="article">مقال</SelectItem>
+            <SelectItem value="faq">أسئلة شائعة</SelectItem>
+            <SelectItem value="glossary">مصطلحات</SelectItem>
+            <SelectItem value="instruction">تعليمات</SelectItem>
+            <SelectItem value="policy">سياسة</SelectItem>
+            <SelectItem value="regulation">لائحة</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-cyan-600 hover:bg-cyan-700">
+          <Plus className="w-4 h-4 ml-2" /> إضافة معرفة
+        </Button>
+      </div>
+
+      {/* Entries List */}
+      <div className="space-y-3">
+        {entries.map((entry: any) => (
+          <Card key={entry.id} className="bg-slate-800/40 border-slate-700 hover:border-cyan-700/50 transition-colors">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-white truncate">{entry.titleAr || entry.title}</h3>
+                    <Badge variant={entry.isPublished ? "default" : "secondary"} className="text-xs">
+                      {entry.isPublished ? "منشور" : "مسودة"}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs text-cyan-400 border-cyan-700">
+                      {entry.category}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-400 line-clamp-2">{entry.contentAr || entry.content}</p>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {entry.viewCount}</span>
+                    <span>{new Date(entry.createdAt).toLocaleDateString("ar-SA")}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => updateMut.mutate({ entryId: entry.entryId, isPublished: !entry.isPublished })}>
+                    {entry.isPublished ? <XCircle className="w-4 h-4 text-yellow-400" /> : <CheckCircle2 className="w-4 h-4 text-green-400" />}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(entry)}>
+                    <Edit className="w-4 h-4 text-blue-400" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => deleteMut.mutate({ entryId: entry.entryId })}>
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {entries.length === 0 && (
+          <div className="text-center py-12 text-slate-500">
+            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>لا توجد معارف بعد</p>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAdd || !!editEntry} onOpenChange={(open) => { if (!open) { setShowAdd(false); setEditEntry(null); resetForm(); } }}>
+        <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>{editEntry ? "تعديل المعرفة" : "إضافة معرفة جديدة"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">العنوان (EN)</label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-slate-800 border-slate-700" />
+              </div>
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">العنوان (AR)</label>
+                <Input value={form.titleAr} onChange={(e) => setForm({ ...form, titleAr: e.target.value })} className="bg-slate-800 border-slate-700" dir="rtl" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">المحتوى (EN)</label>
+              <Textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="bg-slate-800 border-slate-700 min-h-[100px]" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">المحتوى (AR)</label>
+              <Textarea value={form.contentAr} onChange={(e) => setForm({ ...form, contentAr: e.target.value })} className="bg-slate-800 border-slate-700 min-h-[100px]" dir="rtl" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">التصنيف</label>
+                <Select value={form.category} onValueChange={(v: "article" | "faq" | "glossary" | "instruction" | "policy" | "regulation") => setForm({ ...form, category: v })}>
+                  <SelectTrigger className="bg-slate-800 border-slate-700"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="article">مقال</SelectItem>
+                    <SelectItem value="faq">أسئلة شائعة</SelectItem>
+                    <SelectItem value="glossary">مصطلحات</SelectItem>
+                    <SelectItem value="instruction">تعليمات</SelectItem>
+                    <SelectItem value="policy">سياسة</SelectItem>
+                    <SelectItem value="regulation">لائحة</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm text-slate-400 mb-1 block">الوسوم (مفصولة بفاصلة)</label>
+                <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="bg-slate-800 border-slate-700" placeholder="pdpl, خصوصية, بيانات" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="border-slate-700">إلغاء</Button>
+            </DialogClose>
+            <Button onClick={handleSubmit} className="bg-cyan-600 hover:bg-cyan-700" disabled={createMut.isPending || updateMut.isPending}>
+              {editEntry ? "تحديث" : "إضافة"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Custom Actions Tab ─────────────────────────────────────────
+function ActionsTab() {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editAction, setEditAction] = useState<any>(null);
+  const [form, setForm] = useState({
+    triggerPhrase: "", triggerAliases: "",
+    actionType: "custom_response" as string,
+    actionTarget: "", description: "", descriptionAr: "",
+    priority: 0,
+  });
+
+  const { data: actions = [], refetch } = trpc.trainingCenter.customActions.list.useQuery();
+  const createMut = trpc.trainingCenter.customActions.create.useMutation({
+    onSuccess: () => { refetch(); setShowAdd(false); resetForm(); toast.success("تم إنشاء الإجراء بنجاح"); },
+  });
+  const updateMut = trpc.trainingCenter.customActions.update.useMutation({
+    onSuccess: () => { refetch(); setEditAction(null); resetForm(); toast.success("تم تحديث الإجراء"); },
+  });
+  const deleteMut = trpc.trainingCenter.customActions.delete.useMutation({
+    onSuccess: () => { refetch(); toast.success("تم حذف الإجراء"); },
+  });
+
+  function resetForm() {
+    setForm({ triggerPhrase: "", triggerAliases: "", actionType: "custom_response", actionTarget: "", description: "", descriptionAr: "", priority: 0 });
+  }
+
+  function openEdit(action: any) {
+    setEditAction(action);
+    setForm({
+      triggerPhrase: action.triggerPhrase || "",
+      triggerAliases: (action.triggerAliases || []).join(", "),
+      actionType: action.actionType || "custom_response",
+      actionTarget: action.actionTarget || "",
+      description: action.description || "",
+      descriptionAr: action.descriptionAr || "",
+      priority: action.priority || 0,
+    });
+  }
+
+  function handleSubmit() {
+    const aliases = form.triggerAliases.split(",").map(a => a.trim()).filter(Boolean);
+    if (editAction) {
+      updateMut.mutate({ actionId: editAction.actionId, triggerPhrase: form.triggerPhrase, triggerAliases: aliases, actionType: form.actionType as any, actionTarget: form.actionTarget || undefined, description: form.description || undefined, descriptionAr: form.descriptionAr || undefined, priority: form.priority });
+    } else {
+      createMut.mutate({ triggerPhrase: form.triggerPhrase, triggerAliases: aliases, actionType: form.actionType as any, actionTarget: form.actionTarget || undefined, description: form.description || undefined, descriptionAr: form.descriptionAr || undefined, priority: form.priority });
+    }
+  }
+
+  const typeLabels: Record<string, string> = {
+    call_function: "استدعاء دالة",
+    custom_response: "رد مخصص",
+    redirect: "إعادة توجيه",
+    api_call: "استدعاء API",
+  };
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Brain className="h-7 w-7 text-primary" />
-            مركز تدريب راصد الذكي
-          </h1>
-          <p className="text-muted-foreground mt-1">إدارة وتدريب المساعد الذكي لمنصة راصد</p>
+          <h3 className="text-lg font-semibold text-white">الإجراءات المخصصة</h3>
+          <p className="text-sm text-slate-400">أضف إجراءات مخصصة يستجيب لها راصد الذكي تلقائياً</p>
         </div>
-        <Button variant="outline" onClick={() => statsQuery.refetch()}>
-          <RefreshCw className={`h-4 w-4 ms-2 ${statsQuery.isFetching ? 'animate-spin' : ''}`} />تحديث
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-cyan-600 hover:bg-cyan-700">
+          <Plus className="w-4 h-4 ml-2" /> إجراء جديد
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {actions.map((action: any) => (
+          <Card key={action.id} className="bg-slate-800/40 border-slate-700 hover:border-cyan-700/50 transition-colors">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-4 h-4 text-yellow-400" />
+                    <h3 className="font-semibold text-white">{action.triggerPhrase}</h3>
+                    <Badge variant="outline" className="text-xs text-cyan-400 border-cyan-700">
+                      {typeLabels[action.actionType] || action.actionType}
+                    </Badge>
+                    <Badge variant={action.isActive ? "default" : "secondary"} className="text-xs">
+                      {action.isActive ? "نشط" : "معطل"}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-400">{action.descriptionAr || action.description || "بدون وصف"}</p>
+                  {action.triggerAliases && (action.triggerAliases as string[]).length > 0 && (
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      {(action.triggerAliases as string[]).map((alias: string, i: number) => (
+                        <Badge key={i} variant="outline" className="text-xs text-slate-400 border-slate-600">{alias}</Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(action)}>
+                    <Edit className="w-4 h-4 text-blue-400" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => deleteMut.mutate({ actionId: action.actionId })}>
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {actions.length === 0 && (
+          <div className="text-center py-12 text-slate-500">
+            <Zap className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>لا توجد إجراءات مخصصة بعد</p>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAdd || !!editAction} onOpenChange={(open) => { if (!open) { setShowAdd(false); setEditAction(null); resetForm(); } }}>
+        <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>{editAction ? "تعديل الإجراء" : "إجراء مخصص جديد"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">عبارة التفعيل</label>
+              <Input value={form.triggerPhrase} onChange={(e) => setForm({ ...form, triggerPhrase: e.target.value })} className="bg-slate-800 border-slate-700" dir="rtl" placeholder="مثال: ما هي سياسة الخصوصية؟" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">عبارات بديلة (مفصولة بفاصلة)</label>
+              <Input value={form.triggerAliases} onChange={(e) => setForm({ ...form, triggerAliases: e.target.value })} className="bg-slate-800 border-slate-700" dir="rtl" placeholder="سياسة الخصوصية, privacy policy" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">نوع الإجراء</label>
+              <Select value={form.actionType} onValueChange={(v) => setForm({ ...form, actionType: v })}>
+                <SelectTrigger className="bg-slate-800 border-slate-700"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="custom_response">رد مخصص</SelectItem>
+                  <SelectItem value="call_function">استدعاء دالة</SelectItem>
+                  <SelectItem value="redirect">إعادة توجيه</SelectItem>
+                  <SelectItem value="api_call">استدعاء API</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">الهدف / الرد</label>
+              <Textarea value={form.actionTarget} onChange={(e) => setForm({ ...form, actionTarget: e.target.value })} className="bg-slate-800 border-slate-700 min-h-[80px]" dir="rtl" placeholder="النص الذي سيرد به راصد الذكي أو رابط الدالة" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">الوصف (AR)</label>
+              <Input value={form.descriptionAr} onChange={(e) => setForm({ ...form, descriptionAr: e.target.value })} className="bg-slate-800 border-slate-700" dir="rtl" />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="border-slate-700">إلغاء</Button>
+            </DialogClose>
+            <Button onClick={handleSubmit} className="bg-cyan-600 hover:bg-cyan-700" disabled={createMut.isPending || updateMut.isPending}>
+              {editAction ? "تحديث" : "إنشاء"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Training Documents Tab ─────────────────────────────────────
+function DocumentsTab() {
+  const [showUpload, setShowUpload] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+
+  const { data: docs = [], refetch } = trpc.trainingCenter.documents.list.useQuery();
+  const uploadMut = trpc.trainingCenter.documents.upload.useMutation({
+    onSuccess: () => { refetch(); setShowUpload(false); setFileName(""); setFileUrl(""); toast.success("تم رفع المستند بنجاح"); },
+  });
+  const processMut = trpc.trainingCenter.documents.process.useMutation({
+    onSuccess: () => { refetch(); toast.success("تم معالجة المستند"); },
+    onError: () => { refetch(); toast.error("فشل في معالجة المستند"); },
+  });
+  const deleteMut = trpc.trainingCenter.documents.delete.useMutation({
+    onSuccess: () => { refetch(); toast.success("تم حذف المستند"); },
+  });
+
+  const statusLabels: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+    pending: { label: "في الانتظار", color: "text-yellow-400", icon: <Clock className="w-3 h-3" /> },
+    processing: { label: "جاري المعالجة", color: "text-blue-400", icon: <RefreshCw className="w-3 h-3 animate-spin" /> },
+    completed: { label: "مكتمل", color: "text-green-400", icon: <CheckCircle2 className="w-3 h-3" /> },
+    failed: { label: "فشل", color: "text-red-400", icon: <XCircle className="w-3 h-3" /> },
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white">مستندات التدريب</h3>
+          <p className="text-sm text-slate-400">ارفع مستندات لتدريب راصد الذكي عليها</p>
+        </div>
+        <Button onClick={() => setShowUpload(true)} className="bg-cyan-600 hover:bg-cyan-700">
+          <Upload className="w-4 h-4 ml-2" /> رفع مستند
         </Button>
       </div>
 
       {/* Stats */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 stagger-children">
-          <StatCard title="قاعدة المعرفة" value={stats.knowledge} icon={BookOpen} color="bg-blue-500/10 text-blue-600" />
-          <StatCard title="السيناريوهات" value={stats.scenarios} icon={Sparkles} color="bg-primary/10 text-primary" />
-          <StatCard title="الأوامر" value={stats.actions} icon={Zap} color="bg-amber-500/10 text-amber-600" />
-          <StatCard title="المستندات" value={stats.documents} icon={FileText} color="bg-cyan-500/10 text-cyan-600" />
-          <StatCard title="تقييم إيجابي" value={stats.feedbackGood} icon={ThumbsUp} color="bg-green-500/10 text-green-600" />
-          <StatCard title="تقييم سلبي" value={stats.feedbackBad} icon={ThumbsDown} color="bg-red-500/10 text-red-600" />
-          <StatCard title="المحادثات" value={stats.chats} icon={MessageSquare} color="bg-indigo-500/10 text-indigo-600" />
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-cyan-400">{docs.length}</div>
+            <div className="text-xs text-slate-400">إجمالي المستندات</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-400">{docs.filter((d: any) => d.status === "completed").length}</div>
+            <div className="text-xs text-slate-400">تمت المعالجة</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-400">{docs.filter((d: any) => d.status === "pending").length}</div>
+            <div className="text-xs text-slate-400">في الانتظار</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="space-y-3">
+        {docs.map((doc: any) => {
+          const status = statusLabels[doc.status] || statusLabels.pending;
+          return (
+            <Card key={doc.id} className="bg-slate-800/40 border-slate-700 hover:border-cyan-700/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-blue-400" />
+                      <h3 className="font-semibold text-white truncate">{doc.fileName}</h3>
+                      <span className={`flex items-center gap-1 text-xs ${status.color}`}>
+                        {status.icon} {status.label}
+                      </span>
+                    </div>
+                    {doc.extractedContent && (
+                      <p className="text-sm text-slate-400 line-clamp-2 mt-1">{doc.extractedContent}</p>
+                    )}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                      {doc.chunkCount && <span>{doc.chunkCount} أجزاء</span>}
+                      <span>بواسطة: {doc.uploadedByName || "غير معروف"}</span>
+                      <span>{new Date(doc.createdAt).toLocaleDateString("ar-SA")}</span>
+                    </div>
+                    {doc.errorMessage && (
+                      <p className="text-xs text-red-400 mt-1">{doc.errorMessage}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {doc.status === "pending" && (
+                      <Button size="sm" variant="ghost" onClick={() => processMut.mutate({ docId: doc.docId })} disabled={processMut.isPending}>
+                        <Brain className="w-4 h-4 text-purple-400" />
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => deleteMut.mutate({ docId: doc.docId })}>
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {docs.length === 0 && (
+          <div className="text-center py-12 text-slate-500">
+            <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>لا توجد مستندات تدريب بعد</p>
+          </div>
+        )}
+      </div>
+
+      {/* Upload Dialog */}
+      <Dialog open={showUpload} onOpenChange={setShowUpload}>
+        <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>رفع مستند تدريب</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">اسم المستند</label>
+              <Input value={fileName} onChange={(e) => setFileName(e.target.value)} className="bg-slate-800 border-slate-700" dir="rtl" placeholder="مثال: دليل PDPL الشامل" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">رابط المستند (URL)</label>
+              <Input value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="bg-slate-800 border-slate-700" placeholder="https://example.com/document.pdf" />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="border-slate-700">إلغاء</Button>
+            </DialogClose>
+            <Button onClick={() => uploadMut.mutate({ fileName, fileUrl })} className="bg-cyan-600 hover:bg-cyan-700" disabled={!fileName || !fileUrl || uploadMut.isPending}>
+              رفع
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Feedback Tab ───────────────────────────────────────────────
+function FeedbackTab() {
+  const { data: ratings = [] } = trpc.trainingCenter.feedback.list.useQuery();
+  const { data: stats } = trpc.trainingCenter.feedback.stats.useQuery();
+
+  const distribution = stats?.distribution || {};
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { value: stats?.total ?? 0, label: "إجمالي التقييمات", color: "text-cyan-400", extra: null },
+          { value: stats?.avgRating ?? 0, label: "متوسط التقييم", color: "text-yellow-400", extra: <Star className="w-5 h-5 fill-yellow-400" /> },
+          { value: Number(distribution["5"] ?? 0) + Number(distribution["4"] ?? 0), label: "تقييمات إيجابية", color: "text-green-400", extra: null },
+          { value: Number(distribution["1"] ?? 0) + Number(distribution["2"] ?? 0), label: "تقييمات سلبية", color: "text-red-400", extra: null },
+        ].map((s, idx) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4, delay: idx * 0.1 }}
+            whileHover={{ scale: 1.05, y: -3 }}
+          >
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4 text-center">
+                <div className={`text-2xl font-bold ${s.color} flex items-center justify-center gap-1`}>
+                  {s.extra}
+                  {s.value}
+                </div>
+                <div className="text-xs text-slate-400">{s.label}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Distribution Chart */}
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-cyan-400" />
+            توزيع التقييمات
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[5, 4, 3, 2, 1].map((star) => {
+              const count = Number(distribution[String(star)] ?? 0);
+              const total = stats?.total || 1;
+              const pct = Math.round((count / total) * 100);
+              return (
+                <div key={star} className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 w-16 justify-end">
+                    {Array.from({ length: star }).map((_, i) => (
+                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <div className="flex-1 bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-l from-cyan-400 to-cyan-600 transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-slate-400 w-12 text-left">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Ratings */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-white">آخر التقييمات</h3>
+        {ratings.map((rating: any) => (
+          <Card key={rating.id} className="bg-slate-800/40 border-slate-700">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < rating.rating ? "fill-yellow-400 text-yellow-400" : "text-slate-600"}`} />
+                      ))}
+                    </div>
+                  </div>
+                  {rating.feedback && <p className="text-sm text-slate-400 mt-1">{rating.feedback}</p>}
+                  <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                    <span>{new Date(rating.createdAt).toLocaleDateString("ar-SA")}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {ratings.length === 0 && (
+          <div className="text-center py-12 text-slate-500">
+            <Star className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>لا توجد تقييمات بعد</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Personality Tab ────────────────────────────────────────────
+function PersonalityTab() {
+  const [showAdd, setShowAdd] = useState(false);
+  const [editScenario, setEditScenario] = useState<any>(null);
+  const [form, setForm] = useState({
+    scenarioType: "greeting_first" as "greeting_first" | "greeting_return" | "leader_respect" | "custom",
+    triggerKeyword: "",
+    responseTemplate: "",
+    isActive: true,
+  });
+
+  const { data: scenarios = [], refetch } = trpc.personality.scenarios.list.useQuery();
+  const createMut = trpc.personality.scenarios.create.useMutation({
+    onSuccess: () => { refetch(); setShowAdd(false); resetForm(); toast.success("تم إنشاء السيناريو بنجاح"); },
+  });
+  const updateMut = trpc.personality.scenarios.update.useMutation({
+    onSuccess: () => { refetch(); setEditScenario(null); resetForm(); toast.success("تم تحديث السيناريو"); },
+  });
+  const deleteMut = trpc.personality.scenarios.delete.useMutation({
+    onSuccess: () => { refetch(); toast.success("تم حذف السيناريو"); },
+  });
+
+  function resetForm() {
+    setForm({ scenarioType: "greeting_first", triggerKeyword: "", responseTemplate: "", isActive: true });
+  }
+
+  function openEdit(s: any) {
+    setEditScenario(s);
+    setForm({
+      scenarioType: s.scenarioType || "greeting_first",
+      triggerKeyword: s.triggerKeyword || "",
+      responseTemplate: s.responseTemplate || "",
+      isActive: s.isActive !== false,
+    });
+  }
+
+  function handleSubmit() {
+    if (editScenario) {
+      updateMut.mutate({ id: editScenario.id, scenarioType: form.scenarioType, triggerKeyword: form.triggerKeyword || undefined, responseTemplate: form.responseTemplate, isActive: form.isActive });
+    } else {
+      createMut.mutate({ scenarioType: form.scenarioType, triggerKeyword: form.triggerKeyword || undefined, responseTemplate: form.responseTemplate, isActive: form.isActive });
+    }
+  }
+
+  const typeLabels: Record<string, string> = {
+    greeting_first: "تحية أولى",
+    greeting_return: "تحية عودة",
+    leader_respect: "احترام القيادة",
+    custom: "مخصص",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white">سيناريوهات الشخصية</h3>
+          <p className="text-sm text-slate-400">إدارة ردود وسلوكيات راصد الذكي التلقائية</p>
         </div>
-      )}
+        <Button onClick={() => { resetForm(); setShowAdd(true); }} className="bg-cyan-600 hover:bg-cyan-700">
+          <Plus className="w-4 h-4 ml-2" /> سيناريو جديد
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {scenarios.map((s: any) => (
+          <Card key={s.id} className="bg-slate-800/40 border-slate-700 hover:border-cyan-700/50 transition-colors">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-purple-400" />
+                    <Badge variant="outline" className="text-xs text-cyan-400 border-cyan-700">
+                      {typeLabels[s.scenarioType] || s.scenarioType}
+                    </Badge>
+                    <Badge variant={s.isActive ? "default" : "secondary"} className="text-xs">
+                      {s.isActive ? "نشط" : "معطل"}
+                    </Badge>
+                  </div>
+                    <p className="text-sm text-slate-300 mt-1">{s.triggerKeyword || "بدون كلمة مفتاحية"}</p>
+                  <p className="text-sm text-slate-400 mt-1 line-clamp-2">{s.responseTemplate}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(s)}>
+                    <Edit className="w-4 h-4 text-blue-400" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => deleteMut.mutate({ id: s.id })}>
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {scenarios.length === 0 && (
+          <div className="text-center py-12 text-slate-500">
+            <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p>لا توجد سيناريوهات بعد</p>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showAdd || !!editScenario} onOpenChange={(open) => { if (!open) { setShowAdd(false); setEditScenario(null); resetForm(); } }}>
+        <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle>{editScenario ? "تعديل السيناريو" : "سيناريو جديد"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">نوع السيناريو</label>
+              <Select value={form.scenarioType} onValueChange={(v: "greeting_first" | "greeting_return" | "leader_respect" | "custom") => setForm({ ...form, scenarioType: v })}>
+                <SelectTrigger className="bg-slate-800 border-slate-700"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="greeting_first">تحية أولى</SelectItem>
+                    <SelectItem value="greeting_return">تحية عودة</SelectItem>
+                    <SelectItem value="leader_respect">احترام القيادة</SelectItem>
+                    <SelectItem value="custom">مخصص</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">شرط التفعيل</label>
+              <Input value={form.triggerKeyword} onChange={(e) => setForm({ ...form, triggerKeyword: e.target.value })} className="bg-slate-800 border-slate-700" dir="rtl" placeholder="مثال: الملك سلمان أو رؤية 2030" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-400 mb-1 block">قالب الرد</label>
+              <Textarea value={form.responseTemplate} onChange={(e) => setForm({ ...form, responseTemplate: e.target.value })} className="bg-slate-800 border-slate-700 min-h-[100px]" dir="rtl" placeholder="النص الذي سيرد به راصد الذكي" />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="border-slate-700">إلغاء</Button>
+            </DialogClose>
+            <Button onClick={handleSubmit} className="bg-cyan-600 hover:bg-cyan-700" disabled={createMut.isPending || updateMut.isPending}>
+              {editScenario ? "تحديث" : "إنشاء"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Main Training Center Page ──────────────────────────────────
+export default function TrainingCenter() {
+  const [activeTab, setActiveTab] = useState<TabId>("knowledge");
+
+  return (
+    <div className="min-h-screen p-6" dir="rtl">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
+            <Brain className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">مركز تدريب وإدارة راصد الذكي</h1>
+            <p className="text-sm text-slate-400">إدارة المعرفة والسلوكيات والتدريب لراصد الذكي</p>
+          </div>
+        </div>
+      </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="knowledge" dir="rtl">
-        <TabsList className="w-full justify-start flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="knowledge" className="gap-1"><BookOpen className="h-4 w-4" />قاعدة المعرفة</TabsTrigger>
-          <TabsTrigger value="actions" className="gap-1"><Zap className="h-4 w-4" />الأوامر المخصصة</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1"><FileText className="h-4 w-4" />مستندات التدريب</TabsTrigger>
-          <TabsTrigger value="feedback" className="gap-1"><MessageSquare className="h-4 w-4" />التقييمات</TabsTrigger>
-          <TabsTrigger value="scenarios" className="gap-1"><Sparkles className="h-4 w-4" />الشخصية والسيناريوهات</TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1"><Activity className="h-4 w-4" />سجل التدريب</TabsTrigger>
-        </TabsList>
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+              activeTab === tab.id
+                ? "bg-cyan-600/20 text-cyan-400 border border-cyan-600/50"
+                : "bg-slate-800/50 text-slate-400 border border-slate-700 hover:border-slate-600 hover:text-slate-300"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value="knowledge" className="mt-4"><KnowledgeBaseTab /></TabsContent>
-        <TabsContent value="actions" className="mt-4"><CustomActionsTab /></TabsContent>
-        <TabsContent value="documents" className="mt-4"><TrainingDocumentsTab /></TabsContent>
-        <TabsContent value="feedback" className="mt-4"><FeedbackTab /></TabsContent>
-        <TabsContent value="scenarios" className="mt-4"><PersonalityScenariosTab /></TabsContent>
-        <TabsContent value="logs" className="mt-4"><TrainingLogsTab /></TabsContent>
-      </Tabs>
+      {/* Tab Content */}
+      <div className="min-h-[500px]">
+        {activeTab === "knowledge" && <KnowledgeTab />}
+        {activeTab === "actions" && <ActionsTab />}
+        {activeTab === "documents" && <DocumentsTab />}
+        {activeTab === "feedback" && <FeedbackTab />}
+        {activeTab === "personality" && <PersonalityTab />}
+      </div>
     </div>
   );
 }

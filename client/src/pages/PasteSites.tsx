@@ -59,7 +59,7 @@ const statusText = (s: string) => {
 const severityLevel = (paste: any): { level: string; color: string; icon: typeof Shield; label: string } => {
   const piiCount = (paste.piiTypes as string[] | undefined)?.length ?? 0;
   if (paste.status === "flagged" || piiCount >= 4) {
-    return { level: "critical", color: "text-red-500", icon: Flame, label: "عالي الأهمية" };
+    return { level: "critical", color: "text-red-500", icon: Flame, label: "حرج" };
   }
   if (piiCount >= 2) {
     return { level: "high", color: "text-orange-400", icon: AlertTriangle, label: "عالي" };
@@ -170,7 +170,7 @@ export default function PasteSites() {
       return;
     }
     const BOM = "\uFEFF";
-    const headers = ["اسم الملف", "المصدر", "الحالة", "تاريخ الاكتشاف", "أنواع البيانات", "مستوى التأثير"];
+    const headers = ["اسم الملف", "المصدر", "الحالة", "تاريخ الاكتشاف", "أنواع البيانات", "الخطورة"];
     const rows = filteredPastes.map(p => [
       p.filename,
       p.sourceName,
@@ -199,7 +199,7 @@ export default function PasteSites() {
   }
 
   const stats = [
-    { id: "monitored-sites", label: "مواقع مراقبة", value: pasteChannels.length, color: "text-amber-400", icon: Server, description: "إجمالي عدد مواقع اللصق التي تتم مراقبتها حاليًا بحثًا عن حالات رصد محتملة." },
+    { id: "monitored-sites", label: "مواقع مراقبة", value: pasteChannels.length, color: "text-amber-400", icon: Server, description: "إجمالي عدد مواقع اللصق التي تتم مراقبتها حاليًا بحثًا عن تسريبات محتملة." },
     { id: "pastes-found", label: "لصقات مرصودة", value: pasteEntries.length, color: "text-cyan-400", icon: ScanLine, description: "إجمالي عدد اللصقات (Pastes) التي تم رصدها عبر جميع المواقع المراقبة." },
     { id: "analyzing", label: "قيد التحليل", value: pasteEntries.filter((p) => p.status === "analyzing").length, color: "text-violet-400", icon: Loader2, description: "عدد اللصقات التي يتم تحليلها حاليًا لتحديد ما إذا كانت تحتوي على بيانات حساسة." },
     { id: "flagged", label: "موثّقة", value: pasteEntries.filter((p) => p.status === "flagged").length, color: "text-red-400", icon: ShieldAlert, description: "عدد اللصقات التي تم تحديدها على أنها تحتوي على بيانات شخصية مسربة وتم توثيقها." },
@@ -225,7 +225,7 @@ export default function PasteSites() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground max-w-lg">
-            مراقبة Pastebin وبدائله حيث تُنشر كثير من حالات الرصد الأولية
+            مراقبة Pastebin وبدائله حيث تُنشر كثير من التسريبات الأولية
           </p>
         </div>
       </motion.div>
@@ -255,13 +255,13 @@ export default function PasteSites() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-amber-400" />
-              توزيع مستوى التأثير
+              توزيع مستوى الخطورة
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4">
             <div className="grid grid-cols-4 gap-2">
               {[
-                { key: "critical", label: "عالي الأهمية", color: "bg-red-500", textColor: "text-red-400", count: riskDistribution.critical },
+                { key: "critical", label: "حرج", color: "bg-red-500", textColor: "text-red-400", count: riskDistribution.critical },
                 { key: "high", label: "عالي", color: "bg-orange-500", textColor: "text-orange-400", count: riskDistribution.high },
                 { key: "medium", label: "متوسط", color: "bg-amber-500", textColor: "text-amber-400", count: riskDistribution.medium },
                 { key: "low", label: "منخفض", color: "bg-emerald-500", textColor: "text-emerald-400", count: riskDistribution.low },
@@ -356,7 +356,7 @@ export default function PasteSites() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{source.leaksDetected ?? 0} حالة رصد مكتشف</span>
+                      <span>{source.leaksDetected ?? 0} تسريب مكتشف</span>
                       <span className={`px-2 py-0.5 rounded border text-[10px] ${
                         source.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                         source.riskLevel === "medium" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
@@ -477,7 +477,7 @@ export default function PasteSites() {
                       }`}
                     >
                       <AlertTriangle className="w-3 h-3" />
-                      مستوى التأثير
+                      الخطورة
                     </button>
                   </div>
                 </div>
@@ -632,7 +632,7 @@ export default function PasteSites() {
                 </div>
             </div>
             <div className="p-3 bg-secondary/30 rounded-lg text-center">
-                <p className="text-xs text-muted-foreground">حالات الرصد المكتشفة</p>
+                <p className="text-xs text-muted-foreground">التسريبات المكتشفة</p>
                 <p className="font-bold text-2xl text-cyan-400">{channel.leaksDetected ?? 0}</p>
             </div>
             <Button variant="outline" className="w-full" onClick={() => {
@@ -677,7 +677,7 @@ export default function PasteSites() {
                 }`}>
                   <sev.icon className={`w-5 h-5 ${sev.color}`} />
                   <div>
-                    <p className="text-[10px] text-muted-foreground">مستوى التأثير</p>
+                    <p className="text-[10px] text-muted-foreground">مستوى الخطورة</p>
                     <p className={`font-bold ${sev.color}`}>{sev.label}</p>
                   </div>
                 </div>

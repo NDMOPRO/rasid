@@ -20,7 +20,7 @@ import { trpc } from "@/lib/trpc";
 
 const classLabels: Record<string, { label: string; color: string }> = {
   personal_data: { label: "بيانات شخصية", color: "text-red-400" },
-  cybersecurity: { label: "حماية البيانات", color: "text-amber-400" },
+  cybersecurity: { label: "أمن سيبراني", color: "text-amber-400" },
   clean: { label: "نظيف", color: "text-emerald-400" },
   unknown: { label: "غير محدد", color: "text-muted-foreground" },
 };
@@ -90,8 +90,8 @@ export default function FeedbackAccuracy() {
           {/* Gauge Visualization */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { label: "Precision (الدقة)", value: stats?.precision || 0, description: "نسبة حالات الرصد المكتشفة الصحيحة من إجمالي ما أعلنه النظام", color: "text-cyan-400", bg: "bg-cyan-500" },
-              { label: "Recall (الاستدعاء)", value: stats?.recall || 0, description: "نسبة حالات الرصد الحقيقية التي اكتشفها النظام", color: "text-violet-400", bg: "bg-violet-500" },
+              { label: "Precision (الدقة)", value: stats?.precision || 0, description: "نسبة التسريبات المكتشفة الصحيحة من إجمالي ما أعلنه النظام", color: "text-cyan-400", bg: "bg-cyan-500" },
+              { label: "Recall (الاستدعاء)", value: stats?.recall || 0, description: "نسبة التسريبات الحقيقية التي اكتشفها النظام", color: "text-violet-400", bg: "bg-violet-500" },
               { label: "F1 Score", value: stats?.f1 || 0, description: "المتوسط التوافقي بين الدقة والاستدعاء", color: "text-amber-400", bg: "bg-amber-500" },
             ].map((metric) => (
               <Card key={metric.label} className="border-border">
@@ -133,7 +133,7 @@ export default function FeedbackAccuracy() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border">
-                        <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">حالة الرصد</th>
+                        <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">التسريب</th>
                         <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">تصنيف النظام</th>
                         <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">تصنيف المحلل</th>
                         <th className="text-right py-2 px-3 text-xs text-muted-foreground font-medium">النتيجة</th>

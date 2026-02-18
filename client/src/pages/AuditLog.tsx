@@ -29,7 +29,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 
 const categoryConfig: Record<string, { label: string; labelEn: string; icon: React.ElementType; color: string }> = {
   auth: { label: "المصادقة", labelEn: "Auth", icon: LogIn, color: "text-blue-400 bg-blue-500/10" },
-  leak: { label: "حالات الرصد", labelEn: "Monitoring Cases", icon: Shield, color: "text-red-400 bg-red-500/10" },
+  leak: { label: "التسريبات", labelEn: "Leaks", icon: Shield, color: "text-red-400 bg-red-500/10" },
   export: { label: "التصدير", labelEn: "Export", icon: FileOutput, color: "text-emerald-400 bg-emerald-500/10" },
   pii: { label: "فحص PII", labelEn: "PII Scan", icon: ScanSearch, color: "text-purple-400 bg-purple-500/10" },
   user: { label: "المستخدمين", labelEn: "Users", icon: Users, color: "text-amber-400 bg-amber-500/10" },
@@ -102,9 +102,9 @@ export default function AuditLog() {
   };
 
   const stats = [
-    { key: "total", label: "إجمالي ادعاءات البائع", value: auditLogs?.length ?? 0, color: "text-cyan-400" },
+    { key: "total", label: "إجمالي السجلات", value: auditLogs?.length ?? 0, color: "text-cyan-400" },
     { key: "auth", label: "المصادقة", value: auditLogs?.filter((l) => l.category === "auth").length ?? 0, color: "text-blue-400" },
-    { key: "leak", label: "حالات الرصد", value: auditLogs?.filter((l) => l.category === "leak").length ?? 0, color: "text-red-400" },
+    { key: "leak", label: "التسريبات", value: auditLogs?.filter((l) => l.category === "leak").length ?? 0, color: "text-red-400" },
     { key: "export", label: "التصدير", value: auditLogs?.filter((l) => l.category === "export").length ?? 0, color: "text-emerald-400" },
   ];
 
@@ -252,7 +252,7 @@ export default function AuditLog() {
       <DetailModal
         open={activeModal === "stat-total"}
         onClose={() => setActiveModal(null)}
-        title="تفاصيل إجمالي ادعاءات البائع"
+        title="تفاصيل إجمالي السجلات"
         icon={<BarChart3 />}
       >
         <p className="text-sm text-muted-foreground">هذا الرقم يمثل العدد الإجمالي لجميع الإجراءات المسجلة في نظام المراقبة. ويشمل كل الفئات من مصادقة المستخدمين إلى أنشطة النظام.</p>
@@ -268,10 +268,10 @@ export default function AuditLog() {
       <DetailModal
         open={activeModal === "stat-leak"}
         onClose={() => setActiveModal(null)}
-        title="تفاصيل سجلات حالات الرصد"
+        title="تفاصيل سجلات التسريبات"
         icon={<Shield />}
       >
-        <p className="text-sm text-muted-foreground">يمثل هذا العدد جميع الأحداث المتعلقة بالكشف عن حالات رصد بيانات محتملة. كل سجل هنا يشير إلى تفعيل آليات الحماية.</p>
+        <p className="text-sm text-muted-foreground">يمثل هذا العدد جميع الأحداث المتعلقة بالكشف عن تسريبات البيانات المحتملة. كل سجل هنا يشير إلى تفعيل آليات الحماية.</p>
       </DetailModal>
       <DetailModal
         open={activeModal === "stat-export"}

@@ -43,7 +43,7 @@ const typeIcons: Record<string, React.ElementType> = {
 };
 
 const typeLabels: Record<string, string> = {
-  new_leak: "رصد جديد",
+  new_leak: "تسريب جديد",
   status_change: "تغيير حالة",
   scan_complete: "اكتمال فحص",
   job_complete: "اكتمال مهمة",
@@ -55,7 +55,7 @@ const severityConfig: Record<string, {
 }> = {
   critical: {
     text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30",
-    label: "عالي الأهمية", labelEn: "Critical", glow: "rgba(239, 68, 68, 0.3)",
+    label: "حرج", labelEn: "Critical", glow: "rgba(239, 68, 68, 0.3)",
   },
   high: {
     text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30",
@@ -185,8 +185,8 @@ function getDateGroup(dateStr: string | Date | null | undefined): string {
 /* ═══ Filter Tabs ═══ */
 const filterTabs = [
   { id: "all", label: "الكل", icon: Bell },
-  { id: "critical", label: "عالي الأهمية", icon: Zap },
-  { id: "new_leak", label: "حالات رصد", icon: ShieldAlert },
+  { id: "critical", label: "حرج", icon: Zap },
+  { id: "new_leak", label: "تسريبات", icon: ShieldAlert },
   { id: "system", label: "نظام", icon: Shield },
 ];
 
@@ -439,7 +439,7 @@ export default function NotificationBell({ userId }: { userId?: number }) {
                   </motion.div>
                   <p className="text-sm font-medium">لا توجد إشعارات</p>
                   <p className="text-xs mt-1 text-muted-foreground/60">
-                    {activeFilter !== "all" ? "جرب تغيير الفلتر" : "ستظهر الإشعارات هنا عند رصد حالات جديدة"}
+                    {activeFilter !== "all" ? "جرب تغيير الفلتر" : "ستظهر الإشعارات هنا عند رصد تسريبات جديدة"}
                   </p>
                 </div>
               ) : (

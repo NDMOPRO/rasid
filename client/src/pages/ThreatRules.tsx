@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { DetailModal } from "@/components/DetailModal";
 
 const categoryConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  data_leak: { label: "حالة رصد بيانات", icon: Database, color: "text-red-400" },
+  data_leak: { label: "تسريب بيانات", icon: Database, color: "text-red-400" },
   credentials: { label: "بيانات اعتماد", icon: Lock, color: "text-amber-400" },
   sale_ad: { label: "إعلان بيع", icon: CreditCard, color: "text-violet-400" },
   db_dump: { label: "تفريغ قاعدة بيانات", icon: Server, color: "text-cyan-400" },
@@ -76,9 +76,9 @@ export default function ThreatRules() {
   };
 
   const statItems = [
-    { key: "total_rules", label: "إجمالي القواعد", value: stats.total, icon: Crosshair, color: "text-primary", description: "إجمالي القواعد يمثل العدد الكلي لقواعد الصيد والكشف عن التهديدات المتاحة في النظام. هذه القواعد مصممة لتحديد الأنشطة المشبوهة وحالة رصد البيانات والمخاطر الأخرى." },
+    { key: "total_rules", label: "إجمالي القواعد", value: stats.total, icon: Crosshair, color: "text-primary", description: "إجمالي القواعد يمثل العدد الكلي لقواعد الصيد والكشف عن التهديدات المتاحة في النظام. هذه القواعد مصممة لتحديد الأنشطة المشبوهة وتسريب البيانات والتهديدات الأمنية الأخرى." },
     { key: "enabled_rules", label: "قواعد نشطة", value: stats.enabled, icon: CheckCircle2, color: "text-emerald-400", description: "القواعد النشطة هي القواعد التي يتم تطبيقها حاليًا للمراقبة والتحليل. يمكن تمكين أو تعطيل القواعد بناءً على احتياجات الأمان والأداء." },
-    { key: "critical_rules", label: "قواعد واسعة النطاق", value: stats.critical, icon: AlertTriangle, color: "text-red-400", description: "القواعد واسعة النطاق هي القواعد ذات الأولوية القصوى والتي تشير إلى حالات رصد كبيرة تتطلب متابعة فورية. يتم تصنيفها بناءً على حجم التأثير المحتمل." },
+    { key: "critical_rules", label: "قواعد واسعة النطاق", value: stats.critical, icon: AlertTriangle, color: "text-red-400", description: "القواعد واسعة النطاق هي القواعد ذات الأولوية القصوى والتي تشير إلى تسريبات كبيرة تتطلب متابعة فورية. يتم تصنيفها بناءً على حجم التأثير المحتمل." },
     { key: "total_matches", label: "إجمالي التطابقات", value: stats.totalMatches.toLocaleString(), icon: Zap, color: "text-amber-400", description: "إجمالي التطابقات يمثل عدد المرات التي تم فيها تفعيل قواعد الكشف نتيجة تطابقها مع بيانات أو أنشطة محددة. هذا الرقم يساعد في قياس فعالية القواعد وتحديد حجم التهديدات." },
   ];
 
@@ -102,7 +102,7 @@ export default function ThreatRules() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground max-w-lg">
-            25 قاعدة YARA مخصصة للسياق السعودي — كشف تلقائي للحالات رصد وبيانات الاعتماد وإعلانات البيع
+            25 قاعدة YARA مخصصة للسياق السعودي — كشف تلقائي للتسريبات وبيانات الاعتماد وإعلانات البيع
           </p>
         </div>
       </motion.div>

@@ -1,98 +1,92 @@
+/**
+ * useWebSocket — React hook for real-time WebSocket notifications
+ * Connects to the socket.io server and provides notification events
+ */
 import { useEffect, useRef, useState, useCallback } from "react";
+import { io, Socket } from "socket.io-client";
 
-export interface WSNotification {
-  id: number;
-  notificationType: string;
+export interface WsNotification {
+  id?: number;
+  type: string;
   title: string;
-  message: string;
-  data: any;
-  timestamp: string;
-  read?: boolean;
+  titleAr: string;
+  message?: string;
+  messageAr?: string;
+  severity: string;
+  relatedId?: string;
+  createdAt?: string;
 }
 
-export function useWebSocket() {
-  const [connected, setConnected] = useState(false);
-  const [notifications, setNotifications] = useState<WSNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+export interface WsJobUpdate {
+  jobId: string;
+  status: string;
+  lastResult?: string;
+  leaksFound?: number;
+}
 
-  const connect = useCallback(() => {
-    try {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
-      const ws = new WebSocket(wsUrl);
+interface UseWebSocketReturn {
+  isConnected: boolean;
+  lastNotification: WsNotification | null;
+  lastJobUpdate: WsJobUpdate | null;
+  notifications: WsNotification[];
+  clearNotifications: () => void;
+}
 
-      ws.onopen = () => {
-        setConnected(true);
-        console.log("[WS] Connected to notification server");
-      };
+export function useWebSocket(userId?: number): UseWebSocketReturn {
+  const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastNotification, setLastNotification] = useState<WsNotification | null>(null);
+  const [lastJobUpdate, setLastJobUpdate] = useState<WsJobUpdate | null>(null);
+  const [notifications, setNotifications] = useState<WsNotification[]>([]);
 
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === "notification") {
-            const notif: WSNotification = { ...msg.data, read: false };
-            setNotifications((prev) => [notif, ...prev].slice(0, 50));
-            setUnreadCount((prev) => prev + 1);
-          }
-        } catch (e) {
-          // Ignore invalid messages
-        }
-      };
-
-      ws.onclose = () => {
-        setConnected(false);
-        // Reconnect after 5 seconds
-        reconnectTimer.current = setTimeout(connect, 5000);
-      };
-
-      ws.onerror = () => {
-        ws.close();
-      };
-
-      wsRef.current = ws;
-    } catch (e) {
-      // Connection failed, retry
-      reconnectTimer.current = setTimeout(connect, 5000);
-    }
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
   }, []);
 
   useEffect(() => {
-    connect();
+    // Connect to WebSocket server
+    const socket = io({
+      path: "/api/ws",
+      transports: ["websocket", "polling"],
+    });
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+      console.log("[WS] Connected");
+
+      // Join user room if authenticated
+      if (userId) {
+        socket.emit("join", userId);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+      console.log("[WS] Disconnected");
+    });
+
+    socket.on("notification", (notif: WsNotification) => {
+      setLastNotification(notif);
+      setNotifications((prev) => [notif, ...prev].slice(0, 100));
+    });
+
+    socket.on("job_update", (update: WsJobUpdate) => {
+      setLastJobUpdate(update);
+    });
+
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      if (reconnectTimer.current) {
-        clearTimeout(reconnectTimer.current);
-      }
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }, [connect]);
-
-  const markAllRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
-  }, []);
-
-  const markRead = useCallback((id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
-  }, []);
-
-  const clearAll = useCallback(() => {
-    setNotifications([]);
-    setUnreadCount(0);
-  }, []);
+  }, [userId]);
 
   return {
-    connected,
+    isConnected,
+    lastNotification,
+    lastJobUpdate,
     notifications,
-    unreadCount,
-    markAllRead,
-    markRead,
-    clearAll,
+    clearNotifications,
   };
 }

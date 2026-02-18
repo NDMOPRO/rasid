@@ -223,7 +223,7 @@ export default function DataRetention() {
               icon={<Database />}
             >
               <p>مجموع السجلات التي تمت معالجتها بواسطة هذه السياسة هو: {policy.recordsArchived?.toLocaleString() ?? 0}.</p>
-              <p>هذا العدد يمثل إجمالي ادعاءات البائع التي تم حذفها أو أرشفتها منذ إنشاء السياسة.</p>
+              <p>هذا العدد يمثل إجمالي السجلات التي تم حذفها أو أرشفتها منذ إنشاء السياسة.</p>
             </DetailModal>
           </motion.div>
         ))}

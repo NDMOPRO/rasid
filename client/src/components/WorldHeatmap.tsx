@@ -180,7 +180,7 @@ export default function WorldHeatmap({ leaks }: WorldHeatmapProps) {
           </AnimatePresence>
 
           <div className={`absolute bottom-2 right-2 flex items-center gap-2 px-2 py-1 rounded-lg ${isDark ? "bg-[#0f172a]/80" : "bg-white/80"}`}>
-            {[{ label: "منخفض", color: "#10b981" }, { label: "متوسط", color: "#3b82f6" }, { label: "مرتفع", color: "#f59e0b" }, { label: "عالي الأهمية", color: "#ef4444" }].map(l => (
+            {[{ label: "منخفض", color: "#10b981" }, { label: "متوسط", color: "#3b82f6" }, { label: "مرتفع", color: "#f59e0b" }, { label: "حرج", color: "#ef4444" }].map(l => (
               <span key={l.label} className="flex items-center gap-1 text-[8px] text-muted-foreground">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.color }} />{l.label}
               </span>

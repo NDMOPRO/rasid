@@ -542,7 +542,7 @@ export default function KnowledgeBaseAdmin() {
               <Input
                 value={formData.tags}
                 onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                placeholder="رصد, بيانات شخصية, PDPL"
+                placeholder="تسريب, بيانات شخصية, PDPL"
                 className="bg-white/[0.03] border-white/[0.08]"
               />
             </div>

@@ -1,93 +1,166 @@
-import { useSoundEffects } from '@/hooks/useSoundEffects';
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
+/**
+ * GlowButton — Ultra Premium animated button with glow effects
+ * Adapted from design.rasid.vip reference
+ */
+import { motion } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 
-interface GlowButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  variant?: 'primary' | 'accent' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg' | 'full';
-  loading?: boolean;
-  icon?: ReactNode;
+interface GlowButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "primary" | "secondary" | "danger" | "success" | "ghost";
+  size?: "sm" | "md" | "lg";
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  className?: string;
+  fullWidth?: boolean;
 }
 
-const variantStyles = {
+const VARIANTS = {
   primary: {
-    bg: 'bg-gradient-to-r from-[#1E3A5F] via-[#273470] to-[#6459A7]',
-    glow: '0 0 20px rgba(30, 58, 95, 0.4), 0 0 40px rgba(39, 52, 112, 0.2)',
-    hoverGlow: '0 0 30px rgba(30, 58, 95, 0.6), 0 0 60px rgba(39, 52, 112, 0.3), 0 0 80px rgba(100, 89, 167, 0.15)',
-    text: 'text-white',
-  },
-  accent: {
-    bg: 'bg-gradient-to-r from-[#1E3A5F] to-[#2A4F7A]',
-    glow: '0 0 20px rgba(30, 58, 95, 0.3)',
-    hoverGlow: '0 0 30px rgba(30, 58, 95, 0.5), 0 0 60px rgba(42, 79, 122, 0.2)',
-    text: 'text-white',
+    dark: {
+      bg: "linear-gradient(135deg, rgba(74, 122, 181, 0.25), rgba(99, 74, 181, 0.2))",
+      border: "rgba(74, 122, 181, 0.35)",
+      glow: "0 0 20px rgba(74, 122, 181, 0.25), 0 0 40px rgba(74, 122, 181, 0.1)",
+      hoverGlow: "0 0 30px rgba(74, 122, 181, 0.4), 0 0 60px rgba(74, 122, 181, 0.15)",
+      text: "#E8E6F5",
+    },
+    light: {
+      bg: "linear-gradient(135deg, rgba(30, 58, 95, 0.08), rgba(74, 122, 181, 0.12))",
+      border: "rgba(30, 58, 95, 0.15)",
+      glow: "0 2px 8px rgba(30, 58, 95, 0.08)",
+      hoverGlow: "0 4px 16px rgba(30, 58, 95, 0.12)",
+      text: "#1E3A5F",
+    },
   },
   secondary: {
-    bg: 'bg-gradient-to-r from-[#6459A7] to-[#7C70CA]',
-    glow: '0 0 20px rgba(100, 89, 167, 0.3)',
-    hoverGlow: '0 0 30px rgba(100, 89, 167, 0.5), 0 0 60px rgba(100, 89, 167, 0.2)',
-    text: 'text-white',
+    dark: {
+      bg: "linear-gradient(135deg, rgba(99, 74, 181, 0.2), rgba(147, 74, 181, 0.15))",
+      border: "rgba(99, 74, 181, 0.3)",
+      glow: "0 0 15px rgba(99, 74, 181, 0.2)",
+      hoverGlow: "0 0 25px rgba(99, 74, 181, 0.35)",
+      text: "#E8E6F5",
+    },
+    light: {
+      bg: "linear-gradient(135deg, rgba(99, 74, 181, 0.06), rgba(147, 74, 181, 0.08))",
+      border: "rgba(99, 74, 181, 0.12)",
+      glow: "0 2px 8px rgba(99, 74, 181, 0.06)",
+      hoverGlow: "0 4px 16px rgba(99, 74, 181, 0.1)",
+      text: "#634AB5",
+    },
   },
   danger: {
-    bg: 'bg-gradient-to-r from-[#EB3D63] to-[#d42f53]',
-    glow: '0 0 20px rgba(235, 61, 99, 0.3)',
-    hoverGlow: '0 0 30px rgba(235, 61, 99, 0.5), 0 0 60px rgba(235, 61, 99, 0.2)',
-    text: 'text-white',
+    dark: {
+      bg: "linear-gradient(135deg, rgba(235, 61, 99, 0.2), rgba(235, 61, 99, 0.12))",
+      border: "rgba(235, 61, 99, 0.3)",
+      glow: "0 0 15px rgba(235, 61, 99, 0.2)",
+      hoverGlow: "0 0 25px rgba(235, 61, 99, 0.35)",
+      text: "#FFB4C2",
+    },
+    light: {
+      bg: "linear-gradient(135deg, rgba(235, 61, 99, 0.06), rgba(235, 61, 99, 0.1))",
+      border: "rgba(235, 61, 99, 0.15)",
+      glow: "0 2px 8px rgba(235, 61, 99, 0.08)",
+      hoverGlow: "0 4px 16px rgba(235, 61, 99, 0.12)",
+      text: "#EB3D63",
+    },
+  },
+  success: {
+    dark: {
+      bg: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.12))",
+      border: "rgba(16, 185, 129, 0.3)",
+      glow: "0 0 15px rgba(16, 185, 129, 0.2)",
+      hoverGlow: "0 0 25px rgba(16, 185, 129, 0.35)",
+      text: "#A7F3D0",
+    },
+    light: {
+      bg: "linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(16, 185, 129, 0.1))",
+      border: "rgba(16, 185, 129, 0.15)",
+      glow: "0 2px 8px rgba(16, 185, 129, 0.08)",
+      hoverGlow: "0 4px 16px rgba(16, 185, 129, 0.12)",
+      text: "#059669",
+    },
+  },
+  ghost: {
+    dark: {
+      bg: "transparent",
+      border: "rgba(74, 122, 181, 0.1)",
+      glow: "none",
+      hoverGlow: "0 0 15px rgba(74, 122, 181, 0.15)",
+      text: "#B8B5D0",
+    },
+    light: {
+      bg: "transparent",
+      border: "rgba(30, 58, 95, 0.06)",
+      glow: "none",
+      hoverGlow: "0 2px 8px rgba(30, 58, 95, 0.06)",
+      text: "#4A5568",
+    },
   },
 };
 
-const sizeStyles = {
-  sm: 'px-4 py-2 text-sm rounded-lg',
-  md: 'px-6 py-3 text-base rounded-xl',
-  lg: 'px-8 py-4 text-lg rounded-xl',
-  full: 'w-full px-6 py-3 text-base rounded-xl',
+const SIZES = {
+  sm: "px-3 py-1.5 text-xs gap-1.5 rounded-lg",
+  md: "px-4 py-2.5 text-sm gap-2 rounded-xl",
+  lg: "px-6 py-3 text-base gap-2.5 rounded-xl",
 };
 
-export function GlowButton({
+export default function GlowButton({
   children,
-  variant = 'primary',
-  size = 'md',
-  loading = false,
-  icon,
   onClick,
-  disabled,
-  className = '',
-  ...props
+  variant = "primary",
+  size = "md",
+  icon,
+  disabled = false,
+  className = "",
+  fullWidth = false,
 }: GlowButtonProps) {
-  const { playClick } = useSoundEffects();
-  const styles = variantStyles[variant];
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) return;
-    playClick();
-    onClick?.(e);
-  };
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const colors = VARIANTS[variant][isDark ? "dark" : "light"];
 
   return (
-    <button
+    <motion.button
       className={`
-        relative font-bold transition-all duration-300
-        animate-gradient-shift bg-[length:200%_200%]
-        ${styles.bg} ${styles.text} ${sizeStyles[size]}
-        ${disabled || loading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'}
-        flex items-center justify-center gap-2
+        relative inline-flex items-center justify-center font-semibold
+        overflow-hidden transition-all duration-300
+        ${SIZES[size]}
+        ${fullWidth ? "w-full" : ""}
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `}
-      style={{ boxShadow: styles.glow }}
-      onMouseEnter={(e) => { if (!disabled && !loading) (e.currentTarget as HTMLElement).style.boxShadow = styles.hoverGlow; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = styles.glow; }}
-      onClick={handleClick}
-      disabled={disabled || loading}
-      {...(props as any)}
+      style={{
+        background: colors.bg,
+        border: `1px solid ${colors.border}`,
+        boxShadow: colors.glow,
+        color: colors.text,
+      }}
+      onClick={disabled ? undefined : onClick}
+      whileHover={
+        disabled
+          ? {}
+          : {
+              scale: 1.03,
+              boxShadow: colors.hoverGlow,
+              borderColor: isDark ? "rgba(74, 122, 181, 0.5)" : "rgba(30, 58, 95, 0.25)",
+            }
+      }
+      whileTap={disabled ? {} : { scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 400, damping: 20 }}
     >
-      {loading ? (
-        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-      ) : (
-        <>
-          {icon && <span className="flex-shrink-0">{icon}</span>}
-          {children}
-        </>
-      )}
-    </button>
+      {/* Shimmer effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(105deg, transparent 40%, ${isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.3)"} 50%, transparent 60%)`,
+          backgroundSize: "200% 100%",
+        }}
+        animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
+      />
+
+      {icon && <span className="relative z-10">{icon}</span>}
+      <span className="relative z-10">{children}</span>
+    </motion.button>
   );
 }

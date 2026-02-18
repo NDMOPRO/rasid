@@ -1,57 +1,84 @@
+/**
+ * NotificationBadge — Ultra Premium animated badge with urgency levels
+ * Adapted from design.rasid.vip reference
+ */
+import { motion } from "framer-motion";
 
 interface NotificationBadgeProps {
   count: number;
-  level?: 'info' | 'warning' | 'critical';
-  className?: string;
+  urgency?: "normal" | "warning" | "critical";
+  showRipple?: boolean;
+  size?: "sm" | "md" | "lg";
 }
 
-const levelStyles = {
-  info: {
-    bg: 'bg-[#4A7AB5]',
-    pulse: 'rgba(74, 122, 181, 0.4)',
+const URGENCY_COLORS = {
+  normal: {
+    bg: "rgba(74, 122, 181, 0.18)",
+    text: "#4A7AB5",
+    ring: "rgba(74, 122, 181, 0.3)",
   },
   warning: {
-    bg: 'bg-amber-500',
-    pulse: 'rgba(245, 158, 11, 0.4)',
+    bg: "rgba(255, 193, 7, 0.18)",
+    text: "#FFC107",
+    ring: "rgba(255, 193, 7, 0.3)",
   },
   critical: {
-    bg: 'bg-[#EB3D63]',
-    pulse: 'rgba(235, 61, 99, 0.4)',
+    bg: "rgba(235, 61, 99, 0.18)",
+    text: "#EB3D63",
+    ring: "rgba(235, 61, 99, 0.3)",
   },
 };
 
-export function NotificationBadge({
+const SIZES = {
+  sm: { badge: "min-w-[16px] h-[16px] text-[9px] px-1", offset: "-top-1 -left-1" },
+  md: { badge: "min-w-[20px] h-[20px] text-[10px] px-1.5", offset: "-top-1.5 -left-1.5" },
+  lg: { badge: "min-w-[24px] h-[24px] text-[11px] px-2", offset: "-top-2 -left-2" },
+};
+
+export default function NotificationBadge({
   count,
-  level = 'info',
-  className = '',
+  urgency = "normal",
+  showRipple = false,
+  size = "sm",
 }: NotificationBadgeProps) {
-  const styles = levelStyles[level];
+  if (count <= 0) return null;
+
+  const colors = URGENCY_COLORS[urgency];
+  const sizeConfig = SIZES[size];
+  const displayCount = count > 99 ? "99+" : count;
 
   return (
-    <>
-      {count > 0 && (
-        <div
-          className={`relative ${className}`}
-        >
-          <span
-            className={`
-              inline-flex items-center justify-center
-              min-w-[18px] h-[18px] px-1
-              text-[10px] font-bold text-white
-              rounded-full ${styles.bg}
-              ${level === 'critical' ? 'animate-notification-pulse' : ''}
-            `}
-          >
-            {count > 99 ? '99+' : count}
-          </span>
-          {level === 'critical' && (
-            <span
-              className="absolute inset-0 rounded-full animate-ping"
-              style={{ backgroundColor: styles.pulse, opacity: 0.3 }}
-            />
-          )}
-        </div>
+    <div className={`absolute ${sizeConfig.offset} z-10`}>
+      {/* Ripple effect for critical/active */}
+      {showRipple && urgency === "critical" && (
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ background: colors.ring }}
+          animate={{
+            scale: [1, 2, 1],
+            opacity: [0.4, 0, 0.4],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
       )}
-    </>
+
+      {/* Badge */}
+      <motion.span
+        className={`
+          relative flex items-center justify-center rounded-full font-bold
+          ${sizeConfig.badge}
+        `}
+        style={{
+          background: colors.bg,
+          color: colors.text,
+          boxShadow: `0 0 8px ${colors.ring}`,
+        }}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 500, damping: 20 }}
+      >
+        {displayCount}
+      </motion.span>
+    </div>
   );
 }

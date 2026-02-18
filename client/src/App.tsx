@@ -105,6 +105,7 @@ const LiveScan = lazy(() => import("./pages/LiveScan"));
 const KnowledgeBaseAdmin = lazy(() => import("./pages/KnowledgeBaseAdmin"));
 const PersonalityScenarios = lazy(() => import("./pages/PersonalityScenarios"));
 const NationalOverview = lazy(() => import("./pages/NationalOverview"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const LeakAnatomy = lazy(() => import("./pages/LeakAnatomy"));
 const SectorAnalysis = lazy(() => import("./pages/SectorAnalysis"));
 const LeakTimeline = lazy(() => import("./pages/LeakTimeline"));
@@ -234,7 +235,7 @@ function Router() {
           <Route path="/live-scan" component={LiveScan} />
           <Route path="/knowledge-base" component={KnowledgeBaseAdmin} />
           <Route path="/personality-scenarios" component={PersonalityScenarios} />
-          <Route path="/national-overview" component={NationalOverview} />
+          <Route path="/national-overview" component={Dashboard} />
           <Route path="/leak-anatomy" component={LeakAnatomy} />
           <Route path="/sector-analysis" component={SectorAnalysis} />
           <Route path="/leak-timeline" component={LeakTimeline} />

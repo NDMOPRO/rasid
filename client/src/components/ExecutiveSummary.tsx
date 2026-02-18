@@ -57,7 +57,7 @@ export default function ExecutiveSummary({ totalLeaks, newLeaks, totalRecords, s
   const avgResponseHours = useMemo(() => Math.max(2, Math.round(48 - (compliancePercent / 100) * 30)), [compliancePercent]);
 
   const getRiskColor = (s: number) => s >= 80 ? "#ef4444" : s >= 60 ? "#f59e0b" : s >= 40 ? "#3b82f6" : "#10b981";
-  const getRiskLabel = (s: number) => s >= 80 ? "عالي الأهمية" : s >= 60 ? "مرتفع" : s >= 40 ? "متوسط" : "منخفض";
+  const getRiskLabel = (s: number) => s >= 80 ? "حرج" : s >= 60 ? "مرتفع" : s >= 40 ? "متوسط" : "منخفض";
   const getSevColor = (sev: string) => sev === "critical" ? "text-red-400 bg-red-500/10" : sev === "high" ? "text-amber-400 bg-amber-500/10" : sev === "medium" ? "text-blue-400 bg-blue-500/10" : "text-emerald-400 bg-emerald-500/10";
 
   const sectorColors = ["#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#10b981", "#ec4899"];
@@ -100,7 +100,7 @@ export default function ExecutiveSummary({ totalLeaks, newLeaks, totalRecords, s
           </div>
         </div>
         <div className="flex justify-center gap-2">
-          {[{ l: "منخفض", c: "#10b981" }, { l: "متوسط", c: "#3b82f6" }, { l: "مرتفع", c: "#f59e0b" }, { l: "عالي الأهمية", c: "#ef4444" }].map(z => (
+          {[{ l: "منخفض", c: "#10b981" }, { l: "متوسط", c: "#3b82f6" }, { l: "مرتفع", c: "#f59e0b" }, { l: "حرج", c: "#ef4444" }].map(z => (
             <span key={z.l} className="flex items-center gap-1 text-[8px] text-muted-foreground">
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: z.c }} />{z.l}
             </span>

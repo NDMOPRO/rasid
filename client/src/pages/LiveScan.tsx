@@ -86,13 +86,13 @@ const TARGET_TYPES = [
 ];
 
 const SCAN_SOURCES = [
-  { id: "xposedornot", name: "XposedOrNot", desc: "فحص حالات رصد البريد الإلكتروني", icon: ShieldAlert, color: "text-red-400" },
+  { id: "xposedornot", name: "XposedOrNot", desc: "فحص تسريبات البريد الإلكتروني", icon: ShieldAlert, color: "text-red-400" },
   { id: "crtsh", name: "crt.sh", desc: "شفافية الشهادات واكتشاف النطاقات", icon: Globe, color: "text-blue-400" },
   { id: "psbdmp", name: "PSBDMP", desc: "البحث في تفريغات مواقع اللصق", icon: FileText, color: "text-yellow-400" },
   { id: "googledork", name: "Google Dorking", desc: "استعلامات بحث ذكية", icon: Search, color: "text-green-400" },
-  { id: "breachdirectory", name: "BreachDirectory", desc: "قاعدة بيانات حالات الرصد العامة", icon: Database, color: "text-purple-400" },
+  { id: "breachdirectory", name: "BreachDirectory", desc: "قاعدة بيانات التسريبات العامة", icon: Database, color: "text-purple-400" },
   { id: "github", name: "GitHub Code", desc: "فحص مستودعات الكود العامة", icon: Code, color: "text-gray-400" },
-  { id: "dehashed", name: "Dehashed", desc: "قواعد بيانات الحالة رصدات المجمعة", icon: Eye, color: "text-orange-400" },
+  { id: "dehashed", name: "Dehashed", desc: "قواعد بيانات الاختراقات المجمعة", icon: Eye, color: "text-orange-400" },
   { id: "intelx", name: "IntelX", desc: "استخبارات التهديدات", icon: Radar, color: "text-cyan-400" },
 ];
 
@@ -235,8 +235,6 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
-      // Trigger global auto-scroll for main container
-      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -276,8 +274,6 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
-      // Trigger global auto-scroll for main container
-      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -326,7 +322,7 @@ export default function LiveScan() {
             </div>
             المسح والفحص المباشر
           </h1>
-          <p className="text-sm text-white/50 mt-1">فحص حقيقي ومباشر عن حالات رصد البيانات الشخصية عبر مصادر متعددة</p>
+          <p className="text-sm text-white/50 mt-1">فحص حقيقي ومباشر عن تسريبات البيانات الشخصية عبر مصادر متعددة</p>
         </div>
         {scanHistory.length > 0 && (
           <Badge variant="outline" className="border-purple-500/30 text-purple-300">
@@ -494,8 +490,8 @@ export default function LiveScan() {
               <div>
                 <p className="text-sm text-blue-300 font-medium">مسح حقيقي ومباشر</p>
                 <p className="text-xs text-white/50 mt-1">
-                  يتم إجراء المسح عبر واجهات برمجية حقيقية (APIs) متصلة بمصادر بيانات حالات الرصد العالمية. النتائج فعلية وليست تجريبية.
-                  يشمل المسح: فحص حالات رصد البريد الإلكتروني، اكتشاف النطاقات الفرعية، البحث في مواقع اللصق، واستعلامات بحث ذكية.
+                  يتم إجراء المسح عبر واجهات برمجية حقيقية (APIs) متصلة بمصادر بيانات التسريبات العالمية. النتائج فعلية وليست تجريبية.
+                  يشمل المسح: فحص تسريبات البريد الإلكتروني، اكتشاف النطاقات الفرعية، البحث في مواقع اللصق، واستعلامات بحث ذكية.
                 </p>
               </div>
             </div>
@@ -824,8 +820,8 @@ export default function LiveScan() {
           {scanCompleted && scanResults.length === 0 && !isScanning && (
             <div className="glass-card rounded-2xl p-12 text-center">
               <ShieldCheck className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white">لم يتم اكتشاف أي حالات رصد</h3>
-              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مرصودة مرتبطة بالهدف المحدد</p>
+              <h3 className="text-lg font-semibold text-white">لم يتم اكتشاف أي تسريبات</h3>
+              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مسربة مرتبطة بالهدف المحدد</p>
             </div>
           )}
 

@@ -37,7 +37,7 @@ const platformIcons: Record<string, React.ElementType> = {
 
 const platformLabels: Record<string, { ar: string; en: string }> = {
   telegram: { ar: "تليجرام", en: "Telegram" },
-  darkweb: { ar: "الدارك ويب", en: "Publishing Sites" },
+  darkweb: { ar: "الدارك ويب", en: "Dark Web" },
   paste: { ar: "مواقع اللصق", en: "Paste Sites" },
   all: { ar: "جميع المنصات", en: "All Platforms" },
 };
@@ -126,7 +126,7 @@ export default function MonitoringJobs() {
         {[
           { key: "activeJobs", label: "المهام النشطة", labelEn: "Active Jobs", value: activeJobs, icon: Radio, color: "text-emerald-400", borderColor: "border-emerald-500/20", bgColor: "bg-emerald-500/5" },
           { key: "totalRuns", label: "إجمالي التشغيلات", labelEn: "Total Runs", value: totalRuns, icon: RefreshCw, color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
-          { key: "leaksFound", label: "حالات رصد مكتشفة", labelEn: "Cases Found", value: totalLeaksFound, icon: AlertTriangle, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
+          { key: "leaksFound", label: "تسريبات مكتشفة", labelEn: "Leaks Found", value: totalLeaksFound, icon: AlertTriangle, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
           { key: "totalJobs", label: "إجمالي المهام", labelEn: "Total Jobs", value: jobs?.length ?? 0, icon: Clock, color: "text-purple-400", borderColor: "border-purple-500/20", bgColor: "bg-purple-500/5" },
         ].map((stat, i) => {
           const Icon = stat.icon;
@@ -265,7 +265,7 @@ export default function MonitoringJobs() {
                     <p className="text-xs text-foreground mt-0.5 font-bold">{job.totalRuns ?? 0}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
+                    <p className="text-[10px] text-muted-foreground">تسريبات مكتشفة</p>
                     <p className="text-xs text-amber-400 mt-0.5 font-bold">{job.leaksFound ?? 0}</p>
                   </div>
                   <div>
@@ -323,11 +323,11 @@ export default function MonitoringJobs() {
       </DetailModal>
 
       {/* Leaks Found Modal */}
-      <DetailModal open={activeModal === "leaksFound"} onClose={() => setActiveModal(null)} title="حالات الرصد المكتشفة بواسطة المهام" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
+      <DetailModal open={activeModal === "leaksFound"} onClose={() => setActiveModal(null)} title="التسريبات المكتشفة بواسطة المهام" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
         <div className="space-y-3">
           <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
             <p className="text-2xl font-bold text-amber-400">{totalLeaksFound}</p>
-            <p className="text-xs text-muted-foreground">حالة رصد مكتشف</p>
+            <p className="text-xs text-muted-foreground">تسريب مكتشف</p>
           </div>
           {jobs?.filter(j => (j.leaksFound ?? 0) > 0).sort((a, b) => (b.leaksFound ?? 0) - (a.leaksFound ?? 0)).map(job => (
             <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between">
@@ -401,7 +401,7 @@ export default function MonitoringJobs() {
                 <p className="text-lg font-bold text-cyan-400 mt-1">{selectedJob.totalRuns ?? 0}</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground">حالات الرصد</p>
+                <p className="text-xs text-muted-foreground">التسريبات</p>
                 <p className="text-lg font-bold text-amber-400 mt-1">{selectedJob.leaksFound ?? 0}</p>
               </div>
             </div>

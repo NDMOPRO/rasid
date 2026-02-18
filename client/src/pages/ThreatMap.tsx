@@ -91,8 +91,8 @@ export default function ThreatMap() {
       {/* Header Stats — clickable */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { key: "totalLeaks", label: "إجمالي حالات الرصد", value: totalLeaks, icon: Shield, color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
-          { key: "critical", label: "حالات رصد واسعة النطاق", value: criticalCount, icon: AlertTriangle, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5" },
+          { key: "totalLeaks", label: "إجمالي التسريبات", value: totalLeaks, icon: Shield, color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
+          { key: "critical", label: "تسريبات واسعة النطاق", value: criticalCount, icon: AlertTriangle, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5" },
           { key: "regions", label: "المناطق المتأثرة", value: regionsAffected, icon: MapPin, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
           { key: "records", label: "السجلات المتأثرة", value: totalRecords.toLocaleString(), icon: Activity, color: "text-emerald-400", borderColor: "border-emerald-500/20", bgColor: "bg-emerald-500/5" },
         ].map((stat, i) => (
@@ -201,7 +201,7 @@ export default function ThreatMap() {
           <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
             <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-primary" />
-              ترتيب المناطق حسب حالات الرصد
+              ترتيب المناطق حسب التسريبات
             </h3>
             <div className="space-y-2">
               {regionStats.map((region, i) => {
@@ -220,7 +220,7 @@ export default function ThreatMap() {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-foreground">{region.regionAr}</span>
-                      <span className="text-xs text-muted-foreground">{region.count} حالة رصد</span>
+                      <span className="text-xs text-muted-foreground">{region.count} تسريب</span>
                     </div>
                     <div className="w-full h-1.5 bg-background rounded-full overflow-hidden">
                       <motion.div
@@ -247,8 +247,8 @@ export default function ThreatMap() {
             <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
               <Eye className="w-4 h-4 text-primary" />
               {selectedRegion
-                ? `حالات رصد ${regionStats.find((r) => r.region === selectedRegion)?.regionAr || selectedRegion}`
-                : "أحدث حالات الرصد"}
+                ? `تسريبات ${regionStats.find((r) => r.region === selectedRegion)?.regionAr || selectedRegion}`
+                : "أحدث التسريبات"}
             </h3>
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {filteredLeaks.slice(0, 10).map((leak, i) => {
@@ -281,7 +281,7 @@ export default function ThreatMap() {
                 );
               })}
               {filteredLeaks.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">لا توجد حالات رصد مطابقة</p>
+                <p className="text-xs text-muted-foreground text-center py-4">لا توجد تسريبات مطابقة</p>
               )}
             </div>
           </div>
@@ -291,11 +291,11 @@ export default function ThreatMap() {
       {/* ═══ MODALS ═══ */}
 
       {/* Total Leaks Modal */}
-      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="إجمالي حالات الرصد على الخريطة" icon={<Shield className="w-5 h-5 text-cyan-400" />}>
+      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="إجمالي التسريبات على الخريطة" icon={<Shield className="w-5 h-5 text-cyan-400" />}>
         <div className="space-y-3">
           <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
             <p className="text-2xl font-bold text-cyan-400">{totalLeaks}</p>
-            <p className="text-xs text-muted-foreground">حالة رصد مرصود جغرافياً</p>
+            <p className="text-xs text-muted-foreground">تسريب مرصود جغرافياً</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {(["critical", "high", "medium", "low"] as const).map(sev => (
@@ -309,11 +309,11 @@ export default function ThreatMap() {
       </DetailModal>
 
       {/* Critical Leaks Modal */}
-      <DetailModal open={activeModal === "critical"} onClose={() => setActiveModal(null)} title="حالات الرصد الواسعة النطاق" icon={<AlertTriangle className="w-5 h-5 text-red-400" />}>
+      <DetailModal open={activeModal === "critical"} onClose={() => setActiveModal(null)} title="التسريبات الواسعة النطاق" icon={<AlertTriangle className="w-5 h-5 text-red-400" />}>
         <div className="space-y-3">
           <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20 text-center">
             <p className="text-2xl font-bold text-red-400">{criticalCount}</p>
-            <p className="text-xs text-muted-foreground">حالة رصد واسع النطاق</p>
+            <p className="text-xs text-muted-foreground">تسريب واسع النطاق</p>
           </div>
           {data?.leaks?.filter(l => l.severity === "critical").map(leak => (
             <div key={leak.leakId} className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 cursor-pointer hover:bg-red-500/10 transition-colors" onClick={() => { setSelectedLeak(leak); setActiveModal("leakDetail"); }}>
@@ -378,7 +378,7 @@ export default function ThreatMap() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground">إجمالي حالات الرصد</p>
+                <p className="text-xs text-muted-foreground">إجمالي التسريبات</p>
                 <p className="text-xl font-bold text-foreground mt-1">{selectedRegionDetail.count}</p>
               </div>
               <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20 text-center">
@@ -395,7 +395,7 @@ export default function ThreatMap() {
               </div>
             </div>
             <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
-              <h4 className="text-xs font-semibold text-muted-foreground mb-2">حالات الرصد في هذه المنطقة</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-2">التسريبات في هذه المنطقة</h4>
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {data?.leaks?.filter(l => l.region === selectedRegionDetail.region).map(leak => {
                   const colors = severityColors[leak.severity as keyof typeof severityColors] || severityColors.medium;
