@@ -7625,13 +7625,16 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       return scans.length > 0 ? (scans[0] as any).requirements || [] : [];
     }),
     stats: protectedProcedure.query(async () => {
-      const sites = await db.getSites({});
-      const siteList = (sites as any).sites || sites || [];
+      const sites = await db.getSites({ limit: 100000 });
+      const siteList = Array.isArray((sites as any).sites) ? (sites as any).sites : Array.isArray(sites) ? sites : [];
       return {
-        totalSites: Array.isArray(siteList) ? siteList.length : 0,
-        compliant: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'compliant').length : 0,
-        nonCompliant: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'non_compliant').length : 0,
-        partial: Array.isArray(siteList) ? siteList.filter((s: any) => s.complianceStatus === 'partial').length : 0,
+        totalSites: siteList.length,
+        totalScans: siteList.length,
+        compliant: siteList.filter((s: any) => s.complianceStatus === 'compliant').length,
+        nonCompliant: siteList.filter((s: any) => s.complianceStatus === 'non_compliant').length,
+        partiallyCompliant: siteList.filter((s: any) => s.complianceStatus === 'partially_compliant' || s.complianceStatus === 'partial').length,
+        notWorking: siteList.filter((s: any) => s.complianceStatus === 'not_working' || s.siteStatus === 'not_working' || s.siteStatus === 'inactive').length,
+        noPolicy: siteList.filter((s: any) => !s.privacyPageUrl && s.complianceStatus !== 'compliant').length,
       };
     }),
     policyVersions: protectedProcedure.input(z.object({ siteId: z.number() })).query(async ({ input }) => {
