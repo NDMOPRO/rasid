@@ -640,7 +640,7 @@ export async function getSiteScans(siteId: number) {
 export async function getUserByUsername(username: string) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  const result = await db.select().from(users).where(sql`LOWER(${users.username}) = LOWER(${username})`).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 
