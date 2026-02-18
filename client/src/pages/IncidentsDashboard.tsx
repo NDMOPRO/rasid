@@ -11,7 +11,7 @@ export default function IncidentsDashboard() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">لوحة التسربات</h1>
+        <h1 className="text-2xl font-bold">لوحة حالات الرصد</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-32 rounded-xl" />
@@ -37,7 +37,7 @@ export default function IncidentsDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">لوحة التسربات</h1>
+        <h1 className="text-2xl font-bold">لوحة حالات الرصد</h1>
         <Badge variant="outline" className="text-gold border-gold/30">وقائع تسرب البيانات الشخصية</Badge>
       </div>
 

@@ -218,7 +218,7 @@ export default function IncidentCard() {
                 <InfoItem icon={<Database size={20} />} label="ادعاء البائع" value={overview.exposed_records?.toLocaleString('ar-SA')} />
                 <InfoItem icon={<Server size={20} />} label="حجم البيانات" value={overview.data_size} />
                 <InfoItem icon={<GitBranch size={20} />} label="المنصة المصدر" value={overview.source_platform} />
-                <InfoItem icon={<Cpu size={20} />} label="أسلوب الهجوم" value={overview.attack_method_ar || overview.attack_method} />
+                <InfoItem icon={<Cpu size={20} />} label="أسلوب التسرب" value={overview.attack_method_ar || overview.attack_method} />
                 <InfoItem icon={<CheckCircle size={20} />} label="مستوى الثقة" value={`${overview.confidence_level}%`} />
                 {leak_source?.region && <InfoItem icon={<Globe size={20} />} label="المنطقة" value={leak_source.region} />}
               </div>

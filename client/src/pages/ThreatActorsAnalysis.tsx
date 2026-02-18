@@ -94,7 +94,7 @@ export default function ThreatActorsAnalysis() {
         </GlassCard>
 
         <GlassCard className="col-span-1">
-          <h2 className="text-2xl font-bold mb-4 text-white">أساليب الهجوم الشائعة</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">أساليب التسرب الشائعة</h2>
           <p className="text-slate-400 mb-6">Common Attack Methods</p>
           <div style={{ height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">

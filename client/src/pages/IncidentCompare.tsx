@@ -40,7 +40,7 @@ const ComparisonCard = ({ incident }) => {
         <div className="flex items-center gap-2 text-slate-300"><AlertTriangle size={16} className="text-cyan-400" /><span>مستوى التأثير:</span><strong className="text-white">{incident.overview.severity}</strong></div>
         <div className="flex items-center gap-2 text-slate-300"><FileText size={16} className="text-cyan-400" /><span>عدد أنواع البيانات:</span><strong className="text-white">{incident.data_types_count}</strong></div>
         <div className="flex items-center gap-2 text-slate-300"><Crosshair size={16} className="text-cyan-400" /><span>الجهة المهاجمة:</span><strong className="text-white">{incident.threat_actor}</strong></div>
-        <div className="flex items-center gap-2 text-slate-300 col-span-2"><ShieldCheck size={16} className="text-cyan-400" /><span>أسلوب الهجوم:</span><strong className="text-white">{incident.overview.attack_method_ar}</strong></div>
+        <div className="flex items-center gap-2 text-slate-300 col-span-2"><ShieldCheck size={16} className="text-cyan-400" /><span>أسلوب التسرب:</span><strong className="text-white">{incident.overview.attack_method_ar}</strong></div>
       </div>
     </div>
   );
