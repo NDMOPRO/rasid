@@ -162,10 +162,10 @@ export default function Login() {
 
 
 
-  const loginMutation = trpc.auth.builtinLogin.useMutation({
+  const loginMutation = trpc.platformAuth.login.useMutation({
     onSuccess: (data) => {
       playSuccess();
-      localStorage.setItem("rasid_session", JSON.stringify(data.user));
+      localStorage.setItem("rasid_session", JSON.stringify({ displayName: data.displayName, role: data.role }));
       toast.success("تم تسجيل الدخول بنجاح");
       window.location.href = "/";
     },
@@ -185,7 +185,7 @@ export default function Login() {
       return;
     }
     setError("");
-    loginMutation.mutate({ username: username.trim(), password, rememberMe });
+    loginMutation.mutate({ userId: username.trim(), password });
   };
 
   /* ── Shared gold tokens ── */
