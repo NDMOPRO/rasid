@@ -104,6 +104,35 @@ export const appRouter = router({
       password: z.string().min(1),
       rememberMe: z.boolean().optional().default(false),
     })).mutation(async ({ input, ctx }) => {
+      // Try platformUsers table first (where seed data lives)
+      const pUser = await getPlatformUserByUserId(input.username.toUpperCase()) || await getPlatformUserByUserId(input.username);
+      if (pUser && pUser.passwordHash) {
+        const valid = await bcrypt.compare(input.password, pUser.passwordHash);
+        if (!valid) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
+        if (pUser.status !== 'active') throw new TRPCError({ code: 'UNAUTHORIZED', message: 'الحساب معطل' });
+        const secret = new TextEncoder().encode(ENV.cookieSecret);
+        const token = await new SignJWT({ platformUserId: pUser.id, userId: pUser.userId })
+          .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+          .setExpirationTime(Math.floor((Date.now() + 365 * 24 * 60 * 60 * 1000) / 1000))
+          .sign(secret);
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie('platform_session', token, { ...cookieOptions, maxAge: 365 * 24 * 60 * 60 * 1000 });
+        await updatePlatformUser(pUser.id, { lastLoginAt: new Date() });
+        return {
+          success: true,
+          user: {
+            id: pUser.id,
+            name: pUser.name,
+            displayName: pUser.displayName,
+            email: pUser.email,
+            mobile: pUser.mobile,
+            role: pUser.platformRole === 'root_admin' ? 'admin' as const : 'user' as const,
+            rasidRole: pUser.platformRole === 'root_admin' ? 'root' as const : 'monitoring_officer' as const,
+            username: pUser.userId,
+          },
+        };
+      }
+      // Fallback to users table
       const user = await db.getUserByUsername(input.username);
       if (!user || !user.passwordHash) {
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
@@ -112,39 +141,14 @@ export const appRouter = router({
       if (!valid) {
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
       }
-      // Update last signed in
       await db.updateLastSignedIn(user.id);
-      // Log login activity
-      await db.insertActivityLog({
-        userId: user.id,
-        username: user.username || user.name || '',
-        action: 'login',
-        details: `تسجيل دخول: ${user.displayName || user.username}`,
-        ipAddress: ctx.req.ip || ctx.req.headers['x-forwarded-for']?.toString() || '',
-        userAgent: ctx.req.headers['user-agent'] || '',
-      });
-      // Create session token - longer for remember me
-      const sessionMs = input.rememberMe ? ONE_YEAR_MS : 24 * 60 * 60 * 1000; // 1 year or 24 hours
-      const sessionToken = await sdk.createSessionToken(user.openId, {
-        name: user.displayName || user.name || user.username || '',
-        expiresInMs: sessionMs,
-      });
+      const secret = new TextEncoder().encode(ENV.cookieSecret);
+      const token = await new SignJWT({ platformUserId: user.id, userId: user.username || '' })
+        .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+        .setExpirationTime(Math.floor((Date.now() + 365 * 24 * 60 * 60 * 1000) / 1000))
+        .sign(secret);
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: sessionMs });
-      // Track session
-      try {
-        const ua = ctx.req.headers['user-agent'] || '';
-        const ip = ctx.req.ip || ctx.req.headers['x-forwarded-for']?.toString() || '';
-        await db.createUserSession({
-          userId: user.id,
-          sessionToken: sessionToken.substring(0, 64), // Store only prefix for security
-          deviceInfo: ua.substring(0, 255),
-          ipAddress: ip,
-          isActive: true,
-          expiresAt: new Date(Date.now() + sessionMs),
-          lastActivity: new Date(),
-        });
-      } catch (e) { console.warn('Failed to track session:', e); }
+      ctx.res.cookie('platform_session', token, { ...cookieOptions, maxAge: 365 * 24 * 60 * 60 * 1000 });
       return {
         success: true,
         user: {
