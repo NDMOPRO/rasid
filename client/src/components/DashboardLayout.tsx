@@ -1,11 +1,11 @@
 /**
- * DashboardLayout — NDMO Rasid National Monitoring Platform
+ * DashboardLayout — SDAIA Ultra Premium Design System
  * RTL-first sidebar with SDAIA official colors (#273470, #6459A7, #3DB1AC)
- * 2 Workspaces: Privacy + Monitoring Cases, with shared section
  * Glassmorphism, scan-line effects, and premium animations
  * - Mobile: auto-close sidebar on nav item click
  * - Groups: collapsed by default, only active group expanded
  * - Root Admin protection: AI control pages only visible to mruhaily
+ * - Workspace Switcher: الخصوصية / حالات الرصد
  */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
@@ -85,19 +85,17 @@ import { ParticleField } from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import CinematicMode, { CinematicButton } from "@/components/CinematicMode";
 import RasidCharacterWidget from "@/components/RasidCharacterWidget";
-import WorkspaceSwitcher, {
-  type WorkspaceId,
-  getWorkspaceForRoute,
-  getActiveMainWorkspace,
-} from "./WorkspaceSwitcher";
 
-/* SDAIA Official FULL Logo URLs (with "منصة راصد" + "مكتب إدارة البيانات الوطنية") */
-const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/rnrmkZWzwqxCCISu.png"; // Navy+Gold for light bg
-const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/hcjCfBRgGfXAVgzK.png"; // Cream+Gold for dark bg
-const RASID_LOGO_COLLAPSED = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/qJkWJtLPpgEYdrpF.png"; // Gold calligraphy only
+/* SDAIA Official FULL Logo URLs */
+const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
+const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
+const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ziWPuMClYqvYmkJG.png";
 
 /** Root Admin userId — protected from any modifications */
 const ROOT_ADMIN_USER_ID = "mruhaily";
+
+/* ═══ Workspace Types ═══ */
+type WorkspaceId = "privacy" | "leaks";
 
 interface NavItem {
   label: string;
@@ -106,7 +104,6 @@ interface NavItem {
   path: string;
   requiresAuth?: boolean;
   minRole?: string;
-  /** Only visible to root admin (mruhaily) */
   rootAdminOnly?: boolean;
   badge?: number;
 }
@@ -117,14 +114,15 @@ interface NavGroup {
   labelEn: string;
   icon: React.ElementType;
   items: NavItem[];
-  /** Which workspace this group belongs to */
-  workspace: WorkspaceId;
+  /** Which workspace: "shared" always shows, "privacy"/"leaks" show per active workspace, "admin" for admin only */
+  workspace: "shared" | "privacy" | "leaks" | "admin";
 }
 
+/* ═══════════════════════════════════════════════════════════
+   NAV GROUPS — Restructured per requirements
+   ═══════════════════════════════════════════════════════════ */
 const navGroups: NavGroup[] = [
-  // ═══════════════════════════════════════════════════════════
-  // القسم المشترك (ثابت في المنصتين)
-  // ═══════════════════════════════════════════════════════════
+  // ═══ القسم المشترك (ثابت في المنصتين) ═══
   {
     id: "shared_main",
     label: "الرئيسية",
@@ -204,9 +202,8 @@ const navGroups: NavGroup[] = [
       { label: "إدارة المستخدمين", labelEn: "Users", icon: Users, path: "/user-management", requiresAuth: true, minRole: "admin" },
     ],
   },
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE: الخصوصية (Privacy)
-  // ═══════════════════════════════════════════════════════════
+
+  // ═══ WORKSPACE: الخصوصية (Privacy) ═══
   {
     id: "privacy_dashboard",
     label: "لوحة الخصوصية",
@@ -225,6 +222,15 @@ const navGroups: NavGroup[] = [
     workspace: "privacy",
     items: [
       { label: "المواقع", labelEn: "Sites", icon: Globe, path: "/sites" },
+    ],
+  },
+  {
+    id: "privacy_changes",
+    label: "التغييرات",
+    labelEn: "Changes",
+    icon: Eye,
+    workspace: "privacy",
+    items: [
       { label: "رصد التغييرات", labelEn: "Change Detection", icon: Eye, path: "/change-detection" },
     ],
   },
@@ -239,7 +245,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    id: "privacy_scan",
+    id: "privacy_import",
     label: "الاستيراد والفحص",
     labelEn: "Import & Scan",
     icon: ScanSearch,
@@ -249,9 +255,6 @@ const navGroups: NavGroup[] = [
       { label: "الفحص الجماعي", labelEn: "Batch Scan", icon: Import, path: "/batch-scan" },
       { label: "الفحص المتقدم", labelEn: "Advanced Scan", icon: Scan, path: "/advanced-scan" },
       { label: "الفحص العميق", labelEn: "Deep Scan", icon: Radar, path: "/deep-scan" },
-      { label: "الفحص المباشر", labelEn: "Live Scan", icon: Radio, path: "/live-scan" },
-      { label: "مكتبة الفحوصات", labelEn: "Scan Library", icon: FolderOpen, path: "/scan-library" },
-      { label: "جدولة الفحوصات", labelEn: "Scan Schedules", icon: CalendarClock, path: "/scan-schedules" },
     ],
   },
   {
@@ -265,12 +268,15 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    id: "privacy_analytics",
-    label: "التحليلات والمقارنات",
-    labelEn: "Analytics & Comparisons",
-    icon: BarChart3,
+    id: "privacy_tools",
+    label: "أدوات إضافية",
+    labelEn: "Additional Tools",
+    icon: Wrench,
     workspace: "privacy",
     items: [
+      { label: "الفحص المباشر", labelEn: "Live Scan", icon: Radio, path: "/live-scan" },
+      { label: "مكتبة الفحوصات", labelEn: "Scan Library", icon: FolderOpen, path: "/scan-library" },
+      { label: "جدولة الفحوصات", labelEn: "Scan Schedules", icon: CalendarClock, path: "/scan-schedules" },
       { label: "مقارنة الامتثال", labelEn: "Compliance Comparison", icon: Link2, path: "/compliance-comparison" },
       { label: "خريطة الامتثال", labelEn: "Compliance Heatmap", icon: Map, path: "/compliance-heatmap" },
       { label: "التحليلات المتقدمة", labelEn: "Advanced Analytics", icon: BarChart3, path: "/advanced-analytics" },
@@ -280,29 +286,11 @@ const navGroups: NavGroup[] = [
       { label: "المقارنة التفاعلية", labelEn: "Interactive Compare", icon: Link2, path: "/interactive-comparison" },
       { label: "تغطية الاستراتيجية", labelEn: "Strategy Coverage", icon: Shield, path: "/strategy-coverage" },
       { label: "اللوحة الحية", labelEn: "Real-time", icon: Radio, path: "/real-time" },
-    ],
-  },
-  {
-    id: "privacy_reports",
-    label: "التقارير المتخصصة",
-    labelEn: "Specialized Reports",
-    icon: FileBarChart,
-    workspace: "privacy",
-    items: [
       { label: "التقارير المخصصة", labelEn: "Custom Reports", icon: FileBarChart, path: "/custom-reports" },
       { label: "التقارير المجدولة", labelEn: "Scheduled Reports", icon: CalendarClock, path: "/scheduled-reports" },
       { label: "تقارير PDF", labelEn: "PDF Reports", icon: FileText, path: "/pdf-reports" },
       { label: "التقرير التنفيذي", labelEn: "Executive Report", icon: LayoutDashboard, path: "/executive-report" },
       { label: "الخطابات", labelEn: "Letters", icon: Send, path: "/letters" },
-    ],
-  },
-  {
-    id: "privacy_tools",
-    label: "أدوات إضافية",
-    labelEn: "Additional Tools",
-    icon: Wrench,
-    workspace: "privacy",
-    items: [
       { label: "متتبع التحسين", labelEn: "Improvement Tracker", icon: CheckCircle2, path: "/improvement-tracker" },
       { label: "تصدير البيانات", labelEn: "Export Data", icon: Archive, path: "/export-data" },
       { label: "وضع العرض", labelEn: "Presentation", icon: PanelTop, path: "/presentation" },
@@ -318,9 +306,8 @@ const navGroups: NavGroup[] = [
       { label: "التطبيقات", labelEn: "Mobile Apps", icon: Monitor, path: "/mobile-apps" },
     ],
   },
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE: حالات الرصد (Monitoring Cases)
-  // ═══════════════════════════════════════════════════════════
+
+  // ═══ WORKSPACE: حالات الرصد (Monitoring Cases) ═══
   {
     id: "leaks_dashboard",
     label: "لوحة حالات الرصد",
@@ -369,62 +356,44 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    id: "leaks_monitoring",
-    label: "الرصد المباشر",
-    labelEn: "Live Monitoring",
-    icon: Radar,
+    id: "leaks_history",
+    label: "السجل",
+    labelEn: "History",
+    icon: History,
+    workspace: "leaks",
+    items: [
+      { label: "سجل الحالات", labelEn: "Cases History", icon: History, path: "/incidents-registry" },
+    ],
+  },
+  {
+    id: "leaks_tools",
+    label: "أدوات إضافية",
+    labelEn: "Additional Tools",
+    icon: Wrench,
     workspace: "leaks",
     items: [
       { label: "الرصد المباشر", labelEn: "Live Scan", icon: Scan, path: "/live-scan" },
       { label: "رصد المنصات", labelEn: "Telegram", icon: Send, path: "/telegram" },
       { label: "مواقع النشر", labelEn: "Publishing Sites", icon: Globe, path: "/darkweb" },
       { label: "مواقع اللصق", labelEn: "Paste Sites", icon: FileText, path: "/paste-sites" },
-    ],
-  },
-  {
-    id: "leaks_tools",
-    label: "أدوات الرصد",
-    labelEn: "Monitoring Tools",
-    icon: Wrench,
-    workspace: "leaks",
-    items: [
       { label: "أدوات البحث", labelEn: "Search Tools", icon: Radar, path: "/osint-tools" },
       { label: "قواعد الرصد", labelEn: "Monitoring Rules", icon: Crosshair, path: "/threat-rules" },
       { label: "رسم المعرفة", labelEn: "Knowledge Graph", icon: Network, path: "/knowledge-graph" },
       { label: "خريطة الرصد", labelEn: "Monitoring Map", icon: Map, path: "/threat-map" },
-    ],
-  },
-  {
-    id: "leaks_compliance",
-    label: "الامتثال والتقارير",
-    labelEn: "Compliance & Reports",
-    icon: FileBarChart,
-    workspace: "leaks",
-    items: [
       { label: "التقارير التنفيذية", labelEn: "Executive Brief", icon: LayoutDashboard, path: "/executive-brief" },
       { label: "المقارنة", labelEn: "Comparison", icon: Link2, path: "/incident-compare" },
       { label: "الحملات", labelEn: "Campaigns", icon: Crosshair, path: "/campaign-tracker" },
       { label: "التوصيات", labelEn: "Recommendations", icon: Brain, path: "/recommendations-hub" },
       { label: "الامتثال PDPL", labelEn: "PDPL Compliance", icon: Shield, path: "/pdpl-compliance" },
       { label: "المصادقة على التقارير", labelEn: "Report Approval", icon: Stamp, path: "/report-approval" },
-    ],
-  },
-  {
-    id: "leaks_data_analysis",
-    label: "تحليل البيانات",
-    labelEn: "Data Analysis",
-    icon: Brain,
-    workspace: "leaks",
-    items: [
       { label: "أطلس البيانات الشخصية", labelEn: "PII Atlas", icon: Network, path: "/pii-atlas" },
       { label: "مختبر الأنماط", labelEn: "Pattern Lab", icon: ScanSearch, path: "/pii-classifier" },
       { label: "عدسة الأثر والحقوق", labelEn: "Impact & Rights", icon: Link2, path: "/evidence-chain" },
       { label: "الاتجاهات والمقارنات", labelEn: "Trends", icon: Brain, path: "/feedback-accuracy" },
     ],
   },
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE: الإدارة (Admin) — مخفي في القائمة، يظهر فقط عبر المشترك
-  // ═══════════════════════════════════════════════════════════
+
+  // ═══ Admin system (hidden, accessed via shared admin) ═══
   {
     id: "admin_system",
     label: "إدارة النظام",
@@ -468,34 +437,43 @@ const roleLabels: Record<string, string> = {
   viewer: "مشاهد",
 };
 
+/* ═══ Route → Workspace mapping ═══ */
+const privacyPaths = new Set(
+  navGroups.filter((g) => g.workspace === "privacy").flatMap((g) => g.items.map((i) => i.path))
+);
+const leaksPaths = new Set(
+  navGroups.filter((g) => g.workspace === "leaks").flatMap((g) => g.items.map((i) => i.path))
+);
+
+function getWorkspaceForRoute(path: string): WorkspaceId {
+  if (privacyPaths.has(path)) return "privacy";
+  if (leaksPaths.has(path)) return "leaks";
+  // Default to last selected or "leaks"
+  return (localStorage.getItem("rasid_workspace") as WorkspaceId) || "leaks";
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const prevLocationRef = useRef(location);
 
-  // Auto-scroll: follows any new content growing downward (AI typing, scans, verification, etc.)
+  // Auto-scroll for specific pages
   const autoScrollPages = ["/smart-rasid", "/live-scan"];
   const enableAutoScroll = autoScrollPages.includes(location);
   const { containerRef: mainContentRef } = useAutoScroll<HTMLElement>({ enabled: enableAutoScroll, threshold: 200 });
 
-  // Scroll to top on EVERY page navigation (robust: multiple attempts + requestAnimationFrame)
+  // Scroll to top on page navigation
   useEffect(() => {
     if (prevLocationRef.current !== location) {
       prevLocationRef.current = location;
       const scrollReset = () => {
         if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
         window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
       };
-      // Immediate
       scrollReset();
-      // After paint
       requestAnimationFrame(scrollReset);
-      // After lazy-loaded content settles
       const t1 = setTimeout(scrollReset, 50);
       const t2 = setTimeout(scrollReset, 150);
-      const t3 = setTimeout(scrollReset, 300);
-      return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [location, mainContentRef]);
 
@@ -505,29 +483,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, isAuthenticated, loading, logout, isAdmin, ndmoRole } = useNdmoAuth();
   const { theme, themeMode, toggleTheme, switchable } = useTheme();
 
-  // Get the platform userId for root admin check
+  // Root admin check
   const platformUserId = (user as any)?.userId ?? "";
   const isRootAdmin = platformUserId === ROOT_ADMIN_USER_ID;
 
-  // Active workspace from current route
-  const activeWorkspace = getWorkspaceForRoute(location);
-  // Determine the active "switchable" workspace (privacy or leaks)
-  const activeMainWs = getActiveMainWorkspace(location);
+  // ═══ WORKSPACE STATE ═══
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(() => {
+    return getWorkspaceForRoute(location);
+  });
 
-  // Filter nav groups: show shared + active main workspace + admin (if on admin page)
-  const workspaceGroups = navGroups.filter((g) => {
+  // Update workspace when route changes
+  useEffect(() => {
+    const ws = getWorkspaceForRoute(location);
+    if (privacyPaths.has(location) || leaksPaths.has(location)) {
+      setActiveWorkspace(ws);
+      localStorage.setItem("rasid_workspace", ws);
+    }
+  }, [location]);
+
+  // Filter nav groups: show shared + active workspace groups + admin if root
+  const visibleGroups = navGroups.filter((g) => {
     if (g.workspace === "shared") return true;
-    if (g.workspace === activeMainWs) return true;
-    if (g.workspace === "admin" && activeWorkspace === "admin") return true;
+    if (g.workspace === activeWorkspace) return true;
+    if (g.workspace === "admin") return true; // admin groups handle their own visibility via rootAdminOnly
     return false;
   });
 
-  // Determine which group is active based on current location
-  const activeGroupId = workspaceGroups.find((g) =>
+  // Determine which group is active
+  const activeGroupId = visibleGroups.find((g) =>
     g.items.some((item) => item.path === location)
   )?.id;
 
-  // Groups default to collapsed, only active group is expanded
+  // Groups default to collapsed, only active group expanded
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     navGroups.forEach((g) => {
@@ -539,7 +526,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return initial;
   });
 
-  // Update expanded groups when location changes
   useEffect(() => {
     if (activeGroupId) {
       setExpandedGroups((prev) => {
@@ -556,11 +542,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     playClick();
   };
 
-  // Close mobile sidebar on navigation
   const handleNavClick = useCallback(() => {
-    if (mobileOpen) {
-      setMobileOpen(false);
-    }
+    if (mobileOpen) setMobileOpen(false);
   }, [mobileOpen]);
 
   const isItemVisible = (item: NavItem) => {
@@ -583,7 +566,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const logoSrc = isDark ? FULL_LOGO_LIGHT : FULL_LOGO_DARK;
   const { playClick, playHover } = useSoundEffects();
 
-  // Redirect unauthenticated users to login page
+  // Redirect unauthenticated users
   if (!loading && !isAuthenticated) {
     return <Redirect to="/login" />;
   }
@@ -625,7 +608,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </AnimatePresence>
 
-      {/* ═══ SIDEBAR — SDAIA Frosted Glass ═══ */}
+      {/* ═══ SIDEBAR — SDAIA Frosted Glass (pdpl-old design) ═══ */}
       <aside
         className={`
           fixed lg:relative z-50 h-full
@@ -634,67 +617,95 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ${collapsed ? "w-[72px]" : "w-[270px]"}
           ${mobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
           right-0 lg:right-auto
-          bg-sidebar lux-sidebar
-          ${isDark ? '' : ''}
+          bg-sidebar
+          backdrop-blur-2xl
+          ${isDark ? 'border-l border-[rgba(61,177,172,0.08)]' : 'border-l border-[#e2e5ef]'}
         `}
       >
         {/* Logo area — Full Brand Logo with Creative Effects */}
-        <div className={`flex items-center justify-center px-2 py-4 ${isDark ? 'border-b border-[rgba(61,177,172,0.1)]' : 'border-b border-[#edf0f7]'}`} style={{ minHeight: collapsed ? '60px' : '130px' }}>
+        <div className={`flex items-center justify-center px-2 py-8 ${isDark ? 'border-b border-[rgba(61,177,172,0.1)]' : 'border-b border-[#edf0f7]'}`} style={{ minHeight: collapsed ? '72px' : '200px' }}>
           <motion.div
             className="relative flex items-center justify-center flex-shrink-0"
             whileHover={{ scale: 1.04 }}
             transition={{ type: "spring", stiffness: 200 }}
-            style={{ width: collapsed ? '52px' : '100%', height: collapsed ? '52px' : '120px' }}
+            style={{ width: collapsed ? '52px' : '100%', height: collapsed ? '52px' : '180px' }}
           >
             {/* Orbiting glow ring */}
             <div
               className="absolute rounded-full pointer-events-none"
               style={{
                 width: collapsed ? '60px' : 'calc(100% + 16px)',
-                height: collapsed ? '60px' : '130px',
-                border: isDark ? '1px solid rgba(197, 165, 90, 0.15)' : '1px solid rgba(30, 58, 138, 0.06)',
+                height: collapsed ? '60px' : '190px',
+                border: isDark ? '1px solid rgba(61, 177, 172, 0.12)' : '1px solid rgba(30, 58, 138, 0.06)',
                 animation: 'breathing-glow 4s ease-in-out infinite',
-                boxShadow: isDark ? '0 0 30px rgba(197, 165, 90, 0.08), inset 0 0 30px rgba(100, 89, 167, 0.06)' : '0 0 20px rgba(30, 58, 138, 0.04)',
+                boxShadow: isDark ? '0 0 30px rgba(61, 177, 172, 0.1), inset 0 0 30px rgba(100, 89, 167, 0.06)' : '0 0 20px rgba(30, 58, 138, 0.04)',
               }}
             />
-            {/* Floating particles around logo — Gold + Teal */}
+            {/* Floating particles around logo */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#C5A55A]' : 'bg-[#3b82f6]'}`} style={{ top: '8%', right: '12%', opacity: isDark ? 0.6 : 0.25, animation: 'orbit 6s linear infinite' }} />
-              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#1e3a8a]'}`} style={{ bottom: '15%', left: '8%', opacity: isDark ? 0.5 : 0.2, animation: 'orbit 8s linear infinite reverse' }} />
-              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#C5A55A]' : 'bg-[#3b82f6]'}`} style={{ top: '50%', left: '3%', opacity: isDark ? 0.4 : 0.15, animation: 'orbit 10s linear infinite' }} />
-              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#6459A7]' : 'bg-[#6366f1]'}`} style={{ top: '25%', left: '15%', opacity: isDark ? 0.35 : 0.15, animation: 'orbit 12s linear infinite' }} />
+              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#3b82f6]'}`} style={{ top: '8%', right: '12%', opacity: isDark ? 0.5 : 0.25, animation: 'orbit 6s linear infinite' }} />
+              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#6459A7]' : 'bg-[#1e3a8a]'}`} style={{ bottom: '15%', left: '8%', opacity: isDark ? 0.4 : 0.2, animation: 'orbit 8s linear infinite reverse' }} />
+              <div className={`absolute w-1.5 h-1.5 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#3b82f6]'}`} style={{ top: '50%', left: '3%', opacity: isDark ? 0.3 : 0.15, animation: 'orbit 10s linear infinite' }} />
+              <div className={`absolute w-1 h-1 rounded-full ${isDark ? 'bg-[#6459A7]' : 'bg-[#1e3a8a]'}`} style={{ top: '20%', left: '50%', opacity: isDark ? 0.25 : 0.12, animation: 'orbit 12s linear infinite reverse' }} />
             </div>
             {/* Logo image */}
             <img
-              src={collapsed ? RASID_LOGO_COLLAPSED : logoSrc}
+              src={collapsed ? RASID_LOGO : logoSrc}
               alt="منصة راصد - مكتب إدارة البيانات الوطنية"
               className="relative z-10 object-contain"
               style={{
                 width: collapsed ? '44px' : '100%',
-                height: collapsed ? '44px' : '110px',
+                height: collapsed ? '44px' : '170px',
                 maxWidth: '260px',
-                filter: isDark ? 'drop-shadow(0 0 15px rgba(197, 165, 90, 0.3)) drop-shadow(0 0 40px rgba(100, 89, 167, 0.12))' : 'drop-shadow(0 0 8px rgba(30, 58, 138, 0.08))',
+                filter: isDark ? 'drop-shadow(0 0 15px rgba(61, 177, 172, 0.25)) drop-shadow(0 0 40px rgba(100, 89, 167, 0.12))' : 'drop-shadow(0 0 8px rgba(30, 58, 138, 0.08))',
                 animation: 'logo-float 5s ease-in-out infinite',
               }}
             />
           </motion.div>
         </div>
 
+        {/* Data flow line under logo */}
+        <div className="data-flow-line mx-4 opacity-50" />
+
         {/* ═══ WORKSPACE SWITCHER ═══ */}
-        <div className={`${isDark ? 'border-b border-[rgba(61,177,172,0.08)]' : 'border-b border-[#edf0f7]'}`}>
-          <WorkspaceSwitcher
-            collapsed={collapsed}
-            isAdmin={isAdmin}
-            isRootAdmin={isRootAdmin}
-          />
-        </div>
+        {!collapsed && (
+          <div className={`mx-3 my-2 flex rounded-lg overflow-hidden ${isDark ? 'bg-[rgba(61,177,172,0.06)] border border-[rgba(61,177,172,0.12)]' : 'bg-[rgba(30,58,138,0.03)] border border-[rgba(30,58,138,0.08)]'}`}>
+            <button
+              onClick={() => { setActiveWorkspace("leaks"); localStorage.setItem("rasid_workspace", "leaks"); playClick(); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold transition-all duration-200 ${
+                activeWorkspace === "leaks"
+                  ? isDark
+                    ? "bg-[rgba(61,177,172,0.15)] text-[#3DB1AC] shadow-sm"
+                    : "bg-[rgba(30,58,138,0.08)] text-[#1e3a8a] shadow-sm"
+                  : isDark
+                    ? "text-[#D4DDEF]/50 hover:text-[#D4DDEF]/70"
+                    : "text-[#5a6478] hover:text-[#1c2833]"
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>حالات الرصد</span>
+            </button>
+            <button
+              onClick={() => { setActiveWorkspace("privacy"); localStorage.setItem("rasid_workspace", "privacy"); playClick(); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-semibold transition-all duration-200 ${
+                activeWorkspace === "privacy"
+                  ? isDark
+                    ? "bg-[rgba(34,197,94,0.15)] text-[#22c55e] shadow-sm"
+                    : "bg-[rgba(22,163,74,0.08)] text-[#16a34a] shadow-sm"
+                  : isDark
+                    ? "text-[#D4DDEF]/50 hover:text-[#D4DDEF]/70"
+                    : "text-[#5a6478] hover:text-[#1c2833]"
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>الخصوصية</span>
+            </button>
+          </div>
+        )}
 
-        {/* Gold accent divider */}
-        <div className="gold-divider mx-4" />
-
-        {/* Navigation with groups — filtered by active workspace */}
+        {/* Navigation with groups */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
-          {workspaceGroups.filter(isGroupVisible).map((group) => {
+          {visibleGroups.filter(isGroupVisible).map((group) => {
             const isExpanded = expandedGroups[group.id];
             const isActive = isGroupActive(group);
             const GroupIcon = group.icon;
@@ -770,7 +781,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 {!collapsed && (
                                   <span className="text-[13px] font-medium whitespace-nowrap">{item.label}</span>
                                 )}
-                                {/* Root admin badge */}
                                 {!collapsed && item.rootAdminOnly && (
                                   <span className="text-[8px] px-1 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/20 mr-auto">
                                     ROOT
@@ -869,7 +879,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ═══ MAIN CONTENT AREA ═══ */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* Top header — SDAIA frosted glass */}
-        <header className={`h-16 flex items-center justify-between px-4 lg:px-6 lux-navbar sticky top-0 z-30`}>
+        <header className={`h-16 flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 ${isDark ? 'border-b border-[rgba(61,177,172,0.08)] bg-[rgba(13,21,41,0.7)]' : 'border-b border-[#e2e5ef] bg-white/90'}`}>
           <div className="flex items-center gap-4">
             <button
               className="lg:hidden text-muted-foreground hover:text-foreground"
@@ -935,7 +945,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content with particle background */}
-        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 lg:p-6 relative lux-page-bg">
+        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 lg:p-6 relative">
           <ParticleField count={30} className="z-0" />
           <motion.div
             key={location}
@@ -958,7 +968,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {children}
       </CinematicMode>
 
-      {/* Rasid Smart Character Widget — floating on all pages */}
+      {/* Rasid Smart Character Widget */}
       <RasidCharacterWidget />
     </div>
   );
