@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import DrillDownModal, { useDrillDown, type DrillDownFilter } from "@/components/DrillDownModal";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

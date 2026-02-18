@@ -8,7 +8,7 @@ import { Bell, Info, AlertTriangle, CheckCircle, XCircle, CheckCheck, Trash2, Ex
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

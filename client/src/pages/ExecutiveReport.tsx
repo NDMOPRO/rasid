@@ -15,7 +15,7 @@ import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrap
 
 import { LOGO_FULL_DARK } from "@/lib/rasidAssets";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 const LOGO_DARK = LOGO_FULL_DARK;
 

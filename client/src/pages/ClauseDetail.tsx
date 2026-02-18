@@ -9,7 +9,7 @@ import { useRoute, useLocation } from "wouter";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

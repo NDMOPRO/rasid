@@ -17,7 +17,7 @@ import {
   ARTICLE_12_CLAUSES,
 } from "../../../shared/compliance";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

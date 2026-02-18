@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { FileSpreadsheet, Upload, Download, Clock, CheckCircle2, XCircle, Loader2, AlertTriangle, FileDown } from "lucide-react";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

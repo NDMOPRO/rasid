@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import DrillDownModal, { useDrillDown } from "@/components/DrillDownModal";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

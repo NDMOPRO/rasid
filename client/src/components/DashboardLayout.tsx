@@ -27,7 +27,7 @@ import { getLoginUrl } from "@/const";
 import NotificationBell from "./NotificationBell";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Redirect } from "wouter";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import CinematicMode, { CinematicButton } from "@/components/CinematicMode";
 import RasidCharacterWidget from "@/components/RasidCharacterWidget";

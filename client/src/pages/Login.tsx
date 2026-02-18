@@ -14,7 +14,7 @@ import {
   QL_LOGO_OFFICE,
   QL_CHAR_STANDING,
 } from "@/lib/rasidAssets";
-import { AnimatedLogo } from "@/components/AnimatedLogo";
+import AnimatedLogo from "@/components/AnimatedLogo";
 
 /* ═══════════════════════════════════════════════════════════════════
    §1  Hover Light — radial gradient follows mouse cursor

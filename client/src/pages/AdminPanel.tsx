@@ -19,7 +19,7 @@ import {
   Download, RefreshCw, Lock, Unlock, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

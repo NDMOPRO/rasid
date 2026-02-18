@@ -46,7 +46,7 @@ import { toast } from "sonner";
 import { useState, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

@@ -2,7 +2,7 @@ import { useParams, useSearch } from "wouter";
 import ScanExecutionScreen from "@/components/ScanExecutionScreen";
 import { useMemo } from "react";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

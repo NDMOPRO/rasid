@@ -12,7 +12,7 @@ import { Users, Shield, UserCog, Eye, UserCheck, Crown, Loader2, UserPlus, Trash
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

@@ -18,7 +18,7 @@ import {
   Building2, Landmark, Download, RefreshCw, Layers, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
 const CLAUSE_NAMES = [

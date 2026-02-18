@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { FolderKanban, Plus, Search, Clock, CheckCircle2, XCircle, AlertTriangle, ArrowRight, MessageSquare, Loader2 } from "lucide-react";
 import CaseComments from "@/components/CaseComments";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 

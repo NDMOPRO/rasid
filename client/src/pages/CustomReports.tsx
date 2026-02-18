@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { generateProfessionalPDF, downloadBlob } from "@/lib/pdfGenerator";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
-import { ParticleField } from "@/components/ParticleField";
+import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 
