@@ -4,3 +4,4 @@ node_modules/
 dist/
 .manus-logs/
 *.log
+server/seed-data.json

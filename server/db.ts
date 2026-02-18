@@ -7053,3 +7053,78 @@ export async function getTrainingDocumentContent(): Promise<string> {
   return docs.map(d => `[مستند: ${d.fileName}]\n${d.content || ""}`).join("\n\n---\n\n");
 }
 
+
+// ===== Bulk Import Functions =====
+export async function bulkInsertSites(sitesData: any[]) {
+  const db = await getDb();
+  if (!db) return { inserted: 0, skipped: 0 };
+  
+  let inserted = 0;
+  let skipped = 0;
+  const BATCH_SIZE = 500;
+  
+  for (let i = 0; i < sitesData.length; i += BATCH_SIZE) {
+    const batch = sitesData.slice(i, i + BATCH_SIZE);
+    try {
+      await db.insert(sites).values(batch);
+      inserted += batch.length;
+    } catch (e: any) {
+      // Try one by one on batch failure
+      for (const site of batch) {
+        try {
+          await db.insert(sites).values(site);
+          inserted++;
+        } catch {
+          skipped++;
+        }
+      }
+    }
+  }
+  return { inserted, skipped };
+}
+
+export async function bulkInsertScans(scansData: any[]) {
+  const db = await getDb();
+  if (!db) return { inserted: 0, skipped: 0 };
+  
+  let inserted = 0;
+  let skipped = 0;
+  const BATCH_SIZE = 500;
+  
+  for (let i = 0; i < scansData.length; i += BATCH_SIZE) {
+    const batch = scansData.slice(i, i + BATCH_SIZE);
+    try {
+      await db.insert(scans).values(batch);
+      inserted += batch.length;
+    } catch (e: any) {
+      for (const scan of batch) {
+        try {
+          await db.insert(scans).values(scan);
+          inserted++;
+        } catch {
+          skipped++;
+        }
+      }
+    }
+  }
+  return { inserted, skipped };
+}
+
+export async function getSitesCount() {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: count() }).from(sites);
+  return result[0]?.count || 0;
+}
+
+export async function clearAllSites() {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(sites);
+}
+
+export async function clearAllScans() {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(scans);
+}

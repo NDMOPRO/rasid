@@ -5917,6 +5917,60 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       return { success: true };
     }),
 
+    // ===== Seed Database from CSV Data =====
+    seedDatabase: rootAdminProcedure.input(z.object({
+      clearExisting: z.boolean().default(false),
+    })).mutation(async ({ input }) => {
+      const fs = await import('fs');
+      const path = await import('path');
+      const zlib = await import('zlib');
+      const { promisify } = await import('util');
+      const gunzip = promisify(zlib.gunzip);
+      
+      const gzPath = path.join(process.cwd(), 'server', 'seed-data.json.gz');
+      const jsonPath = path.join(process.cwd(), 'server', 'seed-data.json');
+      
+      let seedData: any[];
+      if (fs.existsSync(gzPath)) {
+        const compressed = fs.readFileSync(gzPath);
+        const decompressed = await gunzip(compressed);
+        seedData = JSON.parse(decompressed.toString());
+      } else if (fs.existsSync(jsonPath)) {
+        seedData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+      } else {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Seed data file not found' });
+      }
+      
+      const currentCount = await db.getSitesCount();
+      if (currentCount > 0 && !input.clearExisting) {
+        return { success: false, message: `Database already has ${currentCount} sites. Set clearExisting=true to replace.`, currentCount };
+      }
+      
+      if (input.clearExisting) {
+        await db.clearAllScans();
+        await db.clearAllSites();
+      }
+      
+      const sitesData = seedData.map((s: any) => ({
+        domain: s.d,
+        url: s.u,
+        siteNameAr: s.na || null,
+        siteNameEn: s.ne || null,
+        title: s.t || null,
+        classification: s.cl || null,
+        siteStatus: s.s === 1 ? 'active' as const : 'unreachable' as const,
+        complianceStatus: s.s !== 1 ? 'not_working' as const : (s.p ? 'partial' as const : 'non_compliant' as const),
+        hasPrivacyPolicy: s.p ? 1 : 0,
+        privacyUrl: s.p || null,
+        cms: s.cm || null,
+        sslStatus: s.ssl || null,
+        sectorType: (s.cl && s.cl.includes('\u062d\u0643\u0648\u0645')) ? 'public' as const : 'private' as const,
+      }));
+      
+      const result = await db.bulkInsertSites(sitesData);
+      return { success: true, sites: result, totalSeedData: seedData.length };
+    }),
+
   }),
 
   // ===== Strategy Coverage Report =====
