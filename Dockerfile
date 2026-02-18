@@ -8,8 +8,9 @@ WORKDIR /app
 # Force development mode during build so devDependencies are installed
 ENV NODE_ENV=development
 
-# Install dependencies
+# Install dependencies (include patches for pnpm)
 COPY package.json pnpm-lock.yaml ./
+COPY patches/ ./patches/
 RUN pnpm install --frozen-lockfile --ignore-scripts
 RUN pnpm rebuild esbuild
 
