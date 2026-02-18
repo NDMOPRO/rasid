@@ -1,206 +1,238 @@
-import { LOGOS } from '@/lib/assets';
-import { useSidebarState } from '@/hooks/useSidebarState';
+/**
+ * Sidebar — Glass sidebar with collapsible groups, skin-aware accent
+ * Matching pdpl-old DashboardLayout sidebar
+ */
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronDown, Home, BarChart3, Search, Shield, Settings,
-  FileText, Users, Bell, Database, Activity, Lock, Eye,
-  Layers, HelpCircle, Globe, Server, Wifi, AlertTriangle
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-type SkinType = 'gold' | 'silver';
+  Shield, Eye, Globe, Users, FileText, AlertTriangle,
+  Search, Database, BarChart3, Settings, ChevronDown,
+  Crosshair, Lock, Fingerprint, Scale, BookOpen, Bell,
+  Activity, Server, Wifi, Layers
+} from "lucide-react";
+import { LOGOS } from "@/lib/assets";
+import type { Skin } from "@/hooks/useSkin";
 
 interface SidebarProps {
-  skin: SkinType;
-  activePage: string;
-  onPageChange: (page: string) => void;
+  skin: Skin;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const goldGroups = [
+interface SidebarGroup {
+  id: string;
+  title: string;
+  titleEn: string;
+  icon: React.ElementType;
+  items: { id: string; label: string; labelEn: string; icon: React.ElementType }[];
+}
+
+const goldGroups: SidebarGroup[] = [
   {
-    id: 'monitoring',
-    title: 'الرصد والمراقبة',
+    id: "monitoring",
+    title: "الرصد والمراقبة",
+    titleEn: "Monitoring",
+    icon: Eye,
     items: [
-      { id: 'home', label: 'لوحة التحكم', icon: Activity },
-      { id: 'threats', label: 'صيد التهديدات', icon: AlertTriangle },
-      { id: 'darkweb', label: 'رصد الدارك ويب', icon: Globe },
-      { id: 'leaks', label: 'التسريبات', icon: Eye },
+      { id: "dashboard", label: "لوحة التحكم", labelEn: "Dashboard", icon: BarChart3 },
+      { id: "leaks", label: "رصد التسريبات", labelEn: "Leak Detection", icon: Search },
+      { id: "darkweb", label: "الدارك ويب", labelEn: "Dark Web", icon: Globe },
+      { id: "threats", label: "صيد التهديدات", labelEn: "Threat Hunting", icon: Crosshair },
     ],
   },
   {
-    id: 'analysis',
-    title: 'التحليل والتقارير',
+    id: "analysis",
+    title: "التحليل والتقارير",
+    titleEn: "Analysis",
+    icon: BarChart3,
     items: [
-      { id: 'reports', label: 'التقارير', icon: FileText },
-      { id: 'analytics', label: 'التحليلات', icon: BarChart3 },
-      { id: 'search', label: 'البحث المتقدم', icon: Search },
+      { id: "reports", label: "التقارير", labelEn: "Reports", icon: FileText },
+      { id: "alerts", label: "التنبيهات", labelEn: "Alerts", icon: AlertTriangle },
+      { id: "database", label: "قاعدة البيانات", labelEn: "Database", icon: Database },
     ],
   },
   {
-    id: 'system',
-    title: 'إدارة النظام',
+    id: "management",
+    title: "الإدارة",
+    titleEn: "Management",
+    icon: Settings,
     items: [
-      { id: 'users', label: 'المستخدمون', icon: Users },
-      { id: 'alerts', label: 'التنبيهات', icon: Bell },
-      { id: 'sources', label: 'مصادر البيانات', icon: Database },
-      { id: 'infra', label: 'البنية التحتية', icon: Server },
-      { id: 'settings', label: 'الإعدادات', icon: Settings },
+      { id: "users", label: "المستخدمين", labelEn: "Users", icon: Users },
+      { id: "settings", label: "الإعدادات", labelEn: "Settings", icon: Settings },
+      { id: "notifications", label: "الإشعارات", labelEn: "Notifications", icon: Bell },
     ],
   },
 ];
 
-const silverGroups = [
+const silverGroups: SidebarGroup[] = [
   {
-    id: 'privacy',
-    title: 'الخصوصية والامتثال',
+    id: "privacy",
+    title: "الخصوصية والامتثال",
+    titleEn: "Privacy & Compliance",
+    icon: Lock,
     items: [
-      { id: 'home', label: 'لوحة التحكم', icon: Activity },
-      { id: 'policies', label: 'السياسات', icon: Shield },
-      { id: 'compliance', label: 'الامتثال', icon: Lock },
-      { id: 'dpia', label: 'تقييمات الأثر', icon: Layers },
+      { id: "dashboard", label: "لوحة التحكم", labelEn: "Dashboard", icon: BarChart3 },
+      { id: "impact", label: "تقييم الأثر", labelEn: "Impact Assessment", icon: Scale },
+      { id: "processing", label: "سجل المعالجة", labelEn: "Processing Log", icon: BookOpen },
+      { id: "rights", label: "حقوق الأفراد", labelEn: "Individual Rights", icon: Fingerprint },
     ],
   },
   {
-    id: 'governance',
-    title: 'الحوكمة',
+    id: "governance",
+    title: "السياسات والحوكمة",
+    titleEn: "Policies",
+    icon: Shield,
     items: [
-      { id: 'classification', label: 'تصنيف البيانات', icon: Database },
-      { id: 'access', label: 'طلبات الوصول', icon: Users },
-      { id: 'audit', label: 'التدقيق', icon: Search },
+      { id: "policies", label: "السياسات", labelEn: "Policies", icon: FileText },
+      { id: "audit", label: "التدقيق", labelEn: "Audit", icon: Search },
+      { id: "alerts", label: "التنبيهات", labelEn: "Alerts", icon: AlertTriangle },
     ],
   },
   {
-    id: 'system',
-    title: 'إدارة النظام',
+    id: "management",
+    title: "الإدارة",
+    titleEn: "Management",
+    icon: Settings,
     items: [
-      { id: 'reports', label: 'التقارير', icon: FileText },
-      { id: 'connectivity', label: 'الاتصال الآمن', icon: Wifi },
-      { id: 'settings', label: 'الإعدادات', icon: Settings },
+      { id: "users", label: "المستخدمين", labelEn: "Users", icon: Users },
+      { id: "settings", label: "الإعدادات", labelEn: "Settings", icon: Settings },
+      { id: "notifications", label: "الإشعارات", labelEn: "Notifications", icon: Bell },
     ],
   },
 ];
 
-export default function Sidebar({ skin, activePage, onPageChange }: SidebarProps) {
-  const groups = skin === 'gold' ? goldGroups : silverGroups;
-  const { openGroups, toggleGroup } = useSidebarState(groups.map(g => g.id));
+const STORAGE_KEY = "rasid-sidebar-collapsed";
+
+export default function Sidebar({ skin, isOpen, onClose }: SidebarProps) {
+  const groups = skin === "gold" ? goldGroups : silverGroups;
+  const [activeItem, setActiveItem] = useState("dashboard");
+
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    const def: Record<string, boolean> = {};
+    [...goldGroups, ...silverGroups].forEach(g => { def[g.id] = true; });
+    if (groups[0]) def[groups[0].id] = false;
+    return def;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(collapsed));
+  }, [collapsed]);
+
+  const toggleGroup = (id: string) => {
+    setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
-    <aside className="lux-sidebar">
-      {/* Logo area — metallic header */}
-      <div style={{
-        padding: '1.25rem 1.125rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        borderBottom: '2px solid rgba(100,120,160,.12)',
-        background: 'linear-gradient(180deg, rgba(35,48,72,.60), rgba(28,40,62,.40))',
-        boxShadow: 'inset 0 -1px 0 rgba(5,10,20,.30), inset 0 1px 0 rgba(140,165,210,.06)',
-      }}>
-        <img
-          src={skin === 'gold' ? LOGOS.calligraphyGold : LOGOS.calligraphyLight}
-          alt="راصد"
-          style={{ height: 32 }}
-        />
-        <div style={{
-          fontSize: '0.6875rem',
-          color: 'var(--accent-text)',
-          fontWeight: 700,
-          letterSpacing: '0.04em',
-          opacity: 0.8,
-        }}>
-          {skin === 'gold' ? 'الرصد' : 'الخصوصية'}
-        </div>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Navigation Groups */}
-      <nav style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '0.75rem 0',
-      }}>
-        {groups.map(group => (
-          <div key={group.id} style={{ marginBottom: '0.375rem' }}>
-            <div
-              className="sidebar-group-title"
-              onClick={() => toggleGroup(group.id)}
-            >
-              <span>{group.title}</span>
-              <motion.span
-                animate={{ rotate: openGroups[group.id] ? 0 : -90 }}
-                transition={{ duration: 0.2 }}
-                style={{ display: 'flex' }}
+      <aside
+        className={`
+          glass-sidebar fixed top-0 right-0 h-full z-50
+          w-[280px] flex flex-col
+          transition-transform duration-300 ease-in-out
+          lg:translate-x-0
+          ${isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
+        `}
+      >
+        {/* Logo */}
+        <div className="p-5 flex items-center justify-center border-b border-white/5">
+          <motion.img
+            src={LOGOS.calligraphyLight}
+            alt="راصد"
+            className="h-12 object-contain"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          />
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          {groups.map((group) => (
+            <div key={group.id} className="mb-2">
+              <button
+                onClick={() => toggleGroup(group.id)}
+                className="sidebar-group-header w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-right"
               >
-                <ChevronDown size={12} />
-              </motion.span>
-            </div>
-
-            <AnimatePresence initial={false}>
-              {openGroups[group.id] && (
+                <group.icon className="w-4 h-4 text-muted-foreground" />
+                <div className="flex-1 text-right">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{group.title}</span>
+                  <span className="text-[9px] text-muted-foreground/50 block">{group.titleEn}</span>
+                </div>
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
-                  style={{ overflow: 'hidden' }}
+                  animate={{ rotate: collapsed[group.id] ? -90 : 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  {group.items.map(item => {
-                    const Icon = item.icon;
-                    return (
-                      <div
-                        key={item.id}
-                        className={`sidebar-item ${activePage === item.id ? 'active' : ''}`}
-                        onClick={() => onPageChange(item.id)}
-                      >
-                        <span style={{ opacity: 0.65, display: 'flex' }}>
-                          <Icon size={16} />
-                        </span>
-                        <span>{item.label}</span>
-                      </div>
-                    );
-                  })}
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-      </nav>
+              </button>
 
-      {/* User Footer — metallic panel */}
-      <div style={{
-        padding: '0.875rem 1.125rem',
-        borderTop: '2px solid rgba(100,120,160,.12)',
-        background: 'linear-gradient(180deg, rgba(28,40,62,.40), rgba(35,48,72,.60))',
-        boxShadow: 'inset 0 1px 0 rgba(140,165,210,.06), inset 0 -1px 0 rgba(5,10,20,.20)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.625rem',
-      }}>
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
-          background: 'linear-gradient(165deg, rgba(50,65,100,.80), rgba(35,48,78,.90))',
-          border: '2px solid rgba(100,120,160,.22)',
-          borderTopColor: 'rgba(140,165,210,.28)',
-          borderBottomColor: 'rgba(20,30,50,.40)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--accent-text)',
-          fontSize: '0.8125rem',
-          fontWeight: 700,
-          boxShadow: '0 2px 4px rgba(0,0,0,.25), inset 0 1px 0 rgba(160,180,220,.15)',
-        }}>
-          م
-        </div>
-        <div>
-          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-            مدير النظام
+              <AnimatePresence initial={false}>
+                {!collapsed[group.id] && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-0.5 mt-1 mr-2">
+                      {group.items.map((item) => {
+                        const isActive = activeItem === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveItem(item.id)}
+                            className={`
+                              sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-right
+                              ${isActive ? "sidebar-nav-item-active" : "text-muted-foreground hover:text-foreground"}
+                            `}
+                          >
+                            <item.icon className="sidebar-nav-icon w-4.5 h-4.5" />
+                            <div className="flex-1 text-right">
+                              <span className="text-sm font-medium">{item.label}</span>
+                              <span className="text-[9px] text-muted-foreground/50 block">{item.labelEn}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </nav>
+
+        {/* Bottom section */}
+        <div className="p-4 border-t border-white/5">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--skin-gradient-from)] to-[var(--skin-gradient-to)] flex items-center justify-center">
+              <span className="text-sm font-bold text-[#0D1529]">م</span>
+            </div>
+            <div className="flex-1 text-right">
+              <p className="text-sm font-semibold text-foreground">مدير النظام</p>
+              <p className="text-[10px] text-muted-foreground">admin@rasid.sa</p>
+            </div>
           </div>
-          <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)' }}>
-            admin@rasid.sa
-          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

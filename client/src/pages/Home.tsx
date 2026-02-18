@@ -1,451 +1,452 @@
-import { useState } from 'react';
-import { useSkin, Skin } from '@/hooks/useSkin';
-import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
-import KPICard from '@/components/KPICard';
-import RasidCard from '@/components/RasidCard';
-import RasidTable from '@/components/RasidTable';
-import Chart3D from '@/components/Chart3D';
-import RasidButton from '@/components/RasidButton';
-import RasidInput from '@/components/RasidInput';
-import StatusBadge from '@/components/StatusBadge';
-import { LOGOS, CHARACTERS } from '@/lib/assets';
-import { motion, AnimatePresence } from 'framer-motion';
+/**
+ * Home — Rasid Lux Ultra Premium Dashboard
+ * Matching pdpl-old reference with gold/silver dual skin
+ */
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield, Eye, Activity, Database, Users, Bell,
-  FileText, Lock, BarChart3, Search, AlertTriangle,
-  CheckCircle, Globe, Zap, Server, Wifi, Menu, X
-} from 'lucide-react';
+  Shield, Eye, Globe, Users, FileText, AlertTriangle,
+  Search, Database, BarChart3, TrendingUp, TrendingDown,
+  Activity, Radio, Building2, Menu, Bell, X,
+  Lock, Fingerprint, Scale, BookOpen, Crosshair,
+  ChevronLeft, ChevronRight, RefreshCw
+} from "lucide-react";
+import { useSkin, type Skin } from "@/hooks/useSkin";
+import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
+import { LOGOS, CHARACTERS } from "@/lib/assets";
+import PremiumCard from "@/components/PremiumCard";
+import ParticleField from "@/components/ParticleField";
+import MiniSparkline from "@/components/MiniSparkline";
+import Sidebar from "@/components/Sidebar";
 
-/* ============================================================
-   DATA
-   ============================================================ */
+/* ═══ Animated Number ═══ */
+function AnimatedNumber({ value }: { value: number }) {
+  const display = useAnimatedNumber(value, 1200);
+  return <>{display.toLocaleString("ar-SA")}</>;
+}
 
-const goldChartData = [
-  { name: 'يناير', value: 42 },
-  { name: 'فبراير', value: 58 },
-  { name: 'مارس', value: 35 },
-  { name: 'أبريل', value: 72 },
-  { name: 'مايو', value: 48 },
-  { name: 'يونيو', value: 63 },
-  { name: 'يوليو', value: 55 },
+/* ═══ Section Header ═══ */
+function SectionHeader({ icon: Icon, title, subtitle, action, onAction }: {
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <div className="icon-box">
+          <Icon />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-foreground">{title}</h3>
+          <p className="text-[9px] text-muted-foreground">{subtitle}</p>
+        </div>
+      </div>
+      {action && (
+        <button onClick={onAction} className="text-[11px] text-[var(--skin-text)] hover:underline font-medium">
+          {action}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ═══ KPI DATA ═══ */
+const goldKPIs = [
+  { key: "total", label: "إجمالي التسريبات", labelEn: "Total Leaks", value: 12847, trend: "+12%", trendUp: true, trendLabel: "من الشهر الماضي", icon: Database, gradient: "from-amber-500/10 to-amber-700/5", iconBg: "bg-amber-500/15", iconColor: "text-amber-400", glowColor: "rgba(212,175,55,0.15)", sparkColor: "#D4AF37", sparkData: [3, 5, 4, 7, 6, 8, 9] },
+  { key: "critical", label: "تسريبات حرجة", labelEn: "Critical Leaks", value: 342, trend: "-8%", trendUp: false, trendLabel: "تحسن", icon: AlertTriangle, gradient: "from-red-500/10 to-red-700/5", iconBg: "bg-red-500/15", iconColor: "text-red-400", glowColor: "rgba(239,68,68,0.15)", sparkColor: "#ef4444", sparkData: [8, 6, 7, 5, 4, 3, 2] },
+  { key: "darkweb", label: "رصد الدارك ويب", labelEn: "Dark Web Monitoring", value: 1893, trend: "+23%", trendUp: true, trendLabel: "نشاط متزايد", icon: Globe, gradient: "from-purple-500/10 to-purple-700/5", iconBg: "bg-purple-500/15", iconColor: "text-purple-400", glowColor: "rgba(168,85,247,0.15)", sparkColor: "#a855f7", sparkData: [2, 4, 3, 6, 5, 8, 9] },
+  { key: "resolved", label: "تم المعالجة", labelEn: "Resolved", value: 9621, trend: "+31%", trendUp: true, trendLabel: "معدل حل ممتاز", icon: Shield, gradient: "from-emerald-500/10 to-emerald-700/5", iconBg: "bg-emerald-500/15", iconColor: "text-emerald-400", glowColor: "rgba(16,185,129,0.15)", sparkColor: "#10b981", sparkData: [4, 5, 6, 7, 8, 9, 10] },
+  { key: "sources", label: "مصادر الرصد", labelEn: "Monitoring Sources", value: 156, trend: "+5", trendUp: true, trendLabel: "مصدر جديد", icon: Radio, gradient: "from-cyan-500/10 to-cyan-700/5", iconBg: "bg-cyan-500/15", iconColor: "text-cyan-400", glowColor: "rgba(6,182,212,0.15)", sparkColor: "#06b6d4", sparkData: [5, 6, 5, 7, 6, 7, 8] },
+  { key: "threats", label: "تهديدات نشطة", labelEn: "Active Threats", value: 47, trend: "-15%", trendUp: false, trendLabel: "انخفاض", icon: Crosshair, gradient: "from-orange-500/10 to-orange-700/5", iconBg: "bg-orange-500/15", iconColor: "text-orange-400", glowColor: "rgba(249,115,22,0.15)", sparkColor: "#f97316", sparkData: [9, 7, 8, 6, 5, 4, 3] },
+  { key: "sectors", label: "القطاعات المتأثرة", labelEn: "Affected Sectors", value: 23, trend: "+2", trendUp: true, trendLabel: "قطاع جديد", icon: Building2, gradient: "from-blue-500/10 to-blue-700/5", iconBg: "bg-blue-500/15", iconColor: "text-blue-400", glowColor: "rgba(59,130,246,0.15)", sparkColor: "#3b82f6", sparkData: [3, 4, 5, 4, 5, 6, 6] },
+  { key: "users", label: "المستخدمين النشطين", labelEn: "Active Users", value: 89, trend: "+12", trendUp: true, trendLabel: "مستخدم جديد", icon: Users, gradient: "from-pink-500/10 to-pink-700/5", iconBg: "bg-pink-500/15", iconColor: "text-pink-400", glowColor: "rgba(236,72,153,0.15)", sparkColor: "#ec4899", sparkData: [4, 5, 6, 7, 8, 9, 10] },
 ];
 
-const silverChartData = [
-  { name: 'يناير', value: 28 },
-  { name: 'فبراير', value: 45 },
-  { name: 'مارس', value: 62 },
-  { name: 'أبريل', value: 38 },
-  { name: 'مايو', value: 55 },
-  { name: 'يونيو', value: 71 },
-  { name: 'يوليو', value: 49 },
+const silverKPIs = [
+  { key: "policies", label: "السياسات المفعّلة", labelEn: "Active Policies", value: 48, trend: "+6", trendUp: true, trendLabel: "سياسة جديدة", icon: FileText, gradient: "from-slate-400/10 to-slate-600/5", iconBg: "bg-slate-400/15", iconColor: "text-slate-300", glowColor: "rgba(168,180,200,0.15)", sparkColor: "#A8B4C8", sparkData: [3, 4, 5, 6, 7, 8, 9] },
+  { key: "compliance", label: "نسبة الامتثال", labelEn: "Compliance Rate", value: 94, displayValue: "94%", trend: "+3%", trendUp: true, trendLabel: "تحسن", icon: Shield, gradient: "from-emerald-500/10 to-emerald-700/5", iconBg: "bg-emerald-500/15", iconColor: "text-emerald-400", glowColor: "rgba(16,185,129,0.15)", sparkColor: "#10b981", sparkData: [85, 87, 89, 91, 92, 93, 94] },
+  { key: "dpia", label: "تقييمات الأثر", labelEn: "Impact Assessments", value: 127, trend: "+18", trendUp: true, trendLabel: "تقييم جديد", icon: Scale, gradient: "from-violet-500/10 to-violet-700/5", iconBg: "bg-violet-500/15", iconColor: "text-violet-400", glowColor: "rgba(139,92,246,0.15)", sparkColor: "#8b5cf6", sparkData: [5, 6, 7, 8, 9, 10, 11] },
+  { key: "requests", label: "طلبات حقوق الأفراد", labelEn: "Individual Rights", value: 234, trend: "+42", trendUp: true, trendLabel: "طلب جديد", icon: Fingerprint, gradient: "from-cyan-500/10 to-cyan-700/5", iconBg: "bg-cyan-500/15", iconColor: "text-cyan-400", glowColor: "rgba(6,182,212,0.15)", sparkColor: "#06b6d4", sparkData: [8, 9, 10, 11, 12, 13, 14] },
+  { key: "processing", label: "سجلات المعالجة", labelEn: "Processing Records", value: 1456, trend: "+89", trendUp: true, trendLabel: "سجل جديد", icon: BookOpen, gradient: "from-amber-500/10 to-amber-700/5", iconBg: "bg-amber-500/15", iconColor: "text-amber-400", glowColor: "rgba(245,158,11,0.15)", sparkColor: "#f59e0b", sparkData: [6, 7, 8, 9, 10, 11, 12] },
+  { key: "breaches", label: "حوادث الخصوصية", labelEn: "Privacy Incidents", value: 12, trend: "-5", trendUp: false, trendLabel: "انخفاض", icon: AlertTriangle, gradient: "from-red-500/10 to-red-700/5", iconBg: "bg-red-500/15", iconColor: "text-red-400", glowColor: "rgba(239,68,68,0.15)", sparkColor: "#ef4444", sparkData: [18, 15, 14, 13, 12, 11, 12] },
+  { key: "training", label: "التدريب والتوعية", labelEn: "Training", value: 312, trend: "+28", trendUp: true, trendLabel: "موظف مدرب", icon: Users, gradient: "from-blue-500/10 to-blue-700/5", iconBg: "bg-blue-500/15", iconColor: "text-blue-400", glowColor: "rgba(59,130,246,0.15)", sparkColor: "#3b82f6", sparkData: [5, 6, 7, 8, 9, 10, 11] },
+  { key: "audits", label: "عمليات التدقيق", labelEn: "Audits", value: 36, trend: "+4", trendUp: true, trendLabel: "تدقيق جديد", icon: Search, gradient: "from-teal-500/10 to-teal-700/5", iconBg: "bg-teal-500/15", iconColor: "text-teal-400", glowColor: "rgba(20,184,166,0.15)", sparkColor: "#14b8a6", sparkData: [3, 4, 5, 4, 5, 6, 7] },
 ];
 
-const goldTableColumns = [
-  { key: 'id', label: '#', align: 'center' as const },
-  { key: 'threat', label: 'التهديد' },
-  { key: 'source', label: 'المصدر' },
-  { key: 'severity', label: 'الخطورة', align: 'center' as const },
-  { key: 'status', label: 'الحالة', align: 'center' as const },
-  { key: 'date', label: 'التاريخ' },
-];
-
+/* ═══ Table Data ═══ */
 const goldTableData = [
-  { id: '١', threat: 'تسريب بيانات حساسة', source: 'دارك ويب', severity: <StatusBadge status="critical" label="حرج" />, status: <StatusBadge status="active" label="نشط" />, date: '٢٠٢٦/٠٢/١٨' },
-  { id: '٢', threat: 'محاولة اختراق API', source: 'مصدر خارجي', severity: <StatusBadge status="warning" label="متوسط" />, status: <StatusBadge status="active" label="نشط" />, date: '٢٠٢٦/٠٢/١٧' },
-  { id: '٣', threat: 'بيانات مكشوفة على GitHub', source: 'GitHub', severity: <StatusBadge status="warning" label="متوسط" />, status: <StatusBadge status="resolved" label="محلول" />, date: '٢٠٢٦/٠٢/١٦' },
-  { id: '٤', threat: 'نشاط مشبوه على تيليجرام', source: 'تيليجرام', severity: <StatusBadge status="active" label="منخفض" />, status: <StatusBadge status="active" label="قيد المراجعة" />, date: '٢٠٢٦/٠٢/١٥' },
-  { id: '٥', threat: 'تسريب كلمات مرور', source: 'دارك ويب', severity: <StatusBadge status="critical" label="حرج" />, status: <StatusBadge status="resolved" label="محلول" />, date: '٢٠٢٦/٠٢/١٤' },
-];
-
-const silverTableColumns = [
-  { key: 'id', label: '#', align: 'center' as const },
-  { key: 'policy', label: 'السياسة' },
-  { key: 'category', label: 'التصنيف' },
-  { key: 'compliance', label: 'الامتثال', align: 'center' as const },
-  { key: 'status', label: 'الحالة', align: 'center' as const },
-  { key: 'lastAudit', label: 'آخر تدقيق' },
+  { id: 1, source: "الدارك ويب", type: "بيانات مالية", severity: "حرج", status: "قيد المعالجة", date: "2026-02-15" },
+  { id: 2, source: "تيليجرام", type: "بيانات شخصية", severity: "عالي", status: "تم الحل", date: "2026-02-14" },
+  { id: 3, source: "منتديات", type: "بيانات دخول", severity: "متوسط", status: "جديد", date: "2026-02-13" },
+  { id: 4, source: "Paste Sites", type: "بريد إلكتروني", severity: "منخفض", status: "تم الحل", date: "2026-02-12" },
+  { id: 5, source: "الدارك ويب", type: "وثائق سرية", severity: "حرج", status: "قيد المعالجة", date: "2026-02-11" },
 ];
 
 const silverTableData = [
-  { id: '١', policy: 'سياسة حماية البيانات الشخصية', category: 'PDPL', compliance: <StatusBadge status="active" label="ممتثل" />, status: <StatusBadge status="active" label="نشط" />, lastAudit: '٢٠٢٦/٠٢/١٨' },
-  { id: '٢', policy: 'سياسة الاحتفاظ بالبيانات', category: 'حوكمة', compliance: <StatusBadge status="warning" label="جزئي" />, status: <StatusBadge status="active" label="قيد المراجعة" />, lastAudit: '٢٠٢٦/٠٢/١٥' },
-  { id: '٣', policy: 'سياسة الوصول والتحكم', category: 'أمن', compliance: <StatusBadge status="active" label="ممتثل" />, status: <StatusBadge status="active" label="نشط" />, lastAudit: '٢٠٢٦/٠٢/١٢' },
-  { id: '٤', policy: 'سياسة نقل البيانات عبر الحدود', category: 'PDPL', compliance: <StatusBadge status="critical" label="غير ممتثل" />, status: <StatusBadge status="warning" label="تحذير" />, lastAudit: '٢٠٢٦/٠٢/١٠' },
-  { id: '٥', policy: 'سياسة إخفاء الهوية', category: 'خصوصية', compliance: <StatusBadge status="active" label="ممتثل" />, status: <StatusBadge status="active" label="نشط" />, lastAudit: '٢٠٢٦/٠٢/٠٨' },
+  { id: 1, source: "نظام HR", type: "بيانات موظفين", severity: "عالي", status: "مفتوح", date: "2026-02-15" },
+  { id: 2, source: "CRM", type: "بيانات عملاء", severity: "متوسط", status: "مغلق", date: "2026-02-14" },
+  { id: 3, source: "البريد", type: "مراسلات", severity: "منخفض", status: "قيد المراجعة", date: "2026-02-13" },
+  { id: 4, source: "التخزين السحابي", type: "وثائق مالية", severity: "عالي", status: "مفتوح", date: "2026-02-12" },
+  { id: 5, source: "قاعدة البيانات", type: "سجلات طبية", severity: "حرج", status: "مغلق", date: "2026-02-11" },
 ];
 
-/* Metallic icon box style — 3D beveled */
-const metalIconBox = {
-  width: 48,
-  height: 48,
-  borderRadius: 14,
-  background: 'linear-gradient(170deg, rgba(55,72,108,.85), rgba(38,52,82,.92))' as const,
-  borderWidth: 3,
-  borderStyle: 'solid' as const,
-  borderColor: 'var(--accent-border)',
-  borderTopColor: 'rgba(160,185,235,.42)',
-  borderBottomColor: 'rgba(10,16,32,.60)',
-  display: 'flex' as const,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  color: 'var(--accent-text)',
-  boxShadow: '0 4px 10px rgba(0,0,0,.40), inset 0 2px 0 rgba(180,200,240,.25), inset 0 -2px 0 rgba(3,6,15,.55), inset 2px 0 0 rgba(160,185,230,.15), inset -2px 0 0 rgba(3,6,15,.40)',
-};
+/* ═══ Chart Data ═══ */
+const monthlyData = [
+  { month: "يناير", value: 420 },
+  { month: "فبراير", value: 580 },
+  { month: "مارس", value: 350 },
+  { month: "أبريل", value: 720 },
+  { month: "مايو", value: 650 },
+  { month: "يونيو", value: 890 },
+];
 
-/* Section title bar style */
-const sectionTitle = {
-  fontSize: '1rem' as const,
-  fontWeight: 700 as const,
-  color: 'var(--text-primary)',
-  marginBottom: '1.125rem',
-  display: 'flex' as const,
-  alignItems: 'center' as const,
-  gap: '0.5rem',
-};
+/* ═══ Status Cards ═══ */
+const statusCards = [
+  { label: "جديد", labelEn: "New", value: 156, icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-500/10", glow: "rgba(245,158,11,0.1)" },
+  { label: "قيد المعالجة", labelEn: "In Progress", value: 89, icon: RefreshCw, color: "text-blue-400", bg: "bg-blue-500/10", glow: "rgba(59,130,246,0.1)" },
+  { label: "تم الحل", labelEn: "Resolved", value: 342, icon: Shield, color: "text-emerald-400", bg: "bg-emerald-500/10", glow: "rgba(16,185,129,0.1)" },
+  { label: "مغلق", labelEn: "Closed", value: 1205, icon: Lock, color: "text-slate-400", bg: "bg-slate-500/10", glow: "rgba(148,163,184,0.1)" },
+];
 
-const accentBar = {
-  width: 4,
-  height: 18,
-  borderRadius: 2,
-  background: 'var(--accent-color)',
-  display: 'inline-block' as const,
-};
+/* ═══ Severity Badge ═══ */
+function SeverityBadge({ severity }: { severity: string }) {
+  const colors: Record<string, string> = {
+    "حرج": "bg-red-500/15 text-red-400 border-red-500/20",
+    "عالي": "bg-orange-500/15 text-orange-400 border-orange-500/20",
+    "متوسط": "bg-amber-500/15 text-amber-400 border-amber-500/20",
+    "منخفض": "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+  };
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${colors[severity] || "bg-slate-500/15 text-slate-400 border-slate-500/20"}`}>
+      {severity}
+    </span>
+  );
+}
 
-/* ============================================================
-   HOME PAGE
-   ============================================================ */
-
-export default function Home() {
-  const { skin, setSkin } = useSkin();
-  const [activePage, setActivePage] = useState('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const goldKPIs = [
-    { title: 'التهديدات النشطة', value: 247, change: 12, icon: <AlertTriangle size={20} />, watermark: <Shield size={80} /> },
-    { title: 'عمليات الرصد', value: 1842, change: 8, icon: <Eye size={20} />, watermark: <Eye size={80} /> },
-    { title: 'التنبيهات الحرجة', value: 23, change: -5, icon: <Bell size={20} />, watermark: <Bell size={80} /> },
-    { title: 'مصادر البيانات', value: 156, change: 15, icon: <Database size={20} />, watermark: <Database size={80} /> },
-    { title: 'المستخدمون النشطون', value: 89, change: 3, icon: <Users size={20} />, watermark: <Users size={80} /> },
-    { title: 'التقارير المُنشأة', value: 342, change: 22, icon: <FileText size={20} />, watermark: <FileText size={80} /> },
-    { title: 'وقت الاستجابة', value: 98, suffix: '%', change: 2, icon: <Zap size={20} />, watermark: <Zap size={80} /> },
-    { title: 'صحة النظام', value: 99, suffix: '%', change: 1, icon: <Server size={20} />, watermark: <Server size={80} /> },
-  ];
-
-  const silverKPIs = [
-    { title: 'السياسات النشطة', value: 42, change: 5, icon: <Shield size={20} />, watermark: <Shield size={80} /> },
-    { title: 'طلبات الوصول', value: 156, change: -8, icon: <Lock size={20} />, watermark: <Lock size={80} /> },
-    { title: 'نسبة الامتثال', value: 87, suffix: '%', change: 3, icon: <CheckCircle size={20} />, watermark: <CheckCircle size={80} /> },
-    { title: 'تقييمات الأثر', value: 28, change: 12, icon: <BarChart3 size={20} />, watermark: <BarChart3 size={80} /> },
-    { title: 'الموافقات المعلقة', value: 15, change: -3, icon: <FileText size={20} />, watermark: <FileText size={80} /> },
-    { title: 'التدقيقات المكتملة', value: 234, change: 18, icon: <Search size={20} />, watermark: <Search size={80} /> },
-    { title: 'البيانات المصنفة', value: 94, suffix: '%', change: 7, icon: <Database size={20} />, watermark: <Database size={80} /> },
-    { title: 'الاتصال الآمن', value: 100, suffix: '%', change: 0, icon: <Wifi size={20} />, watermark: <Wifi size={80} /> },
-  ];
-
-  const kpis = skin === 'gold' ? goldKPIs : silverKPIs;
-  const chartData = skin === 'gold' ? goldChartData : silverChartData;
-  const tableColumns = skin === 'gold' ? goldTableColumns : silverTableColumns;
-  const tableData = skin === 'gold' ? goldTableData : silverTableData;
+/* ═══ Simple Bar Chart ═══ */
+function BarChart({ data, skin }: { data: { month: string; value: number }[]; skin: Skin }) {
+  const max = Math.max(...data.map(d => d.value));
+  const barColor = skin === "gold" ? "#D4AF37" : "#A8B4C8";
+  const barColorLight = skin === "gold" ? "rgba(212,175,55,0.3)" : "rgba(168,180,200,0.3)";
 
   return (
-    <div style={{ display: 'flex', height: '100dvh' }}>
-      {/* Mobile Sidebar Overlay */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
-            style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
-              zIndex: 39,
-            }}
-          />
-        )}
-      </AnimatePresence>
+    <div className="flex items-end gap-3 h-48 px-2">
+      {data.map((d, i) => {
+        const pct = (d.value / max) * 100;
+        return (
+          <div key={d.month} className="flex-1 flex flex-col items-center gap-2">
+            <motion.div
+              className="w-full rounded-t-lg relative overflow-hidden"
+              style={{
+                background: `linear-gradient(180deg, ${barColor}, ${barColorLight})`,
+                boxShadow: `0 0 12px ${barColorLight}`,
+              }}
+              initial={{ height: 0 }}
+              animate={{ height: `${pct}%` }}
+              transition={{ duration: 0.8, delay: i * 0.1, ease: [0.34, 1.56, 0.64, 1] }}
+            >
+              {/* Shine strip */}
+              <div
+                className="absolute top-0 left-0 w-1/3 h-full"
+                style={{ background: "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)" }}
+              />
+            </motion.div>
+            <span className="text-[10px] text-muted-foreground">{d.month}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN HOME PAGE
+   ═══════════════════════════════════════════════════════════════ */
+export default function Home() {
+  const { skin, setSkin } = useSkin();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const kpis = skin === "gold" ? goldKPIs : silverKPIs;
+  const tableData = skin === "gold" ? goldTableData : silverTableData;
+
+  return (
+    <div className="min-h-screen bg-[#0D1529] aurora-bg dot-grid">
+      {/* Particle Background */}
+      <ParticleField skin={skin} count={35} />
 
       {/* Sidebar */}
-      {sidebarOpen && (
-        <Sidebar skin={skin} activePage={activePage} onPageChange={setActivePage} />
-      )}
+      <Sidebar skin={skin} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
-      <div style={{
-        flex: 1,
-        marginRight: sidebarOpen ? 260 : 0,
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 0,
-        minHeight: 0,
-        height: '100dvh',
-        transition: 'margin-right 220ms cubic-bezier(.22,.61,.36,1)',
-      }}>
-        <TopBar
-          skin={skin}
-          onSkinChange={setSkin}
-          onToggleSidebar={() => setSidebarOpen(prev => !prev)}
-          sidebarOpen={sidebarOpen}
-        />
+      <div className="lg:mr-[280px] min-h-screen relative z-10">
+        {/* TopBar */}
+        <header className="glass-topbar sticky top-0 z-30 px-4 lg:px-6 py-3 flex items-center gap-4">
+          {/* Mobile menu */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 rounded-lg hover:bg-white/5 transition"
+          >
+            <Menu className="w-5 h-5 text-muted-foreground" />
+          </button>
 
-        <main className="page-bg" style={{
-          flex: '1 1 0%',
-          padding: '1.75rem 2rem',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          minHeight: 0,
-        }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={skin}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+          {/* Workspace Switcher */}
+          <div className="workspace-switcher">
+            <button
+              onClick={() => setSkin("gold")}
+              className={`workspace-btn ${skin === "gold" ? "active" : ""}`}
             >
-              {/* ============ Page Header ============ */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                marginBottom: '2rem',
-              }}>
-                <div>
-                  {/* Status badge — metallic pill */}
-                  <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.3rem 0.875rem',
-                    borderRadius: '9999px',
-                    background: 'linear-gradient(165deg, rgba(50,65,100,.70), rgba(35,48,78,.80))',
-                    border: '2px solid rgba(100,120,160,.18)',
-                    borderTopColor: 'rgba(140,165,210,.22)',
-                    borderBottomColor: 'rgba(20,30,50,.35)',
-                    marginBottom: '0.875rem',
-                    fontSize: '0.75rem',
-                    color: 'var(--accent-text)',
-                    fontWeight: 600,
-                    boxShadow: '0 2px 4px rgba(0,0,0,.25), inset 0 1px 0 rgba(160,180,220,.12)',
-                  }}>
-                    <span style={{
-                      width: 7, height: 7, borderRadius: '50%',
-                      background: '#10B981',
-                      boxShadow: '0 0 10px #10B981',
-                    }} />
-                    النظام نشط
-                  </div>
-                  <h1 style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 800,
-                    color: 'var(--text-primary)',
-                    marginBottom: '0.5rem',
-                    letterSpacing: '-0.01em',
-                  }}>
-                    {skin === 'gold' ? 'لوحة الرصد والمراقبة' : 'لوحة الخصوصية والامتثال'}
-                  </h1>
-                  <p style={{
-                    fontSize: '0.9375rem',
-                    color: 'var(--text-muted)',
-                    lineHeight: 1.7,
-                  }}>
-                    {skin === 'gold'
-                      ? 'نظرة شاملة على التهديدات وعمليات الرصد النشطة — تحديث مباشر'
-                      : 'نظرة شاملة على سياسات الخصوصية ومستوى الامتثال — تحديث مباشر'
-                    }
-                  </p>
-                </div>
-                <img
-                  src={skin === 'gold' ? LOGOS.calligraphyGold : LOGOS.calligraphyLight}
-                  alt="راصد"
-                  style={{ height: 48, opacity: 0.12, marginTop: '0.5rem' }}
-                />
-              </div>
+              <span className="flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5" />
+                الرصد
+              </span>
+            </button>
+            <button
+              onClick={() => setSkin("silver")}
+              className={`workspace-btn ${skin === "silver" ? "active" : ""}`}
+            >
+              <span className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                الخصوصية
+              </span>
+            </button>
+          </div>
 
-              {/* ============ KPI Cards Grid — 8 cards, 4 columns ============ */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1.125rem',
-                marginBottom: '1.75rem',
-              }}>
-                {kpis.map((kpi, i) => (
-                  <KPICard
-                    key={`${skin}-${i}`}
-                    title={kpi.title}
-                    value={kpi.value}
-                    suffix={kpi.suffix}
-                    change={kpi.change}
-                    icon={kpi.icon}
-                    watermarkIcon={kpi.watermark}
-                    delay={i * 0.05}
-                  />
-                ))}
-              </div>
+          <div className="flex-1" />
 
-              {/* ============ Chart + Assistant ============ */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1.4fr 1fr',
-                gap: '1.125rem',
-                marginBottom: '1.75rem',
-              }}>
-                <Chart3D
-                  data={chartData}
-                  title={skin === 'gold' ? 'التهديدات المكتشفة شهرياً' : 'مستوى الامتثال الشهري'}
-                  skin={skin}
-                />
+          {/* Search */}
+          <div className="hidden md:flex items-center">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="بحث..."
+                className="glass-input pr-10 pl-4 py-2 rounded-xl text-sm w-64"
+              />
+            </div>
+          </div>
 
-                <RasidCard delay={0.3}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                    justifyContent: 'space-between',
-                    minHeight: 280,
-                  }}>
-                    <div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        marginBottom: '1rem',
-                      }}>
-                        <div style={metalIconBox}>
-                          <Activity size={20} style={{ color: 'var(--accent-text)' }} />
-                        </div>
-                        <div>
-                          <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                            مساعد راصد الذكي
-                          </h3>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            متصل الآن
-                          </span>
-                        </div>
+          {/* Notifications */}
+          <button className="relative p-2 rounded-lg hover:bg-white/5 transition">
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 status-breathing" />
+          </button>
+        </header>
+
+        {/* Page Content */}
+        <main className="p-4 lg:p-6 space-y-6 page-transition-enter">
+          {/* Page Title */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-between"
+          >
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {skin === "gold" ? "لوحة تحكم الرصد" : "لوحة تحكم الخصوصية"}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {skin === "gold" ? "Monitoring Dashboard" : "Privacy Dashboard"}
+              </p>
+            </div>
+            <motion.img
+              src={CHARACTERS.armsCrossed}
+              alt="راصد"
+              className="h-16 object-contain character-float hidden sm:block"
+              style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
+            />
+          </motion.div>
+
+          {/* ═══ KPI CARDS ═══ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map((card, idx) => {
+              const Icon = card.icon;
+              return (
+                <PremiumCard key={card.key} delay={idx * 0.08} className="group">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50 pointer-events-none`} />
+                  <div className="relative p-5">
+                    {/* Top: trend + icon */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-xs font-bold ${card.trendUp ? "text-emerald-400" : "text-red-400"}`}>{card.trend}</span>
+                        {card.trendUp ? <TrendingUp className="w-3.5 h-3.5 text-emerald-400" /> : <TrendingDown className="w-3.5 h-3.5 text-red-400" />}
+                        <span className="text-[9px] text-muted-foreground">{card.trendLabel}</span>
                       </div>
-                      <p style={{
-                        fontSize: '0.9375rem',
-                        color: 'var(--text-secondary)',
-                        lineHeight: 1.9,
-                        marginBottom: '1rem',
-                      }}>
-                        {skin === 'gold'
-                          ? 'مرحباً بك في منصة الرصد. تم اكتشاف ٢٤٧ تهديداً نشطاً يتطلب مراجعتك. النظام يعمل بكفاءة ٩٩٪ مع ١٨٤٢ عملية رصد جارية.'
-                          : 'مرحباً بك في منصة الخصوصية. نسبة الامتثال الحالية ٨٧٪. يوجد ١٥ موافقة معلقة و٢٨ تقييم أثر يحتاج مراجعتك.'
-                        }
-                      </p>
+                      <motion.div
+                        className={`w-11 h-11 rounded-xl ${card.iconBg} flex items-center justify-center`}
+                        style={{ boxShadow: `0 0 16px ${card.glowColor}` }}
+                        whileHover={{ rotate: -8, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Icon className={`w-5 h-5 ${card.iconColor}`} />
+                      </motion.div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', gap: '0.625rem' }}>
-                        <RasidButton variant="primary">
-                          <Activity size={14} />
-                          عرض التفاصيل
-                        </RasidButton>
-                        <RasidButton variant="ghost">
-                          <FileText size={14} />
-                          تقرير
-                        </RasidButton>
-                      </div>
-                      <img
-                        src={skin === 'gold' ? CHARACTERS.sunglasses : CHARACTERS.waving}
-                        alt="مساعد راصد"
-                        style={{ height: 120, objectFit: 'contain', opacity: 0.85 }}
-                      />
+
+                    {/* Value */}
+                    <div className="kpi-number premium-stat-enter">
+                      {(card as any).displayValue ? String((card as any).displayValue) : <AnimatedNumber value={card.value} />}
                     </div>
+
+                    {/* Label */}
+                    <p className="text-xs text-muted-foreground mb-0.5">{card.label}</p>
+                    <p className="text-[9px] text-muted-foreground/60">{card.labelEn}</p>
+
+                    {/* Sparkline */}
+                    <div className="mt-3">
+                      <MiniSparkline data={card.sparkData} color={card.sparkColor} />
+                    </div>
+
+                    {/* Click hint */}
+                    <p className="text-[9px] text-[var(--skin-text)]/40 mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      <Eye className="w-3 h-3" /> اضغط لعرض التفاصيل
+                    </p>
                   </div>
-                </RasidCard>
-              </div>
+                </PremiumCard>
+              );
+            })}
+          </div>
 
-              {/* ============ Table ============ */}
-              <div style={{ marginBottom: '1.75rem' }}>
-                <RasidTable
-                  columns={tableColumns}
-                  data={tableData}
-                  title={skin === 'gold' ? 'آخر التهديدات المكتشفة' : 'سياسات الخصوصية'}
-                />
-              </div>
-
-              {/* ============ Buttons & Inputs Row ============ */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1.125rem',
-                marginBottom: '1.75rem',
-              }}>
-                {/* Buttons Card */}
-                <RasidCard delay={0.35}>
-                  <h3 style={sectionTitle}>
-                    <span style={accentBar} />
-                    الأزرار والإجراءات
-                  </h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    <RasidButton variant="primary">
-                      <Shield size={14} />
-                      زر رئيسي
-                    </RasidButton>
-                    <RasidButton variant="accent">
-                      <Zap size={14} />
-                      زر مميز
-                    </RasidButton>
-                    <RasidButton variant="ghost">
-                      <Globe size={14} />
-                      زر شفاف
-                    </RasidButton>
-                    <RasidButton variant="primary">
-                      <Search size={14} />
-                      بحث متقدم
-                    </RasidButton>
-                    <RasidButton variant="accent">
-                      <Bell size={14} />
-                      إرسال تنبيه
-                    </RasidButton>
-                    <RasidButton variant="ghost">
-                      <FileText size={14} />
-                      تصدير PDF
-                    </RasidButton>
-                  </div>
-                </RasidCard>
-
-                {/* Inputs Card */}
-                <RasidCard delay={0.4}>
-                  <h3 style={sectionTitle}>
-                    <span style={accentBar} />
-                    حقول الإدخال
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <RasidInput label="اسم المستخدم" placeholder="أدخل اسم المستخدم..." />
-                    <RasidInput label="البريد الإلكتروني" placeholder="admin@rasid.sa" type="email" />
-                    <RasidInput label="كلمة البحث" placeholder="ابحث في التهديدات..." />
-                  </div>
-                </RasidCard>
-              </div>
-
-              {/* ============ Footer ============ */}
-              <div style={{
-                textAlign: 'center',
-                padding: '1.75rem 0 1rem',
-                borderTop: '2px solid rgba(100,120,160,.10)',
-                color: 'var(--text-muted)',
-                fontSize: '0.75rem',
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.75rem',
-                  marginBottom: '0.5rem',
-                }}>
-                  <img src={LOGOS.calligraphyLight} alt="راصد" style={{ height: 20, opacity: 0.25 }} />
-                  <span>منصة راصد — مكتب إدارة البيانات الوطنية</span>
+          {/* ═══ SECOND ROW: Status + Chart ═══ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Status Cards */}
+            <PremiumCard delay={0.35}>
+              <div className="p-5">
+                <SectionHeader icon={Activity} title="حالة الحوادث" subtitle="Incident Status" />
+                <div className="grid grid-cols-2 gap-3">
+                  {statusCards.map((sc) => {
+                    const SIcon = sc.icon;
+                    return (
+                      <motion.div
+                        key={sc.label}
+                        className={`p-4 rounded-xl ${sc.bg} border border-transparent hover:border-white/10 transition-all`}
+                        style={{ boxShadow: `0 0 12px ${sc.glow}` }}
+                        whileHover={{ scale: 1.03, y: -2 }}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <motion.div whileHover={{ rotate: -10 }}>
+                            <SIcon className={`w-4.5 h-4.5 ${sc.color}`} />
+                          </motion.div>
+                          <span className="text-[11px] text-muted-foreground font-medium">{sc.label}</span>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground"><AnimatedNumber value={sc.value} /></p>
+                        <p className="text-[9px] text-muted-foreground/60 mt-0.5">{sc.labelEn}</p>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-                <span style={{ opacity: 0.5 }}>
-                  Rasid Lux Ultra Premium — جميع الحقوق محفوظة ٢٠٢٦
-                </span>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </PremiumCard>
+
+            {/* Bar Chart */}
+            <PremiumCard delay={0.4}>
+              <div className="p-5">
+                <SectionHeader icon={BarChart3} title="التسريبات الشهرية" subtitle="Monthly Leaks" />
+                <BarChart data={monthlyData} skin={skin} />
+              </div>
+            </PremiumCard>
+          </div>
+
+          {/* ═══ THIRD ROW: Table ═══ */}
+          <PremiumCard delay={0.5}>
+            <div className="p-5">
+              <SectionHeader
+                icon={skin === "gold" ? Database : FileText}
+                title={skin === "gold" ? "آخر التسريبات المكتشفة" : "آخر سجلات المعالجة"}
+                subtitle={skin === "gold" ? "Latest Detected Leaks" : "Latest Processing Records"}
+                action="عرض الكل"
+              />
+              <div className="overflow-x-auto rounded-xl">
+                <table className="glass-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>المصدر</th>
+                      <th>النوع</th>
+                      <th>الخطورة</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableData.map((row) => (
+                      <tr key={row.id}>
+                        <td className="font-mono text-[var(--skin-text)]">{row.id}</td>
+                        <td>{row.source}</td>
+                        <td>{row.type}</td>
+                        <td><SeverityBadge severity={row.severity} /></td>
+                        <td>
+                          <span className="text-xs font-medium">{row.status}</span>
+                        </td>
+                        <td className="font-mono text-xs">{row.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </PremiumCard>
+
+          {/* ═══ FOURTH ROW: Buttons + Inputs Demo ═══ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <PremiumCard delay={0.6}>
+              <div className="p-5">
+                <SectionHeader icon={Activity} title="الأزرار" subtitle="Buttons" />
+                <div className="flex flex-wrap gap-3">
+                  <button className="glass-btn-primary hover-shine">زر رئيسي</button>
+                  <button className="glass-btn-secondary">زر ثانوي</button>
+                  <button className="glass-btn-primary hover-shine flex items-center gap-2">
+                    <Search className="w-4 h-4" />
+                    بحث متقدم
+                  </button>
+                  <button className="glass-btn-secondary flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    تصدير التقرير
+                  </button>
+                </div>
+              </div>
+            </PremiumCard>
+
+            <PremiumCard delay={0.65}>
+              <div className="p-5">
+                <SectionHeader icon={Search} title="حقول الإدخال" subtitle="Input Fields" />
+                <div className="space-y-3">
+                  <input type="text" placeholder="البحث عن تسريب..." className="glass-input w-full px-4 py-2.5 rounded-xl text-sm" />
+                  <input type="text" placeholder="البريد الإلكتروني..." className="glass-input w-full px-4 py-2.5 rounded-xl text-sm" />
+                  <div className="flex gap-3">
+                    <input type="text" placeholder="من تاريخ..." className="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" />
+                    <input type="text" placeholder="إلى تاريخ..." className="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm" />
+                  </div>
+                </div>
+              </div>
+            </PremiumCard>
+          </div>
+
+          {/* ═══ Assistant Card ═══ */}
+          <PremiumCard delay={0.7}>
+            <div className="p-5 flex items-center gap-4">
+              <motion.img
+                src={CHARACTERS.waving}
+                alt="مساعد راصد"
+                className="h-20 object-contain character-breathe"
+                style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
+              />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-foreground mb-1">مساعد راصد الذكي</h3>
+                <p className="text-sm text-muted-foreground">
+                  {skin === "gold"
+                    ? "مرحباً! أنا مساعد راصد الذكي. أراقب التهديدات والتسريبات على مدار الساعة وأنبهك فوراً عند اكتشاف أي نشاط مشبوه."
+                    : "مرحباً! أنا مساعد راصد للخصوصية. أساعدك في إدارة سياسات الخصوصية والامتثال لنظام حماية البيانات الشخصية."
+                  }
+                </p>
+              </div>
+              <button className="glass-btn-primary hover-shine text-sm">
+                تحدث مع راصد
+              </button>
+            </div>
+          </PremiumCard>
+
         </main>
       </div>
     </div>
