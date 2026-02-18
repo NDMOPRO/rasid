@@ -10,12 +10,14 @@ const RASID_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/sessi
 const RASID_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png"; // Navy+Gold for light bg
 
 interface AnimatedLogoProps {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | number;
   showOrbits?: boolean;
+  showText?: boolean;
+  variant?: string;
   className?: string;
 }
 
-export default function AnimatedLogo({ size = "md", showOrbits = true, className = "" }: AnimatedLogoProps) {
+export default function AnimatedLogo({ size = "md", showOrbits = true, showText, variant, className = "" }: AnimatedLogoProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -26,7 +28,10 @@ export default function AnimatedLogo({ size = "md", showOrbits = true, className
     xl: { logo: 140, container: 180, orbit1: 80, orbit2: 100 },
   };
 
-  const s = sizeMap[size];
+  // If size is a number, calculate proportional dimensions
+  const s = typeof size === "number"
+    ? { logo: size, container: Math.round(size * 1.35), orbit1: Math.round(size * 0.6), orbit2: Math.round(size * 0.76) }
+    : sizeMap[size];
   const logoSrc = isDark ? RASID_LOGO_DARK : RASID_LOGO_LIGHT;
 
   const C = {
