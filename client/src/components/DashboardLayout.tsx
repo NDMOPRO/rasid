@@ -64,6 +64,15 @@ import {
   Palette,
   Menu as MenuLucide,
   Home,
+  Eye,
+  Clipboard,
+  QrCode,
+  FolderOpen,
+  Import,
+  History,
+  Wrench,
+  PanelTop,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -78,6 +87,7 @@ import CinematicMode, { CinematicButton } from "@/components/CinematicMode";
 import WorkspaceSwitcher, {
   type WorkspaceId,
   getWorkspaceForRoute,
+  getActiveMainWorkspace,
 } from "./WorkspaceSwitcher";
 
 /* SDAIA Official FULL Logo URLs (with "منصة راصد" + "مكتب إدارة البيانات الوطنية") */
@@ -112,230 +122,338 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   // ═══════════════════════════════════════════════════════════
-  // WORKSPACE: الخصوصية (Privacy)
+  // القسم المشترك (ثابت في المنصتين)
   // ═══════════════════════════════════════════════════════════
   {
-    id: "privacy_home",
-    label: "قيادي",
-    labelEn: "Command",
-    icon: LayoutDashboard,
-    workspace: "privacy",
+    id: "shared_main",
+    label: "الرئيسية",
+    labelEn: "Home",
+    icon: Home,
+    workspace: "shared",
     items: [
-      { label: "لوحة القيادة", labelEn: "Dashboard", icon: LayoutDashboard, path: "/" },
+      { label: "الرئيسية", labelEn: "Home", icon: Home, path: "/" },
     ],
   },
-
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE 1: الرصد والتحليلات (Leaks & Analytics)
-  // ═══════════════════════════════════════════════════════════
   {
-    id: "home",
-    label: "البداية",
-    labelEn: "Home",
-    icon: LayoutDashboard,
-    workspace: "leaks",
+    id: "shared_my_dashboard",
+    label: "لوحتي",
+    labelEn: "My Dashboard",
+    icon: PanelTop,
+    workspace: "shared",
+    items: [
+      { label: "لوحتي", labelEn: "My Dashboard", icon: PanelTop, path: "/my-custom-dashboard" },
+    ],
+  },
+  {
+    id: "shared_followups",
+    label: "المتابعات",
+    labelEn: "Follow-ups",
+    icon: ClipboardList,
+    workspace: "shared",
+    items: [
+      { label: "المتابعات", labelEn: "Follow-ups", icon: ClipboardList, path: "/cases" },
+    ],
+  },
+  {
+    id: "shared_reports",
+    label: "التقارير",
+    labelEn: "Reports",
+    icon: BarChart3,
+    workspace: "shared",
+    items: [
+      { label: "التقارير", labelEn: "Reports", icon: BarChart3, path: "/reports" },
+    ],
+  },
+  {
+    id: "shared_smart_rasid",
+    label: "راصد الذكي",
+    labelEn: "Smart Rasid",
+    icon: Bot,
+    workspace: "shared",
     items: [
       { label: "راصد الذكي", labelEn: "Smart Rasid AI", icon: Bot, path: "/smart-rasid" },
     ],
   },
   {
-    id: "atlas",
-    label: "الأطلس",
-    labelEn: "Atlas",
-    icon: Network,
-    workspace: "leaks",
+    id: "shared_verification",
+    label: "التوثيق والتحقق (QR)",
+    labelEn: "Verification & QR",
+    icon: QrCode,
+    workspace: "shared",
     items: [
-      { label: "النظرة الوطنية", labelEn: "National Overview", icon: LayoutDashboard, path: "/national-overview" },
-      { label: "تشريح حالات الرصد", labelEn: "Leak Anatomy", icon: ScanSearch, path: "/leak-anatomy" },
-      { label: "القطاعات المتضررة", labelEn: "Affected Sectors", icon: Network, path: "/sector-analysis" },
-      { label: "الخط الزمني", labelEn: "Timeline", icon: CalendarClock, path: "/leak-timeline" },
+      { label: "التحقق من الوثائق", labelEn: "Verify Document", icon: FileCheck, path: "/verify" },
+      { label: "سجل التوثيقات", labelEn: "Documents Registry", icon: ScrollText, path: "/documents-registry" },
+      { label: "إحصائيات التوثيق", labelEn: "Document Stats", icon: FileBarChart, path: "/document-stats" },
     ],
   },
   {
-    id: "advanced_analysis",
-    label: "التحليل المتقدم",
-    labelEn: "Advanced Analysis",
+    id: "shared_admin",
+    label: "الإدارة",
+    labelEn: "Administration",
+    icon: Crown,
+    workspace: "shared",
+    items: [
+      { label: "نظرة عامة", labelEn: "Admin Overview", icon: Crown, path: "/admin", requiresAuth: true, rootAdminOnly: true },
+      { label: "الأدوار والصلاحيات", labelEn: "Roles", icon: Shield, path: "/admin/roles", requiresAuth: true, rootAdminOnly: true },
+      { label: "المجموعات", labelEn: "Groups", icon: Layers, path: "/admin/groups", requiresAuth: true, rootAdminOnly: true },
+      { label: "مفاتيح الميزات", labelEn: "Features", icon: ToggleLeft, path: "/admin/feature-flags", requiresAuth: true, rootAdminOnly: true },
+      { label: "إعدادات المظهر", labelEn: "Theme", icon: Palette, path: "/admin/theme", requiresAuth: true, rootAdminOnly: true },
+      { label: "إدارة القوائم", labelEn: "Menus", icon: MenuLucide, path: "/admin/menus", requiresAuth: true, rootAdminOnly: true },
+      { label: "سجل تدقيق الإدارة", labelEn: "Audit Log", icon: ScrollText, path: "/admin/audit-log", requiresAuth: true, rootAdminOnly: true },
+      { label: "إدارة المستخدمين", labelEn: "Users", icon: Users, path: "/user-management", requiresAuth: true, minRole: "admin" },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════
+  // WORKSPACE: الخصوصية (Privacy)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "privacy_dashboard",
+    label: "لوحة الخصوصية",
+    labelEn: "Privacy Dashboard",
+    icon: Shield,
+    workspace: "privacy",
+    items: [
+      { label: "لوحة الخصوصية", labelEn: "Privacy Dashboard", icon: Shield, path: "/leadership" },
+    ],
+  },
+  {
+    id: "privacy_sites",
+    label: "المواقع",
+    labelEn: "Sites",
+    icon: Globe,
+    workspace: "privacy",
+    items: [
+      { label: "المواقع", labelEn: "Sites", icon: Globe, path: "/sites" },
+      { label: "رصد التغييرات", labelEn: "Change Detection", icon: Eye, path: "/change-detection" },
+    ],
+  },
+  {
+    id: "privacy_clauses",
+    label: "البنود الثمانية (المادة 12)",
+    labelEn: "8 Clauses (Article 12)",
+    icon: FileText,
+    workspace: "privacy",
+    items: [
+      { label: "البنود الثمانية", labelEn: "8 Clauses", icon: FileText, path: "/clauses" },
+    ],
+  },
+  {
+    id: "privacy_scan",
+    label: "الاستيراد والفحص",
+    labelEn: "Import & Scan",
+    icon: ScanSearch,
+    workspace: "privacy",
+    items: [
+      { label: "الفحص", labelEn: "Scan", icon: ScanSearch, path: "/scan" },
+      { label: "الفحص الجماعي", labelEn: "Batch Scan", icon: Import, path: "/batch-scan" },
+      { label: "الفحص المتقدم", labelEn: "Advanced Scan", icon: Scan, path: "/advanced-scan" },
+      { label: "الفحص العميق", labelEn: "Deep Scan", icon: Radar, path: "/deep-scan" },
+      { label: "الفحص المباشر", labelEn: "Live Scan", icon: Radio, path: "/live-scan" },
+      { label: "مكتبة الفحوصات", labelEn: "Scan Library", icon: FolderOpen, path: "/scan-library" },
+      { label: "جدولة الفحوصات", labelEn: "Scan Schedules", icon: CalendarClock, path: "/scan-schedules" },
+    ],
+  },
+  {
+    id: "privacy_history",
+    label: "السجل",
+    labelEn: "History",
+    icon: History,
+    workspace: "privacy",
+    items: [
+      { label: "سجل الفحوصات", labelEn: "Scan History", icon: History, path: "/scan-history" },
+    ],
+  },
+  {
+    id: "privacy_analytics",
+    label: "التحليلات والمقارنات",
+    labelEn: "Analytics & Comparisons",
     icon: BarChart3,
+    workspace: "privacy",
+    items: [
+      { label: "مقارنة الامتثال", labelEn: "Compliance Comparison", icon: Link2, path: "/compliance-comparison" },
+      { label: "خريطة الامتثال", labelEn: "Compliance Heatmap", icon: Map, path: "/compliance-heatmap" },
+      { label: "التحليلات المتقدمة", labelEn: "Advanced Analytics", icon: BarChart3, path: "/advanced-analytics" },
+      { label: "لوحة المؤشرات", labelEn: "KPI Dashboard", icon: Activity, path: "/kpi-dashboard" },
+      { label: "المقارنة الزمنية", labelEn: "Time Comparison", icon: CalendarClock, path: "/time-comparison" },
+      { label: "مقارنة القطاعات", labelEn: "Sector Comparison", icon: Layers, path: "/sector-comparison" },
+      { label: "المقارنة التفاعلية", labelEn: "Interactive Compare", icon: Link2, path: "/interactive-comparison" },
+      { label: "تغطية الاستراتيجية", labelEn: "Strategy Coverage", icon: Shield, path: "/strategy-coverage" },
+      { label: "اللوحة الحية", labelEn: "Real-time", icon: Radio, path: "/real-time" },
+    ],
+  },
+  {
+    id: "privacy_reports",
+    label: "التقارير المتخصصة",
+    labelEn: "Specialized Reports",
+    icon: FileBarChart,
+    workspace: "privacy",
+    items: [
+      { label: "التقارير المخصصة", labelEn: "Custom Reports", icon: FileBarChart, path: "/custom-reports" },
+      { label: "التقارير المجدولة", labelEn: "Scheduled Reports", icon: CalendarClock, path: "/scheduled-reports" },
+      { label: "تقارير PDF", labelEn: "PDF Reports", icon: FileText, path: "/pdf-reports" },
+      { label: "التقرير التنفيذي", labelEn: "Executive Report", icon: LayoutDashboard, path: "/executive-report" },
+      { label: "الخطابات", labelEn: "Letters", icon: Send, path: "/letters" },
+    ],
+  },
+  {
+    id: "privacy_tools",
+    label: "أدوات إضافية",
+    labelEn: "Additional Tools",
+    icon: Wrench,
+    workspace: "privacy",
+    items: [
+      { label: "متتبع التحسين", labelEn: "Improvement Tracker", icon: CheckCircle2, path: "/improvement-tracker" },
+      { label: "تصدير البيانات", labelEn: "Export Data", icon: Archive, path: "/export-data" },
+      { label: "وضع العرض", labelEn: "Presentation", icon: PanelTop, path: "/presentation" },
+      { label: "منشئ العروض", labelEn: "Presentation Builder", icon: Layers, path: "/presentation-builder" },
+      { label: "التحليل الجماعي", labelEn: "Bulk Analysis", icon: Brain, path: "/bulk-analysis" },
+      { label: "البحث المتقدم", labelEn: "Advanced Search", icon: Search, path: "/advanced-search" },
+      { label: "التنبيهات الذكية", labelEn: "Smart Alerts", icon: Bell, path: "/smart-alerts" },
+      { label: "التنبيهات المرئية", labelEn: "Visual Alerts", icon: Eye, path: "/visual-alerts" },
+      { label: "إشعارات البريد", labelEn: "Email Notifications", icon: Send, path: "/email-notifications" },
+      { label: "إدارة البريد", labelEn: "Email Management", icon: Send, path: "/email-management" },
+      { label: "قوالب الرسائل", labelEn: "Message Templates", icon: FileText, path: "/message-templates" },
+      { label: "قواعد التصعيد", labelEn: "Escalation Rules", icon: ShieldAlert, path: "/escalation" },
+      { label: "التطبيقات", labelEn: "Mobile Apps", icon: Monitor, path: "/mobile-apps" },
+    ],
+  },
+  // ═══════════════════════════════════════════════════════════
+  // WORKSPACE: حالات الرصد (Incidents / Leaks)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "leaks_dashboard",
+    label: "لوحة حالات الرصد",
+    labelEn: "Incidents Dashboard",
+    icon: Eye,
     workspace: "leaks",
     items: [
-      { label: "مصادر البيع", labelEn: "Threat Actors", icon: UserX, path: "/threat-actors-analysis" },
-      { label: "تحليل الأثر", labelEn: "Impact Analysis", icon: ShieldAlert, path: "/impact-assessment" },
-      { label: "المصادر", labelEn: "Sources", icon: Globe, path: "/source-intelligence" },
+      { label: "لوحة حالات الرصد", labelEn: "Incidents Dashboard", icon: Eye, path: "/national-overview" },
+    ],
+  },
+  {
+    id: "leaks_cases",
+    label: "الحالات",
+    labelEn: "Incidents",
+    icon: ShieldAlert,
+    workspace: "leaks",
+    items: [
+      { label: "سجل الحالات", labelEn: "Incidents Log", icon: ShieldAlert, path: "/leaks" },
+      { label: "سجل الحالات المتقدم", labelEn: "Incidents Registry", icon: ScrollText, path: "/incidents-registry" },
+    ],
+  },
+  {
+    id: "leaks_analysis",
+    label: "تحليل الحالات",
+    labelEn: "Incident Analysis",
+    icon: ScanSearch,
+    workspace: "leaks",
+    items: [
+      { label: "تشريح الحالات", labelEn: "Incident Anatomy", icon: ScanSearch, path: "/leak-anatomy" },
+      { label: "القطاعات المتضررة", labelEn: "Sector Analysis", icon: Layers, path: "/sector-analysis" },
+      { label: "الخط الزمني", labelEn: "Timeline", icon: CalendarClock, path: "/leak-timeline" },
+      { label: "تحليل الأثر", labelEn: "Impact Assessment", icon: ShieldAlert, path: "/impact-assessment" },
       { label: "التحليل الجغرافي", labelEn: "Geo Analysis", icon: Map, path: "/geo-analysis" },
     ],
   },
   {
-    id: "reports_compare",
-    label: "التقارير والمقارنة",
-    labelEn: "Reports & Comparison",
-    icon: FileBarChart,
+    id: "leaks_sources",
+    label: "مصادر النشر",
+    labelEn: "Publishing Sources",
+    icon: Globe,
     workspace: "leaks",
     items: [
-      { label: "التقارير التنفيذية", labelEn: "Executive Reports", icon: LayoutDashboard, path: "/executive-brief" },
-      { label: "المقارنة", labelEn: "Comparison", icon: Link2, path: "/incident-compare" },
-      { label: "الحملات", labelEn: "Campaigns", icon: Crosshair, path: "/campaign-tracker" },
+      { label: "المصادر", labelEn: "Source Intelligence", icon: Globe, path: "/source-intelligence" },
+      { label: "مصادر البيع", labelEn: "Threat Actors", icon: UserX, path: "/threat-actors-analysis" },
+      { label: "ملفات المصادر", labelEn: "Seller Profiles", icon: UserX, path: "/seller-profiles" },
     ],
   },
   {
-    id: "records_compliance",
-    label: "السجلات والامتثال",
-    labelEn: "Records & Compliance",
-    icon: ScrollText,
-    workspace: "leaks",
-    items: [
-      { label: "سجل الحوادث", labelEn: "Incidents Registry", icon: ScrollText, path: "/incidents-registry" },
-      { label: "التوصيات", labelEn: "Recommendations", icon: Brain, path: "/recommendations-hub" },
-      { label: "الامتثال PDPL", labelEn: "PDPL Compliance", icon: Shield, path: "/pdpl-compliance" },
-    ],
-  },
-  {
-    id: "analysis",
-    label: "التحليل",
-    labelEn: "Analysis",
-    icon: ScanSearch,
-    workspace: "leaks",
-    items: [
-      { label: "سجل الحوادث", labelEn: "Incident Log", icon: ShieldAlert, path: "/leaks" },
-      { label: "أطلس البيانات الشخصية", labelEn: "PII Atlas", icon: Network, path: "/pii-atlas" },
-      { label: "مختبر الأنماط", labelEn: "Pattern Lab", icon: ScanSearch, path: "/pii-classifier" },
-      { label: "عدسة الأثر والحقوق", labelEn: "Impact & Rights", icon: Link2, path: "/evidence-chain" },
-      { label: "الاتجاهات والمقارنات", labelEn: "Trends & Comparisons", icon: Brain, path: "/feedback-accuracy" },
-      { label: "مركز التقارير", labelEn: "Reports Center", icon: BarChart3, path: "/reports" },
-      { label: "التحقق من المصادقة", labelEn: "Document Verification", icon: FileCheck, path: "/verify" },
-      { label: "المصادقة على التقارير", labelEn: "Report Approval", icon: Stamp, path: "/report-approval" },
-    ],
-  },
-
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE 2: الرصد والمراقبة (Monitoring & Surveillance)
-  // ═══════════════════════════════════════════════════════════
-  {
-    id: "live_monitoring",
+    id: "leaks_monitoring",
     label: "الرصد المباشر",
     labelEn: "Live Monitoring",
-    icon: Scan,
-    workspace: "monitoring",
+    icon: Radar,
+    workspace: "leaks",
     items: [
       { label: "الرصد المباشر", labelEn: "Live Scan", icon: Scan, path: "/live-scan" },
-      { label: "رصد تليجرام", labelEn: "Telegram", icon: Send, path: "/telegram" },
-      { label: "الدارك ويب", labelEn: "Dark Web", icon: Globe, path: "/darkweb" },
+      { label: "رصد المنصات", labelEn: "Telegram", icon: Send, path: "/telegram" },
+      { label: "مواقع النشر", labelEn: "Dark Web", icon: Globe, path: "/darkweb" },
       { label: "مواقع اللصق", labelEn: "Paste Sites", icon: FileText, path: "/paste-sites" },
     ],
   },
   {
-    id: "threat_tools",
-    label: "أدوات التهديدات",
-    labelEn: "Threat Tools",
-    icon: Crosshair,
-    workspace: "monitoring",
+    id: "leaks_tools",
+    label: "أدوات الرصد",
+    labelEn: "Monitoring Tools",
+    icon: Wrench,
+    workspace: "leaks",
     items: [
-      { label: "أدوات OSINT", labelEn: "OSINT Tools", icon: Radar, path: "/osint-tools" },
-      { label: "قواعد صيد التهديدات", labelEn: "Threat Rules", icon: Crosshair, path: "/threat-rules" },
+      { label: "أدوات البحث", labelEn: "OSINT Tools", icon: Radar, path: "/osint-tools" },
+      { label: "قواعد الرصد", labelEn: "Threat Rules", icon: Crosshair, path: "/threat-rules" },
       { label: "رسم المعرفة", labelEn: "Knowledge Graph", icon: Network, path: "/knowledge-graph" },
-      { label: "خريطة التهديدات", labelEn: "Threat Map", icon: Map, path: "/threat-map" },
-      { label: "ملفات البائعين", labelEn: "Seller Profiles", icon: UserX, path: "/seller-profiles" },
-    ],
-  },
-
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE 3: إعدادات المنصة (Platform Settings)
-  // ═══════════════════════════════════════════════════════════
-  {
-    id: "operations",
-    label: "العمليات",
-    labelEn: "Operations",
-    icon: Activity,
-    workspace: "settings",
-    items: [
-      { label: "مهام الرصد", labelEn: "Monitoring Jobs", icon: Radio, path: "/monitoring-jobs", requiresAuth: true, minRole: "admin" },
-      { label: "قنوات التنبيه", labelEn: "Alert Channels", icon: Bell, path: "/alert-channels", requiresAuth: true, minRole: "admin" },
-      { label: "التقارير المجدولة", labelEn: "Scheduled Reports", icon: CalendarClock, path: "/scheduled-reports", requiresAuth: true, minRole: "admin" },
+      { label: "خريطة الرصد", labelEn: "Threat Map", icon: Map, path: "/threat-map" },
     ],
   },
   {
-    id: "admin",
-    label: "الإدارة",
-    labelEn: "Administration",
-    icon: Shield,
-    workspace: "settings",
+    id: "leaks_compliance",
+    label: "الامتثال والتقارير",
+    labelEn: "Compliance & Reports",
+    icon: FileBarChart,
+    workspace: "leaks",
     items: [
-      { label: "مفاتيح API", labelEn: "API Keys", icon: KeyRound, path: "/api-keys", requiresAuth: true, minRole: "admin" },
-      { label: "الاحتفاظ بالبيانات", labelEn: "Data Retention", icon: Archive, path: "/data-retention", requiresAuth: true, minRole: "admin" },
-      { label: "سجل التدقيق", labelEn: "Audit Log", icon: ScrollText, path: "/audit-log", requiresAuth: true, minRole: "admin" },
-      { label: "سجل التوثيقات", labelEn: "Documents Registry", icon: FileBarChart, path: "/documents-registry", requiresAuth: true, minRole: "admin" },
+      { label: "التقارير التنفيذية", labelEn: "Executive Brief", icon: LayoutDashboard, path: "/executive-brief" },
+      { label: "المقارنة", labelEn: "Comparison", icon: Link2, path: "/incident-compare" },
+      { label: "الحملات", labelEn: "Campaigns", icon: Crosshair, path: "/campaign-tracker" },
+      { label: "التوصيات", labelEn: "Recommendations", icon: Brain, path: "/recommendations-hub" },
+      { label: "الامتثال PDPL", labelEn: "PDPL Compliance", icon: Shield, path: "/pdpl-compliance" },
+      { label: "المصادقة على التقارير", labelEn: "Report Approval", icon: Stamp, path: "/report-approval" },
     ],
   },
-
+  {
+    id: "leaks_data_analysis",
+    label: "تحليل البيانات",
+    labelEn: "Data Analysis",
+    icon: Brain,
+    workspace: "leaks",
+    items: [
+      { label: "أطلس البيانات الشخصية", labelEn: "PII Atlas", icon: Network, path: "/pii-atlas" },
+      { label: "مختبر الأنماط", labelEn: "Pattern Lab", icon: ScanSearch, path: "/pii-classifier" },
+      { label: "عدسة الأثر والحقوق", labelEn: "Impact & Rights", icon: Link2, path: "/evidence-chain" },
+      { label: "الاتجاهات والمقارنات", labelEn: "Trends", icon: Brain, path: "/feedback-accuracy" },
+    ],
+  },
   // ═══════════════════════════════════════════════════════════
-  // WORKSPACE 4: المستخدمين والتدريب (Users & Training)
+  // WORKSPACE: الإدارة (Admin) — مخفي في القائمة، يظهر فقط عبر المشترك
   // ═══════════════════════════════════════════════════════════
   {
-    id: "user_mgmt",
-    label: "إدارة المستخدمين",
-    labelEn: "User Management",
-    icon: Users,
-    workspace: "users",
-    items: [
-      { label: "إدارة المستخدمين", labelEn: "User Management", icon: Users, path: "/user-management", requiresAuth: true, minRole: "admin" },
-    ],
-  },
-  {
-    id: "ai_control",
-    label: "تحكم راصد الذكي",
-    labelEn: "AI Control",
-    icon: Sparkles,
-    workspace: "users",
-    items: [
-      { label: "قاعدة المعرفة", labelEn: "Knowledge Base", icon: BookOpen, path: "/knowledge-base", requiresAuth: true, rootAdminOnly: true },
-      { label: "سيناريوهات الشخصية", labelEn: "Personality", icon: HeartHandshake, path: "/personality-scenarios", requiresAuth: true, rootAdminOnly: true },
-      { label: "مركز التدريب", labelEn: "Training Center", icon: GraduationCap, path: "/training-center", requiresAuth: true, rootAdminOnly: true },
-    ],
-  },
-
-  // ═══════════════════════════════════════════════════════════
-  // WORKSPACE 5: لوحة التحكم (Admin Dashboard)
-  // ═══════════════════════════════════════════════════════════
-  {
-    id: "admin_overview",
-    label: "النظرة العامة",
-    labelEn: "Overview",
-    icon: Crown,
-    workspace: "admin",
-    items: [
-      { label: "نظرة عامة", labelEn: "Admin Overview", icon: Crown, path: "/admin", requiresAuth: true, rootAdminOnly: true },
-    ],
-  },
-  {
-    id: "admin_access",
-    label: "الوصول والصلاحيات",
-    labelEn: "Access & Permissions",
-    icon: Shield,
-    workspace: "admin",
-    items: [
-      { label: "الأدوار والصلاحيات", labelEn: "Roles & Permissions", icon: Shield, path: "/admin/roles", requiresAuth: true, rootAdminOnly: true },
-      { label: "المجموعات", labelEn: "Groups", icon: Layers, path: "/admin/groups", requiresAuth: true, rootAdminOnly: true },
-    ],
-  },
-  {
-    id: "admin_config",
-    label: "التهيئة",
-    labelEn: "Configuration",
+    id: "admin_system",
+    label: "إدارة النظام",
+    labelEn: "System Admin",
     icon: Settings,
     workspace: "admin",
     items: [
-      { label: "مفاتيح الميزات", labelEn: "Feature Flags", icon: ToggleLeft, path: "/admin/feature-flags", requiresAuth: true, rootAdminOnly: true },
-      { label: "إعدادات المظهر", labelEn: "Theme Settings", icon: Palette, path: "/admin/theme", requiresAuth: true, rootAdminOnly: true },
-      { label: "إدارة القوائم", labelEn: "Menu Management", icon: MenuLucide, path: "/admin/menus", requiresAuth: true, rootAdminOnly: true },
+      { label: "المشرف العام", labelEn: "Super Admin", icon: Crown, path: "/super-admin", requiresAuth: true, rootAdminOnly: true },
+      { label: "لوحة الإدارة", labelEn: "Admin Panel", icon: Settings, path: "/admin-panel", requiresAuth: true, rootAdminOnly: true },
+      { label: "صحة النظام", labelEn: "System Health", icon: Activity, path: "/system-health", requiresAuth: true, rootAdminOnly: true },
+      { label: "مفاتيح API", labelEn: "API Keys", icon: KeyRound, path: "/api-keys", requiresAuth: true, minRole: "admin" },
+      { label: "الاحتفاظ بالبيانات", labelEn: "Data Retention", icon: Archive, path: "/data-retention", requiresAuth: true, minRole: "admin" },
+      { label: "سجل التدقيق", labelEn: "Audit Log", icon: ScrollText, path: "/audit-log", requiresAuth: true, minRole: "admin" },
+      { label: "مهام الرصد", labelEn: "Monitoring Jobs", icon: Radio, path: "/monitoring-jobs", requiresAuth: true, minRole: "admin" },
+      { label: "قنوات التنبيه", labelEn: "Alert Channels", icon: Bell, path: "/alert-channels", requiresAuth: true, minRole: "admin" },
+      { label: "تحليلات الاستخدام", labelEn: "Usage Analytics", icon: BarChart3, path: "/usage-analytics", requiresAuth: true, rootAdminOnly: true },
     ],
   },
   {
-    id: "admin_audit",
-    label: "التدقيق",
-    labelEn: "Audit",
-    icon: ScrollText,
+    id: "admin_ai",
+    label: "تحكم راصد الذكي",
+    labelEn: "AI Control",
+    icon: Sparkles,
     workspace: "admin",
     items: [
-      { label: "سجل تدقيق الإدارة", labelEn: "Admin Audit Log", icon: ScrollText, path: "/admin/audit-log", requiresAuth: true, rootAdminOnly: true },
+      { label: "إدارة السيناريوهات", labelEn: "Scenarios", icon: Sparkles, path: "/scenario-management", requiresAuth: true, rootAdminOnly: true },
+      { label: "إدارة الذكاء الاصطناعي", labelEn: "AI Management", icon: Bot, path: "/ai-management", requiresAuth: true, rootAdminOnly: true },
+      { label: "قاعدة المعرفة", labelEn: "Knowledge Base", icon: BookOpen, path: "/knowledge-base", requiresAuth: true, rootAdminOnly: true },
+      { label: "سيناريوهات الشخصية", labelEn: "Personality", icon: HeartHandshake, path: "/personality-scenarios", requiresAuth: true, rootAdminOnly: true },
+      { label: "مركز التدريب", labelEn: "Training Center", icon: GraduationCap, path: "/training-center", requiresAuth: true, rootAdminOnly: true },
     ],
   },
 ];
@@ -392,9 +510,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Active workspace from current route
   const activeWorkspace = getWorkspaceForRoute(location);
+  // Determine the active "switchable" workspace (privacy or leaks)
+  const activeMainWs = getActiveMainWorkspace(location);
 
-  // Filter nav groups by active workspace
-  const workspaceGroups = navGroups.filter((g) => g.workspace === activeWorkspace);
+  // Filter nav groups: show shared + active main workspace + admin (if on admin page)
+  const workspaceGroups = navGroups.filter((g) => {
+    if (g.workspace === "shared") return true;
+    if (g.workspace === activeMainWs) return true;
+    if (g.workspace === "admin" && activeWorkspace === "admin") return true;
+    return false;
+  });
 
   // Determine which group is active based on current location
   const activeGroupId = workspaceGroups.find((g) =>
