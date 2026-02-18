@@ -189,7 +189,7 @@ export function PlatformSettingsProvider({ children }: { children: React.ReactNo
   // Build lookup maps
   const settingsMap = useMemo(() => {
     const map: Record<string, PlatformSetting> = {};
-    if (configData?.settings) {
+    if (configData?.settings && Array.isArray(configData.settings)) {
       (configData.settings as any[]).forEach((s) => {
         map[s.settingKey] = s;
       });
@@ -199,7 +199,7 @@ export function PlatformSettingsProvider({ children }: { children: React.ReactNo
 
   const themesMap = useMemo(() => {
     const map: Record<string, ThemeSetting> = {};
-    if (configData?.themes) {
+    if (configData?.themes && Array.isArray(configData.themes)) {
       (configData.themes as any[]).forEach((t) => {
         map[t.themeKey] = t;
       });
@@ -209,7 +209,7 @@ export function PlatformSettingsProvider({ children }: { children: React.ReactNo
 
   const contentMap = useMemo(() => {
     const map: Record<string, ContentBlock> = {};
-    if (configData?.content) {
+    if (configData?.content && Array.isArray(configData.content)) {
       (configData.content as any[]).forEach((c) => {
         map[c.blockKey] = c;
       });
