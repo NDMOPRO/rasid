@@ -122,6 +122,15 @@ export const routeWorkspaceMap: Record<string, WorkspaceId> = {
   "/threat-map": "monitoring",
   "/seller-profiles": "monitoring",
 
+  // ═══ Rasid Platform Routes ═══
+  "/properties": "leaks",
+  "/contracts": "leaks",
+  "/team": "leaks",
+  "/financials": "leaks",
+  "/mensun-ai": "leaks",
+  "/owner-dashboard": "leaks",
+  "/auth": "leaks",
+
   // ═══ Workspace 3: إعدادات المنصة ═══
   "/monitoring-jobs": "settings",
   "/alert-channels": "settings",
@@ -154,6 +163,8 @@ export function getWorkspaceForRoute(path: string): WorkspaceId {
   // Dynamic routes
   if (path.startsWith("/incident/")) return "leaks";
   if (path.startsWith("/verify/")) return "leaks";
+  if (path.startsWith("/properties/")) return "leaks";
+  if (path.startsWith("/contracts/")) return "leaks";
   if (path.startsWith("/admin")) return "admin";
   // Default
   return "leaks";

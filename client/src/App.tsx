@@ -119,6 +119,17 @@ const ExecutiveBrief = lazy(() => import("./pages/ExecutiveBrief"));
 const IncidentsRegistry = lazy(() => import("./pages/IncidentsRegistry"));
 const PlatformLogin = lazy(() => import("./pages/PlatformLogin"));
 
+// Pages from rasid-platform
+const Auth = lazy(() => import("./pages/Auth"));
+const Properties = lazy(() => import("./pages/Properties"));
+const PropertyDetail = lazy(() => import("./pages/PropertyDetail"));
+const Contracts = lazy(() => import("./pages/Contracts"));
+const ContractDetail = lazy(() => import("./pages/ContractDetail"));
+const Team = lazy(() => import("./pages/Team"));
+const Financials = lazy(() => import("./pages/Financials"));
+const MensunAI = lazy(() => import("./pages/MensunAI"));
+const OwnerDashboard = lazy(() => import("./pages/OwnerDashboard"));
+
 function Router() {
   return (
     <DashboardLayout>
@@ -225,6 +236,16 @@ function Router() {
           <Route path="/recommendations" component={RecommendationsHub} />
           <Route path="/executive-brief" component={ExecutiveBrief} />
           <Route path="/incidents-registry" component={IncidentsRegistry} />
+          {/* Rasid Platform Routes */}
+          <Route path="/properties" component={Properties} />
+          <Route path="/properties/:id" component={PropertyDetail} />
+          <Route path="/contracts" component={Contracts} />
+          <Route path="/contracts/:id" component={ContractDetail} />
+          <Route path="/team" component={Team} />
+          <Route path="/financials" component={Financials} />
+          <Route path="/mensun-ai" component={MensunAI} />
+          <Route path="/owner-dashboard" component={OwnerDashboard} />
+          <Route path="/auth" component={Auth} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
