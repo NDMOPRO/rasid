@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
 interface Column {
@@ -8,7 +9,7 @@ interface Column {
 
 interface RasidTableProps {
   columns: Column[];
-  data: Record<string, any>[];
+  data: Record<string, ReactNode>[];
   title?: string;
 }
 
@@ -17,35 +18,52 @@ export default function RasidTable({ columns, data, title }: RasidTableProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.45, delay: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
     >
       {title && (
-        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
+        <h3 style={{
+          fontSize: '1rem',
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          marginBottom: '0.875rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+        }}>
+          <span style={{
+            width: 4,
+            height: 18,
+            borderRadius: 2,
+            background: 'var(--accent-color)',
+            display: 'inline-block',
+          }} />
           {title}
         </h3>
       )}
-      <table className="rasid-table">
-        <thead>
-          <tr>
-            {columns.map(col => (
-              <th key={col.key} style={{ textAlign: col.align || 'right' }}>
-                {col.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, i) => (
-            <tr key={i}>
+      <div className="lux-table-wrap">
+        <table className="lux-table">
+          <thead>
+            <tr>
               {columns.map(col => (
-                <td key={col.key} style={{ textAlign: col.align || 'right' }}>
-                  {row[col.key]}
-                </td>
+                <th key={col.key} style={{ textAlign: col.align || 'right' }}>
+                  {col.label}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((row, i) => (
+              <tr key={i}>
+                {columns.map(col => (
+                  <td key={col.key} style={{ textAlign: col.align || 'right' }}>
+                    {row[col.key]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </motion.div>
   );
 }

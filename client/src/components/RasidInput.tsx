@@ -13,16 +13,17 @@ export default function RasidInput({ placeholder, value, onChange, type = 'text'
       {label && (
         <label style={{
           display: 'block',
-          fontSize: '0.8125rem',
-          fontWeight: 500,
+          fontSize: '0.75rem',
+          fontWeight: 600,
           color: 'var(--text-secondary)',
-          marginBottom: '0.375rem'
+          marginBottom: '0.375rem',
+          letterSpacing: '0.02em',
         }}>
           {label}
         </label>
       )}
       <input
-        className="rasid-input"
+        className="lux-input"
         type={type}
         placeholder={placeholder}
         value={value}

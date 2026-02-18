@@ -14,7 +14,7 @@ export default function WorkspaceSwitcher({ skin, onSwitch }: WorkspaceSwitcherP
         onClick={() => onSwitch('gold')}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-          <Eye size={16} />
+          <Eye size={15} />
           الرصد
         </span>
       </button>
@@ -23,7 +23,7 @@ export default function WorkspaceSwitcher({ skin, onSwitch }: WorkspaceSwitcherP
         onClick={() => onSwitch('silver')}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-          <Shield size={16} />
+          <Shield size={15} />
           الخصوصية
         </span>
       </button>

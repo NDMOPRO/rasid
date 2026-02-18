@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSkin } from '@/hooks/useSkin';
+import { useSkin, Skin } from '@/hooks/useSkin';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import KPICard from '@/components/KPICard';
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 /* ============================================================
-   DATA — Gold (الرصد) & Silver (الخصوصية)
+   DATA
    ============================================================ */
 
 const goldChartData = [
@@ -75,6 +75,43 @@ const silverTableData = [
   { id: '٥', policy: 'سياسة إخفاء الهوية', category: 'خصوصية', compliance: <StatusBadge status="active" label="ممتثل" />, status: <StatusBadge status="active" label="نشط" />, lastAudit: '٢٠٢٦/٠٢/٠٨' },
 ];
 
+/* Metallic icon box style — 3D beveled */
+const metalIconBox = {
+  width: 48,
+  height: 48,
+  borderRadius: 14,
+  background: 'linear-gradient(170deg, rgba(55,72,108,.85), rgba(38,52,82,.92))' as const,
+  borderWidth: 3,
+  borderStyle: 'solid' as const,
+  borderColor: 'var(--accent-border)',
+  borderTopColor: 'rgba(160,185,235,.42)',
+  borderBottomColor: 'rgba(10,16,32,.60)',
+  display: 'flex' as const,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  color: 'var(--accent-text)',
+  boxShadow: '0 4px 10px rgba(0,0,0,.40), inset 0 2px 0 rgba(180,200,240,.25), inset 0 -2px 0 rgba(3,6,15,.55), inset 2px 0 0 rgba(160,185,230,.15), inset -2px 0 0 rgba(3,6,15,.40)',
+};
+
+/* Section title bar style */
+const sectionTitle = {
+  fontSize: '1rem' as const,
+  fontWeight: 700 as const,
+  color: 'var(--text-primary)',
+  marginBottom: '1.125rem',
+  display: 'flex' as const,
+  alignItems: 'center' as const,
+  gap: '0.5rem',
+};
+
+const accentBar = {
+  width: 4,
+  height: 18,
+  borderRadius: 2,
+  background: 'var(--accent-color)',
+  display: 'inline-block' as const,
+};
+
 /* ============================================================
    HOME PAGE
    ============================================================ */
@@ -112,7 +149,7 @@ export default function Home() {
   const tableData = skin === 'gold' ? goldTableData : silverTableData;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--surface-0)' }}>
+    <div style={{ display: 'flex', height: '100dvh' }}>
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -123,8 +160,8 @@ export default function Home() {
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden"
             style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)',
-              zIndex: 39, display: 'none',
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
+              zIndex: 39,
             }}
           />
         )}
@@ -141,8 +178,10 @@ export default function Home() {
         marginRight: sidebarOpen ? 260 : 0,
         display: 'flex',
         flexDirection: 'column',
-        transition: 'margin var(--transition-default)',
         minWidth: 0,
+        minHeight: 0,
+        height: '100dvh',
+        transition: 'margin-right 220ms cubic-bezier(.22,.61,.36,1)',
       }}>
         <TopBar
           skin={skin}
@@ -151,61 +190,66 @@ export default function Home() {
           sidebarOpen={sidebarOpen}
         />
 
-        <main style={{
-          flex: 1,
-          padding: '1.5rem 2rem',
+        <main className="page-bg" style={{
+          flex: '1 1 0%',
+          padding: '1.75rem 2rem',
           overflowY: 'auto',
           overflowX: 'hidden',
+          minHeight: 0,
         }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={skin}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
             >
-              {/* Page Header */}
+              {/* ============ Page Header ============ */}
               <div style={{
                 display: 'flex',
                 alignItems: 'flex-start',
                 justifyContent: 'space-between',
-                marginBottom: '1.75rem',
+                marginBottom: '2rem',
               }}>
                 <div>
+                  {/* Status badge — metallic pill */}
                   <div style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    padding: '0.25rem 0.75rem',
+                    padding: '0.3rem 0.875rem',
                     borderRadius: '9999px',
-                    background: 'var(--accent-glow)',
-                    border: '1px solid var(--accent-border)',
-                    marginBottom: '0.75rem',
+                    background: 'linear-gradient(165deg, rgba(50,65,100,.70), rgba(35,48,78,.80))',
+                    border: '2px solid rgba(100,120,160,.18)',
+                    borderTopColor: 'rgba(140,165,210,.22)',
+                    borderBottomColor: 'rgba(20,30,50,.35)',
+                    marginBottom: '0.875rem',
                     fontSize: '0.75rem',
                     color: 'var(--accent-text)',
                     fontWeight: 600,
+                    boxShadow: '0 2px 4px rgba(0,0,0,.25), inset 0 1px 0 rgba(160,180,220,.12)',
                   }}>
                     <span style={{
-                      width: 6, height: 6, borderRadius: '50%',
-                      background: '#34D399',
-                      boxShadow: '0 0 8px #34D399',
+                      width: 7, height: 7, borderRadius: '50%',
+                      background: '#10B981',
+                      boxShadow: '0 0 10px #10B981',
                     }} />
                     النظام نشط
                   </div>
                   <h1 style={{
-                    fontSize: '1.625rem',
-                    fontWeight: 700,
+                    fontSize: '1.75rem',
+                    fontWeight: 800,
                     color: 'var(--text-primary)',
-                    marginBottom: '0.375rem',
+                    marginBottom: '0.5rem',
                     letterSpacing: '-0.01em',
                   }}>
                     {skin === 'gold' ? 'لوحة الرصد والمراقبة' : 'لوحة الخصوصية والامتثال'}
                   </h1>
                   <p style={{
-                    fontSize: '0.875rem',
+                    fontSize: '0.9375rem',
                     color: 'var(--text-muted)',
-                    lineHeight: 1.6,
+                    lineHeight: 1.7,
                   }}>
                     {skin === 'gold'
                       ? 'نظرة شاملة على التهديدات وعمليات الرصد النشطة — تحديث مباشر'
@@ -216,16 +260,16 @@ export default function Home() {
                 <img
                   src={skin === 'gold' ? LOGOS.calligraphyGold : LOGOS.calligraphyLight}
                   alt="راصد"
-                  style={{ height: 44, opacity: 0.15, marginTop: '0.5rem' }}
+                  style={{ height: 48, opacity: 0.12, marginTop: '0.5rem' }}
                 />
               </div>
 
-              {/* KPI Cards Grid — 8 cards, 4 columns */}
+              {/* ============ KPI Cards Grid — 8 cards, 4 columns ============ */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1rem',
-                marginBottom: '1.5rem',
+                gap: '1.125rem',
+                marginBottom: '1.75rem',
               }}>
                 {kpis.map((kpi, i) => (
                   <KPICard
@@ -236,17 +280,17 @@ export default function Home() {
                     change={kpi.change}
                     icon={kpi.icon}
                     watermarkIcon={kpi.watermark}
-                    delay={i * 0.04}
+                    delay={i * 0.05}
                   />
                 ))}
               </div>
 
-              {/* Chart + Assistant Section */}
+              {/* ============ Chart + Assistant ============ */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1.4fr 1fr',
-                gap: '1rem',
-                marginBottom: '1.5rem',
+                gap: '1.125rem',
+                marginBottom: '1.75rem',
               }}>
                 <Chart3D
                   data={chartData}
@@ -260,24 +304,20 @@ export default function Home() {
                     flexDirection: 'column',
                     height: '100%',
                     justifyContent: 'space-between',
+                    minHeight: 280,
                   }}>
                     <div>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.75rem',
-                        marginBottom: '0.75rem',
+                        marginBottom: '1rem',
                       }}>
-                        <div style={{
-                          width: 40, height: 40, borderRadius: '50%',
-                          background: 'var(--accent-glow)',
-                          border: '1px solid var(--accent-border)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <Activity size={18} style={{ color: 'var(--accent-text)' }} />
+                        <div style={metalIconBox}>
+                          <Activity size={20} style={{ color: 'var(--accent-text)' }} />
                         </div>
                         <div>
-                          <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                             مساعد راصد الذكي
                           </h3>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -286,9 +326,9 @@ export default function Home() {
                         </div>
                       </div>
                       <p style={{
-                        fontSize: '0.875rem',
+                        fontSize: '0.9375rem',
                         color: 'var(--text-secondary)',
-                        lineHeight: 1.8,
+                        lineHeight: 1.9,
                         marginBottom: '1rem',
                       }}>
                         {skin === 'gold'
@@ -298,7 +338,7 @@ export default function Home() {
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.625rem' }}>
                         <RasidButton variant="primary">
                           <Activity size={14} />
                           عرض التفاصيل
@@ -311,15 +351,15 @@ export default function Home() {
                       <img
                         src={skin === 'gold' ? CHARACTERS.sunglasses : CHARACTERS.waving}
                         alt="مساعد راصد"
-                        style={{ height: 110, objectFit: 'contain', opacity: 0.9 }}
+                        style={{ height: 120, objectFit: 'contain', opacity: 0.85 }}
                       />
                     </div>
                   </div>
                 </RasidCard>
               </div>
 
-              {/* Table */}
-              <div style={{ marginBottom: '1.5rem' }}>
+              {/* ============ Table ============ */}
+              <div style={{ marginBottom: '1.75rem' }}>
                 <RasidTable
                   columns={tableColumns}
                   data={tableData}
@@ -327,24 +367,20 @@ export default function Home() {
                 />
               </div>
 
-              {/* Buttons & Inputs Row */}
+              {/* ============ Buttons & Inputs Row ============ */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: '1rem',
-                marginBottom: '1.5rem',
+                gap: '1.125rem',
+                marginBottom: '1.75rem',
               }}>
                 {/* Buttons Card */}
                 <RasidCard delay={0.35}>
-                  <h3 style={{
-                    fontSize: '1rem', fontWeight: 700,
-                    color: 'var(--text-primary)', marginBottom: '1rem',
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  }}>
-                    <Zap size={16} style={{ color: 'var(--accent-text)' }} />
+                  <h3 style={sectionTitle}>
+                    <span style={accentBar} />
                     الأزرار والإجراءات
                   </h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                     <RasidButton variant="primary">
                       <Shield size={14} />
                       زر رئيسي
@@ -374,15 +410,11 @@ export default function Home() {
 
                 {/* Inputs Card */}
                 <RasidCard delay={0.4}>
-                  <h3 style={{
-                    fontSize: '1rem', fontWeight: 700,
-                    color: 'var(--text-primary)', marginBottom: '1rem',
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  }}>
-                    <FileText size={16} style={{ color: 'var(--accent-text)' }} />
+                  <h3 style={sectionTitle}>
+                    <span style={accentBar} />
                     حقول الإدخال
                   </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <RasidInput label="اسم المستخدم" placeholder="أدخل اسم المستخدم..." />
                     <RasidInput label="البريد الإلكتروني" placeholder="admin@rasid.sa" type="email" />
                     <RasidInput label="كلمة البحث" placeholder="ابحث في التهديدات..." />
@@ -390,11 +422,11 @@ export default function Home() {
                 </RasidCard>
               </div>
 
-              {/* Footer */}
+              {/* ============ Footer ============ */}
               <div style={{
                 textAlign: 'center',
-                padding: '1.5rem 0 1rem',
-                borderTop: '1px solid rgba(255,255,255,.06)',
+                padding: '1.75rem 0 1rem',
+                borderTop: '2px solid rgba(100,120,160,.10)',
                 color: 'var(--text-muted)',
                 fontSize: '0.75rem',
               }}>
@@ -403,14 +435,12 @@ export default function Home() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.75rem',
-                  marginBottom: '0.375rem',
+                  marginBottom: '0.5rem',
                 }}>
-                  <img src={LOGOS.calligraphyLight} alt="راصد" style={{ height: 18, opacity: 0.3 }} />
-                  <span style={{ color: 'var(--text-muted)' }}>
-                    منصة راصد — مكتب إدارة البيانات الوطنية
-                  </span>
+                  <img src={LOGOS.calligraphyLight} alt="راصد" style={{ height: 20, opacity: 0.25 }} />
+                  <span>منصة راصد — مكتب إدارة البيانات الوطنية</span>
                 </div>
-                <span style={{ opacity: 0.6 }}>
+                <span style={{ opacity: 0.5 }}>
                   Rasid Lux Ultra Premium — جميع الحقوق محفوظة ٢٠٢٦
                 </span>
               </div>
