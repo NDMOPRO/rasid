@@ -63,8 +63,6 @@ import {
   ToggleLeft,
   Palette,
   Menu as MenuLucide,
-  Building2,
-  DollarSign,
   Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -138,12 +136,6 @@ const navGroups: NavGroup[] = [
     workspace: "leaks",
     items: [
       { label: "راصد الذكي", labelEn: "Smart Rasid AI", icon: Bot, path: "/smart-rasid" },
-      { label: "العقارات", labelEn: "Properties", icon: Building2, path: "/properties" },
-      { label: "العقود", labelEn: "Contracts", icon: FileText, path: "/contracts" },
-      { label: "الفريق", labelEn: "Team", icon: Users, path: "/team" },
-      { label: "المالية", labelEn: "Financials", icon: DollarSign, path: "/financials" },
-      { label: "Mensun AI", labelEn: "Mensun AI", icon: Bot, path: "/mensun-ai" },
-      { label: "لوحة المالك", labelEn: "Owner Dashboard", icon: Home, path: "/owner-dashboard" },
     ],
   },
   {
