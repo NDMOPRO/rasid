@@ -66,7 +66,7 @@ export default function GlobalFilterBar() {
       </div>
 
       <Badge variant="outline" className={`text-[10px] ${isFiltered ? "border-[#f59e0b] text-[#f59e0b]" : "border-[#3DB1AC] text-[#3DB1AC]"}`}>
-        {filtered}/{total} حادثة
+        {filtered}/{total} حالة رصد
       </Badge>
 
       {isFiltered && (

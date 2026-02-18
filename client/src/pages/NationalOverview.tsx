@@ -64,7 +64,7 @@ export default function NationalOverview() {
     const critical = records.filter(r => r.overview?.severity === "Critical").length;
     const totalPrice = records.reduce((s, r) => s + ((r as any).attacker_info?.price_usd || 0), 0);
     const ransomware = records.filter(r => r.category === "Ransomware").length;
-    const dataBreach = records.filter(r => r.category === "Data Breach").length;
+    const dataBreach = records.filter(r => r.category === "Data Leak Case").length;
     const highSev = records.filter(r => r.overview?.severity === "High").length;
     const sectors = new Set(records.map(r => r.sector).filter(Boolean));
     const dataTypes = new Set(records.flatMap(r => r.data_types || []));
@@ -123,10 +123,10 @@ export default function NationalOverview() {
 
   /* ─── Quick nav cards ─── */
   const quickNav = [
-    { label: "تشريح حالات الرصد", labelEn: "Leak Anatomy", icon: ScanSearch, path: "/leak-anatomy", color: "#3DB1AC" },
+    { label: "تشريح حالات الرصد", labelEn: "Case Anatomy", icon: ScanSearch, path: "/leak-anatomy", color: "#3DB1AC" },
     { label: "القطاعات المتضررة", labelEn: "Affected Sectors", icon: Network, path: "/sector-analysis", color: "#6459A7" },
     { label: "الخط الزمني", labelEn: "Timeline", icon: CalendarClock, path: "/leak-timeline", color: "#f59e0b" },
-    { label: "مصادر حالة الرصد", labelEn: "Threat Actors", icon: UserX, path: "/threat-actors-analysis", color: "#ef4444" },
+    { label: "مصادر حالة الرصد", labelEn: "Publishing Entities", icon: UserX, path: "/threat-actors-analysis", color: "#ef4444" },
     { label: "التحليل الجغرافي", labelEn: "Geo Analysis", icon: Map, path: "/geo-analysis", color: "#3b82f6" },
     { label: "سجل الحالات", labelEn: "Registry", icon: ScrollText, path: "/incidents-registry", color: "#22c55e" },
   ];

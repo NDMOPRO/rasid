@@ -69,7 +69,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-03-15T09:00:00",
     status: "documented",
     description: "Contractor and employee data from Saudi Aramco's third-party vendor system exposed on XSS.is forum. Includes security clearance levels and access credentials.",
-    descriptionAr: "بيانات مقاولين وموظفين من نظام مورد خارجي لأرامكو السعودية تم كشفها على منتدى XSS.is. تشمل مستويات التصريح الأمني وبيانات الوصول.",
+    descriptionAr: "بيانات مقاولين وموظفين من نظام مورد خارجي لأرامكو السعودية تم كشفها على منتدى XSS.is. تشمل مستويات التصريح وبيانات الوصول.",
   },
   {
     id: "LK-2024-0005",

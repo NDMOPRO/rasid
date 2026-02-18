@@ -29,7 +29,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 
 const categoryConfig: Record<string, { label: string; labelEn: string; icon: React.ElementType; color: string }> = {
   auth: { label: "المصادقة", labelEn: "Auth", icon: LogIn, color: "text-blue-400 bg-blue-500/10" },
-  leak: { label: "حالات الرصد", labelEn: "Leaks", icon: Shield, color: "text-red-400 bg-red-500/10" },
+  leak: { label: "حالات الرصد", labelEn: "Monitoring Cases", icon: Shield, color: "text-red-400 bg-red-500/10" },
   export: { label: "التصدير", labelEn: "Export", icon: FileOutput, color: "text-emerald-400 bg-emerald-500/10" },
   pii: { label: "فحص PII", labelEn: "PII Scan", icon: ScanSearch, color: "text-purple-400 bg-purple-500/10" },
   user: { label: "المستخدمين", labelEn: "Users", icon: Users, color: "text-amber-400 bg-amber-500/10" },

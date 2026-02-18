@@ -165,7 +165,7 @@ export default function AdminRoles() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-muted-foreground">الاسم بالعربية</label>
-                <Input value={newRole.name} onChange={(e) => setNewRole({ ...newRole, name: e.target.value })} placeholder="مثال: محلل أمني" />
+                <Input value={newRole.name} onChange={(e) => setNewRole({ ...newRole, name: e.target.value })} placeholder="مثال: محلل بيانات" />
               </div>
               <div>
                 <label className="text-sm text-muted-foreground">الاسم بالإنجليزية</label>

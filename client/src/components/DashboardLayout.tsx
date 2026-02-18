@@ -1,7 +1,7 @@
 /**
- * DashboardLayout — SDAIA Ultra Premium Design System with Workspace Navigation
+ * DashboardLayout — NDMO Rasid National Monitoring Platform
  * RTL-first sidebar with SDAIA official colors (#273470, #6459A7, #3DB1AC)
- * 4 Workspaces: Leaks & Analytics, Monitoring, Platform Settings, Users & Training
+ * 2 Workspaces: Privacy + Monitoring Cases, with shared section
  * Glassmorphism, scan-line effects, and premium animations
  * - Mobile: auto-close sidebar on nav item click
  * - Groups: collapsed by default, only active group expanded
@@ -318,40 +318,40 @@ const navGroups: NavGroup[] = [
     ],
   },
   // ═══════════════════════════════════════════════════════════
-  // WORKSPACE: حالات الرصد (Incidents / Leaks)
+  // WORKSPACE: حالات الرصد (Monitoring Cases)
   // ═══════════════════════════════════════════════════════════
   {
     id: "leaks_dashboard",
     label: "لوحة حالات الرصد",
-    labelEn: "Incidents Dashboard",
+    labelEn: "Monitoring Dashboard",
     icon: Eye,
     workspace: "leaks",
     items: [
-      { label: "لوحة حالات الرصد", labelEn: "Incidents Dashboard", icon: Eye, path: "/national-overview" },
+      { label: "لوحة حالات الرصد", labelEn: "Monitoring Dashboard", icon: Eye, path: "/national-overview" },
     ],
   },
   {
     id: "leaks_cases",
     label: "الحالات",
-    labelEn: "Incidents",
+    labelEn: "Monitoring Cases",
     icon: ShieldAlert,
     workspace: "leaks",
     items: [
-      { label: "سجل الحالات", labelEn: "Incidents Log", icon: ShieldAlert, path: "/leaks" },
-      { label: "سجل الحالات المتقدم", labelEn: "Incidents Registry", icon: ScrollText, path: "/incidents-registry" },
+      { label: "سجل الحالات", labelEn: "Cases Log", icon: ShieldAlert, path: "/leaks" },
+      { label: "سجل الحالات المتقدم", labelEn: "Cases Registry", icon: ScrollText, path: "/incidents-registry" },
     ],
   },
   {
     id: "leaks_analysis",
     label: "تحليل الحالات",
-    labelEn: "Incident Analysis",
+    labelEn: "Case Analysis",
     icon: ScanSearch,
     workspace: "leaks",
     items: [
-      { label: "تشريح الحالات", labelEn: "Incident Anatomy", icon: ScanSearch, path: "/leak-anatomy" },
+      { label: "تشريح الحالات", labelEn: "Case Anatomy", icon: ScanSearch, path: "/leak-anatomy" },
       { label: "القطاعات المتضررة", labelEn: "Sector Analysis", icon: Layers, path: "/sector-analysis" },
       { label: "الخط الزمني", labelEn: "Timeline", icon: CalendarClock, path: "/leak-timeline" },
-      { label: "تحليل الأثر", labelEn: "Impact Assessment", icon: ShieldAlert, path: "/impact-assessment" },
+      { label: "تحليل الأثر", labelEn: "Impact Assessment", icon: BarChart3, path: "/impact-assessment" },
       { label: "التحليل الجغرافي", labelEn: "Geo Analysis", icon: Map, path: "/geo-analysis" },
     ],
   },
@@ -363,8 +363,8 @@ const navGroups: NavGroup[] = [
     workspace: "leaks",
     items: [
       { label: "المصادر", labelEn: "Source Intelligence", icon: Globe, path: "/source-intelligence" },
-      { label: "مصادر البيع", labelEn: "Threat Actors", icon: UserX, path: "/threat-actors-analysis" },
-      { label: "ملفات المصادر", labelEn: "Seller Profiles", icon: UserX, path: "/seller-profiles" },
+      { label: "جهات النشر", labelEn: "Publishing Entities", icon: UserX, path: "/threat-actors-analysis" },
+      { label: "ملفات المصادر", labelEn: "Source Profiles", icon: UserX, path: "/seller-profiles" },
     ],
   },
   {
@@ -376,7 +376,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "الرصد المباشر", labelEn: "Live Scan", icon: Scan, path: "/live-scan" },
       { label: "رصد المنصات", labelEn: "Telegram", icon: Send, path: "/telegram" },
-      { label: "مواقع النشر", labelEn: "Dark Web", icon: Globe, path: "/darkweb" },
+      { label: "مواقع النشر", labelEn: "Publishing Sites", icon: Globe, path: "/darkweb" },
       { label: "مواقع اللصق", labelEn: "Paste Sites", icon: FileText, path: "/paste-sites" },
     ],
   },
@@ -387,10 +387,10 @@ const navGroups: NavGroup[] = [
     icon: Wrench,
     workspace: "leaks",
     items: [
-      { label: "أدوات البحث", labelEn: "OSINT Tools", icon: Radar, path: "/osint-tools" },
-      { label: "قواعد الرصد", labelEn: "Threat Rules", icon: Crosshair, path: "/threat-rules" },
+      { label: "أدوات البحث", labelEn: "Search Tools", icon: Radar, path: "/osint-tools" },
+      { label: "قواعد الرصد", labelEn: "Monitoring Rules", icon: Crosshair, path: "/threat-rules" },
       { label: "رسم المعرفة", labelEn: "Knowledge Graph", icon: Network, path: "/knowledge-graph" },
-      { label: "خريطة الرصد", labelEn: "Threat Map", icon: Map, path: "/threat-map" },
+      { label: "خريطة الرصد", labelEn: "Monitoring Map", icon: Map, path: "/threat-map" },
     ],
   },
   {

@@ -1,6 +1,6 @@
 /**
  * WorkspaceSwitcher — Professional workspace navigation for Rasid Platform
- * 2 main workspaces: الخصوصية (Privacy) + حالات الرصد (Incidents)
+ * 2 main workspaces: الخصوصية (Privacy) + حالات الرصد (Monitoring Cases)
  * Shared section always visible + admin section for authorized users
  * Animated transitions, role-based visibility, localStorage persistence
  */
@@ -137,7 +137,7 @@ export const routeWorkspaceMap: Record<string, WorkspaceId> = {
   "/app/privacy": "privacy",
   "/app/privacy/sites": "privacy",
 
-  // ═══ Leaks/Incidents workspace ═══
+  // ═══ Monitoring Cases workspace ═══
   "/national-overview": "leaks",
   "/leaks": "leaks",
   "/incidents-registry": "leaks",
@@ -167,7 +167,7 @@ export const routeWorkspaceMap: Record<string, WorkspaceId> = {
   "/threat-map": "leaks",
   "/seller-profiles": "leaks",
 
-  // ═══ Leaks: structured /app routes ═══
+  // ═══ Monitoring Cases: structured /app routes ═══
   "/app/incidents": "leaks",
   "/app/incidents/list": "leaks",
 };

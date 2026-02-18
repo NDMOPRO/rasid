@@ -207,7 +207,7 @@ export default function ChangePassword() {
         <CardContent className="pt-6">
           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#1E3A5F]" />
-            نصائح أمنية
+            نصائح لحماية الحساب
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">

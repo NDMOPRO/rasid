@@ -37,7 +37,7 @@ const platformIcons: Record<string, React.ElementType> = {
 
 const platformLabels: Record<string, { ar: string; en: string }> = {
   telegram: { ar: "تليجرام", en: "Telegram" },
-  darkweb: { ar: "الدارك ويب", en: "Dark Web" },
+  darkweb: { ar: "الدارك ويب", en: "Publishing Sites" },
   paste: { ar: "مواقع اللصق", en: "Paste Sites" },
   all: { ar: "جميع المنصات", en: "All Platforms" },
 };
@@ -126,7 +126,7 @@ export default function MonitoringJobs() {
         {[
           { key: "activeJobs", label: "المهام النشطة", labelEn: "Active Jobs", value: activeJobs, icon: Radio, color: "text-emerald-400", borderColor: "border-emerald-500/20", bgColor: "bg-emerald-500/5" },
           { key: "totalRuns", label: "إجمالي التشغيلات", labelEn: "Total Runs", value: totalRuns, icon: RefreshCw, color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
-          { key: "leaksFound", label: "حالات رصد مكتشفة", labelEn: "Leaks Found", value: totalLeaksFound, icon: AlertTriangle, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
+          { key: "leaksFound", label: "حالات رصد مكتشفة", labelEn: "Cases Found", value: totalLeaksFound, icon: AlertTriangle, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
           { key: "totalJobs", label: "إجمالي المهام", labelEn: "Total Jobs", value: jobs?.length ?? 0, icon: Clock, color: "text-purple-400", borderColor: "border-purple-500/20", bgColor: "bg-purple-500/5" },
         ].map((stat, i) => {
           const Icon = stat.icon;
