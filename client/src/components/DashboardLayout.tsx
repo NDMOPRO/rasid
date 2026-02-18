@@ -114,6 +114,20 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   // ═══════════════════════════════════════════════════════════
+  // WORKSPACE: الخصوصية (Privacy)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "privacy_home",
+    label: "قيادي",
+    labelEn: "Command",
+    icon: LayoutDashboard,
+    workspace: "privacy",
+    items: [
+      { label: "لوحة القيادة", labelEn: "Dashboard", icon: LayoutDashboard, path: "/" },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // WORKSPACE 1: الرصد والتحليلات (Leaks & Analytics)
   // ═══════════════════════════════════════════════════════════
   {
@@ -123,7 +137,6 @@ const navGroups: NavGroup[] = [
     icon: LayoutDashboard,
     workspace: "leaks",
     items: [
-      { label: "الرئيسية", labelEn: "Home", icon: LayoutDashboard, path: "/" },
       { label: "راصد الذكي", labelEn: "Smart Rasid AI", icon: Bot, path: "/smart-rasid" },
       { label: "العقارات", labelEn: "Properties", icon: Building2, path: "/properties" },
       { label: "العقود", labelEn: "Contracts", icon: FileText, path: "/contracts" },

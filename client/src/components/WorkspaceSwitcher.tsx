@@ -13,10 +13,11 @@ import {
   GraduationCap,
   ChevronDown,
   Crown,
+  Shield,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-export type WorkspaceId = "leaks" | "monitoring" | "settings" | "users" | "admin";
+export type WorkspaceId = "leaks" | "privacy" | "monitoring" | "settings" | "users" | "admin";
 
 export interface Workspace {
   id: WorkspaceId;
@@ -41,6 +42,15 @@ export const workspaces: Workspace[] = [
     description: "لوحة المؤشرات الرئيسية وتحليلات حالات الرصد",
     color: "rgba(61, 177, 172, 0.9)",
     colorLight: "rgba(30, 58, 138, 0.9)",
+  },
+  {
+    id: "privacy",
+    label: "الخصوصية",
+    labelEn: "Privacy",
+    icon: Shield,
+    description: "رصد سياسة الخصوصية ولوحة القيادة",
+    color: "rgba(34, 197, 94, 0.9)",
+    colorLight: "rgba(22, 163, 74, 0.9)",
   },
   {
     id: "monitoring",
@@ -85,8 +95,11 @@ export const workspaces: Workspace[] = [
 
 /** Map each route path to its workspace */
 export const routeWorkspaceMap: Record<string, WorkspaceId> = {
+  // ═══ Workspace: الخصوصية (Privacy) ═══
+  "/": "privacy",
+  "/leadership": "privacy",
+
   // ═══ Workspace 1: الرصد والتحليلات ═══
-  "/": "leaks",
   "/smart-rasid": "leaks",
   "/national-overview": "leaks",
   "/leak-anatomy": "leaks",
@@ -122,7 +135,7 @@ export const routeWorkspaceMap: Record<string, WorkspaceId> = {
   "/threat-map": "monitoring",
   "/seller-profiles": "monitoring",
 
-  // ═══ Rasid Platform Routes ═══
+  // ═══ Rasid Platform Routes (التسريبات) ═══
   "/properties": "leaks",
   "/contracts": "leaks",
   "/team": "leaks",
