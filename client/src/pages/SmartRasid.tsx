@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Streamdown } from "streamdown";
@@ -62,8 +62,6 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { soundManager } from "@/lib/soundManager";
 import { Save, Trash2, FolderOpen, Download, X, MessageCircle, Archive, Timer, Table2, FileDown, Lightbulb } from "lucide-react";
-const RasidChart = lazy(() => import("@/components/RasidChart"));
-const RasidDashboard = lazy(() => import("@/components/RasidDashboard"));
 
 // ═══ CONSTANTS ═══
 const RASID_CHARACTER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/rCKQyRDoubhdjHel.png"; // Transparent background character
@@ -93,22 +91,17 @@ interface ChatMessage {
   userQuery?: string;
   followUpSuggestions?: string[];
   processingMeta?: { totalDurationMs: number; toolCount: number; agentsUsed: string[] };
-  chartData?: { chartConfig: any; summary?: string };
-  dashboardData?: { title: string; dashboardType: string; kpis: any; charts: any[]; summary?: string };
-  isStreaming?: boolean;
 }
 
 const quickCommands = [
   { label: "ملخص لوحة المعلومات", icon: BarChart3, color: "text-cyan-400", bgColor: "bg-cyan-500/10 border-cyan-500/20", query: "أعطني ملخص شامل للوحة المعلومات مع تحليل" },
-  { label: "حالات رصد واسعة النطاق", icon: AlertTriangle, color: "text-red-400", bgColor: "bg-red-500/10 border-red-500/20", query: "ما هي الحالات رصد واسعة النطاق الحالية؟ أعطني تفاصيل كل واحد" },
+  { label: "حالات رصد واسعة النطاق", icon: AlertTriangle, color: "text-red-400", bgColor: "bg-red-500/10 border-red-500/20", query: "ما هي حالات الرصد واسعة النطاق الحالية؟ أعطني تفاصيل كل واحدة" },
   { label: "تحليل ارتباطات", icon: GitBranch, color: "text-emerald-400", bgColor: "bg-emerald-500/10 border-emerald-500/20", query: "أجرِ تحليل ارتباطات شامل: ربط البائعين بالقطاعات، أنماط زمنية، واكتشاف الأنماط غير المعتادة" },
   { label: "حالة الحماية", icon: Shield, color: "text-amber-400", bgColor: "bg-amber-500/10 border-amber-500/20", query: "ما حالة حماية البيانات الشخصية؟ وما مستوى التهديدات الحالي والتوصيات؟" },
   { label: "نشاط المستخدمين", icon: UserCheck, color: "text-purple-400", bgColor: "bg-purple-500/10 border-purple-500/20", query: "حلل نشاط المستخدمين اليوم: من فعل ماذا؟ كم عملية نُفذت؟" },
   { label: "خريطة التهديدات", icon: MapPin, color: "text-indigo-400", bgColor: "bg-indigo-500/10 border-indigo-500/20", query: "اعرض خريطة التهديدات الجغرافية والتوزيع حسب المناطق" },
   { label: "التقارير والمستندات", icon: FileSearch, color: "text-teal-400", bgColor: "bg-teal-500/10 border-teal-500/20", query: "اعرض لي كل التقارير والمستندات المتاحة مع روابطها" },
   { label: "قواعد الكشف", icon: Crosshair, color: "text-rose-400", bgColor: "bg-rose-500/10 border-rose-500/20", query: "اعرض قواعد صيد التهديدات النشطة وأداءها" },
-  { label: "مخطط حالات الرصد", icon: BarChart3, color: "text-sky-400", bgColor: "bg-sky-500/10 border-sky-500/20", query: "ارسم لي مخطط يوضح توزيع حالات الرصد حسب القطاعات ومستوى التأثير" },
-  { label: "لوحة تنفيذية", icon: Eye, color: "text-violet-400", bgColor: "bg-violet-500/10 border-violet-500/20", query: "أنشئ لي لوحة مؤشرات تنفيذية شاملة مع مخططات وإحصائيات" },
 ];
 
 const capabilities = [
@@ -132,7 +125,7 @@ const capabilities = [
 // Tool name to Arabic label mapping
 const toolLabels: Record<string, string> = {
   query_leaks: "استعلام حالات الرصد",
-  get_leak_details: "ادعاءات البائع",
+  get_leak_details: "تفاصيل حالة الرصد",
   get_dashboard_stats: "إحصائيات لوحة القيادة",
   get_channels_info: "معلومات القنوات",
   get_monitoring_status: "حالة المراقبة",
@@ -157,8 +150,6 @@ const toolLabels: Record<string, string> = {
   get_personality_greeting: "ترحيب شخصي",
   check_leader_mention: "فحص إشارة لقائد",
   manage_personality_scenarios: "إدارة سيناريوهات الشخصية",
-  generate_chart: "توليد مخطط بياني",
-  generate_dashboard: "إنشاء لوحة مؤشرات",
 };
 
 // Agent icons mapping
@@ -207,7 +198,7 @@ function MatrixRain() {
     resize();
     window.addEventListener("resize", resize);
 
-    const chars = "01راصدحمايةبياناتأمنسيبرانيرصدحالة رصدكشف";
+    const chars = "01راصدحمايةبياناتأمنسيبرانيرصدتسريبكشف";
     const fontSize = 12;
     const columns = Math.floor(canvas.width / fontSize);
     const drops: number[] = Array(columns).fill(1);
@@ -393,69 +384,49 @@ const VIP_LEADERS_CLIENT = [
     keywords: ["الربدي", "المعالي", "معالي القائد", "قائد المبادرة"],
     name: "الربدي",
     title: "معالي قائد مبادرة راصد الوطنية",
-    subtitle: "قائد مبادرة راصد الوطنية — حفظه الله",
-    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/FLeZwTnxoiqwcAUU.png",
-    showImageDuration: 5000,
-    respectPhrase: "كلنا في خدمة هذا القائد البطل ورهن إشارته 🫡",
+    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/EyXIbPHjtTKGlhZg.png",
     type: "leader" as const,
     gradient: "from-amber-500/20 via-yellow-500/10 to-amber-600/20",
-    borderColor: "border-amber-500/40",
-    glowColor: "shadow-amber-500/30",
+    borderColor: "border-amber-500/30",
+    glowColor: "shadow-amber-500/20",
     titleColor: "text-amber-300",
     badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    badgeLabel: "معالي القائد",
-    animation: "salute" as const,
   },
   {
     keywords: ["السرحان", "مشعل السرحان", "مشعل", "نائب المعالي", "سعادة النائب"],
     name: "مشعل السرحان",
-    title: "سعادة النائب البطل",
-    subtitle: "سعادة نائب معالي قائد المبادرة",
-    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/TtePDHRidHFQWMVE.jpg",
-    showImageDuration: 5000,
-    respectPhrase: "أهلاً وسهلاً بسعادة النائب البطل.. نفتخر بقيادته 🫡",
+    title: "سعادة نائب معالي قائد المبادرة",
+    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/jZnDsXzrTXOCeTwv.jpg",
     type: "deputy" as const,
     gradient: "from-cyan-500/20 via-teal-500/10 to-cyan-600/20",
-    borderColor: "border-cyan-500/40",
-    glowColor: "shadow-cyan-500/30",
+    borderColor: "border-cyan-500/30",
+    glowColor: "shadow-cyan-500/20",
     titleColor: "text-cyan-300",
     badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-    badgeLabel: "سعادة النائب",
-    animation: "welcome" as const,
   },
   {
     keywords: ["الرحيلي", "محمد الرحيلي"],
     name: "محمد الرحيلي",
-    title: "الأستاذ والأب الروحي",
-    subtitle: "الأب الروحي لراصد",
+    title: "معلمنا الأكبر",
     imageUrl: null,
-    showImageDuration: 0,
-    respectPhrase: "إلا الأستاذ والأب الروحي لنا.. ما نقدر نتكلم عنه عشان ما يرصدنا براصد 😄🔍",
     type: "team" as const,
     gradient: "from-emerald-500/20 via-green-500/10 to-emerald-600/20",
-    borderColor: "border-emerald-500/40",
-    glowColor: "shadow-emerald-500/30",
+    borderColor: "border-emerald-500/30",
+    glowColor: "shadow-emerald-500/20",
     titleColor: "text-emerald-300",
     badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    badgeLabel: "الأب الروحي",
-    animation: "rasid-character" as const,
   },
   {
     keywords: ["المعتاز", "منال المعتاز", "منال"],
     name: "منال المعتاز",
     title: "مديرتنا الجديدة",
-    subtitle: "المديرة العامة الجديدة",
     imageUrl: null,
-    showImageDuration: 0,
-    respectPhrase: "هذي مديرتنا الجديدة.. نرحب فيها ونتمنى لها التوفيق في قيادة الفريق 🌟",
     type: "team" as const,
     gradient: "from-purple-500/20 via-violet-500/10 to-purple-600/20",
-    borderColor: "border-purple-500/40",
-    glowColor: "shadow-purple-500/30",
+    borderColor: "border-purple-500/30",
+    glowColor: "shadow-purple-500/20",
     titleColor: "text-purple-300",
     badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    badgeLabel: "المديرة العامة",
-    animation: "welcome" as const,
   },
 ];
 
@@ -470,475 +441,70 @@ function detectVipLeader(content: string): typeof VIP_LEADERS_CLIENT[0] | null {
 }
 
 function VipLeaderCard({ leader }: { leader: typeof VIP_LEADERS_CLIENT[0] }) {
-  const [showImage, setShowImage] = useState(true);
-  const [matrixChars, setMatrixChars] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (leader.showImageDuration && leader.showImageDuration > 0) {
-      const timer = setTimeout(() => setShowImage(false), leader.showImageDuration);
-      return () => clearTimeout(timer);
-    }
-  }, [leader.showImageDuration]);
-
-  // Matrix rain effect for hacking style (الرحيلي)
-  useEffect(() => {
-    if (leader.animation !== "rasid-character") return;
-    const chars = "01アイウエオカキクケコ>_{}[]|/\\";
-    const interval = setInterval(() => {
-      setMatrixChars(Array.from({ length: 20 }, () => chars[Math.floor(Math.random() * chars.length)]));
-    }, 150);
-    return () => clearInterval(interval);
-  }, [leader.animation]);
-
-  const isRoyal = leader.type === "leader" || leader.type === "deputy";
-  const isHacker = leader.animation === "rasid-character";
-
-  // ═══ ROYAL GOLD LUXURY CARD (الربدي + السرحان) ═══
-  if (isRoyal) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative overflow-hidden rounded-2xl mb-4"
-      >
-        {/* Outer gold border with animated glow */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl"
-          animate={{
-            boxShadow: [
-              "0 0 20px rgba(212,175,55,0.3), 0 0 40px rgba(212,175,55,0.1), inset 0 0 20px rgba(212,175,55,0.05)",
-              "0 0 35px rgba(212,175,55,0.5), 0 0 60px rgba(212,175,55,0.2), inset 0 0 30px rgba(212,175,55,0.1)",
-              "0 0 20px rgba(212,175,55,0.3), 0 0 40px rgba(212,175,55,0.1), inset 0 0 20px rgba(212,175,55,0.05)",
-            ],
-          }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
-
-        {/* Gold border frame */}
-        <div className="absolute inset-0 rounded-2xl border-2 border-amber-400/50" />
-        <motion.div
-          className="absolute inset-[1px] rounded-2xl border border-amber-300/20"
-          animate={{ borderColor: ["rgba(252,211,77,0.1)", "rgba(252,211,77,0.4)", "rgba(252,211,77,0.1)"] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-        />
-
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-950/80 via-yellow-950/60 to-amber-900/70 rounded-2xl" />
-
-        {/* Gold shimmer sweep */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/10 to-transparent"
-          animate={{ x: ["-100%", "200%"] }}
-          transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-        />
-
-        {/* Corner ornaments */}
-        <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-amber-400/40 rounded-tr-lg" />
-        <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-amber-400/40 rounded-tl-lg" />
-        <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-amber-400/40 rounded-br-lg" />
-        <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-amber-400/40 rounded-bl-lg" />
-
-        <div className="relative p-5">
-          {/* Top section: Large Image + Info side by side */}
-          <div className="flex items-start gap-4">
-            {/* Large Leader Photo with gold frame */}
-            {leader.imageUrl && showImage ? (
-              <motion.div
-                initial={{ scale: 0, rotate: -8 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.3, type: "spring", stiffness: 150, damping: 12 }}
-                className="relative flex-shrink-0"
-              >
-                {/* Animated gold ring */}
-                <motion.div
-                  className="absolute -inset-1 rounded-2xl"
-                  animate={{
-                    background: [
-                      "linear-gradient(0deg, #d4af37, #f5d060, #d4af37)",
-                      "linear-gradient(120deg, #d4af37, #f5d060, #d4af37)",
-                      "linear-gradient(240deg, #d4af37, #f5d060, #d4af37)",
-                      "linear-gradient(360deg, #d4af37, #f5d060, #d4af37)",
-                    ],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  style={{ padding: "2px" }}
-                />
-                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-400/60 shadow-2xl shadow-amber-500/30">
-                  <img
-                    src={leader.imageUrl}
-                    alt={leader.name}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Gold overlay shimmer */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-amber-500/15 to-transparent"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
-                {/* Crown badge on image */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.6, type: "spring" }}
-                  className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/40"
-                >
-                  <Crown className="w-4 h-4 text-amber-950" />
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-                className="w-20 h-20 rounded-2xl border-2 border-amber-400/50 shadow-xl shadow-amber-500/20 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-amber-900/60 to-yellow-900/40"
-              >
-                <Crown className="w-10 h-10 text-amber-400" />
-              </motion.div>
-            )}
-
-            {/* Info section */}
-            <div className="flex-1 min-w-0 pt-1">
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mb-2"
-              >
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.5, type: "spring" }}
-                  className="text-[10px] px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/20 text-amber-300 border border-amber-400/40 font-bold tracking-wide"
-                >
-                  {leader.badgeLabel}
-                </motion.span>
-              </motion.div>
-              {/* Name */}
-              <motion.h3
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="text-lg font-bold bg-gradient-to-l from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
-              >
-                {leader.name}
-              </motion.h3>
-              {/* Subtitle */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-[11px] text-amber-400/60 mt-0.5"
-              >
-                {leader.subtitle || leader.title}
-              </motion.p>
-            </div>
-
-            {/* Salute animation */}
-            <motion.div
-              animate={{ rotate: [0, -20, 0], y: [0, -5, 0] }}
-              transition={{ duration: 1.5, repeat: 3, repeatDelay: 0.8 }}
-              className="text-3xl pt-2"
-            >
-              🫡
-            </motion.div>
-          </div>
-
-          {/* Gold divider */}
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="my-3 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
-          />
-
-          {/* Respect Phrase in gold box */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            className="px-4 py-3 rounded-xl bg-gradient-to-l from-amber-500/10 via-yellow-500/5 to-amber-500/10 border border-amber-400/25"
-          >
-            <p className="text-[13px] font-medium text-amber-200/90 text-center leading-relaxed">
-              {leader.respectPhrase}
-            </p>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // ═══ HACKING / CYBER CARD (الرحيلي) ═══
-  if (isHacker) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.85, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-2xl mb-4 border border-emerald-500/30"
-      >
-        {/* Dark cyber background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-emerald-950/40 to-gray-950 rounded-2xl" />
-
-        {/* Matrix rain overlay */}
-        <div className="absolute inset-0 overflow-hidden opacity-15 pointer-events-none">
-          {matrixChars.map((char, i) => (
-            <motion.span
-              key={i}
-              className="absolute text-emerald-400 font-mono text-[10px]"
-              style={{ left: `${(i / 20) * 100}%`, top: 0 }}
-              animate={{ y: [0, 200], opacity: [1, 0] }}
-              transition={{ duration: 2 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
-            >
-              {char}
-            </motion.span>
-          ))}
-        </div>
-
-        {/* Scan line */}
-        <motion.div
-          className="absolute inset-x-0 h-px bg-emerald-400/30"
-          animate={{ top: ["0%", "100%"] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-
-        {/* Animated border glow */}
-        <motion.div
-          className="absolute inset-0 rounded-2xl"
-          animate={{
-            boxShadow: [
-              "0 0 15px rgba(16,185,129,0.15), inset 0 0 15px rgba(16,185,129,0.03)",
-              "0 0 30px rgba(16,185,129,0.3), inset 0 0 25px rgba(16,185,129,0.06)",
-              "0 0 15px rgba(16,185,129,0.15), inset 0 0 15px rgba(16,185,129,0.03)",
-            ],
-          }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-        />
-
-        <div className="relative p-5">
-          {/* Terminal header */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-2 mb-3 pb-2 border-b border-emerald-500/20"
-          >
-            <div className="flex gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-            </div>
-            <span className="text-[9px] font-mono text-emerald-500/50 mr-auto">RASID_VIP_DETECT.sh</span>
-            <motion.span
-              animate={{ opacity: [1, 0] }}
-              transition={{ duration: 0.8, repeat: Infinity }}
-              className="text-[9px] font-mono text-emerald-400"
-            >
-              █
-            </motion.span>
-          </motion.div>
-
-          {/* Content row: Rasid Character + Info */}
-          <div className="flex items-start gap-4">
-            {/* Large Rasid Character with cyber frame */}
-            <motion.div
-              initial={{ scale: 0, rotate: -15 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 150, damping: 12 }}
-              className="relative flex-shrink-0"
-            >
-              {/* Cyber ring */}
-              <motion.div
-                className="absolute -inset-1.5 rounded-2xl border border-emerald-400/30"
-                animate={{ borderColor: ["rgba(16,185,129,0.2)", "rgba(16,185,129,0.5)", "rgba(16,185,129,0.2)"] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <div className="w-20 h-20 rounded-2xl overflow-hidden border border-emerald-500/40 shadow-xl shadow-emerald-500/20 bg-gradient-to-br from-emerald-950/80 to-gray-950">
-                <img
-                  src={RASID_CHARACTER_ELEGANT}
-                  alt="راصد"
-                  className="w-full h-full object-contain"
-                />
-                {/* Scan overlay */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-b from-emerald-400/5 to-emerald-400/10"
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-              </div>
-              {/* Terminal badge */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.6, type: "spring" }}
-                className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500/20 border border-emerald-400/40 rounded-lg flex items-center justify-center"
-              >
-                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-              </motion.div>
-            </motion.div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0 pt-1">
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mb-2"
-              >
-                <span className="text-[10px] px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono font-bold">
-                  {leader.badgeLabel}
-                </span>
-              </motion.div>
-              {/* Name */}
-              <motion.h3
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="text-lg font-bold text-emerald-300 font-mono"
-              >
-                {leader.name}
-              </motion.h3>
-              {/* Subtitle */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-[11px] text-emerald-500/60 mt-0.5 font-mono"
-              >
-                {leader.subtitle || leader.title}
-              </motion.p>
-            </div>
-
-            {/* Hacking icon */}
-            <motion.div
-              animate={{ rotate: [0, 360] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="pt-2"
-            >
-              <Radar className="w-7 h-7 text-emerald-400/60" />
-            </motion.div>
-          </div>
-
-          {/* Cyber divider */}
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="my-3 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent"
-          />
-
-          {/* Respect Phrase in terminal box */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            className="px-4 py-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 font-mono"
-          >
-            <p className="text-[12px] font-medium text-emerald-300/90 text-center leading-relaxed">
-              <span className="text-emerald-500/50">&gt; </span>{leader.respectPhrase}
-            </p>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // ═══ DEFAULT CARD (المعتاز and others) ═══
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.85, y: 15 }}
+      initial={{ opacity: 0, scale: 0.9, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`relative overflow-hidden rounded-2xl mb-4 border-2 ${leader.borderColor} bg-gradient-to-br ${leader.gradient} shadow-xl ${leader.glowColor}`}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`relative overflow-hidden rounded-xl mb-3 border ${leader.borderColor} bg-gradient-to-br ${leader.gradient} shadow-lg ${leader.glowColor}`}
     >
-      {/* Shimmer sweep */}
+      {/* Decorative shimmer */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
         animate={{ x: ["-100%", "200%"] }}
-        transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }}
+        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
       />
-
-      {/* Animated border glow */}
-      <motion.div
-        className="absolute inset-0 rounded-2xl"
-        animate={{
-          boxShadow: [
-            `0 0 15px rgba(168,85,247,0.2)`,
-            `0 0 30px rgba(168,85,247,0.4)`,
-            `0 0 15px rgba(168,85,247,0.2)`,
-          ],
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-
-      <div className="relative p-5">
-        <div className="flex items-start gap-4">
-          {/* Icon */}
+      
+      <div className="relative flex items-center gap-3 p-3">
+        {leader.imageUrl ? (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className={`w-16 h-16 rounded-2xl border-2 ${leader.borderColor} shadow-xl ${leader.glowColor} flex-shrink-0 flex items-center justify-center bg-gradient-to-br ${leader.gradient}`}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className={`w-14 h-14 rounded-xl overflow-hidden border-2 ${leader.borderColor} shadow-lg ${leader.glowColor} flex-shrink-0`}
           >
-            <Crown className={`w-8 h-8 ${leader.titleColor}`} />
+            <img
+              src={leader.imageUrl}
+              alt={leader.name}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
-
-          <div className="flex-1 min-w-0 pt-1">
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mb-2"
-            >
-              <span className={`text-[10px] px-3 py-1 rounded-full border ${leader.badgeColor} font-bold`}>
-                {leader.badgeLabel}
-              </span>
-            </motion.div>
-            <motion.h3
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className={`text-lg font-bold ${leader.titleColor}`}
-            >
-              {leader.name}
-            </motion.h3>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="text-[11px] text-slate-400 mt-0.5"
-            >
-              {leader.subtitle || leader.title}
-            </motion.p>
-          </div>
-
+        ) : (
           <motion.div
-            animate={{ rotate: [0, 8, -8, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className={`w-14 h-14 rounded-xl border-2 ${leader.borderColor} shadow-lg ${leader.glowColor} flex-shrink-0 flex items-center justify-center bg-gradient-to-br ${leader.gradient}`}
           >
-            <Crown className={`w-7 h-7 ${leader.titleColor} opacity-70`} />
+            <Crown className={`w-6 h-6 ${leader.titleColor}`} />
           </motion.div>
+        )}
+        <div className="flex-1 min-w-0">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center gap-2 mb-0.5"
+          >
+            <span className={`text-sm font-bold ${leader.titleColor}`}>{leader.name}</span>
+            <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${leader.badgeColor} font-semibold`}>
+              {leader.type === "leader" ? "معالي القائد" : leader.type === "deputy" ? "سعادة النائب" : leader.title}
+            </span>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-[11px] text-slate-400 truncate"
+          >
+            {leader.title}
+          </motion.p>
         </div>
-
         <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="my-3 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className={`px-4 py-3 rounded-xl bg-gradient-to-l ${leader.gradient} border ${leader.borderColor}`}
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
         >
-          <p className={`text-[13px] font-medium ${leader.titleColor} text-center leading-relaxed`}>
-            {leader.respectPhrase}
-          </p>
+          <Crown className={`w-5 h-5 ${leader.titleColor} opacity-60`} />
         </motion.div>
       </div>
     </motion.div>
@@ -990,10 +556,6 @@ function TypewriterStreamdown({ children, isNew }: { children: string; isNew: bo
           return;
         }
         setDisplayedContent(content.slice(0, indexRef.current));
-        // Dispatch scroll event every few ticks for auto-scroll
-        if (indexRef.current % 20 < baseCharsPerTick) {
-          window.dispatchEvent(new Event("rasid-typewriter-tick"));
-        }
       }
       rafRef.current = requestAnimationFrame(animate);
     };
@@ -1061,23 +623,10 @@ export default function SmartRasid() {
 
   const chatMutation = trpc.smartRasid.chat.useMutation();
 
-  // Auto-scroll to bottom — also triggered by typing animation via custom event
-  const scrollToBottom = useCallback(() => {
+  // Auto-scroll to bottom
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    // Also trigger global auto-scroll for the DashboardLayout main container
-    window.dispatchEvent(new Event("rasid-auto-scroll"));
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, loadingSteps, scrollToBottom]);
-
-  // Listen for typewriter scroll events
-  useEffect(() => {
-    const handler = () => scrollToBottom();
-    window.addEventListener("rasid-typewriter-tick", handler);
-    return () => window.removeEventListener("rasid-typewriter-tick", handler);
-  }, [scrollToBottom]);
+  }, [messages, loadingSteps]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -1153,232 +702,47 @@ export default function SmartRasid() {
       },
     ]);
 
-    const history = messages.slice(-16).map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
-
-    // Create a placeholder assistant message for streaming
-    const assistantId = `assistant-${Date.now()}`;
-    let streamedContent = "";
-    let streamedToolsUsed: string[] = [];
-    let streamedThinkingSteps: ThinkingStep[] = [];
-    let streamedFollowUp: string[] = [];
-    let streamedProcessingMeta: any = null;
-    let streamedChartData: ChatMessage['chartData'] = undefined;
-    let streamedDashboardData: ChatMessage['dashboardData'] = undefined;
-
     try {
-      // Try SSE streaming first
-      const response = await fetch("/api/rasid/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ message: msg, history }),
+      const history = messages.slice(-16).map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const result = await chatMutation.mutateAsync({
+        message: msg,
+        history: history as Array<{ role: "user" | "assistant"; content: string }>,
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error("SSE not available");
-      }
-
-      // Add placeholder message
-      const placeholderMsg: ChatMessage = {
-        id: assistantId,
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-        userQuery: msg,
-        isStreaming: true,
-      };
-      setMessages(prev => [...prev, placeholderMsg]);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
-
-          if (trimmed.startsWith("event: ")) {
-            const eventType = trimmed.slice(7);
-            // Next line should be data
-            continue;
-          }
-
-          if (trimmed.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(trimmed.slice(6));
-              // Determine event type from the previous event line
-              // We'll parse event+data pairs
-              handleSSEData(data);
-            } catch {
-              // Skip malformed data
-            }
-          }
-        }
-      }
-
-      // Finalize the streamed message
       setLoadingSteps([]);
       soundManager.playMessageReceived();
 
-      setMessages(prev => prev.map(m => m.id === assistantId ? {
-        ...m,
-        content: streamedContent,
-        toolsUsed: streamedToolsUsed,
-        thinkingSteps: streamedThinkingSteps,
-        followUpSuggestions: streamedFollowUp,
-        processingMeta: streamedProcessingMeta,
-        chartData: streamedChartData,
-        dashboardData: streamedDashboardData,
-        isStreaming: false,
-      } : m));
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: (typeof result.response === 'string' ? result.response : '') as string,
+        timestamp: new Date(),
+        toolsUsed: (result as any).toolsUsed,
+        thinkingSteps: (result as any).thinkingSteps,
+        userQuery: msg,
+        followUpSuggestions: (result as any).followUpSuggestions || [],
+        processingMeta: (result as any).processingMeta,
+      };
 
-      setNewMessageIds(prev => new Set(prev).add(assistantId));
-
-    } catch (sseErr) {
-      // Fallback to tRPC mutation if SSE fails
-      console.warn("[SmartRasid] SSE failed, falling back to tRPC:", sseErr);
-      
-      // Remove placeholder if it was added
-      setMessages(prev => prev.filter(m => m.id !== assistantId));
-
-      try {
-        const result = await chatMutation.mutateAsync({
-          message: msg,
-          history: history as Array<{ role: "user" | "assistant"; content: string }>,
-        });
-
-        setLoadingSteps([]);
-        soundManager.playMessageReceived();
-
-        let chartData: ChatMessage['chartData'] = undefined;
-        let dashboardData: ChatMessage['dashboardData'] = undefined;
-        const toolResults = (result as any).toolResults || [];
-        for (const tr of toolResults) {
-          if (tr?.__type === 'chart') {
-            chartData = { chartConfig: tr.chartConfig, summary: tr.summary };
-          } else if (tr?.__type === 'dashboard') {
-            dashboardData = { title: tr.title, dashboardType: tr.dashboardType, kpis: tr.kpis, charts: tr.charts, summary: tr.summary };
-          }
-        }
-
-        const assistantMessage: ChatMessage = {
-          id: `assistant-fallback-${Date.now()}`,
-          role: "assistant",
-          content: (typeof result.response === 'string' ? result.response : '') as string,
-          timestamp: new Date(),
-          toolsUsed: (result as any).toolsUsed,
-          thinkingSteps: (result as any).thinkingSteps,
-          userQuery: msg,
-          followUpSuggestions: (result as any).followUpSuggestions || [],
-          processingMeta: (result as any).processingMeta,
-          chartData,
-          dashboardData,
-        };
-
-        setNewMessageIds(prev => new Set(prev).add(assistantMessage.id));
-        setMessages(prev => [...prev, assistantMessage]);
-      } catch (fallbackErr: any) {
-        setLoadingSteps([]);
-        soundManager.playError();
-        const errorMessage: ChatMessage = {
-          id: `error-${Date.now()}`,
-          role: "assistant",
-          content: "عذراً، حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.",
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, errorMessage]);
-        toast.error("حدث خطأ في الاتصال");
-      }
+      setNewMessageIds(prev => new Set(prev).add(assistantMessage.id));
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (err: any) {
+      setLoadingSteps([]);
+      soundManager.playError();
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: "assistant",
+        content: "عذراً، حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      toast.error("حدث خطأ في الاتصال");
     } finally {
       setIsLoading(false);
-    }
-
-    // SSE event handler
-    function handleSSEData(data: any) {
-      // Token event
-      if (data.text !== undefined) {
-        streamedContent += data.text;
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: streamedContent } : m));
-        scrollToBottom();
-        return;
-      }
-
-      // Thinking step event
-      if (data.agent && data.action) {
-        streamedThinkingSteps.push(data);
-        setLoadingSteps(prev => {
-          const updated = [...prev];
-          const existing = updated.findIndex(s => s.id === data.id);
-          if (existing >= 0) {
-            updated[existing] = data;
-          } else {
-            updated.push(data);
-          }
-          return updated;
-        });
-        return;
-      }
-
-      // Tool event
-      if (data.name && data.status) {
-        if (data.status === "running") {
-          streamedToolsUsed.push(data.name);
-        }
-        return;
-      }
-
-      // Tool result (chart/dashboard)
-      if (data.__type === 'chart') {
-        streamedChartData = { chartConfig: data.chartConfig, summary: data.summary };
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, chartData: streamedChartData } : m));
-        return;
-      }
-      if (data.__type === 'dashboard') {
-        streamedDashboardData = { title: data.title, dashboardType: data.dashboardType, kpis: data.kpis, charts: data.charts, summary: data.summary };
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, dashboardData: streamedDashboardData } : m));
-        return;
-      }
-
-      // Meta event (follow-up suggestions)
-      if (data.followUpSuggestions) {
-        streamedFollowUp = data.followUpSuggestions;
-        return;
-      }
-
-      // Done event
-      if (data.response !== undefined && data.toolsUsed) {
-        streamedContent = data.response;
-        streamedToolsUsed = data.toolsUsed;
-        streamedThinkingSteps = data.thinkingSteps || [];
-        streamedFollowUp = data.followUpSuggestions || [];
-        streamedProcessingMeta = data.processingMeta;
-        const toolResults = data.toolResults || [];
-        for (const tr of toolResults) {
-          if (tr?.__type === 'chart') {
-            streamedChartData = { chartConfig: tr.chartConfig, summary: tr.summary };
-          } else if (tr?.__type === 'dashboard') {
-            streamedDashboardData = { title: tr.title, dashboardType: tr.dashboardType, kpis: tr.kpis, charts: tr.charts, summary: tr.summary };
-          }
-        }
-        return;
-      }
-
-      // Error event
-      if (data.message && !data.agent) {
-        toast.error(data.message);
-        return;
-      }
     }
   };
 
@@ -2025,32 +1389,7 @@ export default function SmartRasid() {
                           const vipLeader = detectVipLeader(msg.content);
                           return vipLeader ? <VipLeaderCard leader={vipLeader} /> : null;
                         })()}
-                        {msg.isStreaming ? (
-                          <div className="prose prose-invert max-w-none text-sm leading-relaxed">
-                            <Streamdown>{msg.content}</Streamdown>
-                            <span className="inline-block w-2 h-4 bg-cyan-400 animate-pulse ml-0.5 rounded-sm" />
-                          </div>
-                        ) : (
-                          <TypewriterStreamdown isNew={newMessageIds.has(msg.id)}>{msg.content}</TypewriterStreamdown>
-                        )}
-                        {/* Chart Rendering */}
-                        {msg.chartData && (
-                          <Suspense fallback={<div className="h-[360px] flex items-center justify-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin" /></div>}>
-                            <RasidChart chartConfig={msg.chartData.chartConfig} summary={msg.chartData.summary} />
-                          </Suspense>
-                        )}
-                        {/* Dashboard Rendering */}
-                        {msg.dashboardData && (
-                          <Suspense fallback={<div className="h-[400px] flex items-center justify-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin" /></div>}>
-                            <RasidDashboard
-                              title={msg.dashboardData.title}
-                              dashboardType={msg.dashboardData.dashboardType}
-                              kpis={msg.dashboardData.kpis}
-                              charts={msg.dashboardData.charts}
-                              summary={msg.dashboardData.summary}
-                            />
-                          </Suspense>
-                        )}
+                        <TypewriterStreamdown isNew={newMessageIds.has(msg.id)}>{msg.content}</TypewriterStreamdown>
                         {/* Clickable Leak IDs */}
                         {extractLeakIds(msg.content).length > 0 && (
                           <div className="mt-3 pt-3 border-t border-cyan-500/10 flex flex-wrap gap-2">
@@ -2445,8 +1784,8 @@ function getFollowUpSuggestions(content: string): string[] {
   const suggestions: string[] = [];
   const lower = content.toLowerCase();
 
-  if (lower.includes("حالة رصد") || lower.includes("leak")) {
-    suggestions.push("تفاصيل أكثر عن الحالات رصد واسعة النطاق");
+  if (lower.includes("تسريب") || lower.includes("leak")) {
+    suggestions.push("تفاصيل أكثر عن حالات الرصد واسعة النطاق");
     suggestions.push("ما التوصيات الأمنية؟");
   }
   if (lower.includes("ملخص") || lower.includes("لوحة") || lower.includes("إحصائي")) {

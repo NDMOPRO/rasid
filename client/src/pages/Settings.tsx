@@ -212,7 +212,7 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { key: "telegramEnabled" as const, label: "رصد تليجرام", desc: "مراقبة قنوات تليجرام لحالات الرصد", icon: "📱" },
+                { key: "telegramEnabled" as const, label: "رصد تليجرام", desc: "مراقبة قنوات تليجرام للتسريبات", icon: "📱" },
                 { key: "darkwebEnabled" as const, label: "رصد الدارك ويب", desc: "مراقبة منتديات وأسواق الدارك ويب", icon: "🌐" },
                 { key: "pasteEnabled" as const, label: "رصد مواقع اللصق", desc: "مراقبة Pastebin وبدائله", icon: "📋" },
                 { key: "autoClassify" as const, label: "التصنيف التلقائي", desc: "تصنيف PII تلقائياً عند الرصد", icon: "🔍" },
@@ -272,10 +272,10 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-6">
               {[
-                { key: "criticalAlerts" as const, label: "حالات رصد واسعة النطاق", desc: "إشعار فوري عند اكتشاف حالة رصد واسعة النطاق", color: "text-red-400" },
-                { key: "highAlerts" as const, label: "حالات رصد مرتفعة التأثير", desc: "إشعار عند اكتشاف حالة رصد مرتفعة التأثير", color: "text-amber-400" },
-                { key: "mediumAlerts" as const, label: "حالات رصد متوسطة التأثير", desc: "إشعار عند اكتشاف حالة رصد متوسطة التأثير", color: "text-yellow-400" },
-                { key: "dailyDigest" as const, label: "ملخص يومي", desc: "تقرير يومي بحالات الرصد", color: "text-cyan-400" },
+                { key: "criticalAlerts" as const, label: "تسريبات واسعة النطاق", desc: "إشعار فوري عند اكتشاف تسريب واسع النطاق", color: "text-red-400" },
+                { key: "highAlerts" as const, label: "تسريبات مرتفعة التأثير", desc: "إشعار عند اكتشاف تسريب مرتفع التأثير", color: "text-amber-400" },
+                { key: "mediumAlerts" as const, label: "تسريبات متوسطة التأثير", desc: "إشعار عند اكتشاف تسريب متوسط التأثير", color: "text-yellow-400" },
+                { key: "dailyDigest" as const, label: "ملخص يومي", desc: "تقرير يومي بالتسريبات المرصودة", color: "text-cyan-400" },
                 { key: "weeklyReport" as const, label: "تقرير أسبوعي", desc: "تقرير أسبوعي شامل بالإحصائيات", color: "text-violet-400" },
               ].map((item) => (
                 <div key={item.key} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border">

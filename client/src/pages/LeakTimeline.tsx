@@ -87,7 +87,7 @@ export default function LeakTimeline() {
       kpiData: {
         earliest: earliestDate.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' }),
         latest: latestDate.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' }),
-        peak: `${peakMonth.month} (${peakMonth.count} حالات رصد)`,
+        peak: `${peakMonth.month} (${peakMonth.count} حوادث)`,
         avg: avgPerMonth,
       },
       cumulativeData: cumulative,
@@ -106,19 +106,19 @@ export default function LeakTimeline() {
         <KpiCard title="أقدم حالة رصد" value={kpiData.earliest} icon={Calendar} subtext="Earliest Leak" />
         <KpiCard title="أحدث حالة رصد" value={kpiData.latest} icon={Clock} subtext="Latest Leak" />
         <KpiCard title="شهر الذروة" value={kpiData.peak} icon={TrendingUp} subtext="Peak Month" />
-        <KpiCard title="متوسط حالات الرصد شهرياً" value={kpiData.avg} icon={BarChart3} subtext="Avg. Incidents / Month" />
+        <KpiCard title="متوسط الحوادث شهرياً" value={kpiData.avg} icon={BarChart3} subtext="Avg. Incidents / Month" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <GlassCard className="h-[400px]">
-          <h2 className="text-xl font-bold mb-4 text-cyan-300">حالات الرصد الشهرية (Monthly Incidents)</h2>
+          <h2 className="text-xl font-bold mb-4 text-cyan-300">الحوادث الشهرية (Monthly Incidents)</h2>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData} margin={{ top: 5, right: 20, left: -10, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis dataKey="month" angle={-45} textAnchor="end" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" allowDecimals={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="count" name="حالات الرصد" stroke="#3DB1AC" fill="rgba(61, 177, 172, 0.2)" />
+              <Area type="monotone" dataKey="count" name="الحوادث" stroke="#3DB1AC" fill="rgba(61, 177, 172, 0.2)" />
             </AreaChart>
           </ResponsiveContainer>
         </GlassCard>
@@ -131,13 +131,13 @@ export default function LeakTimeline() {
               <XAxis dataKey="year" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" allowDecimals={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="count" name="حالات الرصد" fill="#6459A7" />
+              <Bar dataKey="count" name="الحوادث" fill="#6459A7" />
             </BarChart>
           </ResponsiveContainer>
         </GlassCard>
 
         <GlassCard className="h-[400px]">
-          <h2 className="text-xl font-bold mb-4 text-cyan-300">العدد المُدّعى المتراكم (Cumulative Records Exposed)</h2>
+          <h2 className="text-xl font-bold mb-4 text-cyan-300">السجلات المتراكمة المكشوفة (Cumulative Records Exposed)</h2>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cumulativeData} margin={{ top: 5, right: 20, left: 20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />

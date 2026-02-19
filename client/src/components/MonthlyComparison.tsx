@@ -254,40 +254,39 @@ export default function MonthlyComparison() {
 
   if (!data) return null;
 
-  const currentMonth = data?.currentMonth ?? {} as any;
-  const previousMonth = data?.previousMonth ?? {} as any;
+  const { currentMonth, previousMonth } = data;
 
   // KPI comparison cards
   const kpiItems = [
     {
       label: "إجمالي حالات الرصد",
       labelEn: "Total Leaks",
-      current: currentMonth?.totalLeaks ?? 0,
-      previous: previousMonth?.totalLeaks ?? 0,
+      current: currentMonth.totalLeaks,
+      previous: previousMonth.totalLeaks,
       icon: ShieldAlert,
       color: "text-red-400 bg-red-500/10",
     },
     {
       label: "العدد المُدّعى",
       labelEn: "Exposed Records",
-      current: currentMonth?.totalRecords ?? 0,
-      previous: previousMonth?.totalRecords ?? 0,
+      current: currentMonth.totalRecords,
+      previous: previousMonth.totalRecords,
       icon: Database,
       color: "text-amber-400 bg-amber-500/10",
     },
     {
       label: "حالات رصد واسعة النطاق",
       labelEn: "Critical Incidents",
-      current: currentMonth?.criticalCount ?? 0,
-      previous: previousMonth?.criticalCount ?? 0,
+      current: currentMonth.criticalCount,
+      previous: previousMonth.criticalCount,
       icon: Zap,
       color: "text-red-400 bg-red-500/10",
     },
     {
       label: "تم حلها",
       labelEn: "Resolved",
-      current: currentMonth?.resolvedCount ?? 0,
-      previous: previousMonth?.resolvedCount ?? 0,
+      current: currentMonth.resolvedCount,
+      previous: previousMonth.resolvedCount,
       icon: CheckCircle2,
       color: "text-emerald-400 bg-emerald-500/10",
       inverse: true,
@@ -296,9 +295,9 @@ export default function MonthlyComparison() {
 
   // Source comparison
   const sourceItems = [
-    { label: "تيليجرام", current: currentMonth?.telegramCount ?? 0, previous: previousMonth?.telegramCount ?? 0, icon: Radio, color: "text-blue-400 bg-blue-500/10" },
-    { label: "الويب المظلم", current: currentMonth?.darkwebCount ?? 0, previous: previousMonth?.darkwebCount ?? 0, icon: Globe, color: "text-purple-400 bg-purple-500/10" },
-    { label: "مواقع اللصق", current: currentMonth?.pasteCount ?? 0, previous: previousMonth?.pasteCount ?? 0, icon: FileText, color: "text-yellow-400 bg-yellow-500/10" },
+    { label: "تيليجرام", current: currentMonth.telegramCount, previous: previousMonth.telegramCount, icon: Radio, color: "text-blue-400 bg-blue-500/10" },
+    { label: "الويب المظلم", current: currentMonth.darkwebCount, previous: previousMonth.darkwebCount, icon: Globe, color: "text-purple-400 bg-purple-500/10" },
+    { label: "مواقع اللصق", current: currentMonth.pasteCount, previous: previousMonth.pasteCount, icon: FileText, color: "text-yellow-400 bg-yellow-500/10" },
   ];
 
   return (
@@ -317,18 +316,18 @@ export default function MonthlyComparison() {
           <div>
             <h3 className="text-sm font-bold text-foreground">المقارنة الشهرية</h3>
             <p className="text-[11px] text-muted-foreground">
-              {currentMonth?.name ?? ''} {currentMonth?.year ?? ''} مقابل {previousMonth?.name ?? ''} {previousMonth?.year ?? ''}
+              {currentMonth.name} {currentMonth.year} مقابل {previousMonth.name} {previousMonth.year}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1.5 text-[10px]">
             <span className="w-3 h-1.5 rounded-full bg-gradient-to-l from-cyan-500 to-blue-500" />
-            <span className="text-muted-foreground">{currentMonth?.name ?? ''}</span>
+            <span className="text-muted-foreground">{currentMonth.name}</span>
           </span>
           <span className="flex items-center gap-1.5 text-[10px]">
             <span className="w-3 h-1.5 rounded-full bg-slate-400/50" />
-            <span className="text-muted-foreground">{previousMonth?.name ?? ''}</span>
+            <span className="text-muted-foreground">{previousMonth.name}</span>
           </span>
         </div>
       </div>
@@ -392,25 +391,25 @@ export default function MonthlyComparison() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-foreground flex items-center gap-2">
                 <TrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-                {currentMonth?.name ?? ''} - النشاط اليومي
+                {currentMonth.name} - النشاط اليومي
               </span>
               <span className="text-[10px] text-muted-foreground tabular-nums">
-                {(currentMonth?.daily ?? []).length} يوم
+                {currentMonth.daily.length} يوم
               </span>
             </div>
-            <MiniSparkline data={(currentMonth?.daily ?? []).map(d => d.count)} color="#3DB1AC" height={50} />
+            <MiniSparkline data={currentMonth.daily.map(d => d.count)} color="#3DB1AC" height={50} />
           </div>
           <div className="glass-card rounded-xl p-4 border border-border/50">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-foreground flex items-center gap-2">
                 <TrendingDown className="w-3.5 h-3.5 text-slate-400" />
-                {previousMonth?.name ?? ''} - النشاط اليومي
+                {previousMonth.name} - النشاط اليومي
               </span>
               <span className="text-[10px] text-muted-foreground tabular-nums">
-                {(previousMonth?.daily ?? []).length} يوم
+                {previousMonth.daily.length} يوم
               </span>
             </div>
-            <MiniSparkline data={(previousMonth?.daily ?? []).map(d => d.count)} color="#94A3B8" height={50} />
+            <MiniSparkline data={previousMonth.daily.map(d => d.count)} color="#94A3B8" height={50} />
           </div>
         </div>
 
@@ -421,7 +420,7 @@ export default function MonthlyComparison() {
             مقارنة القطاعات
             <span className="text-[10px] text-muted-foreground/50 font-normal">(الحالي / السابق)</span>
           </h4>
-          <SectorComparison currentSectors={currentMonth?.sectors ?? []} prevSectors={previousMonth?.sectors ?? []} />
+          <SectorComparison currentSectors={currentMonth.sectors} prevSectors={previousMonth.sectors} />
         </div>
 
         {/* Overall Summary */}
@@ -434,7 +433,7 @@ export default function MonthlyComparison() {
         >
           <div className="flex items-center gap-3">
             {(() => {
-              const leakDelta = calcDelta(currentMonth?.totalLeaks ?? 0, previousMonth?.totalLeaks ?? 0);
+              const leakDelta = calcDelta(currentMonth.totalLeaks, previousMonth.totalLeaks);
               const isImproving = leakDelta.direction === "down";
               return (
                 <>
@@ -452,9 +451,9 @@ export default function MonthlyComparison() {
                         : "لا تغيير في عدد حالات الرصد"}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {currentMonth?.name ?? ''}: {currentMonth?.totalLeaks ?? 0} حالة رصد ({formatNumber(currentMonth?.totalRecords ?? 0)} سجل)
+                      {currentMonth.name}: {currentMonth.totalLeaks} حالة رصد ({formatNumber(currentMonth.totalRecords)} سجل)
                       {" · "}
-                      {previousMonth?.name ?? ''}: {previousMonth?.totalLeaks ?? 0} حالة رصد ({formatNumber(previousMonth?.totalRecords ?? 0)} سجل)
+                      {previousMonth.name}: {previousMonth.totalLeaks} حالة رصد ({formatNumber(previousMonth.totalRecords)} سجل)
                     </p>
                   </div>
                   <div className={`text-2xl font-bold tabular-nums ${

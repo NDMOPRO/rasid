@@ -99,7 +99,7 @@ export default function DarkWebMonitor() {
           { key: "sources", label: "مصادر مراقبة", value: darkWebChannels.length, color: "text-violet-400", borderColor: "border-violet-500/20", bgColor: "bg-violet-500/5" },
           { key: "leaks", label: "حالات رصد مكتشفة", value: darkWebChannels.reduce((a, c) => a + (c.leaksDetected ?? 0), 0), color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
           { key: "listings", label: "عروض بيع نشطة", value: darkWebListings.length, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5" },
-          { key: "records", label: "العدد المُدّعى", value: darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0).toLocaleString(), color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
+          { key: "records", label: "سجلات مكشوفة", value: darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0).toLocaleString(), color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
         ].map((stat, i) => (
           <motion.div key={stat.key} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card
@@ -435,7 +435,7 @@ export default function DarkWebMonitor() {
             <div className="bg-red-500/5 rounded-xl p-4 border border-red-500/20">
               <h4 className="text-xs font-semibold text-red-400 mb-2">تحذير أمني</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                هذا العرض تم رصده على الدارك ويب ويحتوي على بيانات شخصية مكتشفة. يجب التحقق من صحة البيانات وتوثيق حالة الرصد وتحليلها.
+                هذا العرض تم رصده على الدارك ويب ويحتوي على بيانات شخصية مسربة. يجب التحقق من صحة البيانات وتوثيق الحادثة وتحليلها.
               </p>
             </div>
           </div>

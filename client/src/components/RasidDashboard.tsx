@@ -92,7 +92,7 @@ const RasidDashboard = memo(function RasidDashboard({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
         <KPICard
           icon={BarChart3}
-          label="إجمالي حالات الرصد"
+          label="إجمالي الحوادث"
           value={formatNumber(kpis.totalIncidents)}
           color="sky"
         />

@@ -31,8 +31,8 @@ const modules: TrainingModule[] = [
   { id: "t1", title: "أساسيات رصد البيانات", description: "تعلم كيفية استخدام أدوات الرصد الأساسية وفهم مصادر البيع", icon: Search, duration: "45 دقيقة", level: "مبتدئ", progress: 100, lessons: 6, completedLessons: 6, locked: false },
   { id: "t2", title: "تحليل بيانات الدارك ويب", description: "فهم بنية الدارك ويب وكيفية تتبع حالات الرصد عبر المنتديات والأسواق", icon: Database, duration: "60 دقيقة", level: "متوسط", progress: 67, lessons: 9, completedLessons: 6, locked: false },
   { id: "t3", title: "تصنيف البيانات الشخصية (PII)", description: "تعلم تصنيف أنواع البيانات الشخصية وفقاً لنظام PDPL", icon: FileSearch, duration: "30 دقيقة", level: "مبتدئ", progress: 100, lessons: 4, completedLessons: 4, locked: false },
-  { id: "t4", title: "استخدام راصد الذكي (AI)", description: "إتقان استخدام المساعد الذكي لتحليل حالات الرصد وإنشاء التقارير", icon: Brain, duration: "90 دقيقة", level: "متقدم", progress: 33, lessons: 12, completedLessons: 4, locked: false },
-  { id: "t5", title: "إدارة حالات الرصد والاستجابة", description: "بروتوكولات الاستجابة لحالات الرصد وإدارة دورة حياة حالة الرصد", icon: Shield, duration: "75 دقيقة", level: "متقدم", progress: 0, lessons: 8, completedLessons: 0, locked: false },
+  { id: "t4", title: "استخدام راصد الذكي (AI)", description: "إتقان استخدام المساعد الذكي لتحليل الحوادث وإنشاء التقارير", icon: Brain, duration: "90 دقيقة", level: "متقدم", progress: 33, lessons: 12, completedLessons: 4, locked: false },
+  { id: "t5", title: "إدارة الحوادث والاستجابة", description: "بروتوكولات الاستجابة للحوادث وإدارة دورة حياة حالة الرصد", icon: Shield, duration: "75 دقيقة", level: "متقدم", progress: 0, lessons: 8, completedLessons: 0, locked: false },
   { id: "t6", title: "التحليل الجنائي الرقمي", description: "تقنيات متقدمة في التحليل الجنائي الرقمي وسلسلة الأدلة", icon: Zap, duration: "120 دقيقة", level: "متقدم", progress: 0, lessons: 15, completedLessons: 0, locked: true },
 ];
 

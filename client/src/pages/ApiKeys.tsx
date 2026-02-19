@@ -210,7 +210,7 @@ export default function ApiKeys() {
                 </pre>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-2">جلب حالات الرصد:</p>
+                <p className="text-xs text-muted-foreground mb-2">جلب التسريبات:</p>
                 <pre className="bg-background rounded-lg p-3 text-xs text-cyan-400 font-mono overflow-x-auto" dir="ltr">
 {`GET /api/v1/leaks
 GET /api/v1/leaks?severity=critical

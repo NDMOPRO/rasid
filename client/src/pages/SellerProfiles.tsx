@@ -103,7 +103,7 @@ export default function SellerProfiles() {
           { key: "total", label: "إجمالي البائعين", value: stats.total, icon: UserX, color: "text-primary", borderColor: "border-primary/20", bgColor: "bg-primary/5" },
           { key: "critical", label: "بائعون واسعو النطاق", value: stats.critical, icon: AlertTriangle, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5" },
           { key: "active", label: "بائعون نشطون", value: stats.active, icon: Activity, color: "text-emerald-400", borderColor: "border-emerald-500/20", bgColor: "bg-emerald-500/5" },
-          { key: "totalLeaks", label: "حالات رصد مرتبطة", value: stats?.totalLeaks ?? 0, icon: TrendingUp, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
+          { key: "totalLeaks", label: "تسريبات مرتبطة", value: stats.totalLeaks, icon: TrendingUp, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
         ].map((stat, i) => (
           <motion.div key={stat.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card
@@ -231,7 +231,7 @@ export default function SellerProfiles() {
                   {/* Footer Stats */}
                   <div className="flex items-center justify-between pt-2 border-t border-border">
                     <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
-                      <span>{seller.totalLeaks || 0} حالة رصد</span>
+                      <span>{seller.totalLeaks || 0} تسريب</span>
                       <span>{(seller.totalRecords || 0).toLocaleString()} سجل</span>
                     </div>
                     <span className="text-[9px] text-primary/50">اضغط للتفاصيل ←</span>
@@ -276,7 +276,7 @@ export default function SellerProfiles() {
                 <span className="text-sm font-medium text-foreground">{seller.name}</span>
                 <span className="text-sm font-bold text-red-400">{seller.riskScore}/100</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">{seller?.totalLeaks ?? 0} حالة رصد • {(seller?.totalRecords ?? 0).toLocaleString()} سجل</p>
+              <p className="text-[10px] text-muted-foreground">{seller.totalLeaks} تسريب • {(seller.totalRecords || 0).toLocaleString()} سجل</p>
             </div>
           ))}
         </div>
@@ -308,11 +308,11 @@ export default function SellerProfiles() {
       </DetailModal>
 
       {/* Total Leaks Modal */}
-      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="حالات الرصد المرتبطة بالبائعين" icon={<TrendingUp className="w-5 h-5 text-amber-400" />}>
+      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="التسريبات المرتبطة بالبائعين" icon={<TrendingUp className="w-5 h-5 text-amber-400" />}>
         <div className="space-y-3">
           <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
-            <p className="text-2xl font-bold text-amber-400"><AnimatedCounter value={stats?.totalLeaks ?? 0} /></p>
-            <p className="text-xs text-muted-foreground">حالة رصد مرتبط</p>
+            <p className="text-2xl font-bold text-amber-400"><AnimatedCounter value={stats.totalLeaks} /></p>
+            <p className="text-xs text-muted-foreground">تسريب مرتبط</p>
           </div>
           {sellers?.sort((a, b) => (b.totalLeaks || 0) - (a.totalLeaks || 0)).slice(0, 10).map(seller => (
             <div key={seller.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between">
@@ -377,7 +377,7 @@ export default function SellerProfiles() {
                 }`}>{selectedSeller.riskScore}/100</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground">حالات الرصد</p>
+                <p className="text-xs text-muted-foreground">التسريبات</p>
                 <p className="text-xl font-bold text-foreground mt-1">{selectedSeller.totalLeaks || 0}</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">

@@ -235,8 +235,6 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
-      // Trigger global auto-scroll for main container
-      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -276,8 +274,6 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
-      // Trigger global auto-scroll for main container
-      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -625,7 +621,7 @@ export default function LiveScan() {
                   )}
                   {savedResults.size === scanResults.length && scanResults.length > 0
                     ? "تم حفظ الكل"
-                    : `حفظ الكل كحوادث (${scanResults.length - savedResults.size})`}
+                    : `حفظ الكل كحالات رصد (${scanResults.length - savedResults.size})`}
                 </Button>
               </div>
 
@@ -681,7 +677,7 @@ export default function LiveScan() {
                           {/* Data Types */}
                           {result.dataTypes && result.dataTypes.length > 0 && (
                             <div>
-                              <span className="text-xs text-white/40 block mb-1">البيانات المكشوفة:</span>
+                              <span className="text-xs text-white/40 block mb-1">البيانات المكتشفة:</span>
                               <div className="flex flex-wrap gap-1">
                                 {result.dataTypes.map((dt, i) => (
                                   <Badge key={i} variant="outline" className="text-xs border-red-500/20 text-red-300">

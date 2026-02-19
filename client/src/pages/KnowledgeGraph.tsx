@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 
 const nodeTypeConfig: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  leak: { label: "حالة رصد", icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/20" },
+  leak: { label: "تسريب", icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/20" },
   seller: { label: "بائع", icon: Users, color: "text-amber-400", bg: "bg-amber-500/20" },
   entity: { label: "جهة", icon: Building2, color: "text-blue-400", bg: "bg-blue-500/20" },
   sector: { label: "قطاع", icon: Layers, color: "text-emerald-400", bg: "bg-emerald-500/20" },
@@ -83,7 +83,7 @@ export default function KnowledgeGraph() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground max-w-lg">
-            شبكة العلاقات بين حالات الرصد والبائعين والجهات والقطاعات — تحليل الروابط والأنماط
+            شبكة العلاقات بين التسريبات والبائعين والجهات والقطاعات — تحليل الروابط والأنماط
           </p>
         </div>
       </motion.div>

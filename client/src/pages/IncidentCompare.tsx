@@ -25,7 +25,7 @@ const ComparisonCard = ({ incident }) => {
     return (
       <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex items-center justify-center h-full">
       <div className="mb-4"><GlobalFilterBar /></div>
-        <p className="text-slate-400">اختر حالة رصد لعرض التفاصيل</p>
+        <p className="text-slate-400">اختر حادثة لعرض التفاصيل</p>
       </div>
     );
   }
@@ -85,18 +85,18 @@ export default function IncidentCompare() {
   return (
     <div className="p-4 sm:p-6 md:p-8 min-h-screen text-white" dir="rtl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-cyan-300">مقارنة حالات الرصد | Incident Compare</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-cyan-300">مقارنة الحوادث | Incident Compare</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-          <label htmlFor="incident1" className="block mb-2 text-sm font-medium text-slate-300">اختر حالة الرصد الأولى</label>
+          <label htmlFor="incident1" className="block mb-2 text-sm font-medium text-slate-300">اختر الحادثة الأولى</label>
           <select id="incident1" value={selectedId1} onChange={e => setSelectedId1(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500">
             {filteredRecords.map(rec => <option key={rec.id} value={rec.id}>{rec.title_ar}</option>)}
           </select>
         </div>
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-          <label htmlFor="incident2" className="block mb-2 text-sm font-medium text-slate-300">اختر حالة الرصد الثانية</label>
+          <label htmlFor="incident2" className="block mb-2 text-sm font-medium text-slate-300">اختر الحادثة الثانية</label>
           <select id="incident2" value={selectedId2} onChange={e => setSelectedId2(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500">
             {filteredRecords.map(rec => <option key={rec.id} value={rec.id}>{rec.title_ar}</option>)}
           </select>
@@ -118,8 +118,8 @@ export default function IncidentCompare() {
               <PolarRadiusAxis angle={30} domain={[0, 'dataMax']} tick={{ fill: 'transparent' }}/>
               <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
               <Legend wrapperStyle={{ color: 'white' }} payload={[
-                  { value: incidents[0]?.title_ar || 'حالة الرصد الأولى', type: 'line', color: '#3DB1AC' },
-                  { value: incidents[1]?.title_ar || 'حالة الرصد الثانية', type: 'line', color: '#f59e0b' },
+                  { value: incidents[0]?.title_ar || 'الحادثة الأولى', type: 'line', color: '#3DB1AC' },
+                  { value: incidents[1]?.title_ar || 'الحادثة الثانية', type: 'line', color: '#f59e0b' },
               ]}/>
               <Radar name={incidents[0]?.title_ar} dataKey="A" stroke="#3DB1AC" fill="#3DB1AC" fillOpacity={0.6} />
               <Radar name={incidents[1]?.title_ar} dataKey="B" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} />
@@ -134,8 +134,8 @@ export default function IncidentCompare() {
               <thead className="text-xs text-cyan-300 uppercase bg-slate-900/50">
                 <tr>
                   <th scope="col" className="px-6 py-3 rounded-r-lg">نوع البيان</th>
-                  <th scope="col" className="px-6 py-3 text-center">{incidents[0]?.title_ar || 'حالة الرصد 1'}</th>
-                  <th scope="col" className="px-6 py-3 text-center rounded-l-lg">{incidents[1]?.title_ar || 'حالة الرصد 2'}</th>
+                  <th scope="col" className="px-6 py-3 text-center">{incidents[0]?.title_ar || 'الحادثة 1'}</th>
+                  <th scope="col" className="px-6 py-3 text-center rounded-l-lg">{incidents[1]?.title_ar || 'الحادثة 2'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,7 +156,7 @@ export default function IncidentCompare() {
                 ))}
                  {piiUnion.length === 0 && (
                     <tr>
-                        <td colSpan={3} className="text-center py-8 text-slate-400">لم يتم تحديد حالات رصد أو لا توجد بيانات PII للمقارنة.</td>
+                        <td colSpan={3} className="text-center py-8 text-slate-400">لم يتم تحديد حوادث أو لا توجد بيانات PII للمقارنة.</td>
                     </tr>
                 )}
               </tbody>

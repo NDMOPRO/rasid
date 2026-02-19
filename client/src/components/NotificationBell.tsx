@@ -43,7 +43,7 @@ const typeIcons: Record<string, React.ElementType> = {
 };
 
 const typeLabels: Record<string, string> = {
-  new_leak: "حالة رصد جديد",
+  new_leak: "تسريب جديد",
   status_change: "تغيير حالة",
   scan_complete: "اكتمال فحص",
   job_complete: "اكتمال مهمة",
@@ -186,7 +186,7 @@ function getDateGroup(dateStr: string | Date | null | undefined): string {
 const filterTabs = [
   { id: "all", label: "الكل", icon: Bell },
   { id: "critical", label: "حرج", icon: Zap },
-  { id: "new_leak", label: "حالات رصد", icon: ShieldAlert },
+  { id: "new_leak", label: "تسريبات", icon: ShieldAlert },
   { id: "system", label: "نظام", icon: Shield },
 ];
 
@@ -439,7 +439,7 @@ export default function NotificationBell({ userId }: { userId?: number }) {
                   </motion.div>
                   <p className="text-sm font-medium">لا توجد إشعارات</p>
                   <p className="text-xs mt-1 text-muted-foreground/60">
-                    {activeFilter !== "all" ? "جرب تغيير الفلتر" : "ستظهر الإشعارات هنا عند رصد حالات جديدة"}
+                    {activeFilter !== "all" ? "جرب تغيير الفلتر" : "ستظهر الإشعارات هنا عند رصد تسريبات جديدة"}
                   </p>
                 </div>
               ) : (

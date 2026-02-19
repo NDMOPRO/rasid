@@ -56,7 +56,7 @@ export default function ThreatActorsAnalysis() {
         <div className="bg-slate-800/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
           <p className="label font-bold">{`${label}`}</p>
-          <p className="intro">{`عدد حالات الرصد: ${payload[0].value}`}</p>
+          <p className="intro">{`عدد الحوادث: ${payload[0].value}`}</p>
         </div>
       );
     }
@@ -72,13 +72,13 @@ export default function ThreatActorsAnalysis() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <KpiCard title="إجمالي المهاجمين" value={actorProfiles.length} icon={Users} subtitle="Total Unique Actors" />
-        <KpiCard title="المهاجم الأكثر نشاطًا" value={mostActiveActor.name} icon={Target} subtitle={`بـ ${mostActiveActor.count} حالة رصد`} />
+        <KpiCard title="المهاجم الأكثر نشاطًا" value={mostActiveActor.name} icon={Target} subtitle={`بـ ${mostActiveActor.count} حادثة`} />
         <KpiCard title="المهاجم الأكثر تدميرًا" value={mostDestructiveActor.name} icon={Bomb} subtitle={`تسبب في رصد ${mostDestructiveActor.records.toLocaleString('ar-SA')} سجل`} />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <GlassCard className="col-span-1">
-          <h2 className="text-2xl font-bold mb-4 text-white">أبرز 20 مهاجمًا (حسب عدد حالات الرصد)</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">أبرز 20 مهاجمًا (حسب عدد الحوادث)</h2>
           <p className="text-slate-400 mb-6">Top 20 Actors by Incident Count</p>
           <div style={{ height: '600px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -87,7 +87,7 @@ export default function ThreatActorsAnalysis() {
                 <XAxis type="number" stroke="#9ca3af" />
                 <YAxis dataKey="name" type="category" stroke="#9ca3af" width={120} tick={{ fill: '#e2e8f0' }} />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.2)' }} />
-                <Bar dataKey="count" name="عدد حالات الرصد" fill="#3DB1AC" barSize={15} />
+                <Bar dataKey="count" name="عدد الحوادث" fill="#3DB1AC" barSize={15} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -104,7 +104,7 @@ export default function ThreatActorsAnalysis() {
                 <YAxis stroke="#9ca3af" />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.2)' }} />
                 <Legend wrapperStyle={{ color: '#e2e8f0' }} />
-                <Bar dataKey="count" name="عدد حالات الرصد">
+                <Bar dataKey="count" name="عدد الحوادث">
                   {attackMethods.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -122,7 +122,7 @@ export default function ThreatActorsAnalysis() {
               <thead className="bg-slate-700/50 text-slate-100">
                 <tr>
                   <th className="p-4">اسم المهاجم (Actor)</th>
-                  <th className="p-4">حالات الرصد (Incidents)</th>
+                  <th className="p-4">الحوادث (Incidents)</th>
                   <th className="p-4">السجلات المرصودة (Records)</th>
                   <th className="p-4">القطاعات المستهدفة (Sectors)</th>
                   <th className="p-4">الأساليب المستخدمة (Methods)</th>

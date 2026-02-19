@@ -320,7 +320,7 @@ export default function TelegramMonitor() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {["بيانات سعودية", "قاعدة بيانات", "KSA data", "Saudi database", "تسرب بيانات شخصية", "Saudi leak", "هوية وطنية", "أرقام جوال", "سجلات صحية", "بيانات بنكية", "Saudi PII", "KSA dump"].map((keyword) => (
+            {["بيانات سعودية", "قاعدة بيانات", "KSA data", "Saudi database", "تسريب بيانات", "Saudi leak", "هوية وطنية", "أرقام جوال", "سجلات صحية", "بيانات بنكية", "Saudi PII", "KSA dump"].map((keyword) => (
               <Badge key={keyword} variant="outline" className="bg-primary/5 border-primary/20 text-primary text-xs">
                 {keyword}
               </Badge>

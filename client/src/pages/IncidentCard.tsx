@@ -101,8 +101,8 @@ export default function IncidentCard() {
     return (
       <div className="flex flex-col items-center justify-center h-screen text-white bg-slate-900">
         <AlertTriangle size={48} className="text-yellow-400 mb-4" />
-        <h1 className="text-2xl font-bold">لم يتم العثور على حالة الرصد</h1>
-        <p className="text-slate-400">قد تكون حالة الرصد التي تبحث عنها قد حُذفت أو أن الرابط غير صحيح.</p>
+        <h1 className="text-2xl font-bold">لم يتم العثور على الحادثة</h1>
+        <p className="text-slate-400">قد تكون الحادثة التي تبحث عنها قد حُذفت أو أن الرابط غير صحيح.</p>
         <Link href="/incidents-registry">
           <a className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <ArrowLeft size={16} className="ml-2" />
@@ -128,7 +128,7 @@ export default function IncidentCard() {
               العودة للسجل
             </a>
           </Link>
-          <h1 className="text-xl font-bold text-slate-400">بطاقة حالة الرصد | Incident Detail</h1>
+          <h1 className="text-xl font-bold text-slate-400">بطاقة الحادثة | Incident Detail</h1>
         </div>
 
         {/* Header */}
@@ -206,7 +206,7 @@ export default function IncidentCard() {
             {/* Description */}
             {description_ar && (
               <GlassCard>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Info size={20}/> وصف حالة الرصد</h3>
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Info size={20}/> وصف الحادثة</h3>
                 <p className="text-slate-300 leading-relaxed text-base">{description_ar}</p>
               </GlassCard>
             )}

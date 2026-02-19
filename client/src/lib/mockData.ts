@@ -99,7 +99,7 @@ export const leakRecords: LeakRecord[] = [
     detectedAt: "2024-03-15T12:15:00",
     status: "documented",
     description: "Massive STC customer database leaked on Telegram channel 'KSA Data Dumps'. Contains 2.3M records with national IDs, phone numbers, IMEI numbers, and billing addresses.",
-    descriptionAr: "حالة رصد ضخمة لقاعدة بيانات عملاء STC على قناة تيليجرام 'KSA Data Dumps'. يحتوي على 2.3 مليون سجل مع أرقام هوية وأرقام هواتف وأرقام IMEI وعناوين الفوترة.",
+    descriptionAr: "تسريب ضخم لقاعدة بيانات عملاء STC على قناة تيليجرام 'KSA Data Dumps'. يحتوي على 2.3 مليون سجل مع أرقام هوية وأرقام هواتف وأرقام IMEI وعناوين الفوترة.",
   },
   {
     id: "LK-2025-0010",
@@ -164,7 +164,7 @@ export const leakRecords: LeakRecord[] = [
 ];
 
 export const telegramChannels: MonitoringChannel[] = [
-  { id: "CH-TG-001", name: "Saudi Leaks حالات رصد سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
+  { id: "CH-TG-001", name: "Saudi Leaks تسريبات سعودية", platform: "Telegram", subscribers: 45000, status: "flagged", lastActivity: "2026-02-10T16:00:00", leaksDetected: 18, riskLevel: "high" },
   { id: "CH-TG-002", name: "KSA Data Dumps", platform: "Telegram", subscribers: 28000, status: "active", lastActivity: "2026-02-09T14:00:00", leaksDetected: 12, riskLevel: "high" },
   { id: "CH-TG-003", name: "Gulf Hackers الخليج", platform: "Telegram", subscribers: 67000, status: "flagged", lastActivity: "2026-02-10T10:00:00", leaksDetected: 24, riskLevel: "high" },
   { id: "CH-TG-004", name: "InfoStealer Logs SA", platform: "Telegram", subscribers: 15000, status: "active", lastActivity: "2026-02-08T18:00:00", leaksDetected: 8, riskLevel: "medium" },

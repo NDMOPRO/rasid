@@ -28,7 +28,7 @@ const CustomTreemapTooltip = ({ active, payload }) => {
             <div className="bg-slate-900/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
                 <p className="font-bold">{name}</p>
-                <p>عدد حالات الرصد: {count}</p>
+                <p>عدد الحوادث: {count}</p>
             </div>
         );
     }
@@ -118,7 +118,7 @@ export default function SectorAnalysis() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                    <h2 className="text-2xl font-bold mb-4 text-white">توزيع حالات الرصد حسب القطاع</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">توزيع الحوادث حسب القطاع</h2>
                     <p className="text-slate-400 mb-6">Treemap of sectors by incident count</p>
                     <ResponsiveContainer width="100%" height={400}>
                         <Treemap

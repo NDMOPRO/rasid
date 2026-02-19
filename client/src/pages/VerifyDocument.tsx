@@ -901,7 +901,7 @@ export default function VerifyDocument() {
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { icon: Hash, label: "رقم الوثيقة", value: verifyResult.document.documentId, color: "text-teal-400" },
-                            { icon: FileText, label: "رقم حالة الرصد", value: verifyResult.document.leakId, color: "text-cyan-400" },
+                            { icon: FileText, label: "رقم التسريب", value: verifyResult.document.leakId, color: "text-cyan-400" },
                             { icon: User, label: "أصدرها", value: verifyResult.document.generatedByName, color: "text-white" },
                             {
                               icon: Calendar,
@@ -937,7 +937,7 @@ export default function VerifyDocument() {
                           transition={{ delay: 1.2 }}
                           className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30"
                         >
-                          <p className="text-[10px] text-slate-400 mb-1.5">عنوان حالة الرصد</p>
+                          <p className="text-[10px] text-slate-400 mb-1.5">عنوان الحادثة</p>
                           <p className="text-sm font-semibold text-white">{verifyResult.document.titleAr}</p>
                         </motion.div>
 
@@ -975,7 +975,7 @@ export default function VerifyDocument() {
                             )}
                             {verifyResult.document.leakRecordCount && (
                               <span className="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/30">
-                                {verifyResult.document.leakRecordCount.toLocaleString()} سجل مُدّعى
+                                {verifyResult.document.leakRecordCount.toLocaleString()} سجل مكشوف
                               </span>
                             )}
                           </motion.div>

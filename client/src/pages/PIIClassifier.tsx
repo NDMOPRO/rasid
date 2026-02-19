@@ -257,8 +257,6 @@ export default function PIIClassifier() {
       });
     } finally {
       setIsScanning(false);
-      // Trigger global auto-scroll for main container
-      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
     }
   };
 
