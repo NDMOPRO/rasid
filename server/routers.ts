@@ -6597,6 +6597,50 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         return { success: true };
       }),
 
+    bulkCreate: publicProcedure
+      .input(z.object({
+        leaks: z.array(z.object({
+          leakId: z.string(),
+          title: z.string(),
+          titleAr: z.string(),
+          source: z.enum(["telegram", "darkweb", "paste"]),
+          severity: z.enum(["critical", "high", "medium", "low"]),
+          sector: z.string(),
+          sectorAr: z.string(),
+          piiTypes: z.array(z.string()),
+          recordCount: z.number(),
+          description: z.string().optional(),
+          descriptionAr: z.string().optional(),
+          sourceUrl: z.string().optional(),
+          sourcePlatform: z.string().optional(),
+          threatActor: z.string().optional(),
+          leakPrice: z.string().optional(),
+          breachMethod: z.string().optional(),
+          breachMethodAr: z.string().optional(),
+          region: z.string().optional(),
+          regionAr: z.string().optional(),
+          sampleData: z.any().optional(),
+          detectedAt: z.string().optional(),
+        }))
+      }))
+      .mutation(async ({ input }) => {
+        let success = 0;
+        let failed = 0;
+        for (const leak of input.leaks) {
+          try {
+            await db.createLeak(leak as any);
+            success++;
+          } catch (e: any) {
+            if (e?.message?.includes('Duplicate')) {
+              // skip duplicates
+            } else {
+              failed++;
+            }
+          }
+        }
+        return { success, failed, total: input.leaks.length };
+      }),
+
     updateStatus: protectedProcedure
       .input(
         z.object({
