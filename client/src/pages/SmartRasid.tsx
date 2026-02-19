@@ -102,6 +102,8 @@ const quickCommands = [
   { label: "خريطة التهديدات", icon: MapPin, color: "text-indigo-400", bgColor: "bg-indigo-500/10 border-indigo-500/20", query: "اعرض خريطة التهديدات الجغرافية والتوزيع حسب المناطق" },
   { label: "التقارير والمستندات", icon: FileSearch, color: "text-teal-400", bgColor: "bg-teal-500/10 border-teal-500/20", query: "اعرض لي كل التقارير والمستندات المتاحة مع روابطها" },
   { label: "قواعد الكشف", icon: Crosshair, color: "text-rose-400", bgColor: "bg-rose-500/10 border-rose-500/20", query: "اعرض قواعد صيد التهديدات النشطة وأداءها" },
+  { label: "لوحة الامتثال", icon: Shield, color: "text-violet-400", bgColor: "bg-violet-500/10 border-violet-500/20", query: "أعطني ملخص شامل لحالة الامتثال لنظام PDPL" },
+  { label: "طلبات DSAR", icon: Users, color: "text-pink-400", bgColor: "bg-pink-500/10 border-pink-500/20", query: "اعرض طلبات حقوق أصحاب البيانات المعلقة" },
 ];
 
 const capabilities = [
@@ -120,6 +122,10 @@ const capabilities = [
   { icon: Crosshair, label: "صيد التهديدات", desc: "قواعد YARA-like" },
   { icon: Link2, label: "سلسلة الأدلة", desc: "توثيق وحفظ الأدلة" },
   { icon: HeartHandshake, label: "الشخصية التفاعلية", desc: "ترحيب ذكي واحترام القادة" },
+  { icon: Shield, label: "تقييمات الامتثال", desc: "نظام PDPL والتوصيات" },
+  { icon: FileText, label: "سياسات الخصوصية", desc: "إدارة ورصد السياسات" },
+  { icon: Users, label: "طلبات DSAR", desc: "حقوق أصحاب البيانات" },
+  { icon: Database, label: "سجلات المعالجة", desc: "ROPA والأساس القانوني" },
 ];
 
 // Tool name to Arabic label mapping
@@ -150,6 +156,16 @@ const toolLabels: Record<string, string> = {
   get_personality_greeting: "ترحيب شخصي",
   check_leader_mention: "فحص إشارة لقائد",
   manage_personality_scenarios: "إدارة سيناريوهات الشخصية",
+  get_privacy_assessments: "تقييمات الامتثال",
+  get_privacy_policies: "سياسات الخصوصية",
+  get_dsar_requests: "طلبات حقوق البيانات",
+  get_processing_records: "سجلات المعالجة",
+  get_privacy_impact_assessments: "تقييم الأثر على الخصوصية",
+  get_consent_records: "سجلات الموافقات",
+  get_compliance_dashboard: "لوحة الامتثال",
+  get_pdpl_article_info: "مواد PDPL",
+  get_entities_compliance_status: "حالة امتثال الجهات",
+  analyze_leak_compliance_impact: "أثر التسريب على الامتثال",
 };
 
 // Agent icons mapping
@@ -161,6 +177,7 @@ const agentIcons: Record<string, typeof Brain> = {
   "وكيل المعرفة": BookOpen,
   "وكيل الملفات": FileSearch,
   "وكيل الشخصية": HeartHandshake,
+  "وكيل الخصوصية": Shield,
 };
 
 const agentColors: Record<string, string> = {
@@ -171,6 +188,7 @@ const agentColors: Record<string, string> = {
   "وكيل المعرفة": "text-blue-400",
   "وكيل الملفات": "text-teal-400",
   "وكيل الشخصية": "text-pink-400",
+  "وكيل الخصوصية": "text-purple-400",
 };
 
 // Tool category badges configuration
@@ -622,6 +640,15 @@ export default function SmartRasid() {
   const suggestionsTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const chatMutation = trpc.smartRasid.chat.useMutation();
+
+  // Pick up message from widget
+  useEffect(() => {
+    const widgetMsg = sessionStorage.getItem("rasid_widget_message");
+    if (widgetMsg) {
+      sessionStorage.removeItem("rasid_widget_message");
+      setTimeout(() => sendMessage(widgetMsg), 500);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -1160,10 +1187,25 @@ export default function SmartRasid() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-slate-400 mb-4 text-center max-w-lg font-[Tajawal]"
+              className="text-sm text-slate-400 mb-2 text-center max-w-lg font-[Tajawal]"
             >
               كبير محللي حماية البيانات الشخصية — يحلل، يستنتج، يربط، وينفذ
             </motion.p>
+
+            {/* Personalized Welcome Message */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="text-center mb-4 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500/5 via-teal-500/5 to-emerald-500/5 border border-cyan-500/10"
+            >
+              <p className="text-sm text-cyan-300/80 font-[Tajawal]">
+                مرحباً {user?.name || user?.username || "بك"} 👋 أنا راصد الذكي، مساعدك التشغيلي لمنصتي الرصد والخصوصية
+              </p>
+              <p className="text-xs text-slate-500 mt-1 font-[Tajawal]">
+                اسألني عن حالات الرصد، الامتثال، التقارير، أو أي شيء يخص المنصة
+              </p>
+            </motion.div>
 
             {/* Agent Architecture — Console Display */}
             <motion.div
@@ -1350,6 +1392,26 @@ export default function SmartRasid() {
                           <Copy className="w-3 h-3 text-slate-500" />
                         )}
                       </button>
+                      {msg.role === "assistant" && (
+                        <button
+                          onClick={() => {
+                            if (window.speechSynthesis.speaking) {
+                              window.speechSynthesis.cancel();
+                              return;
+                            }
+                            const plainText = msg.content.replace(/[#*|\-_`>]/g, " ").replace(/\s+/g, " ").trim();
+                            const utterance = new SpeechSynthesisUtterance(plainText.slice(0, 3000));
+                            utterance.lang = "ar-SA";
+                            utterance.rate = 1;
+                            utterance.pitch = 1;
+                            window.speechSynthesis.speak(utterance);
+                          }}
+                          className="p-1 rounded-md hover:bg-white/10"
+                          title="قراءة صوتية"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        </button>
+                      )}
                       {/* Table export buttons - only show if content has tables */}
                       {msg.role === "assistant" && msg.content.includes("|") && msg.content.includes("---") && (
                         <>

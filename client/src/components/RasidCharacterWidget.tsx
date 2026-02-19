@@ -1,11 +1,11 @@
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft } from "lucide-react";
+import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft, Send, Shield } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════════
    RasidCharacterWidget — ويدجت راصد الذكي العائم الإبهاري
-   يظهر في كل الصفحات مع تأثيرات حركية متقدمة
+   يظهر في كل الصفحات مع تأثيرات حركية متقدمة + حقل إدخال
    ═══════════════════════════════════════════════════════════════ */
 
 const CHARACTERS = {
@@ -15,6 +15,8 @@ const CHARACTERS = {
   shmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/cPbwcXQQKHCHhPDD.png",
   crossed: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/MNRoXtmiCwlpGuQF.png",
 };
+
+type CharacterState = "standing" | "waving" | "sunglasses" | "shmagh" | "crossed";
 
 const greetings = [
   "مرحباً! أنا راصد 👋",
@@ -32,15 +34,23 @@ const tips: Record<string, string> = {
   "/smart-rasid": "💡 اسألني أي سؤال عن بياناتك!",
 };
 
+const quickPrompts = [
+  { text: "أعطني ملخص حالات الرصد", icon: "📊" },
+  { text: "كم نسبة الامتثال؟", icon: "🛡️" },
+  { text: "آخر التنبيهات", icon: "🔔" },
+];
+
 export default function RasidCharacterWidget() {
   const [location, setLocation] = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [bubbleText, setBubbleText] = useState("");
-  const [currentChar, setCurrentChar] = useState<keyof typeof CHARACTERS>("standing");
+  const [currentChar, setCurrentChar] = useState<CharacterState>("standing");
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [pulseCount, setPulseCount] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const bubbleTimer = useRef<NodeJS.Timeout | null>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -91,6 +101,13 @@ export default function RasidCharacterWidget() {
     return () => window.removeEventListener("mousemove", handleMouse);
   }, [mouseX, mouseY]);
 
+  // Focus input when expanded
+  useEffect(() => {
+    if (isExpanded && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isExpanded]);
+
   const handleClick = useCallback(() => {
     setHasInteracted(true);
     if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
@@ -99,9 +116,27 @@ export default function RasidCharacterWidget() {
     setCurrentChar(isExpanded ? "standing" : "sunglasses");
   }, [isExpanded]);
 
-  const goToSmartRasid = () => {
+  const goToSmartRasid = (initialMessage?: string) => {
     setIsExpanded(false);
+    if (initialMessage) {
+      // Store the message to be picked up by SmartRasid page
+      sessionStorage.setItem("rasid_widget_message", initialMessage);
+    }
     setLocation("/smart-rasid");
+  };
+
+  const handleSend = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    goToSmartRasid(trimmed);
+    setInputValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
@@ -127,7 +162,6 @@ export default function RasidCharacterWidget() {
               }}
             >
               {bubbleText}
-              {/* Bubble arrow */}
               <div
                 className="absolute -bottom-2 right-6 w-4 h-4 rotate-45"
                 style={{
@@ -149,7 +183,7 @@ export default function RasidCharacterWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute bottom-20 left-0 w-72 rounded-2xl overflow-hidden shadow-2xl"
+            className="absolute bottom-20 left-0 w-80 rounded-2xl overflow-hidden shadow-2xl"
             style={{
               background: "linear-gradient(135deg, rgba(15, 40, 71, 0.98), rgba(11, 29, 53, 0.99))",
               border: "1px solid rgba(197, 165, 90, 0.2)",
@@ -168,7 +202,10 @@ export default function RasidCharacterWidget() {
               />
               <div className="flex-1">
                 <p className="text-sm font-bold text-[#D4DDEF]">راصد الذكي</p>
-                <p className="text-[10px] text-[#D4DDEF]/50">مساعدك التشغيلي الذكي</p>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <p className="text-[10px] text-emerald-400/80">متصل ومستعد</p>
+                </div>
               </div>
               <button
                 onClick={() => setIsExpanded(false)}
@@ -178,12 +215,65 @@ export default function RasidCharacterWidget() {
               </button>
             </div>
 
+            {/* Input Field */}
+            <div className="px-3 pt-3">
+              <div
+                className="flex items-center gap-2 rounded-xl px-3 py-2"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(197, 165, 90, 0.15)",
+                }}
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="اكتب سؤالك هنا..."
+                  className="flex-1 bg-transparent text-xs text-[#D4DDEF] placeholder-[#D4DDEF]/30 outline-none"
+                  dir="rtl"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleSend}
+                  disabled={!inputValue.trim()}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30"
+                  style={{
+                    background: inputValue.trim() ? "linear-gradient(135deg, #C5A55A, #b8963f)" : "rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <Send className="h-3.5 w-3.5 text-white rotate-180" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Quick Prompts */}
+            <div className="px-3 pt-2 flex flex-wrap gap-1.5">
+              {quickPrompts.map((prompt, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => goToSmartRasid(prompt.text)}
+                  className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF] transition-colors"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  {prompt.icon} {prompt.text}
+                </motion.button>
+              ))}
+            </div>
+
             {/* Quick Actions */}
             <div className="p-3 space-y-2">
               <motion.button
                 whileHover={{ x: -4, backgroundColor: "rgba(197, 165, 90, 0.08)" }}
                 whileTap={{ scale: 0.98 }}
-                onClick={goToSmartRasid}
+                onClick={() => goToSmartRasid()}
                 className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
               >
                 <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(197, 165, 90, 0.12)" }}>
@@ -208,6 +298,22 @@ export default function RasidCharacterWidget() {
                 <div className="flex-1">
                   <p className="text-xs font-medium text-[#D4DDEF]">تحليل سريع</p>
                   <p className="text-[10px] text-[#D4DDEF]/40">عرض ملخص المؤشرات</p>
+                </div>
+                <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ x: -4, backgroundColor: "rgba(139, 92, 246, 0.08)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setIsExpanded(false); setLocation("/privacy"); }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(139, 92, 246, 0.12)" }}>
+                  <Shield className="h-4 w-4 text-violet-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-[#D4DDEF]">الخصوصية والامتثال</p>
+                  <p className="text-[10px] text-[#D4DDEF]/40">لوحة مؤشرات PDPL</p>
                 </div>
                 <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
               </motion.button>

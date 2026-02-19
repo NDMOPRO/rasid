@@ -126,7 +126,44 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
   }
 
   return `# هويتك
-أنت "راصد الذكي" — الوكيل التنفيذي لمنصة "راصد" لرصد حالات رصد البيانات الشخصية.
+أنت "راصد الذكي" — الوكيل التنفيذي لمنصة "راصد" الشاملة لحماية البيانات الشخصية.
+تخدم منصتين متكاملتين:
+
+## منصة حالات الرصد (Data Leak Monitoring)
+- رصد وتتبع تسريبات البيانات الشخصية
+- مصادر الرصد: تليجرام، الدارك ويب، مواقع اللصق، المسح المباشر
+- توثيق الحوادث وسلسلة الأدلة
+- تحليل التهديدات والبائعين
+- التقارير والإحصائيات
+
+## منصة الخصوصية (Privacy & Compliance)
+- تقييم الامتثال لنظام حماية البيانات الشخصية (PDPL)
+- إدارة سياسات الخصوصية للجهات
+- طلبات حقوق أصحاب البيانات (DSAR)
+- سجلات أنشطة المعالجة (ROPA)
+- تقييم الأثر على الخصوصية (PIA/DPIA)
+- إدارة الموافقات
+- تدقيق الامتثال الدوري
+
+أنت خبير في كلا المجالين وتستطيع:
+1. الإجابة عن أسئلة الرصد والتسريبات
+2. الإجابة عن أسئلة الخصوصية والامتثال
+3. ربط البيانات بين المنصتين (مثل: تسريب يؤثر على امتثال جهة)
+4. تقديم توصيات شاملة تأخذ في الاعتبار كلا المنظورين
+
+عندما يطلب المستخدم تقريراً:
+1. اجمع البيانات المطلوبة باستخدام الأدوات
+2. استخدم أداة generate_report لإنشاء التقرير
+3. أعطِ المستخدم رابط التنزيل مباشرة
+4. لا تعرض البيانات كنص — بل قدمها في التقرير
+
+عندما يطلب المستخدم لوحة مؤشرات:
+- استخدم get_dashboard_stats أو get_compliance_dashboard
+- اعرض البيانات في بطاقات KPI مرئية
+
+عندما يطلب المستخدم دليلاً استرشادياً:
+- اشرح الخطوات العملية خطوة بخطوة
+- قدم روابط مباشرة للصفحات المعنية
 
 # المستخدم: ${userName}
 # التاريخ: ${today}
@@ -208,6 +245,8 @@ ${atlasSummary ? `\n${atlasSummary}` : ""}
 | التحقق من التوثيق | التحقق من صحة وثائق الحوادث بالـ QR | القائمة الجانبية > إداري > التحقق من التوثيق |
 | إدارة المستخدمين | إضافة وتعديل صلاحيات المستخدمين | القائمة الجانبية > إداري > إدارة المستخدمين |
 | الإعدادات | إعدادات المنصة ومفاتيح API | القائمة الجانبية > إداري > الإعدادات |
+| لوحة الخصوصية | مؤشرات الامتثال وحالة الجهات | القائمة الجانبية > الخصوصية > لوحة الخصوصية |
+| مواقع الخصوصية | رصد سياسات الخصوصية للمواقع | القائمة الجانبية > الخصوصية > مواقع الخصوصية |
 
 عند شرح أي وظيفة، اذكر:
 1. أين يجدها في القائمة الجانبية
@@ -933,6 +972,144 @@ export const RASID_TOOLS = [
       },
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // Privacy & Compliance Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_assessments",
+      description: "جلب تقييمات الامتثال لنظام PDPL — يشمل نتائج التقييم ونسبة الامتثال والتوصيات لكل جهة",
+      parameters: {
+        type: "object",
+        properties: {
+          entityId: { type: "number", description: "معرف الجهة (اختياري)" },
+          status: { type: "string", enum: ["draft", "in_progress", "completed", "overdue"], description: "حالة التقييم" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_policies",
+      description: "جلب سياسات الخصوصية المسجلة — يشمل حالة كل سياسة وتاريخ المراجعة ونسبة التغطية",
+      parameters: {
+        type: "object",
+        properties: {
+          entityId: { type: "number", description: "معرف الجهة" },
+          status: { type: "string", enum: ["active", "draft", "expired", "under_review"], description: "حالة السياسة" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_dsar_requests",
+      description: "جلب طلبات حقوق أصحاب البيانات (DSAR) — يشمل نوع الطلب والحالة ومدة الاستجابة",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["pending", "in_progress", "completed", "rejected", "overdue"], description: "حالة الطلب" },
+          requestType: { type: "string", enum: ["access", "correction", "deletion", "portability", "objection", "restriction"], description: "نوع الطلب" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_processing_records",
+      description: "جلب سجلات أنشطة المعالجة (ROPA) — يشمل الغرض والأساس القانوني وفترة الاحتفاظ",
+      parameters: {
+        type: "object",
+        properties: {
+          entityId: { type: "number", description: "معرف الجهة" },
+          lawfulBasis: { type: "string", enum: ["consent", "contract", "legal_obligation", "vital_interest", "public_interest", "legitimate_interest"], description: "الأساس القانوني" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_impact_assessments",
+      description: "جلب تقييمات الأثر على الخصوصية (PIA/DPIA) — يشمل المخاطر وإجراءات التخفيف",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["not_started", "in_progress", "completed", "needs_review"], description: "حالة التقييم" },
+          riskLevel: { type: "string", enum: ["low", "medium", "high", "critical"], description: "مستوى المخاطر" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_consent_records",
+      description: "جلب سجلات الموافقات — يشمل نوع الموافقة وتاريخها وحالتها",
+      parameters: {
+        type: "object",
+        properties: {
+          entityId: { type: "number", description: "معرف الجهة" },
+          status: { type: "string", enum: ["active", "withdrawn", "expired"], description: "حالة الموافقة" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_compliance_dashboard",
+      description: "جلب ملخص شامل لحالة الامتثال — نسبة الامتثال، عدد الجهات، طلبات DSAR المعلقة، والتنبيهات",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_pdpl_article_info",
+      description: "جلب معلومات عن مادة محددة من نظام حماية البيانات الشخصية PDPL",
+      parameters: {
+        type: "object",
+        properties: {
+          articleNumber: { type: "number", description: "رقم المادة (1-43)" },
+          topic: { type: "string", description: "موضوع البحث (مثل: إفصاح، موافقة، عقوبات)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_entities_compliance_status",
+      description: "جلب حالة امتثال الجهات المسجلة — نسبة الامتثال لكل جهة والمخالفات",
+      parameters: {
+        type: "object",
+        properties: {
+          sector: { type: "string", description: "القطاع (مثل: بنكي، صحي، حكومي)" },
+          complianceLevel: { type: "string", enum: ["compliant", "partially_compliant", "non_compliant"], description: "مستوى الامتثال" },
+        },
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "analyze_leak_compliance_impact",
+      description: "تحليل أثر تسريب معين على امتثال الجهة — يربط بين منصة الرصد ومنصة الخصوصية",
+      parameters: {
+        type: "object",
+        properties: {
+          leakId: { type: "number", description: "معرف حالة الرصد" },
+          entityId: { type: "number", description: "معرف الجهة المتأثرة" },
+        },
+        required: ["leakId"],
+      },
+    },
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -981,6 +1158,16 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_atlas_breach_details: "وكيل أطلس البيانات",
     get_atlas_stats: "وكيل أطلس البيانات",
     analyze_atlas_trends: "وكيل أطلس البيانات",
+    get_privacy_assessments: "وكيل الخصوصية",
+    get_privacy_policies: "وكيل الخصوصية",
+    get_dsar_requests: "وكيل الخصوصية",
+    get_processing_records: "وكيل الخصوصية",
+    get_privacy_impact_assessments: "وكيل الخصوصية",
+    get_consent_records: "وكيل الخصوصية",
+    get_compliance_dashboard: "وكيل الخصوصية",
+    get_pdpl_article_info: "وكيل الخصوصية",
+    get_entities_compliance_status: "وكيل الخصوصية",
+    analyze_leak_compliance_impact: "وكيل الخصوصية",
   };
 
   const toolDescriptions: Record<string, string> = {
@@ -1021,6 +1208,16 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_atlas_breach_details: "جلب تفاصيل حادثة من الأطلس",
     get_atlas_stats: "جلب إحصائيات أطلس البيانات",
     analyze_atlas_trends: "تحليل اتجاهات أطلس البيانات",
+    get_privacy_assessments: "جلب تقييمات الامتثال",
+    get_privacy_policies: "جلب سياسات الخصوصية",
+    get_dsar_requests: "جلب طلبات حقوق أصحاب البيانات",
+    get_processing_records: "جلب سجلات المعالجة",
+    get_privacy_impact_assessments: "جلب تقييمات الأثر على الخصوصية",
+    get_consent_records: "جلب سجلات الموافقات",
+    get_compliance_dashboard: "جلب لوحة الامتثال",
+    get_pdpl_article_info: "جلب معلومات مادة PDPL",
+    get_entities_compliance_status: "جلب حالة امتثال الجهات",
+    analyze_leak_compliance_impact: "تحليل أثر التسريب على الامتثال",
   };
 
   // Determine tool category for UI badges
@@ -1040,6 +1237,11 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     manage_personality_scenarios: "personality",
     query_atlas_breaches: "read", get_atlas_breach_details: "read",
     get_atlas_stats: "read", analyze_atlas_trends: "analysis",
+    get_privacy_assessments: "read", get_privacy_policies: "read",
+    get_dsar_requests: "read", get_processing_records: "read",
+    get_privacy_impact_assessments: "read", get_consent_records: "read",
+    get_compliance_dashboard: "read", get_pdpl_article_info: "read",
+    get_entities_compliance_status: "read", analyze_leak_compliance_impact: "analysis",
   };
 
   const step: ThinkingStep = {
@@ -2225,6 +2427,48 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
         charts: chartsConfig,
         summary: `لوحة مؤشرات ${dashboardType} تحتوي على ${chartsConfig.length} مخطط`,
       };
+    }
+
+    // ═══ PRIVACY & COMPLIANCE TOOLS ═══
+    case "get_privacy_assessments": {
+      const { getPrivacyAssessments } = await import("./privacyData");
+      return await getPrivacyAssessments(params.entityId, params.status);
+    }
+    case "get_privacy_policies": {
+      const { getPrivacyPolicies } = await import("./privacyData");
+      return await getPrivacyPolicies(params.entityId, params.status);
+    }
+    case "get_dsar_requests": {
+      const { getDsarRequests } = await import("./privacyData");
+      return await getDsarRequests(params.status, params.requestType);
+    }
+    case "get_processing_records": {
+      const { getProcessingRecords } = await import("./privacyData");
+      return await getProcessingRecords(params.entityId, params.lawfulBasis);
+    }
+    case "get_privacy_impact_assessments": {
+      const { getPrivacyImpactAssessments } = await import("./privacyData");
+      return await getPrivacyImpactAssessments(params.status, params.riskLevel);
+    }
+    case "get_consent_records": {
+      const { getConsentRecords } = await import("./privacyData");
+      return await getConsentRecords(params.entityId, params.status);
+    }
+    case "get_compliance_dashboard": {
+      const { getComplianceDashboard } = await import("./privacyData");
+      return await getComplianceDashboard();
+    }
+    case "get_pdpl_article_info": {
+      const { getPdplArticleInfo } = await import("./privacyData");
+      return getPdplArticleInfo(params.articleNumber, params.topic);
+    }
+    case "get_entities_compliance_status": {
+      const { getEntitiesComplianceStatus } = await import("./privacyData");
+      return await getEntitiesComplianceStatus(params.sector, params.complianceLevel);
+    }
+    case "analyze_leak_compliance_impact": {
+      const { analyzeLeakComplianceImpact } = await import("./privacyData");
+      return await analyzeLeakComplianceImpact(params.leakId, params.entityId);
     }
 
     default:
