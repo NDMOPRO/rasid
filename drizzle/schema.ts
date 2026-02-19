@@ -1286,6 +1286,10 @@ export const leaks = mysqlTable("leaks", {
 	detectedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	publishStatus: mysqlEnum('publishStatus', ['draft','pending_review','published','archived']).default('draft').notNull(),
+	publishedAt: timestamp('publishedAt', { mode: 'string' }),
+	publishedBy: int('publishedBy'),
+	reviewNotes: text('reviewNotes'),
 },
 (table) => [
 	index("leaks_leakId_unique").on(table.leakId),
@@ -2430,3 +2434,93 @@ updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 
 export type CustomPage = typeof customPages.$inferSelect;
 export type InsertCustomPage = typeof customPages.$inferInsert;
+
+/* ═══ CMS — Import Jobs ═══ */
+export const importJobs = mysqlTable("import_jobs", {
+	id: int().autoincrement().primaryKey().notNull(),
+	jobId: varchar({ length: 64 }).notNull(),
+	fileName: varchar({ length: 500 }).notNull(),
+	fileType: mysqlEnum('fileType', ['zip','json','xlsx','csv']).notNull(),
+	fileSizeBytes: int().default(0).notNull(),
+	status: mysqlEnum('status', ['pending','processing','completed','failed','cancelled']).default('pending').notNull(),
+	totalRecords: int().default(0).notNull(),
+	processedRecords: int().default(0).notNull(),
+	successRecords: int().default(0).notNull(),
+	failedRecords: int().default(0).notNull(),
+	errorLog: json(),
+	importedBy: int().notNull(),
+	importedByName: varchar({ length: 200 }),
+	startedAt: timestamp('startedAt', { mode: 'string' }),
+	completedAt: timestamp('completedAt', { mode: 'string' }),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("import_jobs_jobId_unique").on(table.jobId),
+]);
+
+export type ImportJob = typeof importJobs.$inferSelect;
+export type InsertImportJob = typeof importJobs.$inferInsert;
+
+/* ═══ CMS — Export Jobs ═══ */
+export const exportJobs = mysqlTable("export_jobs", {
+	id: int().autoincrement().primaryKey().notNull(),
+	jobId: varchar({ length: 64 }).notNull(),
+	exportType: mysqlEnum('exportType', ['full_platform','section','page','single_record','custom_query']).notNull(),
+	exportFormat: mysqlEnum('exportFormat', ['zip','json','xlsx','csv','pdf']).notNull(),
+	scope: varchar({ length: 255 }),
+	filters: json(),
+	status: mysqlEnum('status', ['pending','processing','completed','failed']).default('pending').notNull(),
+	totalRecords: int().default(0).notNull(),
+	fileSizeBytes: int().default(0),
+	fileUrl: text(),
+	exportedBy: int().notNull(),
+	exportedByName: varchar({ length: 200 }),
+	startedAt: timestamp('startedAt', { mode: 'string' }),
+	completedAt: timestamp('completedAt', { mode: 'string' }),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("export_jobs_jobId_unique").on(table.jobId),
+]);
+
+export type ExportJob = typeof exportJobs.$inferSelect;
+export type InsertExportJob = typeof exportJobs.$inferInsert;
+
+/* ═══ Control Panel — Page Registry ═══ */
+export const pageRegistry = mysqlTable("page_registry", {
+	id: int().autoincrement().primaryKey().notNull(),
+	pageId: varchar({ length: 100 }).notNull(),
+	path: varchar({ length: 500 }).notNull(),
+	nameAr: varchar({ length: 200 }).notNull(),
+	nameEn: varchar({ length: 200 }).notNull(),
+	icon: varchar({ length: 100 }),
+	category: mysqlEnum('category', ['main','monitoring','analysis','admin','privacy']).default('main').notNull(),
+	sortOrder: int().default(0).notNull(),
+	isActive: tinyint().default(1).notNull(),
+	features: json(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("page_registry_pageId_unique").on(table.pageId),
+]);
+
+export type PageRegistryEntry = typeof pageRegistry.$inferSelect;
+export type InsertPageRegistryEntry = typeof pageRegistry.$inferInsert;
+
+/* ═══ Control Panel — AI Personality Config ═══ */
+export const aiPersonalityConfig = mysqlTable("ai_personality_config", {
+	id: int().autoincrement().primaryKey().notNull(),
+	configKey: varchar("apcKey", { length: 100 }).notNull(),
+	configValue: text("apcValue").notNull(),
+	configType: mysqlEnum("apcType", ["string", "number", "boolean", "json"]).default("string").notNull(),
+	description: text("apcDescription"),
+	updatedBy: int("apcUpdatedBy"),
+	updatedAt: timestamp("apcUpdatedAt", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("ai_personality_config_key_unique").on(table.configKey),
+]);
+
+export type AiPersonalityConfigEntry = typeof aiPersonalityConfig.$inferSelect;
+export type InsertAiPersonalityConfigEntry = typeof aiPersonalityConfig.$inferInsert;

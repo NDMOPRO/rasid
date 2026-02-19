@@ -18,7 +18,7 @@ import {
   Brain, Network, Sun, Moon, Monitor, Bot, CheckCircle2, Scan, FileCheck,
   FileBarChart, Stamp, Sparkles, BookOpen, HeartHandshake, GraduationCap,
   Activity, Crown, Layers, Eye, QrCode, Home, Import, History,
-  FolderOpen, Wrench, Clock, Download, FileDown,
+  FolderOpen, Wrench, Clock, Download, FileDown, Database, Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -236,6 +236,8 @@ const controlPanelGroup: NavGroup = {
     { label: "إدارة الذكاء الاصطناعي", labelEn: "AI Management", icon: Bot, path: "/ai-management", requiresAuth: true, rootAdminOnly: true },
     { label: "قاعدة المعرفة", labelEn: "Knowledge Base", icon: BookOpen, path: "/knowledge-base", requiresAuth: true, rootAdminOnly: true },
     { label: "مركز التدريب", labelEn: "Training Center", icon: GraduationCap, path: "/training-center", requiresAuth: true, rootAdminOnly: true },
+    { label: "إدارة المحتوى", labelEn: "CMS", icon: Database, path: "/admin/cms", requiresAuth: true, rootAdminOnly: true },
+    { label: "لوحة التحكم الرئيسية", labelEn: "Control Panel", icon: Cpu, path: "/admin/control-panel", requiresAuth: true, rootAdminOnly: true },
     { label: "الإعدادات", labelEn: "Settings", icon: Settings, path: "/settings" },
   ],
 };

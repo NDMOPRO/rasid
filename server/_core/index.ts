@@ -2,11 +2,14 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import path from "path";
+import multer from "multer";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { processImport } from "../importEngine";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -39,6 +42,56 @@ async function startServer() {
   });
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // ─── CMS Import Upload Route ────────────────────────────────
+  const uploadStorage = multer({
+    dest: "/tmp/rasid-uploads/",
+    limits: { fileSize: 500 * 1024 * 1024 }, // 500 MB max
+  });
+
+  app.post("/api/cms/import/upload", uploadStorage.single("file"), async (req, res) => {
+    try {
+      // Basic auth check via session cookie
+      if (!(req as any).session?.userId && !(req as any).user) {
+        // Try to get user from cookie-based auth
+        const ctx = await createContext({ req, res } as any);
+        if (!ctx.user || (ctx.user as any).platformRole === "viewer") {
+          res.status(403).json({ error: "Admin access required" });
+          return;
+        }
+        const file = req.file;
+        if (!file) {
+          res.status(400).json({ error: "No file uploaded" });
+          return;
+        }
+        const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+        const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
+        const result = await processImport(
+          file.path,
+          fileType,
+          (ctx.user as any).id || 0,
+          (ctx.user as any).displayName || "Admin"
+        );
+        res.json(result);
+        return;
+      }
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return;
+      }
+      const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+      const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
+      const result = await processImport(file.path, fileType, 0, "Admin");
+      res.json(result);
+    } catch (err: any) {
+      console.error("Import error:", err);
+      res.status(500).json({ error: err.message || "Import failed" });
+    }
+  });
+
+  // Serve uploaded files (evidence, exports)
+  app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
   // tRPC API
   app.use(
     "/api/trpc",
