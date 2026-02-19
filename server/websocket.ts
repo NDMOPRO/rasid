@@ -195,6 +195,33 @@ export function notifyScheduledScanComplete(data: {
   });
 }
 
+// Broadcast job status updates (scan schedules, bulk analysis, etc.)
+export function broadcastJobUpdate(data: {
+  jobId: number | string;
+  status: string;
+  lastResult?: string;
+  progress?: number;
+}) {
+  if (!wss) return;
+  const payload = JSON.stringify({ type: "job_update", data });
+  clients.forEach((client) => {
+    if (client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(payload);
+    }
+  });
+}
+
+// Broadcast generic data to all clients
+function broadcast(msg: { type: string; data: any }) {
+  if (!wss) return;
+  const payload = JSON.stringify(msg);
+  clients.forEach((client) => {
+    if (client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(payload);
+    }
+  });
+}
+
 // Get connected clients count
 export function getConnectedClientsCount(): number {
   return clients.size;
