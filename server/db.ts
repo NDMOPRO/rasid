@@ -4666,7 +4666,7 @@ export async function getDocumentDetailedStats() {
 
   // By type array for pie chart
   const byType = [
-    { type: "incident_report", label: "توثيق حادثة", count: incidentResult.count, color: "#ef4444" },
+    { type: "incident_report", label: "توثيق حالة رصد", count: incidentResult.count, color: "#ef4444" },
     { type: "custom_report", label: "تقرير مخصص", count: customResult.count, color: "#3b82f6" },
     { type: "executive_summary", label: "ملخص تنفيذي", count: execResult.count, color: "#8b5cf6" },
     { type: "compliance_report", label: "تقرير امتثال", count: compResult.count, color: "#10b981" },

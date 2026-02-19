@@ -277,7 +277,7 @@ export default function AlertChannels() {
                   <th className="text-right text-xs text-muted-foreground font-medium p-4">المستلم</th>
                   <th className="text-right text-xs text-muted-foreground font-medium p-4">القناة</th>
                   <th className="text-right text-xs text-muted-foreground font-medium p-4">الموضوع</th>
-                  <th className="text-right text-xs text-muted-foreground font-medium p-4">التسريب</th>
+                  <th className="text-right text-xs text-muted-foreground font-medium p-4">حالة الرصد</th>
                   <th className="text-right text-xs text-muted-foreground font-medium p-4">التاريخ</th>
                 </tr>
               </thead>
@@ -531,9 +531,9 @@ export default function AlertChannels() {
             </div>
             {selectedEntry.leakId && (
               <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors" onClick={() => setDrillLeakId(selectedEntry.leakId)}>
-                <p className="text-xs text-muted-foreground">التسريب المرتبط</p>
+                <p className="text-xs text-muted-foreground">حالة الرصد المرتبطة</p>
                 <p className="text-sm font-mono text-primary mt-1">{selectedEntry.leakId}</p>
-                <p className="text-[10px] text-primary/60 mt-1">اضغط لعرض تفاصيل التسريب</p>
+                <p className="text-[10px] text-primary/60 mt-1">اضغط لعرض تفاصيل حالة الرصد</p>
               </div>
             )}
           </div>

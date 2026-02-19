@@ -99,14 +99,14 @@ export default function ImpactAssessment() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KpiCard title="إجمالي ادعاءات البائع" value={kpiStats.totalRecords.toLocaleString('ar-SA')} icon={FileText} />
-        <KpiCard title="متوسط السجلات لكل حادثة" value={Math.round(kpiStats.avgRecords).toLocaleString('ar-SA')} icon={BarChart3} />
-        <KpiCard title="أكبر عدد سجلات في حادثة واحدة" value={kpiStats.maxRecords.toLocaleString('ar-SA')} icon={ShieldAlert} />
+        <KpiCard title="متوسط السجلات لكل حالة رصد" value={Math.round(kpiStats.avgRecords).toLocaleString('ar-SA')} icon={BarChart3} />
+        <KpiCard title="أكبر عدد سجلات في حالة رصد واحدة" value={kpiStats.maxRecords.toLocaleString('ar-SA')} icon={ShieldAlert} />
         <KpiCard title="إجمالي الغرامات التقديرية (SAR)" value={`${(kpiStats.totalFines / 1_000_000).toFixed(1)} مليون`} icon={PieChartIcon} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <GlassCard className="h-[500px]">
-          <h2 className="text-2xl font-bold mb-4 text-cyan-300">أبرز 20 حادثة حسب ادعاء البائع</h2>
+          <h2 className="text-2xl font-bold mb-4 text-cyan-300">أبرز 20 حالة رصد حسب ادعاء البائع</h2>
           <ResponsiveContainer width="100%" height="90%">
             <BarChart data={topIncidentsByRecords} layout="vertical" margin={{ top: 5, right: 20, left: 100, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
@@ -120,7 +120,7 @@ export default function ImpactAssessment() {
         </GlassCard>
 
         <GlassCard className="h-[500px]">
-          <h2 className="text-2xl font-bold mb-4 text-cyan-300">توزيع الحوادث حسب مستوى التأثير</h2>
+          <h2 className="text-2xl font-bold mb-4 text-cyan-300">توزيع حالات الرصد حسب مستوى التأثير</h2>
           <ResponsiveContainer width="100%" height="90%">
             <PieChart>
               <Pie data={severityBreakdown} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={150} labelLine={false} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>

@@ -91,7 +91,7 @@ const IncidentsRegistry = () => {
           <div className="relative lg:col-span-2">
             <input
               type="text"
-              placeholder="ابحث في الحوادث..."
+              placeholder="ابحث في حالات الرصد..."
               value={searchTerm}
               onChange={handleSearchChange}
               className="w-full bg-slate-900/50 border border-slate-700 rounded-lg py-2 pr-10 pl-4 focus:outline-none focus:ring-2 focus:ring-cyan-500"
@@ -128,7 +128,7 @@ const IncidentsRegistry = () => {
       {/* Stats Bar */}
       <div className="flex items-center justify-between bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 mb-8">
         <div>
-          <span className="text-slate-400">الحوادث المعروضة: </span>
+          <span className="text-slate-400">حالات الرصد المعروضة: </span>
           <span className="font-bold text-cyan-400 text-lg">{formatNumber(filteredData.length)}</span>
         </div>
         <div>

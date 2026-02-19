@@ -47,7 +47,7 @@ const piiTypes: PIIType[] = [
 
 /* ─── Summary Stats ─── */
 const summaryStats = [
-  { label: "إجمالي الحوادث", value: "728", icon: Shield, color: "#f59e0b" },
+  { label: "إجمالي حالات الرصد", value: "728", icon: Shield, color: "#f59e0b" },
   { label: "ادعاء البائع", value: "336.1M", icon: Database, color: "#ef4444" },
   { label: "أنواع البيانات", value: "276", icon: Fingerprint, color: "#3b82f6" },
   { label: "القطاعات المتأثرة", value: "112", icon: Users, color: "#8b5cf6" },
@@ -485,7 +485,7 @@ export default function PIIAtlas() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Activity className="w-4 h-4 text-amber-400" />
-              الحوادث عبر الزمن — 2025
+              حالات الرصد عبر الزمن — 2025
             </CardTitle>
           </CardHeader>
           <CardContent>

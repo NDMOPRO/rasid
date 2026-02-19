@@ -139,7 +139,7 @@ export default function GeoAnalysis() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <KpiCard title="إجمالي المناطق المتأثرة" value={geoData.totalRegions} icon={Map} />
         <KpiCard title="المنطقة الأكثر استهدافاً" value={geoData.mostTargetedRegion} icon={Target} />
-        <KpiCard title="إجمالي الحوادث" value={filteredRecords.length} icon={MapPin} />
+        <KpiCard title="إجمالي حالات الرصد" value={filteredRecords.length} icon={MapPin} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -160,7 +160,7 @@ export default function GeoAnalysis() {
         </GlassCard>
 
         <GlassCard>
-          <h2 className="text-2xl font-bold mb-4">فئات الحوادث</h2>
+          <h2 className="text-2xl font-bold mb-4">فئات حالات الرصد</h2>
           <ResponsiveContainer width="100%" height={400}>
             <Treemap
               data={categoryTreemapData}

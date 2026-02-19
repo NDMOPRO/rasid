@@ -7466,7 +7466,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
           sourceUrl: scanResult.url || null,
           sourcePlatform: scanResult.source,
           breachMethod: scanResult.type,
-          breachMethodAr: scanResult.type === "breach" ? "اختراق" : scanResult.type === "paste" ? "حالة رصد لصق" : scanResult.type === "certificate" ? "شهادة مكشوفة" : scanResult.type === "exposure" ? "تعرض" : "دارك ويب",
+          breachMethodAr: scanResult.type === "breach" ? "اختراق" : scanResult.type === "paste" ? "حالة رصد لصق" : scanResult.type === "certificate" ? "شهادة مكتشفة" : scanResult.type === "exposure" ? "تعرض" : "دارك ويب",
         });
 
         await logAudit(
@@ -7535,7 +7535,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
               sourceUrl: sr.url || null,
               sourcePlatform: sr.source,
               breachMethod: sr.type,
-              breachMethodAr: sr.type === "breach" ? "اختراق" : sr.type === "paste" ? "حالة رصد لصق" : sr.type === "certificate" ? "شهادة مكشوفة" : sr.type === "exposure" ? "تعرض" : "دارك ويب",
+              breachMethodAr: sr.type === "breach" ? "اختراق" : sr.type === "paste" ? "حالة رصد لصق" : sr.type === "certificate" ? "شهادة مكتشفة" : sr.type === "exposure" ? "تعرض" : "دارك ويب",
             });
             saved.push(leakId);
           } catch (e) {

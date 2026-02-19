@@ -1,5 +1,5 @@
 /**
- * TrendPredictions — تنبؤات الذكاء الاصطناعي لاتجاهات التسريب
+ * TrendPredictions — تنبؤات الذكاء الاصطناعي لاتجاهات الرصد
  * AI-Powered Trend Predictions with forecasting charts
  */
 import { useState, useMemo } from "react";
@@ -220,11 +220,11 @@ export default function TrendPredictions({ monthlyTrend, totalLeaks, totalRecord
                   <span className="font-bold text-foreground text-[11px]">تحليل الذكاء الاصطناعي</span>
                 </div>
                 {analysis.trend === "rising" ? (
-                  <p>يُظهر التحليل <strong className="text-red-400">اتجاهاً تصاعدياً</strong> في حوادث التسريب بمتوسط <strong>{analysis.avgMonthly}</strong> حادثة شهرياً. التوقع للشهر القادم هو <strong>{analysis.predictedNext3[0]}</strong> حادثة. ذروة النشاط كانت في <strong>{analysis.peakMonth}</strong>. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بتكثيف عمليات الرصد وتعزيز إجراءات الحماية.</p>
+                  <p>يُظهر التحليل <strong className="text-red-400">اتجاهاً تصاعدياً</strong> في حالات الرصد بمتوسط <strong>{analysis.avgMonthly}</strong> حالة رصد شهرياً. التوقع للشهر القادم هو <strong>{analysis.predictedNext3[0]}</strong> حالة رصد. ذروة النشاط كانت في <strong>{analysis.peakMonth}</strong>. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بتكثيف عمليات الرصد وتعزيز إجراءات الحماية.</p>
                 ) : analysis.trend === "declining" ? (
-                  <p>يُظهر التحليل <strong className="text-emerald-400">تراجعاً إيجابياً</strong> في حوادث التسريب بمتوسط <strong>{analysis.avgMonthly}</strong> حادثة شهرياً. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بالاستمرار في المراقبة الدورية.</p>
+                  <p>يُظهر التحليل <strong className="text-emerald-400">تراجعاً إيجابياً</strong> في حالات الرصد بمتوسط <strong>{analysis.avgMonthly}</strong> حالة رصد شهرياً. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بالاستمرار في المراقبة الدورية.</p>
                 ) : (
-                  <p>يُظهر التحليل <strong className="text-blue-400">استقراراً نسبياً</strong> في حوادث التسريب بمتوسط <strong>{analysis.avgMonthly}</strong> حادثة شهرياً. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بالحفاظ على مستوى الرصد الحالي مع تحسين أدوات الكشف المبكر.</p>
+                  <p>يُظهر التحليل <strong className="text-blue-400">استقراراً نسبياً</strong> في حالات الرصد بمتوسط <strong>{analysis.avgMonthly}</strong> حالة رصد شهرياً. مستوى المخاطر: <strong style={{ color: getRiskColor(analysis.riskScore) }}>{getRiskLabel(analysis.riskScore)}</strong>. يُوصى بالحفاظ على مستوى الرصد الحالي مع تحسين أدوات الكشف المبكر.</p>
                 )}
               </motion.div>
             </div>

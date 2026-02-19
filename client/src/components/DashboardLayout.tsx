@@ -2,7 +2,7 @@
  * DashboardLayout — SDAIA Ultra Premium Design System
  * RTL-first sidebar with SDAIA official colors (#273470, #6459A7, #3DB1AC)
  * Glassmorphism, scan-line effects, and premium animations
- * - Workspace Switcher in HEADER: التسريبات / الخصوصية
+ * - Workspace Switcher in HEADER: حالات الرصد / الخصوصية
  * - Sidebar: الرئيسية (flat) + workspace groups + لوحة التحكم (flat)
  * - Full workspace switch: sidebar + dashboard + colors + header title
  */

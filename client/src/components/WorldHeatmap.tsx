@@ -172,7 +172,7 @@ export default function WorldHeatmap({ leaks }: WorldHeatmapProps) {
                 <p className="text-xs font-bold text-foreground">{COUNTRY_DATA[hoveredCountry].nameAr}</p>
                 <p className="text-[9px] text-muted-foreground">{COUNTRY_DATA[hoveredCountry].nameEn}</p>
                 <div className="mt-1.5 space-y-0.5">
-                  <p className="text-[10px] text-foreground">الحوادث: <strong>{countryStats.get(hoveredCountry)?.leakCount || 0}</strong></p>
+                  <p className="text-[10px] text-foreground">حالات الرصد: <strong>{countryStats.get(hoveredCountry)?.leakCount || 0}</strong></p>
                   <p className="text-[10px] text-foreground">السجلات: <strong>{(countryStats.get(hoveredCountry)?.recordCount || 0).toLocaleString()}</strong></p>
                 </div>
               </motion.div>
@@ -191,7 +191,7 @@ export default function WorldHeatmap({ leaks }: WorldHeatmapProps) {
 
       <div className="px-4 pb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold text-foreground">ترتيب الدول حسب عدد الحوادث</span>
+          <span className="text-[10px] font-bold text-foreground">ترتيب الدول حسب عدد حالات الرصد</span>
         </div>
         <div className="space-y-1.5">
           {ranking.slice(0, 5).map((country, i) => {

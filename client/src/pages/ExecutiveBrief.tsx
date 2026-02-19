@@ -93,7 +93,7 @@ export default function ExecutiveBrief() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-10">
-          <KpiCard title="إجمالي الحوادث" value={summary.totalIncidents} icon={Siren} />
+          <KpiCard title="إجمالي حالات الرصد" value={summary.totalIncidents} icon={Siren} />
           <KpiCard title="إجمالي ادعاءات البائع" value={new Intl.NumberFormat().format(summary.totalRecords)} icon={FileText} />
           <KpiCard title="القطاعات المتأثرة" value={summary.totalSectors} icon={Building} />
           <KpiCard title="الجهات المهاجمة" value={summary.totalActors} icon={Users} />
@@ -161,7 +161,7 @@ export default function ExecutiveBrief() {
           <h2 className="text-2xl font-semibold mb-4 text-cyan-300">النتائج الرئيسية</h2>
           <div className="prose prose-invert max-w-none text-slate-300 leading-relaxed">
             <p>
-              يُظهر التحليل الشامل لحالات الرصد المسجلة وجود <strong className="text-amber-400">{summary.totalIncidents}</strong> حادثة، أثرت على ما مجموعه <strong className="text-amber-400">{new Intl.NumberFormat().format(summary.totalRecords)}</strong> سجل. القطاع الأكثر استهدافًا هو <strong className="text-cyan-400">{summary.topSector.name}</strong>، بينما كانت الجهة المتسببة الأكثر ظهوراً هي <strong className="text-red-400">{summary.topAttacker.name}</strong>. تم تصنيف <strong className="text-red-500">{summary.criticalCount}</strong> حوادث على أنها عالية الأهمية و <strong className="text-orange-500">{summary.highCount}</strong> على أنها عالية مستوى التأثير، مما يستدعي اهتمامًا فوريًا. المنصة الأكثر شيوعًا كمصدر للحالات رصد كانت <strong className="text-purple-400">{summary.topPlatform.name}</strong>، وأسلوب التسرب الأكثر شيوعاً هو <strong className="text-indigo-400">{summary.topMethod.name}</strong>. إجمالي الغرامات التقديرية لمخالفات نظام حماية البيانات الشخصية تصل إلى <strong className="text-amber-400">{formatCurrency(summary.estimatedFines)}</strong>، مما يؤكد على الأثر المالي الكبير لهذه الحوادث.
+              يُظهر التحليل الشامل لحالات الرصد المسجلة وجود <strong className="text-amber-400">{summary.totalIncidents}</strong> حالة رصد، أثرت على ما مجموعه <strong className="text-amber-400">{new Intl.NumberFormat().format(summary.totalRecords)}</strong> سجل. القطاع الأكثر استهدافًا هو <strong className="text-cyan-400">{summary.topSector.name}</strong>، بينما كانت الجهة المتسببة الأكثر ظهوراً هي <strong className="text-red-400">{summary.topAttacker.name}</strong>. تم تصنيف <strong className="text-red-500">{summary.criticalCount}</strong> حالات رصد على أنها عالية الأهمية و <strong className="text-orange-500">{summary.highCount}</strong> على أنها عالية مستوى التأثير، مما يستدعي اهتمامًا فوريًا. المنصة الأكثر شيوعًا كمصدر للحالات رصد كانت <strong className="text-purple-400">{summary.topPlatform.name}</strong>، وأسلوب التسرب الأكثر شيوعاً هو <strong className="text-indigo-400">{summary.topMethod.name}</strong>. إجمالي الغرامات التقديرية لمخالفات نظام حماية البيانات الشخصية تصل إلى <strong className="text-amber-400">{formatCurrency(summary.estimatedFines)}</strong>، مما يؤكد على الأثر المالي الكبير لهذه حالات الرصد.
             </p>
           </div>
         </GlassCard>
