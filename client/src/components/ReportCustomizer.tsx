@@ -225,8 +225,8 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
   <div class="section">
     <div class="section-title">📋 الملخص التنفيذي</div>
     <p style="font-size:13px;line-height:1.8;color:#cbd5e1;">
-      يقدم هذا التقرير نظرة شاملة على حوادث تسريب البيانات الشخصية المرصودة عبر منصة راصد التابعة لمكتب إدارة البيانات الوطنية.
-      تم رصد ${data.stats.totalLeaks} حادثة تسريب أثرت على ${data.stats.totalRecords.toLocaleString()} سجل بيانات شخصية.
+      يقدم هذا التقرير نظرة شاملة على حالات رصد البيانات الشخصية المرصودة عبر منصة راصد التابعة لمكتب إدارة البيانات الوطنية.
+      تم رصد ${data.stats?.totalLeaks ?? 0} حالة رصد أثرت على ${(data.stats?.totalRecords ?? 0).toLocaleString()} سجل بيانات شخصية.
       يتضمن التقرير تحليلاً تفصيلياً للتسريبات حسب القطاعات والمصادر ومستويات التأثير، مع توصيات لتعزيز حماية البيانات.
     </p>
   </div>` : ""}
@@ -236,19 +236,19 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
     <div class="section-title">📊 الإحصائيات العامة</div>
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="stat-value">${data.stats.totalLeaks}</div>
-        <div class="stat-label">إجمالي التسريبات</div>
+        <div class="stat-value">${data.stats?.totalLeaks ?? 0}</div>
+        <div class="stat-label">إجمالي حالات الرصد</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${data.stats.totalRecords.toLocaleString()}</div>
-        <div class="stat-label">السجلات المكشوفة</div>
+        <div class="stat-value">${(data.stats?.totalRecords ?? 0).toLocaleString()}</div>
+        <div class="stat-label">العدد المُدّعى</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${data.stats.newLeaks}</div>
-        <div class="stat-label">تسريبات جديدة</div>
+        <div class="stat-value">${data.stats?.newLeaks ?? 0}</div>
+        <div class="stat-label">حالات رصد جديدة</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${data.stats.piiDetected}</div>
+        <div class="stat-value">${data.stats?.piiDetected ?? 0}</div>
         <div class="stat-label">أنواع بيانات مكتشفة</div>
       </div>
     </div>
@@ -256,7 +256,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
 
   ${selectedSections.includes("leaks") ? `
   <div class="section">
-    <div class="section-title">🔓 تفاصيل التسريبات المرصودة</div>
+    <div class="section-title">🔓 تفاصيل حالات الرصد</div>
     <table>
       <thead>
         <tr>
@@ -290,7 +290,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
     <div class="section-title">💡 التوصيات</div>
     <div style="space-y:8px;">
       <div class="rec-item"><div class="rec-bullet"></div><div>تطبيق التشفير الإلزامي للبيانات الحساسة في جميع القطاعات</div></div>
-      <div class="rec-item"><div class="rec-bullet"></div><div>إنشاء فريق استجابة وطني لحوادث تسريب البيانات الشخصية</div></div>
+      <div class="rec-item"><div class="rec-bullet"></div><div>إنشاء فريق استجابة وطني لحالات رصد البيانات الشخصية</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>تحديث معايير PDPL للقطاع الصحي وقطاع الاتصالات</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>إلزام الجهات بتوثيق حوادث التسريب خلال 72 ساعة</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>تطوير نظام إنذار مبكر متكامل مع منصة راصد</div></div>
