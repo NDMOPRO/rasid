@@ -129,6 +129,9 @@ const AdminFeatureFlags = lazy(() => import("./pages/admin/AdminFeatureFlags"));
 const AdminTheme = lazy(() => import("./pages/admin/AdminTheme"));
 const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminControlPanel = lazy(() => import("./pages/AdminControlPanel"));
+const AdminCMSPage = lazy(() => import("./pages/AdminCMS"));
+const AdminOperationsPage = lazy(() => import("./pages/AdminOperations"));
 
 // Additional missing pages
 const PrivacyDashboard = lazy(() => import("./pages/PrivacyDashboard"));
@@ -260,6 +263,9 @@ function Router() {
           <Route path="/admin/theme" component={AdminTheme} />
           <Route path="/admin/menus" component={AdminMenus} />
           <Route path="/admin/audit-log" component={AdminAuditLog} />
+          <Route path="/admin/control" component={AdminControlPanel} />
+          <Route path="/admin/cms" component={AdminCMSPage} />
+          <Route path="/admin/operations" component={AdminOperationsPage} />
           {/* New structured routes per spec */}
           <Route path="/app/overview" component={Overview} />
           <Route path="/app/privacy" component={PrivacyDashboard} />

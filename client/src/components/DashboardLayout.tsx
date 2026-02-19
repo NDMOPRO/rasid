@@ -18,7 +18,7 @@ import {
   Brain, Network, Sun, Moon, Monitor, Bot, CheckCircle2, Scan, FileCheck,
   FileBarChart, Stamp, Sparkles, BookOpen, HeartHandshake, GraduationCap,
   Activity, Crown, Layers, Eye, QrCode, Home, Import, History,
-  FolderOpen, Wrench, Clock, Download, FileDown,
+  FolderOpen, Wrench, Clock, Download, FileDown, Database, Gauge, PanelLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -229,6 +229,9 @@ const controlPanelGroup: NavGroup = {
     { label: "سجل المراجعة", labelEn: "Audit Log", icon: ScrollText, path: "/audit-log", requiresAuth: true, minRole: "admin" },
     { label: "الاحتفاظ بالبيانات", labelEn: "Data Retention", icon: Archive, path: "/data-retention", requiresAuth: true, minRole: "admin" },
     { label: "صحة النظام", labelEn: "System Health", icon: Activity, path: "/system-health", requiresAuth: true, rootAdminOnly: true },
+    { label: "لوحة التحكم الرئيسية", labelEn: "Control Panel", icon: PanelLeft, path: "/admin/control", requiresAuth: true, rootAdminOnly: true },
+    { label: "إدارة المحتوى", labelEn: "Content Management", icon: Database, path: "/admin/cms", requiresAuth: true, rootAdminOnly: true },
+    { label: "مركز العمليات", labelEn: "Operations Center", icon: Gauge, path: "/admin/operations", requiresAuth: true, rootAdminOnly: true },
     { label: "لوحة الإدارة", labelEn: "Admin Panel", icon: Settings, path: "/admin-panel", requiresAuth: true, rootAdminOnly: true },
     { label: "المشرف العام", labelEn: "Super Admin", icon: Crown, path: "/super-admin", requiresAuth: true, rootAdminOnly: true },
     { label: "تحليلات الاستخدام", labelEn: "Usage Analytics", icon: BarChart3, path: "/usage-analytics", requiresAuth: true, rootAdminOnly: true },
