@@ -31,9 +31,11 @@ COPY --from=base /app/package.json ./package.json
 COPY --from=base /app/shared ./shared
 COPY --from=base /app/drizzle ./drizzle
 COPY --from=base /app/client/public ./client/public
+COPY --from=base /app/scripts ./scripts
+RUN chmod +x ./scripts/startup.sh
 
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["bash", "./scripts/startup.sh"]
