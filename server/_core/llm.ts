@@ -209,6 +209,7 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
+// التعديل 1: URL fallback — إذا Forge API غير متاح، استخدم OpenAI مباشرة
 const resolveApiUrl = () => {
   if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
     return `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`;
@@ -216,11 +217,17 @@ const resolveApiUrl = () => {
   return "https://api.openai.com/v1/chat/completions";
 };
 
+// التعديل 2: مفتاح fallback — يدعم BUILT_IN_FORGE_API_KEY أو OPENAI_API_KEY
+const getApiKey = () => ENV.forgeApiKey || process.env.OPENAI_API_KEY || "";
+
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+  if (!getApiKey()) {
+    throw new Error("API key not configured. Set BUILT_IN_FORGE_API_KEY or OPENAI_API_KEY");
   }
 };
+
+// هل نستخدم Forge API أم OpenAI مباشرة؟
+const isForgeApi = () => !!(ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0);
 
 const normalizeResponseFormat = ({
   responseFormat,
@@ -281,8 +288,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
+  // التعديل 3: نموذج ذكي — Gemini مع Forge، gpt-4o-mini مع OpenAI
+  const useForge = isForgeApi();
+
   const payload: Record<string, unknown> = {
-    model: "gpt-4o-mini",
+    model: useForge ? "gemini-2.5-flash" : "gpt-4o-mini",
     messages: messages.map(normalizeMessage),
   };
 
@@ -298,7 +308,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 16384;
+  // التعديل 3 تابع: max_tokens حسب النموذج + thinking شرطي
+  payload.max_tokens = useForge ? 32768 : 16384;
+
+  // thinking فقط مع Gemini وبدون tools — يتعارضان
+  if (useForge && (!tools || tools.length === 0)) {
+    payload.thinking = { "budget_tokens": 128 };
+  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -319,7 +335,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
+        // التعديل 4: استخدام getApiKey() بدل ENV.forgeApiKey مباشرة
+        authorization: `Bearer ${getApiKey()}`,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -345,7 +362,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
+        authorization: `Bearer ${getApiKey()}`,
       },
       body: JSON.stringify({
         model: "text-embedding-3-small",
