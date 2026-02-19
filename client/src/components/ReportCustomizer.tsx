@@ -61,13 +61,13 @@ const SOURCE_OPTIONS = [
 
 const REPORT_SECTIONS = [
   { id: "summary", label: "الملخص التنفيذي", description: "نظرة عامة على أهم النتائج والتوصيات" },
-  { id: "statistics", label: "الإحصائيات العامة", description: "أرقام وإحصائيات شاملة عن التسريبات" },
-  { id: "leaks", label: "تفاصيل التسريبات", description: "قائمة مفصلة بجميع التسريبات المرصودة" },
-  { id: "sectors", label: "تحليل القطاعات", description: "توزيع التسريبات حسب القطاعات" },
+  { id: "statistics", label: "الإحصائيات العامة", description: "أرقام وإحصائيات شاملة عن حالات الرصد" },
+  { id: "leaks", label: "تفاصيل حالات الرصد", description: "قائمة مفصلة بجميع حالات الرصد" },
+  { id: "sectors", label: "تحليل القطاعات", description: "توزيع حالات الرصد حسب القطاعات" },
   { id: "threats", label: "تحليل التهديدات", description: "الجهات الفاعلة وأساليب الاختراق" },
-  { id: "pii", label: "البيانات الشخصية المكشوفة", description: "أنواع البيانات الشخصية المسربة" },
+  { id: "pii", label: "البيانات الشخصية المكتشفة", description: "أنواع البيانات الشخصية المكتشفة" },
   { id: "recommendations", label: "التوصيات", description: "توصيات لتعزيز حماية البيانات" },
-  { id: "timeline", label: "الجدول الزمني", description: "تسلسل زمني للحوادث المرصودة" },
+  { id: "timeline", label: "الجدول الزمني", description: "تسلسل زمني لحالات الرصد" },
 ];
 
 interface ReportCustomizerProps {
@@ -77,7 +77,7 @@ interface ReportCustomizerProps {
 
 export default function ReportCustomizer({ open, onClose }: ReportCustomizerProps) {
   const [step, setStep] = useState<"customize" | "warning" | "generating" | "done">("customize");
-  const [reportTitle, setReportTitle] = useState("تقرير رصد تسريبات البيانات الشخصية");
+  const [reportTitle, setReportTitle] = useState("تقرير رصد تسرب البيانات الشخصية");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedSeverities, setSelectedSeverities] = useState<string[]>(["critical", "high", "medium", "low"]);
   const [selectedSources, setSelectedSources] = useState<string[]>(["telegram", "darkweb", "paste"]);
@@ -227,7 +227,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
     <p style="font-size:13px;line-height:1.8;color:#cbd5e1;">
       يقدم هذا التقرير نظرة شاملة على حالات رصد البيانات الشخصية المرصودة عبر منصة راصد التابعة لمكتب إدارة البيانات الوطنية.
       تم رصد ${data.stats?.totalLeaks ?? 0} حالة رصد أثرت على ${(data.stats?.totalRecords ?? 0).toLocaleString()} سجل بيانات شخصية.
-      يتضمن التقرير تحليلاً تفصيلياً للتسريبات حسب القطاعات والمصادر ومستويات التأثير، مع توصيات لتعزيز حماية البيانات.
+      يتضمن التقرير تحليلاً تفصيلياً لحالات الرصد حسب القطاعات والمصادر ومستويات التأثير، مع توصيات لتعزيز حماية البيانات.
     </p>
   </div>` : ""}
 
@@ -282,7 +282,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
         </tr>`).join("")}
       </tbody>
     </table>
-    ${data.leaksSummary.length > 50 ? `<p style="text-align:center;font-size:11px;color:#64748b;margin-top:12px;">عرض 50 من أصل ${data.leaksSummary.length} تسريب</p>` : ""}
+    ${data.leaksSummary.length > 50 ? `<p style="text-align:center;font-size:11px;color:#64748b;margin-top:12px;">عرض 50 من أصل ${data.leaksSummary.length} حالة رصد</p>` : ""}
   </div>` : ""}
 
   ${selectedSections.includes("recommendations") ? `
@@ -292,7 +292,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
       <div class="rec-item"><div class="rec-bullet"></div><div>تطبيق التشفير الإلزامي للبيانات الحساسة في جميع القطاعات</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>إنشاء فريق استجابة وطني لحالات رصد البيانات الشخصية</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>تحديث معايير PDPL للقطاع الصحي وقطاع الاتصالات</div></div>
-      <div class="rec-item"><div class="rec-bullet"></div><div>إلزام الجهات بتوثيق حوادث التسريب خلال 72 ساعة</div></div>
+      <div class="rec-item"><div class="rec-bullet"></div><div>إلزام الجهات بتوثيق حالات الرصد خلال 72 ساعة</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>تطوير نظام إنذار مبكر متكامل مع منصة راصد</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>إطلاق برنامج توعية وطني لحماية البيانات الشخصية</div></div>
       <div class="rec-item"><div class="rec-bullet"></div><div>تعزيز ضوابط الوصول لقواعد البيانات الحساسة</div></div>
@@ -612,7 +612,7 @@ export default function ReportCustomizer({ open, onClose }: ReportCustomizerProp
                           onChange={(e) => setIncludeSampleData(e.target.checked)}
                           className="w-4 h-4 rounded accent-primary"
                         />
-                        <span className="text-xs text-foreground">تضمين عينات البيانات المسربة</span>
+                        <span className="text-xs text-foreground">تضمين عينات البيانات المكتشفة</span>
                       </label>
                     </div>
 

@@ -101,7 +101,7 @@ export default function PdplCompliance() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <KpiCard title="إجمالي المخالفات" value={pdplData.articles.reduce((acc, a) => acc + a.count, 0)} icon={AlertTriangle} />
         <KpiCard title="إجمالي الغرامات المقدرة" value={totalFines} icon={Landmark} unit="ريال" />
-        <KpiCard title="الحوادث المتضمنة مخالفات" value={pdplData.incidentsWithViolations} icon={ShieldAlert} />
+        <KpiCard title="حالات الرصد المتضمنة مخالفات" value={pdplData.incidentsWithViolations} icon={ShieldAlert} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -147,12 +147,12 @@ export default function PdplCompliance() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <GlassCard className="lg:col-span-3">
-            <h2 className="text-2xl font-bold mb-4 text-slate-200">أبرز الحوادث حسب الغرامة</h2>
+            <h2 className="text-2xl font-bold mb-4 text-slate-200">أبرز حالات الرصد حسب الغرامة</h2>
             <div className="overflow-x-auto">
                 <table className="w-full text-right">
                     <thead>
                         <tr className="border-b border-slate-700">
-                            <th className="p-3">الحادثة</th>
+                            <th className="p-3">حالة الرصد</th>
                             <th className="p-3">القطاع</th>
                             <th className="p-3">الغرامة المقدرة (ريال)</th>
                         </tr>

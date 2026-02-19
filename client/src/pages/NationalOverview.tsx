@@ -132,9 +132,9 @@ export default function NationalOverview() {
   ];
 
   const mainKpis = [
-    { label: "إجمالي الحوادث", labelEn: "Total Incidents", value: stats.total, icon: ShieldAlert, color: "#ef4444" },
+    { label: "إجمالي حالات الرصد", labelEn: "Total Incidents", value: stats.total, icon: ShieldAlert, color: "#ef4444" },
     { label: "ادعاء البائع", labelEn: "ادعاء البائع", value: fmt(stats.exposed), icon: Database, color: "#3DB1AC" },
-    { label: "حوادث عالية الأهمية", labelEn: "Critical Incidents", value: stats.critical, icon: AlertTriangle, color: "#f59e0b" },
+    { label: "حالات رصد عالية الأهمية", labelEn: "Critical Incidents", value: stats.critical, icon: AlertTriangle, color: "#f59e0b" },
     { label: "إجمالي السعر المطلوب", labelEn: "Total Asking Price", value: "$" + fmt(stats.totalPrice), icon: DollarSign, color: "#6459A7" },
   ];
 
@@ -367,7 +367,7 @@ export default function NationalOverview() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-[#ef4444]" />
-              أحدث الحوادث
+              أحدث حالات الرصد
               <span className="text-[10px] text-muted-foreground font-normal">Latest Incidents</span>
             </CardTitle>
           </CardHeader>
@@ -430,7 +430,7 @@ export default function NationalOverview() {
 
       {/* Footer stats */}
       <div className={`text-center py-4 text-xs text-muted-foreground border-t ${isDark ? "border-[rgba(61,177,172,0.08)]" : "border-[#e2e5ef]"}`}>
-        <span className="font-mono">{stats.total}</span> حادثة · <span className="font-mono">+{fmt(stats.exposed)}</span> سجل
+        <span className="font-mono">{stats.total}</span> حالة رصد · <span className="font-mono">+{fmt(stats.exposed)}</span> سجل
       </div>
     </div>
   );

@@ -84,7 +84,7 @@ export default function LeakAnatomy() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <KpiCard title="إجمالي أنواع البيانات الشخصية" value={kpis.totalTypes} icon={Fingerprint} subtext="الأنواع الفريدة التي تم رصدها" />
         <KpiCard title="البيان الأكثر شيوعاً" value={kpis.mostCommonType} icon={KeyRound} subtext="الأكثر ظهوراً في حالات الرصد" />
-        <KpiCard title="متوسط الأنواع لكل حادثة" value={kpis.avgTypesPerIncident} icon={BarChart3} subtext="متوسط عدد أنواع البيانات لكل حالة رصد" />
+        <KpiCard title="متوسط الأنواع لكل حالة رصد" value={kpis.avgTypesPerIncident} icon={BarChart3} subtext="متوسط عدد أنواع البيانات لكل حالة رصد" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">

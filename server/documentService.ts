@@ -182,7 +182,7 @@ function buildDocumentHTML(params: DocumentGenerationInput & {
   const dateTime = toGregorianDateTime(params.generatedAt);
 
   const docTypeLabels: Record<string, string> = {
-    incident_report: "توثيق حادثة",
+    incident_report: "توثيق حالة رصد",
     custom_report: "تقرير مخصص",
     executive_summary: "ملخص تنفيذي",
     compliance_report: "تقرير امتثال",
