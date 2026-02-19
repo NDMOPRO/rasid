@@ -181,7 +181,7 @@ export const appRouter = router({
   dashboard: router({
     stats: publicProcedure.query(async () => {
       // Return leak-based stats for the monitoring dashboard
-      const allLeaks = await db.getLeaks();
+      const [allLeaks, scanStats] = await Promise.all([db.getLeaks(), db.getDashboardStats()]);
       const totalLeaks = allLeaks.length;
       const totalRecords = allLeaks.reduce((s: number, l: any) => s + (l.recordCount || 0), 0);
       const newLeaks = allLeaks.filter((l: any) => l.status === 'new').length;
@@ -215,6 +215,14 @@ export const appRouter = router({
         telegramLeaks: allLeaks.filter((l: any) => l.source === 'telegram').length,
         darkwebLeaks: allLeaks.filter((l: any) => l.source === 'darkweb').length,
         pasteLeaks: allLeaks.filter((l: any) => l.source === 'paste').length,
+        // Scan-based stats for AdminPanel compatibility
+        totalSites: scanStats?.totalSites ?? 0,
+        totalScans: scanStats?.totalScans ?? 0,
+        compliant: scanStats?.compliant ?? 0,
+        nonCompliant: scanStats?.nonCompliant ?? 0,
+        partiallyCompliant: scanStats?.partiallyCompliant ?? 0,
+        noPolicy: scanStats?.noPolicy ?? 0,
+        averageScore: scanStats?.averageScore ?? 0,
       };
     }),
     clauseStats: publicProcedure.query(async () => {
