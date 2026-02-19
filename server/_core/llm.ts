@@ -349,7 +349,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768;
+  payload.max_tokens = usingOpenAI ? 16384 : 32768;
   if (!usingOpenAI) {
     payload.thinking = {
       "budget_tokens": 128
@@ -426,7 +426,7 @@ export async function invokeLLMStream(
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768;
+  payload.max_tokens = usingOpenAI ? 16384 : 32768;
   if (!usingOpenAI) {
     payload.thinking = { "budget_tokens": 128 };
   }
