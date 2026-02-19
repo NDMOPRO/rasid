@@ -269,7 +269,23 @@ export const appRouter = router({
       return await db.getClauseStatsBySectorAndCategory();
     }),
     monthlyComparison: publicProcedure.query(async () => {
-      return await db.getMonthlyComparison();
+      // Merge both data sources: getMonthlyComparison (for MonthlyComparison component)
+      // and getMonthlyComparisonStats (for PresentationMode component)
+      const [leakData, scanData] = await Promise.all([
+        db.getMonthlyComparison(),
+        db.getMonthlyComparisonStats(),
+      ]);
+      // Return merged object with all fields both consumers need
+      return {
+        ...leakData,
+        // Fields from scanData needed by PresentationMode
+        totalSites: scanData?.totalSites ?? 0,
+        newSitesThisMonth: scanData?.newSitesThisMonth ?? 0,
+        newSitesLastMonth: scanData?.newSitesLastMonth ?? 0,
+        sitesChange: scanData?.sitesChange ?? 0,
+        newScansThisMonth: scanData?.thisMonth?.totalScans ?? 0,
+        changes: scanData?.changes ?? { totalScans: 0, compliant: 0, partiallyCompliant: 0, nonCompliant: 0, noPolicy: 0 },
+      };
     }),
     exportExcel: protectedProcedure.input(z.object({
       type: z.enum(['overview', 'clauses', 'sectors', 'categories', 'all', 'filtered']),
