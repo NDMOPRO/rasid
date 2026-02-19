@@ -113,7 +113,7 @@ export default function CreatePageModal({ open, onClose, onCreatePage, workspace
                   </h2>
                   <p className="text-slate-400 text-xs mt-0.5">
                     {step === "type"
-                      ? `${workspace === "leaks" ? "التسريبات" : "الخصوصية"} — اختر نوع الصفحة`
+                      ? `${workspace === "leaks" ? "حالات الرصد" : "الخصوصية"} — اختر نوع الصفحة`
                       : `${selectedTypeInfo?.title} — أدخل اسم الصفحة`}
                   </p>
                 </div>

@@ -901,7 +901,7 @@ export default function VerifyDocument() {
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { icon: Hash, label: "رقم الوثيقة", value: verifyResult.document.documentId, color: "text-teal-400" },
-                            { icon: FileText, label: "رقم التسريب", value: verifyResult.document.leakId, color: "text-cyan-400" },
+                            { icon: FileText, label: "رقم حالة الرصد", value: verifyResult.document.leakId, color: "text-cyan-400" },
                             { icon: User, label: "أصدرها", value: verifyResult.document.generatedByName, color: "text-white" },
                             {
                               icon: Calendar,

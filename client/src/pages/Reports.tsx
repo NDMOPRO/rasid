@@ -76,10 +76,10 @@ const policyGaps = [
     titleEn: "Healthcare Data Protection Policy",
     sector: "صحة",
     urgency: "critical",
-    description: "70% من التسريبات المرصودة تتضمن سجلات صحية — لا توجد سياسة قطاعية مخصصة",
+    description: "70% من حالات الرصد تتضمن سجلات صحية — لا توجد سياسة قطاعية مخصصة",
     recommendation: "إصدار سياسة خاصة بحماية البيانات الصحية وفق معايير PDPL",
     progress: 25,
-    details: "تم رصد 42 حادثة تسريب تتضمن سجلات صحية خلال الأشهر الستة الماضية. تشمل البيانات المسربة: السجلات الطبية، نتائج الفحوصات المخبرية، الوصفات الطبية، وبيانات التأمين الصحي. القطاع الصحي يفتقر حالياً لسياسة مخصصة تتوافق مع متطلبات PDPL.",
+    details: "تم رصد 42 حالة رصد تتضمن سجلات صحية خلال الأشهر الستة الماضية. تشمل البيانات المكتشفة: السجلات الطبية، نتائج الفحوصات المخبرية، الوصفات الطبية، وبيانات التأمين الصحي. القطاع الصحي يفتقر حالياً لسياسة مخصصة تتوافق مع متطلبات PDPL.",
     affectedEntities: ["المستشفيات الحكومية", "المستشفيات الخاصة", "شركات التأمين الصحي", "المختبرات الطبية"],
     timeline: "Q2 2026",
   },
@@ -89,10 +89,10 @@ const policyGaps = [
     titleEn: "Telecom Data Encryption Standards",
     sector: "اتصالات",
     urgency: "high",
-    description: "قطاع الاتصالات الأكثر تسريباً — الحاجة لمعايير تشفير إلزامية",
+    description: "قطاع الاتصالات الأكثر رصداً — الحاجة لمعايير تشفير إلزامية",
     recommendation: "تطوير معايير تشفير إلزامية لمشغلي الاتصالات",
     progress: 40,
-    details: "قطاع الاتصالات يمثل 35% من إجمالي التسريبات المرصودة. البيانات المسربة تشمل: أرقام الجوال، سجلات المكالمات، بيانات الموقع الجغرافي، ومعلومات الفوترة. المعايير الحالية لا تفرض مستوى تشفير محدد.",
+    details: "قطاع الاتصالات يمثل 35% من إجمالي حالات الرصد. البيانات المكتشفة تشمل: أرقام الجوال، سجلات المكالمات، بيانات الموقع الجغرافي، ومعلومات الفوترة. المعايير الحالية لا تفرض مستوى تشفير محدد.",
     affectedEntities: ["STC", "Mobily", "Zain", "مشغلو MVNO"],
     timeline: "Q3 2026",
   },
@@ -102,10 +102,10 @@ const policyGaps = [
     titleEn: "Incident Reporting Framework",
     sector: "عام",
     urgency: "high",
-    description: "لا يوجد إطار موحد لتوثيق ورصد تسريبات البيانات الشخصية",
+    description: "لا يوجد إطار موحد لتوثيق ورصد تسرب البيانات الشخصية",
     recommendation: "إنشاء إطار توثيق موحد مع جداول زمنية محددة",
     progress: 60,
-    details: "حالياً لا يوجد إطار موحد لتوثيق حوادث تسريب البيانات خلال فترة زمنية محددة. هذا يؤدي لتأخر الرصد وزيادة الأضرار. الإطار المقترح يشمل: توثيق خلال 72 ساعة، تصنيف الحوادث، وخطة متابعة.",
+    details: "حالياً لا يوجد إطار موحد لتوثيق حالات رصد تسرب البيانات خلال فترة زمنية محددة. هذا يؤدي لتأخر الرصد وزيادة الأضرار. الإطار المقترح يشمل: توثيق خلال 72 ساعة، تصنيف الحوادث، وخطة متابعة.",
     affectedEntities: ["جميع الجهات الحكومية", "القطاع الخاص", "الجهات التنظيمية"],
     timeline: "Q1 2026",
   },
@@ -115,10 +115,10 @@ const policyGaps = [
     titleEn: "Iqama Data Protection",
     sector: "حكومة",
     urgency: "medium",
-    description: "تسريبات بيانات الإقامة تتزايد — الحاجة لضوابط إضافية",
+    description: "حالات رصد بيانات الإقامة تتزايد — الحاجة لضوابط إضافية",
     recommendation: "تعزيز ضوابط الوصول لقواعد بيانات الإقامة",
     progress: 15,
-    details: "بيانات الإقامة (أرقام الإقامة، بيانات الكفيل، تواريخ الانتهاء) تظهر بشكل متزايد في عروض البيع على الدارك ويب. 18 حادثة تسريب خلال الربع الأخير تضمنت بيانات إقامة.",
+    details: "بيانات الإقامة (أرقام الإقامة، بيانات الكفيل، تواريخ الانتهاء) تظهر بشكل متزايد في عروض البيع على الدارك ويب. 18 حالة رصد خلال الربع الأخير تضمنت بيانات إقامة.",
     affectedEntities: ["وزارة الداخلية", "الجوازات", "وزارة الموارد البشرية"],
     timeline: "Q4 2026",
   },
@@ -126,17 +126,17 @@ const policyGaps = [
 
 const recommendations = [
   { id: 1, title: "تطبيق التشفير الإلزامي للبيانات الحساسة", sector: "عام", priority: "عاجل", status: "قيد التنفيذ" },
-  { id: 2, title: "إنشاء فريق استجابة وطني لحوادث التسريب", sector: "عام", priority: "عاجل", status: "مكتمل" },
+  { id: 2, title: "إنشاء فريق استجابة وطني لحالات الرصد", sector: "عام", priority: "عاجل", status: "مكتمل" },
   { id: 3, title: "تحديث معايير PDPL للقطاع الصحي", sector: "صحة", priority: "مهم", status: "قيد المراجعة" },
   { id: 4, title: "إلزام مشغلي الاتصالات بتقارير أمنية ربع سنوية", sector: "اتصالات", priority: "مهم", status: "قيد التنفيذ" },
-  { id: 5, title: "تطوير نظام إنذار مبكر للتسريبات", sector: "عام", priority: "عاجل", status: "قيد التنفيذ" },
+  { id: 5, title: "تطوير نظام إنذار مبكر لحالات الرصد", sector: "عام", priority: "عاجل", status: "قيد التنفيذ" },
   { id: 6, title: "برنامج توعية وطني لحماية البيانات", sector: "عام", priority: "متوسط", status: "مخطط" },
   { id: 7, title: "ضوابط مشاركة البيانات بين الجهات", sector: "حكومة", priority: "مهم", status: "قيد المراجعة" },
   { id: 8, title: "معايير أمان تطبيقات الجوال", sector: "تقنية", priority: "مهم", status: "مخطط" },
   { id: 9, title: "تدقيق أمني دوري للبنية التحتية", sector: "عام", priority: "عاجل", status: "قيد التنفيذ" },
   { id: 10, title: "إطار حوكمة البيانات الوطني", sector: "عام", priority: "عاجل", status: "قيد المراجعة" },
   { id: 11, title: "تصنيف البيانات حسب مستوى الحساسية", sector: "عام", priority: "مهم", status: "مكتمل" },
-  { id: 12, title: "آلية تعويض المتضررين من التسريبات", sector: "قانوني", priority: "متوسط", status: "مخطط" },
+  { id: 12, title: "آلية تعويض المتضررين من حالات الرصد", sector: "قانوني", priority: "متوسط", status: "مخطط" },
 ];
 
 const typeLabel = (t: string) => {
@@ -192,13 +192,13 @@ export default function Reports() {
         `Generated: ${new Date(data.generatedAt).toLocaleString("ar-SA")}`,
         "",
         "=== إحصائيات عامة ===",
-        `إجمالي التسريبات: ${data.stats.totalLeaks}`,
-        `تسريبات جديدة: ${data.stats.newLeaks}`,
+        `إجمالي حالات الرصد: ${data.stats.totalLeaks}`,
+        `حالات رصد جديدة: ${data.stats.newLeaks}`,
         `إجمالي السجلات المكشوفة: ${data.stats.totalRecords}`,
         `مصادر الرصد النشطة: ${data.stats.activeMonitors}`,
         `بيانات شخصية مكتشفة: ${data.stats.piiDetected}`,
         "",
-        "=== ملخص التسريبات ===",
+        "=== ملخص حالات الرصد ===",
         ...data.leaksSummary.map(
           (l) =>
             `[التصنيف: ${l.severity.toUpperCase()}] ${l.title} | المصدر: ${l.source} | القطاع: ${l.sector} | السجلات: ${l.records} | الحالة: ${l.status}`
@@ -583,7 +583,7 @@ export default function Reports() {
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="records" name="السجلات" fill="#06B6D4" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="leaks" name="التسريبات" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="leaks" name="حالات الرصد" fill="#F59E0B" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -592,7 +592,7 @@ export default function Reports() {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-right py-2 px-3 text-xs font-medium text-muted-foreground">الشهر</th>
-                  <th className="text-right py-2 px-3 text-xs font-medium text-muted-foreground">عدد التسريبات</th>
+                  <th className="text-right py-2 px-3 text-xs font-medium text-muted-foreground">عدد حالات الرصد</th>
                   <th className="text-right py-2 px-3 text-xs font-medium text-muted-foreground">السجلات المكشوفة</th>
                   <th className="text-right py-2 px-3 text-xs font-medium text-muted-foreground">التغير</th>
                 </tr>
