@@ -28,7 +28,7 @@ import {
 export async function getAllRoles(): Promise<AdminRole[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminRoles).orderBy(desc(adminRoles.priority));
+  return db.select().from(adminRoles).orderBy(desc(adminRoles.rolePriority));
 }
 
 export async function getRoleById(id: string): Promise<AdminRole | undefined> {
@@ -47,16 +47,16 @@ export async function createRole(role: InsertAdminRole): Promise<void> {
 export async function updateRole(id: string, updates: Partial<AdminRole>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(adminRoles).set({ ...updates, updatedAt: Date.now() }).where(eq(adminRoles.id, id));
+  await db.update(adminRoles).set({ ...updates, roleUpdatedAt: Date.now() }).where(eq(adminRoles.id, id));
 }
 
 export async function deleteRole(id: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   // Delete role permissions first
-  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.roleId, id));
+  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.rpRoleId, id));
   // Delete user-role assignments
-  await db.delete(adminUserRoles).where(eq(adminUserRoles.roleId, id));
+  await db.delete(adminUserRoles).where(eq(adminUserRoles.urRoleId, id));
   // Delete the role
   await db.delete(adminRoles).where(eq(adminRoles.id, id));
 }
@@ -80,9 +80,9 @@ export async function createPermission(perm: InsertAdminPermission): Promise<voi
 export async function deletePermission(id: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.permissionId, id));
-  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.permissionId, id));
-  await db.delete(adminUserOverrides).where(eq(adminUserOverrides.permissionId, id));
+  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.rpPermissionId, id));
+  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.gpPermissionId, id));
+  await db.delete(adminUserOverrides).where(eq(adminUserOverrides.ouPermissionId, id));
   await db.delete(adminPermissions).where(eq(adminPermissions.id, id));
 }
 
@@ -93,7 +93,7 @@ export async function deletePermission(id: string): Promise<void> {
 export async function getRolePermissions(roleId: string): Promise<AdminRolePermission[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminRolePermissions).where(eq(adminRolePermissions.roleId, roleId));
+  return db.select().from(adminRolePermissions).where(eq(adminRolePermissions.rpRoleId, roleId));
 }
 
 export async function setRolePermission(rp: InsertAdminRolePermission): Promise<void> {
@@ -106,7 +106,7 @@ export async function removeRolePermission(roleId: string, permissionId: string)
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(adminRolePermissions).where(
-    and(eq(adminRolePermissions.roleId, roleId), eq(adminRolePermissions.permissionId, permissionId))
+    and(eq(adminRolePermissions.rpRoleId, roleId), eq(adminRolePermissions.rpPermissionId, permissionId))
   );
 }
 
@@ -117,7 +117,7 @@ export async function bulkSetRolePermissions(
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   // Delete existing
-  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.roleId, roleId));
+  await db.delete(adminRolePermissions).where(eq(adminRolePermissions.rpRoleId, roleId));
   // Insert new
   if (permissions.length > 0) {
     const now = Date.now();
@@ -140,7 +140,7 @@ export async function bulkSetRolePermissions(
 export async function getAllGroups(): Promise<AdminGroup[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminGroups).orderBy(desc(adminGroups.createdAt));
+  return db.select().from(adminGroups).orderBy(desc(adminGroups.groupCreatedAt));
 }
 
 export async function getGroupById(id: string): Promise<AdminGroup | undefined> {
@@ -159,14 +159,14 @@ export async function createGroup(group: InsertAdminGroup): Promise<void> {
 export async function updateGroup(id: string, updates: Partial<AdminGroup>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(adminGroups).set({ ...updates, updatedAt: Date.now() }).where(eq(adminGroups.id, id));
+  await db.update(adminGroups).set({ ...updates, groupUpdatedAt: Date.now() }).where(eq(adminGroups.id, id));
 }
 
 export async function deleteGroup(id: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.delete(adminGroupMemberships).where(eq(adminGroupMemberships.groupId, id));
-  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.groupId, id));
+  await db.delete(adminGroupMemberships).where(eq(adminGroupMemberships.gmGroupId, id));
+  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.gpGroupId, id));
   await db.delete(adminGroups).where(eq(adminGroups.id, id));
 }
 
@@ -177,13 +177,13 @@ export async function deleteGroup(id: string): Promise<void> {
 export async function getGroupMembers(groupId: string): Promise<AdminGroupMembership[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminGroupMemberships).where(eq(adminGroupMemberships.groupId, groupId));
+  return db.select().from(adminGroupMemberships).where(eq(adminGroupMemberships.gmGroupId, groupId));
 }
 
 export async function getUserGroups(userId: number): Promise<AdminGroupMembership[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminGroupMemberships).where(eq(adminGroupMemberships.userId, userId));
+  return db.select().from(adminGroupMemberships).where(eq(adminGroupMemberships.gmUserId, userId));
 }
 
 export async function addGroupMember(membership: InsertAdminGroupMembership): Promise<void> {
@@ -196,7 +196,7 @@ export async function removeGroupMember(groupId: string, userId: number): Promis
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(adminGroupMemberships).where(
-    and(eq(adminGroupMemberships.groupId, groupId), eq(adminGroupMemberships.userId, userId))
+    and(eq(adminGroupMemberships.gmGroupId, groupId), eq(adminGroupMemberships.gmUserId, userId))
   );
 }
 
@@ -207,7 +207,7 @@ export async function removeGroupMember(groupId: string, userId: number): Promis
 export async function getGroupPermissions(groupId: string): Promise<AdminGroupPermission[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminGroupPermissions).where(eq(adminGroupPermissions.groupId, groupId));
+  return db.select().from(adminGroupPermissions).where(eq(adminGroupPermissions.gpGroupId, groupId));
 }
 
 export async function bulkSetGroupPermissions(
@@ -216,7 +216,7 @@ export async function bulkSetGroupPermissions(
 ): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.groupId, groupId));
+  await db.delete(adminGroupPermissions).where(eq(adminGroupPermissions.gpGroupId, groupId));
   if (permissions.length > 0) {
     const now = Date.now();
     await db.insert(adminGroupPermissions).values(
@@ -238,7 +238,7 @@ export async function bulkSetGroupPermissions(
 export async function getUserOverrides(userId: number): Promise<AdminUserOverride[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminUserOverrides).where(eq(adminUserOverrides.userId, userId));
+  return db.select().from(adminUserOverrides).where(eq(adminUserOverrides.ouUserId, userId));
 }
 
 export async function createUserOverride(override: InsertAdminUserOverride): Promise<void> {
@@ -260,7 +260,7 @@ export async function removeUserOverride(id: string): Promise<void> {
 export async function getUserRoles(userId: number): Promise<AdminUserRole[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminUserRoles).where(eq(adminUserRoles.userId, userId));
+  return db.select().from(adminUserRoles).where(eq(adminUserRoles.urUserId, userId));
 }
 
 export async function assignUserRole(assignment: InsertAdminUserRole): Promise<void> {
@@ -273,7 +273,7 @@ export async function removeUserRole(userId: number, roleId: string): Promise<vo
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(adminUserRoles).where(
-    and(eq(adminUserRoles.userId, userId), eq(adminUserRoles.roleId, roleId))
+    and(eq(adminUserRoles.urUserId, userId), eq(adminUserRoles.urRoleId, roleId))
   );
 }
 
@@ -284,13 +284,13 @@ export async function removeUserRole(userId: number, roleId: string): Promise<vo
 export async function getAllFeatureFlags(): Promise<AdminFeatureFlag[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminFeatureFlags).orderBy(desc(adminFeatureFlags.updatedAt));
+  return db.select().from(adminFeatureFlags).orderBy(desc(adminFeatureFlags.ffUpdatedAt));
 }
 
 export async function getFeatureFlagByKey(key: string): Promise<AdminFeatureFlag | undefined> {
   const db = await getDb();
   if (!db) return undefined;
-  const [flag] = await db.select().from(adminFeatureFlags).where(eq(adminFeatureFlags.key, key)).limit(1);
+  const [flag] = await db.select().from(adminFeatureFlags).where(eq(adminFeatureFlags.ffKey, key)).limit(1);
   return flag;
 }
 
@@ -303,7 +303,7 @@ export async function createFeatureFlag(flag: InsertAdminFeatureFlag): Promise<v
 export async function updateFeatureFlag(id: string, updates: Partial<AdminFeatureFlag>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(adminFeatureFlags).set({ ...updates, updatedAt: Date.now() }).where(eq(adminFeatureFlags.id, id));
+  await db.update(adminFeatureFlags).set({ ...updates, ffUpdatedAt: Date.now() }).where(eq(adminFeatureFlags.id, id));
 }
 
 export async function deleteFeatureFlag(id: string): Promise<void> {
@@ -316,9 +316,9 @@ export async function toggleFeatureFlag(id: string, enabled: boolean, updatedBy?
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(adminFeatureFlags).set({
-    isEnabled: enabled,
-    updatedBy: updatedBy ?? null,
-    updatedAt: Date.now(),
+    ffIsEnabled: enabled,
+    ffUpdatedBy: updatedBy ?? null,
+    ffUpdatedAt: Date.now(),
   }).where(eq(adminFeatureFlags.id, id));
 }
 
@@ -345,11 +345,11 @@ export async function getAdminAuditLogs(filters?: {
   if (!db) return { logs: [], total: 0 };
 
   const conditions = [];
-  if (filters?.userId) conditions.push(eq(adminAuditLogs.userId, filters.userId));
-  if (filters?.action) conditions.push(eq(adminAuditLogs.action, filters.action));
-  if (filters?.resourceType) conditions.push(eq(adminAuditLogs.resourceType, filters.resourceType));
-  if (filters?.from) conditions.push(gte(adminAuditLogs.createdAt, filters.from));
-  if (filters?.to) conditions.push(lte(adminAuditLogs.createdAt, filters.to));
+  if (filters?.userId) conditions.push(eq(adminAuditLogs.aalUserId, filters.userId));
+  if (filters?.action) conditions.push(eq(adminAuditLogs.aalAction, filters.action));
+  if (filters?.resourceType) conditions.push(eq(adminAuditLogs.aalResourceType, filters.resourceType));
+  if (filters?.from) conditions.push(gte(adminAuditLogs.aalCreatedAt, filters.from));
+  if (filters?.to) conditions.push(lte(adminAuditLogs.aalCreatedAt, filters.to));
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -362,7 +362,7 @@ export async function getAdminAuditLogs(filters?: {
     .select()
     .from(adminAuditLogs)
     .where(where)
-    .orderBy(desc(adminAuditLogs.createdAt))
+    .orderBy(desc(adminAuditLogs.aalCreatedAt))
     .limit(filters?.limit ?? 50)
     .offset(filters?.offset ?? 0);
 
@@ -373,8 +373,8 @@ export async function rollbackAuditLog(logId: string, rolledBackBy: number): Pro
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(adminAuditLogs).set({
-    rolledBack: true,
-    rolledBackBy: rolledBackBy,
+    aalRolledBack: true,
+    aalRolledBackBy: rolledBackBy,
   }).where(eq(adminAuditLogs.id, logId));
 }
 
@@ -385,13 +385,13 @@ export async function rollbackAuditLog(logId: string, rolledBackBy: number): Pro
 export async function getAllThemeSettings(): Promise<AdminThemeSetting[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminThemeSettings).orderBy(adminThemeSettings.category, adminThemeSettings.key);
+  return db.select().from(adminThemeSettings).orderBy(adminThemeSettings.tsCategory, adminThemeSettings.tsKey);
 }
 
 export async function getThemeSettingsByCategory(category: string): Promise<AdminThemeSetting[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminThemeSettings).where(eq(adminThemeSettings.category, category as any));
+  return db.select().from(adminThemeSettings).where(eq(adminThemeSettings.tsCategory, category as any));
 }
 
 export async function upsertThemeSetting(setting: InsertAdminThemeSetting): Promise<void> {
@@ -399,11 +399,11 @@ export async function upsertThemeSetting(setting: InsertAdminThemeSetting): Prom
   if (!db) throw new Error("Database not available");
   await db.insert(adminThemeSettings).values(setting).onDuplicateKeyUpdate({
     set: {
-      value: setting.value,
-      valueLight: setting.valueLight,
-      valueDark: setting.valueDark,
-      updatedBy: setting.updatedBy,
-      updatedAt: Date.now(),
+      tsValue: setting.tsValue,
+      tsValueLight: setting.tsValueLight,
+      tsValueDark: setting.tsValueDark,
+      tsUpdatedBy: setting.tsUpdatedBy,
+      tsUpdatedAt: Date.now(),
     },
   });
 }
@@ -415,7 +415,7 @@ export async function upsertThemeSetting(setting: InsertAdminThemeSetting): Prom
 export async function getAllMenus(): Promise<AdminMenu[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminMenus).orderBy(adminMenus.location);
+  return db.select().from(adminMenus).orderBy(adminMenus.menuLocation);
 }
 
 export async function getMenuById(id: string): Promise<AdminMenu | undefined> {
@@ -434,13 +434,13 @@ export async function createMenu(menu: InsertAdminMenu): Promise<void> {
 export async function updateMenu(id: string, updates: Partial<AdminMenu>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(adminMenus).set({ ...updates, updatedAt: Date.now() }).where(eq(adminMenus.id, id));
+  await db.update(adminMenus).set({ ...updates, menuUpdatedAt: Date.now() }).where(eq(adminMenus.id, id));
 }
 
 export async function deleteMenu(id: string): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.delete(adminMenuItems).where(eq(adminMenuItems.menuId, id));
+  await db.delete(adminMenuItems).where(eq(adminMenuItems.miMenuId, id));
   await db.delete(adminMenus).where(eq(adminMenus.id, id));
 }
 
@@ -451,7 +451,7 @@ export async function deleteMenu(id: string): Promise<void> {
 export async function getMenuItems(menuId: string): Promise<AdminMenuItem[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(adminMenuItems).where(eq(adminMenuItems.menuId, menuId)).orderBy(adminMenuItems.sortOrder);
+  return db.select().from(adminMenuItems).where(eq(adminMenuItems.miMenuId, menuId)).orderBy(adminMenuItems.miSortOrder);
 }
 
 export async function createMenuItem(item: InsertAdminMenuItem): Promise<void> {
@@ -463,7 +463,7 @@ export async function createMenuItem(item: InsertAdminMenuItem): Promise<void> {
 export async function updateMenuItem(id: string, updates: Partial<AdminMenuItem>): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(adminMenuItems).set({ ...updates, updatedAt: Date.now() }).where(eq(adminMenuItems.id, id));
+  await db.update(adminMenuItems).set({ ...updates, miUpdatedAt: Date.now() }).where(eq(adminMenuItems.id, id));
 }
 
 export async function deleteMenuItem(id: string): Promise<void> {
@@ -478,7 +478,7 @@ export async function reorderMenuItems(items: Array<{ id: string; sortOrder: num
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   for (const item of items) {
-    await db.update(adminMenuItems).set({ sortOrder: item.sortOrder, updatedAt: Date.now() }).where(eq(adminMenuItems.id, item.id));
+    await db.update(adminMenuItems).set({ miSortOrder: item.sortOrder, miUpdatedAt: Date.now() }).where(eq(adminMenuItems.id, item.id));
   }
 }
 
@@ -505,20 +505,20 @@ export async function logAdminAction(params: {
 }): Promise<void> {
   await createAdminAuditLog({
     id: crypto.randomUUID(),
-    userId: params.userId,
-    userName: params.userName,
-    action: params.action,
-    resourceType: params.resourceType,
-    resourceId: params.resourceId ?? null,
-    resourceName: params.resourceName ?? null,
-    oldValue: params.oldValue ?? null,
-    newValue: params.newValue ?? null,
-    reason: params.reason ?? null,
-    ipAddress: params.ipAddress ?? null,
-    userAgent: params.userAgent ?? null,
-    isRollbackable: params.isRollbackable ?? false,
-    rolledBack: false,
-    rolledBackBy: null,
-    createdAt: Date.now(),
+    aalUserId: params.userId,
+    aalUserName: params.userName,
+    aalAction: params.action,
+    aalResourceType: params.resourceType,
+    aalResourceId: params.resourceId ?? null,
+    aalResourceName: params.resourceName ?? null,
+    aalOldValue: params.oldValue ? JSON.stringify(params.oldValue) : null,
+    aalNewValue: params.newValue ? JSON.stringify(params.newValue) : null,
+    aalReason: params.reason ?? null,
+    aalIpAddress: params.ipAddress ?? null,
+    aalUserAgent: params.userAgent ?? null,
+    aalIsRollbackable: params.isRollbackable ?? false,
+    aalRolledBack: false,
+    aalRolledBackBy: null,
+    aalCreatedAt: Date.now(),
   });
 }
