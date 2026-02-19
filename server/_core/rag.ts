@@ -415,6 +415,6 @@ async function saveChatMessage(
     sources,
     tokensUsed,
     durationMs,
-    model: "gemini-2.5-flash",
+    model: "gpt-4o-mini",
   }).catch((e: any) => console.error("[RAG] Failed to save chat message:", e));
 }

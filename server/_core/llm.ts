@@ -300,8 +300,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   payload.max_tokens = 16384;
 
-  // NOTE: thinking parameter removed — not supported by OpenAI models
-
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
