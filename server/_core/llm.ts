@@ -292,7 +292,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   const useForge = isForgeApi();
 
   const payload: Record<string, unknown> = {
-    model: useForge ? "gemini-2.5-flash" : "gpt-4o-mini",
+    model: "gpt-4o-mini",
     messages: messages.map(normalizeMessage),
   };
 
@@ -311,10 +311,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   // التعديل 3 تابع: max_tokens حسب النموذج + thinking شرطي
   payload.max_tokens = useForge ? 32768 : 16384;
 
-  // thinking فقط مع Gemini وبدون tools — يتعارضان
-  if (useForge && (!tools || tools.length === 0)) {
-    payload.thinking = { "budget_tokens": 128 };
-  }
+
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
