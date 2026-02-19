@@ -3215,3 +3215,34 @@ export async function rasidAIChatStreaming(
     callbacks.onError(err.message || "حدث خطأ غير متوقع");
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// PDPL Article Knowledge Base
+// ═══════════════════════════════════════════════════════════════
+function getPDPLArticleInfo(articleNumber?: number, topic?: string): any {
+  const articles: Record<number, { title: string; summary: string; requirements: string[] }> = {
+    1: { title: "التعريفات", summary: "تعريف المصطلحات الأساسية في النظام مثل البيانات الشخصية وصاحب البيانات والمعالجة", requirements: ["فهم التعريفات", "تطبيقها على العمليات"] },
+    2: { title: "نطاق التطبيق", summary: "يسري النظام على كل معالجة للبيانات الشخصية داخل المملكة أو المتعلقة بمقيمين فيها", requirements: ["تحديد نطاق المعالجة", "تقييم الانطباق"] },
+    5: { title: "مبادئ المعالجة", summary: "يجب أن تكون المعالجة مشروعة وعادلة وشفافة ومحددة الغرض", requirements: ["الشفافية", "تحديد الغرض", "تقليل البيانات", "الدقة", "تحديد فترة الاحتفاظ"] },
+    6: { title: "الموافقة", summary: "يجب الحصول على موافقة صريحة من صاحب البيانات قبل المعالجة", requirements: ["موافقة صريحة", "حرية الاختيار", "إمكانية السحب", "توثيق الموافقة"] },
+    10: { title: "حقوق صاحب البيانات", summary: "لصاحب البيانات حق الوصول والتصحيح والحذف والنقل والاعتراض", requirements: ["حق الوصول", "حق التصحيح", "حق الحذف", "حق النقل", "حق الاعتراض", "حق تقييد المعالجة"] },
+    14: { title: "الإفصاح والنقل", summary: "ضوابط نقل البيانات خارج المملكة", requirements: ["تقييم مستوى الحماية", "ضمانات كافية", "موافقة صاحب البيانات", "إذن الجهة المختصة"] },
+    19: { title: "أمن البيانات", summary: "يجب اتخاذ التدابير التقنية والتنظيمية لحماية البيانات", requirements: ["التشفير", "التحكم في الوصول", "النسخ الاحتياطي", "اختبارات الأمان", "خطة الاستجابة للحوادث"] },
+    20: { title: "الإبلاغ عن الحوادث", summary: "يجب إبلاغ الجهة المختصة خلال 72 ساعة من اكتشاف أي حادثة تسريب", requirements: ["إبلاغ خلال 72 ساعة", "وصف الحادثة", "تقييم الأثر", "إجراءات التخفيف", "إبلاغ المتضررين"] },
+    22: { title: "مسؤول حماية البيانات", summary: "تعيين مسؤول لحماية البيانات الشخصية في الجهات الكبيرة", requirements: ["تعيين DPO", "استقلالية", "صلاحيات كافية", "تقارير دورية"] },
+    24: { title: "تقييم الأثر", summary: "إجراء تقييم أثر على الخصوصية قبل المعالجة عالية المخاطر", requirements: ["تحديد المخاطر", "تقييم الضرورة", "إجراءات التخفيف", "مراجعة دورية"] },
+    32: { title: "العقوبات", summary: "عقوبات مالية تصل إلى 5 مليون ريال وعقوبات جنائية", requirements: ["غرامات مالية", "إنذارات", "إيقاف المعالجة", "عقوبات جنائية"] },
+  };
+
+  if (articleNumber && articles[articleNumber]) {
+    return { found: true, article: { number: articleNumber, ...articles[articleNumber] } };
+  }
+  if (topic) {
+    const matches = Object.entries(articles).filter(([_, a]) =>
+      a.title.includes(topic) || a.summary.includes(topic) || a.requirements.some(r => r.includes(topic))
+    ).map(([num, a]) => ({ number: parseInt(num), ...a }));
+    return { found: matches.length > 0, articles: matches, query: topic };
+  }
+  return { found: true, articles: Object.entries(articles).map(([num, a]) => ({ number: parseInt(num), title: a.title })), total: Object.keys(articles).length };
+}

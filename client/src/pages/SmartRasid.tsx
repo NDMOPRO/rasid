@@ -653,7 +653,19 @@ export default function SmartRasid() {
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => inputRef.current?.focus(), 300);
   }, [messages, loadingSteps]);
+
+  // Handle ?q= query param from widget
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q && messages.length === 0) {
+      // Clear the query param from URL
+      window.history.replaceState({}, '', window.location.pathname);
+      sendMessage(q);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-resize textarea
   useEffect(() => {
