@@ -34,7 +34,8 @@ const RASID_LOGO_DARK =
 
 // ─── Extract NDMO verification code from text ─────────────────
 function extractVerificationCode(text: string): string | null {
-  const match = text.match(/NDMO-DOC-\d{4}-[A-Z0-9]+/i);
+  // Support both NDMO-DOC-* (leak documents) and NDMO-ATL-* (Atlas certifications)
+  const match = text.match(/NDMO-(?:DOC|ATL)-\d{4}-[A-Z0-9]+/i);
   return match ? match[0].toUpperCase() : null;
 }
 
@@ -576,10 +577,10 @@ export default function PublicVerify() {
                 <label className="text-sm font-medium text-blue-200/80 block text-right">
                   كود التوثيق
                 </label>
-                <Input
+                  <Input
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  placeholder="أدخل كود التوثيق (مثال: NDMO-DOC-2026-XXXX)"
+                  placeholder="أدخل كود التوثيق (مثال: NDMO-DOC-2026-XXXX أو NDMO-ATL-2026-XXXX)"
                   className="h-12 text-center text-lg font-mono bg-[#0a1628]/50 border-blue-500/20 text-white placeholder:text-blue-300/30"
                   dir="ltr"
                   onKeyDown={(e) => e.key === "Enter" && handleVerify()}
@@ -749,7 +750,7 @@ export default function PublicVerify() {
                             <p className="text-white">{result.document.generatedByName}</p>
                           </div>
                           <div>
-                            <p className="text-blue-300/50 text-xs mb-1">عنوان حالة الرصد</p>
+                            <p className="text-blue-300/50 text-xs mb-1">عنوان الحادثة</p>
                             <p className="text-white">{result.document.titleAr}</p>
                           </div>
                         </div>

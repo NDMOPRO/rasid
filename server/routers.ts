@@ -4,6 +4,11 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, rootAdminProcedure, assertNotRootAdmin, router } from "./_core/trpc";
 // Root admin user ID for permission checks
 const ROOT_ADMIN_USER_ID = "mruhaily";
+// ═══ PROTECTED ROOT ADMINS — Cannot be deleted, downgraded, or deactivated ═══
+const PROTECTED_ROOT_ADMINS = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
+function isProtectedAdmin(userId: string): boolean {
+  return PROTECTED_ROOT_ADMINS.includes(userId.toLowerCase());
+}
 import { z } from "zod";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
@@ -6489,19 +6494,20 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         password: z.string().min(6).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ ROOT ADMIN PROTECTION ═══
+        // ═══ PROTECTED ROOT ADMINS — Cannot modify role/status for any of the 4 protected admins ═══
         const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && targetUser.userId === ROOT_ADMIN_USER_ID) {
-          // Only root admin can modify their own account
-          if (!ctx.platformUser || ctx.platformUser.userId !== ROOT_ADMIN_USER_ID) {
-            throw new Error("لا يمكن تعديل حساب مدير النظام الرئيسي");
-          }
-          // Root admin cannot change their own role or status
+        if (targetUser && isProtectedAdmin(targetUser.userId)) {
+          // Protected admins: block role downgrade
           if (input.platformRole && input.platformRole !== "root_admin") {
-            throw new Error("لا يمكن تغيير صلاحية مدير النظام الرئيسي");
+            throw new Error("لا يمكن تغيير صلاحية مدير النظام المحمي — هذا الحساب محمي من التعديل");
           }
+          // Protected admins: block deactivation
           if (input.status && input.status !== "active") {
-            throw new Error("لا يمكن تعطيل حساب مدير النظام الرئيسي");
+            throw new Error("لا يمكن تعطيل حساب مدير النظام المحمي — هذا الحساب محمي من التعديل");
+          }
+          // Protected admins: block name/email/mobile/displayName changes by non-protected users
+          if (!ctx.platformUser || !isProtectedAdmin(ctx.platformUser.userId)) {
+            throw new Error("لا يمكن تعديل حساب مدير النظام المحمي — فقط المديرون المحميون يمكنهم التعديل");
           }
         }
         const updates: Record<string, unknown> = {};
@@ -6520,10 +6526,10 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ ROOT ADMIN PROTECTION — Cannot delete root admin ═══
+        // ═══ PROTECTED ROOT ADMINS — Cannot delete any of the 4 protected admins ═══
         const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && targetUser.userId === ROOT_ADMIN_USER_ID) {
-          throw new Error("لا يمكن حذف حساب مدير النظام الرئيسي — هذا الحساب محمي");
+        if (targetUser && isProtectedAdmin(targetUser.userId)) {
+          throw new Error("لا يمكن حذف حساب مدير النظام المحمي — هذا الحساب محمي بشكل دائم");
         }
         await deletePlatformUser(input.id);
         const who = ctx.platformUser?.displayName ?? ctx.user?.name ?? "System";
@@ -6536,11 +6542,11 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         newPassword: z.string().min(6),
       }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ ROOT ADMIN PROTECTION — Only root admin can reset their own password ═══
+        // ═══ PROTECTED ROOT ADMINS — Only protected admins can reset each other's passwords ═══
         const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && targetUser.userId === ROOT_ADMIN_USER_ID) {
-          if (!ctx.platformUser || ctx.platformUser.userId !== ROOT_ADMIN_USER_ID) {
-            throw new Error("لا يمكن إعادة تعيين كلمة مرور مدير النظام الرئيسي");
+        if (targetUser && isProtectedAdmin(targetUser.userId)) {
+          if (!ctx.platformUser || !isProtectedAdmin(ctx.platformUser.userId)) {
+            throw new Error("لا يمكن إعادة تعيين كلمة مرور مدير النظام المحمي — فقط المديرون المحميون يمكنهم ذلك");
           }
         }
         const hash = await bcrypt.hash(input.newPassword, 12);

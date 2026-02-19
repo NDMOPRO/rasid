@@ -1,5 +1,5 @@
 /**
- * Dashboard — لوحة مؤشرات رصد تسرب البيانات الشخصية
+ * Dashboard — لوحة مؤشرات رصد البيانات الشخصية
  * تصميم Ultra Premium مطابق لـ design.rasid.vip/dashboard
  * جميع البطاقات والمؤشرات قابلة للنقر مع تفاصيل كاملة
  */
@@ -27,6 +27,7 @@ import ExecutiveSummary from "@/components/ExecutiveSummary";
 import ActivityFeed from "@/components/ActivityFeed";
 import WorldHeatmap from "@/components/WorldHeatmap";
 import ExportCenter from "@/components/ExportCenter";
+import SmartRasidTrainingWidget from "@/components/SmartRasidTrainingWidget";
 
 /* ═══ PII Type Arabic Labels ═══ */
 const piiTypeLabels: Record<string, string> = {
@@ -323,7 +324,7 @@ function PresentationOverlay({
                       </div>
                     </div>
                     <div className="text-5xl font-black text-white mb-2 tabular-nums">
-                      {card.displayValue || ((card.value ?? 0) as number).toLocaleString()}
+                      {card.displayValue || (card.value as number).toLocaleString()}
                     </div>
                     <p className="text-base text-slate-300 font-medium">{card.label}</p>
                     <p className="text-xs text-slate-500 mt-1">{card.labelEn}</p>
@@ -349,7 +350,7 @@ function PresentationOverlay({
                     <motion.div key={sc.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.1 }}
                       className={`p-6 rounded-2xl ${sc.bg}`} style={{ boxShadow: `0 0 20px ${sc.glow}` }}>
                       <SIcon className={`w-7 h-7 ${sc.color} mb-3`} />
-                      <p className="text-3xl font-bold text-white">{(sc.value ?? 0).toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-white">{sc.value.toLocaleString()}</p>
                       <p className="text-sm text-slate-400 mt-1">{sc.label}</p>
                     </motion.div>
                   );
@@ -518,7 +519,7 @@ function PresentationOverlay({
                     <motion.div key={st.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.1 }}
                       className="p-5 rounded-2xl bg-white/5 border border-white/5 text-center">
                       <SIcon className="w-7 h-7 text-cyan-400 mx-auto mb-3" />
-                      <p className="text-3xl font-bold text-white">{(st.value ?? 0).toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-white">{st.value.toLocaleString()}</p>
                       <p className="text-sm text-slate-400 mt-1">{st.label}</p>
                     </motion.div>
                   );
@@ -715,16 +716,7 @@ function PremiumCard({ children, className = "", onClick, delay = 0, glow }: { c
    MAIN DASHBOARD COMPONENT
    ═══════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
-  const { data: rawStats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
-  const stats = rawStats ?? {
-    totalLeaks: 0, totalRecords: 0, newLeaks: 0,
-    analyzingLeaks: 0, documentedLeaks: 0, completedLeaks: 0,
-    telegramLeaks: 0, darkwebLeaks: 0, pasteLeaks: 0,
-    enrichedLeaks: 0, activeMonitors: 0, totalChannels: 0,
-    piiDetected: 0, distinctSectors: 0, distinctPiiTypes: 0,
-    sectorDistribution: [], sourceDistribution: [],
-    monthlyTrend: [], piiDistribution: [], recentLeaks: [],
-  } as any;
+  const { data: stats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
   const { data: leaks = [] } = trpc.leaks.list.useQuery();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedLeak, setSelectedLeak] = useState<string | null>(null);
@@ -743,9 +735,9 @@ export default function Dashboard() {
   const SLIDE_INTERVAL = 8000; // 8 seconds per slide
   const presentationSlides = [
     { id: "kpi", title: "مؤشرات الأداء الرئيسية", titleEn: "Key Performance Indicators", icon: BarChart3 },
-    { id: "status", title: "حالة الرصد ومصادر الرصد", titleEn: "Incident Status & Sources", icon: Activity },
+    { id: "status", title: "حالة الحوادث ومصادر الرصد", titleEn: "Incident Status & Sources", icon: Activity },
     { id: "sectors", title: "القطاعات والرادار", titleEn: "Sectors & Radar", icon: Building2 },
-    { id: "pii", title: "أنواع البيانات وحالات الرصد الأخيرة", titleEn: "PII Types & Recent Incidents", icon: Fingerprint },
+    { id: "pii", title: "أنواع البيانات والحوادث الأخيرة", titleEn: "PII Types & Recent Incidents", icon: Fingerprint },
     { id: "trends", title: "الاتجاهات والنشاط", titleEn: "Trends & Activity", icon: TrendingUp },
   ];
 
@@ -779,6 +771,7 @@ export default function Dashboard() {
 
   // ═══ PDF EXPORT STATE ═══
   const [isExporting, setIsExporting] = useState(false);
+  const [timePeriod, setTimePeriod] = useState("all");
 
   const exportPresentationPdf = useCallback(async () => {
     if (isExporting) return;
@@ -934,13 +927,13 @@ export default function Dashboard() {
       value: stats?.totalLeaks ?? 0, icon: ShieldAlert,
       gradient: "from-blue-500/20 to-blue-600/5", iconColor: "text-blue-400",
       iconBg: "bg-blue-500/15 dark:bg-blue-500/20", glowColor: "rgba(59, 130, 246, 0.2)",
-      sparkColor: "#3b82f6", trend: stats?.newLeaks ? `+${stats?.newLeaks}` : "0",
+      sparkColor: "#3b82f6", trend: stats?.newLeaks ? `+${stats.newLeaks}` : "0",
       trendUp: (stats?.newLeaks ?? 0) > 0, trendLabel: "جديدة",
     },
     {
-      key: "totalRecords", label: "العدد المُدّعى للسجلات", labelEn: "Exposed Records",
+      key: "totalRecords", label: "ادعاءات البائع", labelEn: "ادعاء البائع",
       value: stats?.totalRecords ?? 0,
-      displayValue: stats?.totalRecords ? (stats?.totalRecords ?? 0) >= 1000000 ? `${((stats?.totalRecords ?? 0) / 1000000).toFixed(1)}M` : (stats?.totalRecords ?? 0).toLocaleString() : "0",
+      displayValue: stats?.totalRecords ? stats.totalRecords >= 1000000 ? `${(stats.totalRecords / 1000000).toFixed(1)}M` : stats.totalRecords.toLocaleString() : "0",
       icon: Database,
       gradient: "from-emerald-500/20 to-emerald-600/5", iconColor: "text-emerald-400",
       iconBg: "bg-emerald-500/15 dark:bg-emerald-500/20", glowColor: "rgba(16, 185, 129, 0.2)",
@@ -1059,7 +1052,7 @@ export default function Dashboard() {
           </motion.div>
           <div>
             <h1 className="text-xl font-bold text-foreground">لوحة مؤشرات الرصد</h1>
-            <p className="text-xs text-muted-foreground">مؤشرات أداء رصد حالات البيانات الشخصية</p>
+            <p className="text-xs text-muted-foreground">مؤشرات أداء رصد البيانات الشخصية</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -1110,6 +1103,35 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* ═══ TIME PERIOD FILTER ═══ */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {[
+          { id: "all", label: "كل الفترات" },
+          { id: "today", label: "اليوم" },
+          { id: "week", label: "هذا الأسبوع" },
+          { id: "month", label: "هذا الشهر" },
+          { id: "quarter", label: "هذا الربع" },
+          { id: "year", label: "هذه السنة" },
+        ].map((p) => (
+          <motion.button
+            key={p.id}
+            onClick={() => setTimePeriod(p.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+              timePeriod === p.id
+                ? isDark
+                  ? "bg-[rgba(61,177,172,0.2)] text-[#3DB1AC] border-[rgba(61,177,172,0.3)]"
+                  : "bg-[#1e3a8a] text-white border-[#1e3a8a]"
+                : isDark
+                  ? "bg-transparent text-muted-foreground border-border/30 hover:border-[rgba(61,177,172,0.2)] hover:text-[#3DB1AC]"
+                  : "bg-transparent text-muted-foreground border-border/30 hover:border-[#1e3a8a] hover:text-[#1e3a8a]"
+            }`}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+          >
+            {p.label}
+          </motion.button>
+        ))}
+      </div>
       {/* ═══ KPI CARDS ROW ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiCards.map((card, idx) => {
@@ -1164,7 +1186,7 @@ export default function Dashboard() {
         {/* Status Cards */}
         <PremiumCard delay={0.35}>
           <div className="p-5">
-            <SectionHeader icon={Activity} title="حالة الرصد" subtitle="Incident Status" />
+            <SectionHeader icon={Activity} title="حالة الحوادث" subtitle="Incident Status" />
             <div className="grid grid-cols-2 gap-3">
               {statusCards.map((sc) => {
                 const SIcon = sc.icon;
@@ -1267,7 +1289,7 @@ export default function Dashboard() {
                         <span className="text-xs font-semibold text-foreground truncate">{sec.sector}</span>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">{sec.count} حالة رصد · {(sec.records ?? 0).toLocaleString()} سجل</p>
+                      <p className="text-[10px] text-muted-foreground">{sec.count} حادثة · {sec.records.toLocaleString()} سجل</p>
                       <div className="w-full h-1 bg-muted/40 rounded-full mt-1.5 overflow-hidden">
                         <motion.div
                           className="h-full rounded-full bg-primary/70"
@@ -1302,7 +1324,7 @@ export default function Dashboard() {
                       <SSIcon className="w-3.5 h-3.5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">{(ss.value ?? 0).toLocaleString()}</p>
+                      <p className="text-sm font-bold text-foreground">{ss.value.toLocaleString()}</p>
                       <p className="text-[9px] text-muted-foreground">{ss.label}</p>
                     </div>
                   </motion.div>
@@ -1318,7 +1340,7 @@ export default function Dashboard() {
         {/* PII Types Distribution */}
         <PremiumCard delay={0.7} onClick={() => setActiveModal("piiTypes")} className="group">
           <div className="p-5">
-            <SectionHeader icon={Fingerprint} title="تصنيف البيانات الشخصية المكتشفة" subtitle="PII Classification" action="التفاصيل" onAction={() => setActiveModal("piiTypes")} />
+            <SectionHeader icon={Fingerprint} title="تصنيف البيانات الشخصية المسربة" subtitle="PII Classification" action="التفاصيل" onAction={() => setActiveModal("piiTypes")} />
             <div className="space-y-2.5">
               {piiDistribution.slice(0, 8).map((pii, i) => {
                 const PIcon = getPiiIcon(pii.type);
@@ -1369,7 +1391,7 @@ export default function Dashboard() {
         {/* Recent Leaks */}
         <PremiumCard delay={0.8}>
           <div className="p-5">
-            <SectionHeader icon={Eye} title="آخر حالات الرصد" subtitle="Latest Incidents" action="عرض الكل" onAction={() => setActiveModal("allLeaks")} />
+            <SectionHeader icon={Eye} title="آخر الحوادث المرصودة" subtitle="Latest Incidents" action="عرض الكل" onAction={() => setActiveModal("allLeaks")} />
             <div className="space-y-2">
               {recentLeaks.slice(0, 6).map((leak: any, idx: number) => {
                 const sc = sourceColor(leak.source);
@@ -1458,7 +1480,7 @@ export default function Dashboard() {
                       <SIcon className={`w-3.5 h-3.5 ${sc.text}`} />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground truncate font-medium">حالة رصد: {leak.titleAr}</p>
+                      <p className="text-xs text-foreground truncate font-medium">رصد حالة: {leak.titleAr}</p>
                       <p className="text-[10px] text-muted-foreground">{leak.sectorAr} · {sourceLabel(leak.source)}</p>
                     </div>
                     <span className="text-[10px] text-muted-foreground shrink-0">
@@ -1498,6 +1520,9 @@ export default function Dashboard() {
       {/* ═══ NINTH ROW: World Heatmap ═══ */}
       <WorldHeatmap leaks={leaks} />
 
+      {/* ═══ TENTH ROW: Smart Rasid Training Center ═══ */}
+      <SmartRasidTrainingWidget />
+
       {/* ═══ Export Center Drawer ═══ */}
       <ExportCenter
         isOpen={showExportCenter}
@@ -1531,19 +1556,19 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* Total Records Modal */}
-      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل ادعاءات البائع" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-4xl">
         <div className="space-y-4">
           <div className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/20" style={{ boxShadow: "0 0 20px rgba(16, 185, 129, 0.08)" }}>
             <p className="text-3xl font-bold text-foreground">{(stats?.totalRecords ?? 0).toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">إجمالي العدد المُدّعى للسجلات</p>
+            <p className="text-sm text-muted-foreground">إجمالي ادعاءات البائع الشخصية المعروضة</p>
           </div>
-          <h4 className="text-sm font-semibold text-foreground">أكبر حالات الرصد من حيث العدد المُدّعى</h4>
+          <h4 className="text-sm font-semibold text-foreground">أكبر حالات الرصد من حيث ادعاء البائع</h4>
           <LeakListInModal leaks={[...leaks].sort((a, b) => (b.recordCount || 0) - (a.recordCount || 0))} />
         </div>
       </DetailModal>
 
       {/* PII Types Modal */}
-      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المكتشفة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المسربة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-4xl">
         <div className="space-y-3">
           {piiDistribution.map((pii, i) => {
             const PIcon = getPiiIcon(pii.type);
@@ -1560,7 +1585,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-foreground">{getPiiLabel(pii.type)}</h4>
-                      <Badge variant="outline" className="text-[10px]">{pii.count} حالة رصد</Badge>
+                      <Badge variant="outline" className="text-[10px]">{pii.count} حادثة</Badge>
                     </div>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: colors[i % colors.length] }} />
@@ -1572,7 +1597,7 @@ export default function Dashboard() {
                     {piiLeaks.slice(0, 3).map(l => (
                       <p key={l.leakId} className="text-[10px] text-muted-foreground truncate">• {l.titleAr} — {l.sectorAr}</p>
                     ))}
-                    {piiLeaks.length > 3 && <p className="text-[10px] text-primary">+ {piiLeaks.length - 3} حالة رصد أخرى</p>}
+                    {piiLeaks.length > 3 && <p className="text-[10px] text-primary">+ {piiLeaks.length - 3} حادثة أخرى</p>}
                   </div>
                 )}
               </div>
@@ -1599,11 +1624,11 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-foreground">{sec.sector}</h4>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{sec.count} حالة رصد</Badge>
+                        <Badge variant="outline" className="text-[10px]">{sec.count} حادثة</Badge>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">{(sec.records ?? 0).toLocaleString()} سجل مُدّعى</p>
+                    <p className="text-[10px] text-muted-foreground">{sec.records.toLocaleString()} سجل (ادعاء البائع)</p>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full bg-primary/70" style={{ width: `${pct}%` }} />
                     </div>
@@ -1668,7 +1693,7 @@ export default function Dashboard() {
                     <tr key={m.yearMonth} className="border-b border-border/30 hover:bg-secondary/20 transition-colors">
                       <td className="p-2 text-foreground text-xs font-mono">{m.yearMonth}</td>
                       <td className="p-2 text-foreground font-bold text-xs">{m.count}</td>
-                      <td className="p-2 text-foreground text-xs">{(m.records ?? 0).toLocaleString()}</td>
+                      <td className="p-2 text-foreground text-xs">{m.records.toLocaleString()}</td>
                       <td className={`p-2 text-xs font-semibold ${diff > 0 ? "text-red-400" : diff < 0 ? "text-emerald-400" : "text-muted-foreground"}`}>
                         {diff > 0 ? `+${diff}` : diff}
                       </td>
@@ -1682,7 +1707,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* All Leaks Modal */}
-      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع حالات الرصد" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع الحوادث المرصودة" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
         <LeakListInModal leaks={leaks} />
       </DetailModal>
 

@@ -3,6 +3,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
 
+/** Root Admin userId — protected from any modifications */
+export const ROOT_ADMIN_USER_ID = "mruhaily";
+
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
 });
@@ -13,7 +16,8 @@ export const publicProcedure = t.procedure;
 const requireUser = t.middleware(async opts => {
   const { ctx, next } = opts;
 
-  if (!ctx.user) {
+  // Accept either OAuth user or platform user
+  if (!ctx.user && !ctx.platformUser) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
@@ -21,6 +25,7 @@ const requireUser = t.middleware(async opts => {
     ctx: {
       ...ctx,
       user: ctx.user,
+      platformUser: ctx.platformUser,
     },
   });
 });
@@ -31,44 +36,45 @@ export const adminProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
 
-    if (!ctx.user || ctx.user.role !== 'admin') {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    // Check platform user admin roles
+    if (ctx.platformUser) {
+      const adminRoles = ["root_admin", "director", "vice_president", "manager"];
+      if (adminRoles.includes(ctx.platformUser.platformRole)) {
+        return next({ ctx });
+      }
     }
 
-    return next({
-      ctx: {
-        ...ctx,
-        user: ctx.user,
-      },
-    });
+    // Check OAuth user admin role
+    if (ctx.user && ctx.user.role === 'admin') {
+      return next({ ctx });
+    }
+
+    // Neither is admin
+    if (!ctx.user && !ctx.platformUser) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+    }
+
+    throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
   }),
 );
 
-const ROOT_ADMIN_USERNAME = "MRUHAILY";
-
+/**
+ * Root Admin Procedure — Only accessible by mruhaily (root_admin)
+ * Used for AI control pages: Knowledge Base, Personality Scenarios, Training Center
+ */
 export const rootAdminProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
-    if (!ctx.user || ctx.user.role !== 'admin') {
-      throw new TRPCError({ code: "FORBIDDEN", message: "صلاحيات غير كافية" });
+
+    // Must be a platform user with root_admin role AND userId === mruhaily
+    if (ctx.platformUser && ctx.platformUser.platformRole === "root_admin" && ctx.platformUser.userId === ROOT_ADMIN_USER_ID) {
+      return next({ ctx });
     }
-    if (ctx.user.name?.toUpperCase() !== ROOT_ADMIN_USERNAME) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "هذا القسم متاح فقط لمشرف النظام الرئيسي" });
+
+    if (!ctx.user && !ctx.platformUser) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
-    return next({
-      ctx: {
-        ...ctx,
-        user: ctx.user,
-      },
-    });
+
+    throw new TRPCError({ code: "FORBIDDEN", message: "هذه الصفحة متاحة فقط لمدير النظام الرئيسي" });
   }),
 );
-
-export function assertNotRootAdmin(targetUsername: string | null | undefined) {
-  if (targetUsername?.toUpperCase() === ROOT_ADMIN_USERNAME) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "لا يمكن تعديل أو حذف حساب المشرف الرئيسي",
-    });
-  }
-}

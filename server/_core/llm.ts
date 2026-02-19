@@ -30,6 +30,7 @@ export type Message = {
   content: MessageContent | MessageContent[];
   name?: string;
   tool_call_id?: string;
+  tool_calls?: ToolCall[];
 };
 
 export type Tool = {
@@ -137,7 +138,7 @@ const normalizeContentPart = (
 };
 
 const normalizeMessage = (message: Message) => {
-  const { role, name, tool_call_id } = message;
+  const { role, name, tool_call_id, tool_calls } = message;
 
   if (role === "tool" || role === "function") {
     const content = ensureArray(message.content)
@@ -149,6 +150,31 @@ const normalizeMessage = (message: Message) => {
       name,
       tool_call_id,
       content,
+    };
+  }
+
+  // Handle assistant messages with tool_calls (content may be null/empty)
+  if (role === "assistant" && tool_calls && tool_calls.length > 0) {
+    const result: Record<string, unknown> = {
+      role,
+      tool_calls,
+    };
+    // Content can be empty string or null when assistant uses tools
+    if (message.content && message.content !== "") {
+      result.content = typeof message.content === "string" ? message.content : "";
+    } else {
+      result.content = "";
+    }
+    if (name) result.name = name;
+    return result;
+  }
+
+  // Handle messages with empty/null content
+  if (!message.content && message.content !== "") {
+    return {
+      role,
+      name,
+      content: "",
     };
   }
 
@@ -209,25 +235,37 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-// التعديل 1: URL fallback — إذا Forge API غير متاح، استخدم OpenAI مباشرة
 const resolveApiUrl = () => {
-  if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
-    return `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`;
+  // If user has their own OpenAI key, use OpenAI API directly
+  if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+    return "https://api.openai.com/v1/chat/completions";
   }
-  return "https://api.openai.com/v1/chat/completions";
+  return ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://forge.manus.im/v1/chat/completions";
 };
 
-// التعديل 2: مفتاح fallback — يدعم BUILT_IN_FORGE_API_KEY أو OPENAI_API_KEY
-const getApiKey = () => ENV.forgeApiKey || process.env.OPENAI_API_KEY || "";
+const resolveApiKey = () => {
+  // Prefer user's OpenAI key, fallback to forge key
+  if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+    return ENV.openaiApiKey;
+  }
+  return ENV.forgeApiKey;
+};
+
+const resolveModel = () => {
+  // Use GPT-4o-mini when using OpenAI directly, otherwise use gemini
+  if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+    return "gpt-4o-mini";
+  }
+  return "gemini-2.5-flash";
+};
 
 const assertApiKey = () => {
-  if (!getApiKey()) {
-    throw new Error("API key not configured. Set BUILT_IN_FORGE_API_KEY or OPENAI_API_KEY");
+  if (!resolveApiKey()) {
+    throw new Error("OPENAI_API_KEY is not configured");
   }
 };
-
-// هل نستخدم Forge API أم OpenAI مباشرة؟
-const isForgeApi = () => !!(ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0);
 
 const normalizeResponseFormat = ({
   responseFormat,
@@ -288,11 +326,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
-  // التعديل 3: نموذج ذكي — Gemini مع Forge، gpt-4o-mini مع OpenAI
-  const useForge = isForgeApi();
-
+  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0);
   const payload: Record<string, unknown> = {
-    model: "gpt-4o-mini",
+    model: resolveModel(),
     messages: messages.map(normalizeMessage),
   };
 
@@ -308,9 +344,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 16384;
-
-
+  payload.max_tokens = 32768;
+  if (!usingOpenAI) {
+    payload.thinking = {
+      "budget_tokens": 128
+    };
+  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -323,56 +362,189 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const response = await fetch(resolveApiUrl(), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${resolveApiKey()}`,
+    },
+    body: JSON.stringify(payload),
+  });
 
-  try {
-    const response = await fetch(resolveApiUrl(), {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        // التعديل 4: استخدام getApiKey() بدل ENV.forgeApiKey مباشرة
-        authorization: `Bearer ${getApiKey()}`,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
-      );
-    }
-
-    return (await response.json()) as InvokeResult;
-  } finally {
-    clearTimeout(timeout);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+    );
   }
+
+  return (await response.json()) as InvokeResult;
 }
 
-export async function generateEmbedding(text: string): Promise<number[]> {
-  const apiUrl = ENV.forgeApiUrl?.replace(/\/$/, "") || "https://api.openai.com";
-  try {
-    const response = await fetch(`${apiUrl}/v1/embeddings`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${getApiKey()}`,
-      },
-      body: JSON.stringify({
-        model: "text-embedding-3-small",
-        input: text.substring(0, 8000),
-      }),
-    });
-    if (!response.ok) {
-      console.error("[LLM] Embedding generation failed:", await response.text());
-      return [];
-    }
-    const data = await response.json();
-    return data.data?.[0]?.embedding || [];
-  } catch (error) {
-    console.error("[LLM] Embedding generation error:", (error as Error).message);
-    return [];
+/**
+ * Streaming version of invokeLLM — yields tokens via callback as they arrive.
+ * Falls back to non-streaming if the API doesn't support it.
+ */
+export async function invokeLLMStream(
+  params: InvokeParams,
+  onToken: (token: string) => void,
+): Promise<InvokeResult> {
+  assertApiKey();
+
+  const {
+    messages,
+    tools,
+    toolChoice,
+    tool_choice,
+    outputSchema,
+    output_schema,
+    responseFormat,
+    response_format,
+  } = params;
+
+  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0);
+  const payload: Record<string, unknown> = {
+    model: resolveModel(),
+    messages: messages.map(normalizeMessage),
+    stream: true,
+  };
+
+  if (tools && tools.length > 0) {
+    payload.tools = tools;
   }
+
+  const normalizedToolChoice = normalizeToolChoice(
+    toolChoice || tool_choice,
+    tools
+  );
+  if (normalizedToolChoice) {
+    payload.tool_choice = normalizedToolChoice;
+  }
+
+  payload.max_tokens = 32768;
+  if (!usingOpenAI) {
+    payload.thinking = { "budget_tokens": 128 };
+  }
+
+  const normalizedResponseFormat = normalizeResponseFormat({
+    responseFormat,
+    response_format,
+    outputSchema,
+    output_schema,
+  });
+
+  if (normalizedResponseFormat) {
+    payload.response_format = normalizedResponseFormat;
+  }
+
+  const response = await fetch(resolveApiUrl(), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${resolveApiKey()}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `LLM stream invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+    );
+  }
+
+  // Parse SSE stream
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("No response body for streaming");
+  }
+
+  const decoder = new TextDecoder();
+  let fullContent = "";
+  let toolCalls: ToolCall[] = [];
+  let finishReason: string | null = null;
+  let model = "";
+  let id = "";
+  let created = 0;
+  let buffer = "";
+
+  // Track tool call deltas
+  const toolCallMap = new Map<number, ToolCall>();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed === "data: [DONE]") continue;
+        if (!trimmed.startsWith("data: ")) continue;
+
+        try {
+          const chunk = JSON.parse(trimmed.slice(6));
+          if (chunk.id) id = chunk.id;
+          if (chunk.model) model = chunk.model;
+          if (chunk.created) created = chunk.created;
+
+          const delta = chunk.choices?.[0]?.delta;
+          const chunkFinish = chunk.choices?.[0]?.finish_reason;
+
+          if (chunkFinish) finishReason = chunkFinish;
+
+          if (delta?.content) {
+            fullContent += delta.content;
+            onToken(delta.content);
+          }
+
+          // Handle streaming tool calls
+          if (delta?.tool_calls) {
+            for (const tc of delta.tool_calls) {
+              const idx = tc.index ?? 0;
+              if (!toolCallMap.has(idx)) {
+                toolCallMap.set(idx, {
+                  id: tc.id || `call_${Date.now()}_${idx}`,
+                  type: "function" as const,
+                  function: { name: tc.function?.name || "", arguments: "" },
+                });
+              }
+              const existing = toolCallMap.get(idx)!;
+              if (tc.id) existing.id = tc.id;
+              if (tc.function?.name) existing.function.name = tc.function.name;
+              if (tc.function?.arguments) existing.function.arguments += tc.function.arguments;
+            }
+          }
+        } catch {
+          // Skip malformed chunks
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  // Convert tool call map to array
+  toolCalls = Array.from(toolCallMap.values());
+
+  // Build a standard InvokeResult
+  const result: InvokeResult = {
+    id,
+    created,
+    model,
+    choices: [{
+      index: 0,
+      message: {
+        role: "assistant",
+        content: fullContent,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+      },
+      finish_reason: finishReason,
+    }],
+  };
+
+  return result;
 }

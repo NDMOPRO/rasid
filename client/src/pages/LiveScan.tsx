@@ -160,7 +160,7 @@ export default function LiveScan() {
         targetType,
       });
       setSavedResults(prev => new Set(prev).add(result.id));
-      toast.success(`\u062a\u0645 \u062d\u0641\u0638 \u062d\u0627\u0644\u0629 \u0627\u0644\u0631\u0635\u062f: ${res.leakId}`);
+      toast.success(`\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u062d\u0627\u062f\u062b\u0629: ${res.leakId}`);
     } catch (e: any) {
       toast.error(`\u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062d\u0641\u0638: ${e.message}`);
     }
@@ -194,7 +194,7 @@ export default function LiveScan() {
       const newSaved = new Set(savedResults);
       unsaved.forEach(r => newSaved.add(r.id));
       setSavedResults(newSaved);
-      toast.success(`\u062a\u0645 \u062d\u0641\u0638 ${res.savedCount} \u062d\u0627\u0644\u0629 \u0631\u0635\u062f \u0641\u064a \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a`);
+      toast.success(`\u062a\u0645 \u062d\u0641\u0638 ${res.savedCount} \u062d\u0627\u062f\u062b\u0629 \u062a\u0633\u0631\u064a\u0628 \u0641\u064a \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a`);
     } catch (e: any) {
       toast.error(`\u062e\u0637\u0623: ${e.message}`);
     } finally {
@@ -235,6 +235,8 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
+      // Trigger global auto-scroll for main container
+      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -274,6 +276,8 @@ export default function LiveScan() {
         { target: targetValue, type: targetType, findings: session.totalFindings, date: new Date() },
         ...prev.slice(0, 9),
       ]);
+      // Trigger global auto-scroll for main container
+      setTimeout(() => window.dispatchEvent(new Event("rasid-auto-scroll")), 300);
 
       if (session.totalFindings > 0) {
         toast.warning(`تم اكتشاف ${session.totalFindings} تهديد!`);
@@ -621,7 +625,7 @@ export default function LiveScan() {
                   )}
                   {savedResults.size === scanResults.length && scanResults.length > 0
                     ? "تم حفظ الكل"
-                    : `حفظ الكل كحالات رصد (${scanResults.length - savedResults.size})`}
+                    : `حفظ الكل كحوادث (${scanResults.length - savedResults.size})`}
                 </Button>
               </div>
 
@@ -677,7 +681,7 @@ export default function LiveScan() {
                           {/* Data Types */}
                           {result.dataTypes && result.dataTypes.length > 0 && (
                             <div>
-                              <span className="text-xs text-white/40 block mb-1">البيانات المكتشفة:</span>
+                              <span className="text-xs text-white/40 block mb-1">البيانات المكشوفة:</span>
                               <div className="flex flex-wrap gap-1">
                                 {result.dataTypes.map((dt, i) => (
                                   <Badge key={i} variant="outline" className="text-xs border-red-500/20 text-red-300">
@@ -739,7 +743,7 @@ export default function LiveScan() {
                               ) : (
                                 <Save className="w-3 h-3 ml-1" />
                               )}
-                              {savedResults.has(result.id) ? "تم الحفظ" : "حفظ كحالة رصد"}
+                              {savedResults.has(result.id) ? "تم الحفظ" : "حفظ كحادثة"}
                             </Button>
                           </div>
 
@@ -821,7 +825,7 @@ export default function LiveScan() {
             <div className="glass-card rounded-2xl p-12 text-center">
               <ShieldCheck className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white">لم يتم اكتشاف أي حالات رصد</h3>
-              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مكتشفة مرتبطة بالهدف المحدد</p>
+              <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مسربة مرتبطة بالهدف المحدد</p>
             </div>
           )}
 
