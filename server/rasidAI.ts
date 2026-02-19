@@ -126,7 +126,30 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
   }
 
   return `# هويتك
-أنت "راصد الذكي" — الوكيل التنفيذي لمنصة "راصد" لرصد حالات رصد البيانات الشخصية.
+أنت "راصد الذكي" — الوكيل التنفيذي لمنصة "راصد" الشاملة لحماية البيانات الشخصية.
+تخدم منصتين متكاملتين:
+
+## 🛡️ منصة حالات الرصد (Data Leak Monitoring)
+- رصد وتتبع تسريبات البيانات الشخصية
+- مصادر الرصد: تليجرام، الدارك ويب، مواقع اللصق، المسح المباشر
+- توثيق الحوادث وسلسلة الأدلة
+- تحليل التهديدات والبائعين
+- التقارير والإحصائيات
+
+## 🔒 منصة الخصوصية (Privacy & Compliance)
+- تقييم الامتثال لنظام حماية البيانات الشخصية (PDPL)
+- إدارة سياسات الخصوصية للجهات
+- طلبات حقوق أصحاب البيانات (DSAR)
+- سجلات أنشطة المعالجة (ROPA)
+- تقييم الأثر على الخصوصية (PIA/DPIA)
+- إدارة الموافقات
+- تدقيق الامتثال الدوري
+
+أنت خبير في كلا المجالين وتستطيع:
+1. الإجابة عن أسئلة الرصد والتسريبات
+2. الإجابة عن أسئلة الخصوصية والامتثال
+3. ربط البيانات بين المنصتين (مثل: تسريب يؤثر على امتثال جهة)
+4. تقديم توصيات شاملة تأخذ في الاعتبار كلا المنظورين
 
 # المستخدم: ${userName}
 # التاريخ: ${today}
@@ -930,6 +953,156 @@ export const RASID_TOOLS = [
           },
         },
         required: ["dashboard_type"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // أدوات منصة الخصوصية (Privacy & Compliance Tools)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_assessments",
+      description: "جلب تقييمات الامتثال لنظام PDPL — يشمل نتائج التقييم ونسبة الامتثال والتوصيات لكل جهة",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          entityId: { type: "number" as const, description: "معرف الجهة (اختياري)" },
+          status: { type: "string" as const, enum: ["draft", "in_progress", "completed", "overdue"], description: "حالة التقييم" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_policies",
+      description: "جلب سياسات الخصوصية المسجلة — يشمل حالة كل سياسة وتاريخ المراجعة ونسبة التغطية",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          entityId: { type: "number" as const, description: "معرف الجهة" },
+          status: { type: "string" as const, enum: ["active", "draft", "expired", "under_review"], description: "حالة السياسة" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_dsar_requests",
+      description: "جلب طلبات حقوق أصحاب البيانات (DSAR) — يشمل نوع الطلب والحالة ومدة الاستجابة",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          status: { type: "string" as const, enum: ["pending", "in_progress", "completed", "rejected", "overdue"], description: "حالة الطلب" },
+          requestType: { type: "string" as const, enum: ["access", "correction", "deletion", "portability", "objection", "restriction"], description: "نوع الطلب" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_processing_records",
+      description: "جلب سجلات أنشطة المعالجة (ROPA) — يشمل الغرض والأساس القانوني وفترة الاحتفاظ",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          entityId: { type: "number" as const, description: "معرف الجهة" },
+          lawfulBasis: { type: "string" as const, enum: ["consent", "contract", "legal_obligation", "vital_interest", "public_interest", "legitimate_interest"], description: "الأساس القانوني" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_impact_assessments",
+      description: "جلب تقييمات الأثر على الخصوصية (PIA/DPIA) — يشمل المخاطر وإجراءات التخفيف",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          status: { type: "string" as const, enum: ["not_started", "in_progress", "completed", "needs_review"], description: "حالة التقييم" },
+          riskLevel: { type: "string" as const, enum: ["low", "medium", "high", "critical"], description: "مستوى المخاطر" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_consent_records",
+      description: "جلب سجلات الموافقات — يشمل نوع الموافقة وتاريخها وحالتها",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          entityId: { type: "number" as const, description: "معرف الجهة" },
+          status: { type: "string" as const, enum: ["active", "withdrawn", "expired"], description: "حالة الموافقة" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_compliance_dashboard",
+      description: "جلب ملخص شامل لحالة الامتثال — نسبة الامتثال الإجمالية وعدد الجهات وحالة التقييمات",
+      parameters: {
+        type: "object" as const,
+        properties: {},
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_pdpl_article_info",
+      description: "جلب معلومات عن مادة محددة من نظام حماية البيانات الشخصية PDPL — النص والشرح والمتطلبات",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          articleNumber: { type: "number" as const, description: "رقم المادة (1-43)" },
+          topic: { type: "string" as const, description: "موضوع البحث في النظام" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_entities_compliance_status",
+      description: "جلب حالة امتثال الجهات المسجلة — يشمل نسبة الامتثال لكل جهة والمخالفات",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          sector: { type: "string" as const, description: "القطاع (بنكي، صحي، حكومي، تعليمي)" },
+          complianceLevel: { type: "string" as const, enum: ["compliant", "partially_compliant", "non_compliant"], description: "مستوى الامتثال" },
+        },
+        required: [] as string[],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "analyze_leak_compliance_impact",
+      description: "تحليل أثر تسريب معين على امتثال الجهة — يربط بين منصة الرصد ومنصة الخصوصية",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          leakId: { type: "number" as const, description: "معرف حالة الرصد" },
+          entityId: { type: "number" as const, description: "معرف الجهة المتأثرة" },
+        },
+        required: ["leakId"],
       },
     },
   },
@@ -2227,6 +2400,97 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       };
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // أدوات منصة الخصوصية (Privacy & Compliance Tools)
+    // ═══════════════════════════════════════════════════════════════
+    case "get_privacy_assessments": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل الامتثال", action: "fetch", description: "جلب تقييمات الامتثال...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getPrivacyAssessments } = await import("./db");
+        const result = await getPrivacyAssessments(params.entityId, params.status);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_privacy_policies": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل السياسات", action: "fetch", description: "جلب سياسات الخصوصية...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getPrivacyPolicies } = await import("./db");
+        const result = await getPrivacyPolicies(params.entityId, params.status);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_dsar_requests": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل الطلبات", action: "fetch", description: "جلب طلبات DSAR...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getDSARRequests } = await import("./db");
+        const result = await getDSARRequests(params.status, params.requestType);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_processing_records": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل المعالجة", action: "fetch", description: "جلب سجلات المعالجة...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getProcessingRecords } = await import("./db");
+        const result = await getProcessingRecords(params.entityId, params.lawfulBasis);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_privacy_impact_assessments": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل التقييم", action: "fetch", description: "جلب تقييمات الأثر...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getPrivacyImpactAssessments } = await import("./db");
+        const result = await getPrivacyImpactAssessments(params.status, params.riskLevel);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_consent_records": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل الموافقات", action: "fetch", description: "جلب سجلات الموافقات...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getConsentRecords } = await import("./db");
+        const result = await getConsentRecords(params.entityId, params.status);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_compliance_dashboard": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل الامتثال", action: "fetch", description: "جلب لوحة الامتثال...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getComplianceDashboard } = await import("./db");
+        const result = await getComplianceDashboard();
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "get_pdpl_article_info": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل النظام", action: "lookup", description: "البحث في نظام PDPL...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      const result = getPDPLArticleInfo(params.articleNumber, params.topic);
+      thinkingSteps[thinkingSteps.length - 1].status = "completed";
+      return result;
+    }
+    case "get_entities_compliance_status": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل الجهات", action: "fetch", description: "جلب حالة امتثال الجهات...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { getEntitiesComplianceStatus } = await import("./db");
+        const result = await getEntitiesComplianceStatus(params.sector, params.complianceLevel);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+    case "analyze_leak_compliance_impact": {
+      thinkingSteps.push({ id: `think-${Date.now()}`, agent: "وكيل التحليل", action: "analyze", description: "تحليل أثر التسريب على الامتثال...", status: "running" as const, timestamp: new Date(), toolCategory: "privacy" as any });
+      try {
+        const { analyzeLeakComplianceImpact } = await import("./db");
+        const result = await analyzeLeakComplianceImpact(params.leakId, params.entityId);
+        thinkingSteps[thinkingSteps.length - 1].status = "completed";
+        return result;
+      } catch (e: any) { thinkingSteps[thinkingSteps.length - 1].status = "error"; return { error: e.message }; }
+    }
+
     default:
       return { error: `أداة غير معروفة: ${toolName}` };
   }
@@ -2970,4 +3234,35 @@ export async function rasidAIChatStreaming(
     await logAudit(userId, "smart_rasid.stream_error", `Error: ${err.message}`, "system", userName);
     callbacks.onError(err.message || "حدث خطأ غير متوقع");
   }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PDPL Article Knowledge Base
+// ═══════════════════════════════════════════════════════════════
+function getPDPLArticleInfo(articleNumber?: number, topic?: string): any {
+  const articles: Record<number, { title: string; summary: string; requirements: string[] }> = {
+    1: { title: "التعريفات", summary: "تعريف المصطلحات الأساسية في النظام مثل البيانات الشخصية وصاحب البيانات والمعالجة", requirements: ["فهم التعريفات", "تطبيقها على العمليات"] },
+    2: { title: "نطاق التطبيق", summary: "يسري النظام على كل معالجة للبيانات الشخصية داخل المملكة أو المتعلقة بمقيمين فيها", requirements: ["تحديد نطاق المعالجة", "تقييم الانطباق"] },
+    5: { title: "مبادئ المعالجة", summary: "يجب أن تكون المعالجة مشروعة وعادلة وشفافة ومحددة الغرض", requirements: ["الشفافية", "تحديد الغرض", "تقليل البيانات", "الدقة", "تحديد فترة الاحتفاظ"] },
+    6: { title: "الموافقة", summary: "يجب الحصول على موافقة صريحة من صاحب البيانات قبل المعالجة", requirements: ["موافقة صريحة", "حرية الاختيار", "إمكانية السحب", "توثيق الموافقة"] },
+    10: { title: "حقوق صاحب البيانات", summary: "لصاحب البيانات حق الوصول والتصحيح والحذف والنقل والاعتراض", requirements: ["حق الوصول", "حق التصحيح", "حق الحذف", "حق النقل", "حق الاعتراض", "حق تقييد المعالجة"] },
+    14: { title: "الإفصاح والنقل", summary: "ضوابط نقل البيانات خارج المملكة", requirements: ["تقييم مستوى الحماية", "ضمانات كافية", "موافقة صاحب البيانات", "إذن الجهة المختصة"] },
+    19: { title: "أمن البيانات", summary: "يجب اتخاذ التدابير التقنية والتنظيمية لحماية البيانات", requirements: ["التشفير", "التحكم في الوصول", "النسخ الاحتياطي", "اختبارات الأمان", "خطة الاستجابة للحوادث"] },
+    20: { title: "الإبلاغ عن الحوادث", summary: "يجب إبلاغ الجهة المختصة خلال 72 ساعة من اكتشاف أي حادثة تسريب", requirements: ["إبلاغ خلال 72 ساعة", "وصف الحادثة", "تقييم الأثر", "إجراءات التخفيف", "إبلاغ المتضررين"] },
+    22: { title: "مسؤول حماية البيانات", summary: "تعيين مسؤول لحماية البيانات الشخصية في الجهات الكبيرة", requirements: ["تعيين DPO", "استقلالية", "صلاحيات كافية", "تقارير دورية"] },
+    24: { title: "تقييم الأثر", summary: "إجراء تقييم أثر على الخصوصية قبل المعالجة عالية المخاطر", requirements: ["تحديد المخاطر", "تقييم الضرورة", "إجراءات التخفيف", "مراجعة دورية"] },
+    32: { title: "العقوبات", summary: "عقوبات مالية تصل إلى 5 مليون ريال وعقوبات جنائية", requirements: ["غرامات مالية", "إنذارات", "إيقاف المعالجة", "عقوبات جنائية"] },
+  };
+
+  if (articleNumber && articles[articleNumber]) {
+    return { found: true, article: { number: articleNumber, ...articles[articleNumber] } };
+  }
+  if (topic) {
+    const matches = Object.entries(articles).filter(([_, a]) =>
+      a.title.includes(topic) || a.summary.includes(topic) || a.requirements.some(r => r.includes(topic))
+    ).map(([num, a]) => ({ number: parseInt(num), ...a }));
+    return { found: matches.length > 0, articles: matches, query: topic };
+  }
+  return { found: true, articles: Object.entries(articles).map(([num, a]) => ({ number: parseInt(num), title: a.title })), total: Object.keys(articles).length };
 }

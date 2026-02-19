@@ -1,7 +1,7 @@
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft } from "lucide-react";
+import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft, Send } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════════
    RasidCharacterWidget — ويدجت راصد الذكي العائم الإبهاري
@@ -40,6 +40,20 @@ export default function RasidCharacterWidget() {
   const [currentChar, setCurrentChar] = useState<keyof typeof CHARACTERS>("standing");
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [miniMessage, setMiniMessage] = useState("");
+
+  const handleMiniSend = () => {
+    if (!miniMessage.trim()) return;
+    // Navigate to SmartRasid with the message as query param
+    setIsExpanded(false);
+    setLocation(`/app/smart-rasid?q=${encodeURIComponent(miniMessage.trim())}`);
+    setMiniMessage("");
+  };
+
+  const handleQuickAction = (action: string) => {
+    setIsExpanded(false);
+    setLocation(`/app/smart-rasid?q=${encodeURIComponent(action)}`);
+  };
   const [pulseCount, setPulseCount] = useState(0);
   const bubbleTimer = useRef<NodeJS.Timeout | null>(null);
   const mouseX = useMotionValue(0);
@@ -229,8 +243,39 @@ export default function RasidCharacterWidget() {
               </motion.button>
             </div>
 
+            {/* ═══ حقل الإدخال السريع ═══ */}
+            <div className="p-3 border-t border-white/5">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={miniMessage}
+                  onChange={(e) => setMiniMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && miniMessage.trim()) {
+                      handleMiniSend();
+                    }
+                  }}
+                  placeholder="اكتب رسالتك هنا..."
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#3DB1AC]/50 text-right"
+                  dir="rtl"
+                />
+                <button
+                  onClick={handleMiniSend}
+                  disabled={!miniMessage.trim()}
+                  className="p-2 rounded-lg bg-[#3DB1AC] hover:bg-[#3DB1AC]/80 disabled:opacity-30 transition-colors"
+                >
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div className="flex gap-1 mt-2">
+                <button onClick={() => handleQuickAction("تحليل سريع للوضع الحالي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">⚡ تحليل</button>
+                <button onClick={() => handleQuickAction("أصدر تقرير تنفيذي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">📊 تقرير</button>
+                <button onClick={() => handleQuickAction("أعطني دليل استرشادي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">📖 دليل</button>
+              </div>
+            </div>
+
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-white/5">
+            <div className="px-4 py-2 border-t border-white/5">
               <p className="text-[9px] text-center text-[#D4DDEF]/25">
                 راصد الذكي — مدعوم بالذكاء الاصطناعي
               </p>

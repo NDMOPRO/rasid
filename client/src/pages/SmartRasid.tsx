@@ -623,10 +623,22 @@ export default function SmartRasid() {
 
   const chatMutation = trpc.smartRasid.chat.useMutation();
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom + Auto-focus input
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => inputRef.current?.focus(), 300);
   }, [messages, loadingSteps]);
+
+  // Handle ?q= query param from widget
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q && messages.length === 0) {
+      // Clear the query param from URL
+      window.history.replaceState({}, '', window.location.pathname);
+      sendMessage(q);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-resize textarea
   useEffect(() => {
@@ -1350,6 +1362,27 @@ export default function SmartRasid() {
                           <Copy className="w-3 h-3 text-slate-500" />
                         )}
                       </button>
+                      {/* Speak button - TTS for AI messages */}
+                      {msg.role === "assistant" && (
+                        <button
+                          onClick={() => {
+                            if (window.speechSynthesis.speaking) {
+                              window.speechSynthesis.cancel();
+                              return;
+                            }
+                            const utterance = new SpeechSynthesisUtterance(
+                              msg.content.replace(/[#*\-_`|]/g, '').replace(/\n+/g, '. ')
+                            );
+                            utterance.lang = 'ar-SA';
+                            utterance.rate = 0.9;
+                            window.speechSynthesis.speak(utterance);
+                          }}
+                          className="p-1 rounded-md hover:bg-white/10"
+                          title="استمع"
+                        >
+                          <Radio className="w-3 h-3 text-slate-500" />
+                        </button>
+                      )}
                       {/* Table export buttons - only show if content has tables */}
                       {msg.role === "assistant" && msg.content.includes("|") && msg.content.includes("---") && (
                         <>
