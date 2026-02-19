@@ -254,8 +254,13 @@ const resolveApiKey = () => {
 };
 
 const resolveModel = () => {
-  // Use GPT-4o-mini when using OpenAI directly, otherwise use gemini
+  // Use GPT-4o-mini when using OpenAI API (directly or via forge)
   if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+    return "gpt-4o-mini";
+  }
+  // If forge API URL points to OpenAI, use gpt-4o-mini
+  const apiUrl = ENV.forgeApiUrl || "";
+  if (apiUrl.includes("openai.com")) {
     return "gpt-4o-mini";
   }
   return "gemini-2.5-flash";
@@ -326,7 +331,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
-  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0);
+  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) || (ENV.forgeApiUrl || "").includes("openai.com");
   const payload: Record<string, unknown> = {
     model: resolveModel(),
     messages: messages.map(normalizeMessage),
@@ -402,7 +407,7 @@ export async function invokeLLMStream(
     response_format,
   } = params;
 
-  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0);
+  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) || (ENV.forgeApiUrl || "").includes("openai.com");
   const payload: Record<string, unknown> = {
     model: resolveModel(),
     messages: messages.map(normalizeMessage),
