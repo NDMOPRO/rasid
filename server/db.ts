@@ -28,6 +28,9 @@ import {
   customPages,
   // CMS + Control Panel tables
   importJobs, exportJobs, pageRegistry, aiPersonalityConfig,
+  // Settings & Operations tables
+  platformAssets, apiProviders, templates, notificationRules, notificationLog,
+  systemHealthLog, dashboardLayouts,
 } from "../drizzle/schema";
 import type {
   InsertUser, Site, InsertSite, Scan, InsertScan, Letter, InsertLetter,

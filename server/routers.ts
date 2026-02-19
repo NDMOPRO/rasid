@@ -31,6 +31,8 @@ import { rasidAIChat } from "./rasidAI";
 import { adminRouter } from "./adminRouter";
 import { cmsRouter } from "./cmsRouter";
 import { controlPanelRouter } from "./controlPanelRouter";
+import { settingsRouter } from "./settingsRouter";
+import { operationsRouter } from "./operationsRouter";
 import {
   aiChatSessions, aiChatMessages, aiRatings, aiSearchLog,
   aiScenarios, aiCustomCommands, knowledgeBase,
@@ -85,6 +87,8 @@ export const appRouter = router({
   admin: adminRouter,
   cms: cmsRouter,
   controlPanel: controlPanelRouter,
+  adminSettings: settingsRouter,
+  operations: operationsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(async ({ ctx }) => {

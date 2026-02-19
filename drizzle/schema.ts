@@ -2524,3 +2524,129 @@ export const aiPersonalityConfig = mysqlTable("ai_personality_config", {
 
 export type AiPersonalityConfigEntry = typeof aiPersonalityConfig.$inferSelect;
 export type InsertAiPersonalityConfigEntry = typeof aiPersonalityConfig.$inferInsert;
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* ═══ Prompt 5 — System Settings & Operations Center Tables ═══ */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* ═══ Platform Assets (logos, favicons, mascot) ═══ */
+export const platformAssets = mysqlTable("platform_assets", {
+	id: int().autoincrement().primaryKey().notNull(),
+	assetKey: varchar("paKey", { length: 100 }).notNull(),
+	assetUrl: text("paUrl").notNull(),
+	assetType: mysqlEnum("paType", ["image", "svg", "icon"]).notNull(),
+	width: int("paWidth"),
+	height: int("paHeight"),
+	fileSize: int("paFileSize"),
+	updatedBy: int("paUpdatedBy"),
+	updatedAt: timestamp("paUpdatedAt", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("platform_assets_key_unique").on(table.assetKey),
+]);
+export type PlatformAsset = typeof platformAssets.$inferSelect;
+export type InsertPlatformAsset = typeof platformAssets.$inferInsert;
+
+/* ═══ API Providers (LLM, SMS, Email, Storage) ═══ */
+export const apiProviders = mysqlTable("api_providers", {
+	id: int().autoincrement().primaryKey().notNull(),
+	providerId: varchar("apProviderId", { length: 64 }).notNull(),
+	name: varchar("apName", { length: 200 }).notNull(),
+	type: mysqlEnum("apType", ["llm", "search", "sms", "email", "storage"]).notNull(),
+	baseUrl: text("apBaseUrl"),
+	keyEncrypted: text("apKeyEncrypted"),
+	model: varchar("apModel", { length: 100 }),
+	isActive: tinyint("apIsActive").default(1).notNull(),
+	rateLimit: int("apRateLimit"),
+	usedToday: int("apUsedToday").default(0),
+	lastChecked: timestamp("apLastChecked", { mode: 'string' }),
+	status: mysqlEnum("apStatus", ["active", "inactive", "error"]).default("active").notNull(),
+	createdBy: int("apCreatedBy"),
+	createdAt: timestamp("apCreatedAt", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("apUpdatedAt", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("api_providers_providerId_unique").on(table.providerId),
+]);
+export type ApiProvider = typeof apiProviders.$inferSelect;
+export type InsertApiProvider = typeof apiProviders.$inferInsert;
+
+/* ═══ Templates (reports, notifications, exports) ═══ */
+export const templates = mysqlTable("templates", {
+	id: int().autoincrement().primaryKey().notNull(),
+	templateId: varchar("tplId", { length: 64 }).notNull(),
+	name: varchar("tplName", { length: 200 }).notNull(),
+	nameAr: varchar("tplNameAr", { length: 200 }).notNull(),
+	type: mysqlEnum("tplType", ["report", "notification", "export", "import"]).notNull(),
+	format: mysqlEnum("tplFormat", ["pdf", "docx", "xlsx", "csv", "html", "email", "sms"]).notNull(),
+	content: text("tplContent").notNull(),
+	variables: json("tplVariables"),
+	isDefault: tinyint("tplIsDefault").default(0).notNull(),
+	isActive: tinyint("tplIsActive").default(1).notNull(),
+	createdBy: int("tplCreatedBy"),
+	createdAt: timestamp("tplCreatedAt", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("tplUpdatedAt", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("templates_templateId_unique").on(table.templateId),
+]);
+export type Template = typeof templates.$inferSelect;
+export type InsertTemplate = typeof templates.$inferInsert;
+
+/* ═══ Notification Rules ═══ */
+export const notificationRules = mysqlTable("notification_rules", {
+	id: int().autoincrement().primaryKey().notNull(),
+	ruleId: varchar("nrRuleId", { length: 64 }).notNull(),
+	name: varchar("nrName", { length: 200 }).notNull(),
+	nameAr: varchar("nrNameAr", { length: 200 }).notNull(),
+	trigger: mysqlEnum("nrTrigger", [
+		"new_leak", "critical_leak", "wide_impact_leak",
+		"system_failure", "llm_failure", "db_failure",
+		"weekly_report", "monthly_report",
+		"user_login", "user_locked", "permission_change",
+		"import_complete", "export_complete",
+	]).notNull(),
+	conditions: json("nrConditions"),
+	channels: json("nrChannels").notNull(),
+	recipients: json("nrRecipients").notNull(),
+	templateId: varchar("nrTemplateId", { length: 64 }),
+	isActive: tinyint("nrIsActive").default(1).notNull(),
+	createdBy: int("nrCreatedBy"),
+	createdAt: timestamp("nrCreatedAt", { mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("notification_rules_ruleId_unique").on(table.ruleId),
+]);
+export type NotificationRule = typeof notificationRules.$inferSelect;
+export type InsertNotificationRule = typeof notificationRules.$inferInsert;
+
+/* ═══ Notification Log ═══ */
+export const notificationLog = mysqlTable("notification_log", {
+	id: int().autoincrement().primaryKey().notNull(),
+	ruleId: varchar("nlRuleId", { length: 64 }),
+	channel: mysqlEnum("nlChannel", ["internal", "email", "sms", "slack", "teams"]).notNull(),
+	recipientId: int("nlRecipientId"),
+	recipientEmail: varchar("nlRecipientEmail", { length: 320 }),
+	subject: varchar("nlSubject", { length: 500 }),
+	content: text("nlContent"),
+	status: mysqlEnum("nlStatus", ["sent", "delivered", "failed", "bounced"]).notNull(),
+	errorMessage: text("nlErrorMessage"),
+	sentAt: timestamp("nlSentAt", { mode: 'string' }).defaultNow().notNull(),
+});
+export type NotificationLogEntry = typeof notificationLog.$inferSelect;
+export type InsertNotificationLogEntry = typeof notificationLog.$inferInsert;
+
+/* ═══ System Health Log ═══ */
+export const systemHealthLog = mysqlTable("system_health_log", {
+	id: int().autoincrement().primaryKey().notNull(),
+	service: mysqlEnum("shService", ["database", "llm", "api", "railway"]).notNull(),
+	status: mysqlEnum("shStatus", ["healthy", "degraded", "down", "recovered"]).notNull(),
+	responseTime: int("shResponseTime"),
+	errorMessage: text("shErrorMessage"),
+	metadata: json("shMetadata"),
+	checkedAt: timestamp("shCheckedAt", { mode: 'string' }).defaultNow().notNull(),
+});
+export type SystemHealthLogEntry = typeof systemHealthLog.$inferSelect;
+export type InsertSystemHealthLogEntry = typeof systemHealthLog.$inferInsert;
+
+/* ═══ Dashboard Layouts — already defined above (line ~750) ═══ */

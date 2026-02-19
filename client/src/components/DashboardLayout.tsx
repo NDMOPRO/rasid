@@ -238,6 +238,8 @@ const controlPanelGroup: NavGroup = {
     { label: "مركز التدريب", labelEn: "Training Center", icon: GraduationCap, path: "/training-center", requiresAuth: true, rootAdminOnly: true },
     { label: "إدارة المحتوى", labelEn: "CMS", icon: Database, path: "/admin/cms", requiresAuth: true, rootAdminOnly: true },
     { label: "لوحة التحكم الرئيسية", labelEn: "Control Panel", icon: Cpu, path: "/admin/control-panel", requiresAuth: true, rootAdminOnly: true },
+    { label: "إعدادات النظام", labelEn: "System Settings", icon: Wrench, path: "/admin/settings", requiresAuth: true, rootAdminOnly: true },
+    { label: "مركز العمليات", labelEn: "Operations Center", icon: Activity, path: "/admin/operations", requiresAuth: true, rootAdminOnly: true },
     { label: "الإعدادات", labelEn: "Settings", icon: Settings, path: "/settings" },
   ],
 };

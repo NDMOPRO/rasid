@@ -12,6 +12,11 @@ import {
   platformUsers,
   pageRegistry,
   aiPersonalityConfig,
+  platformSettings,
+  templates,
+  notificationRules,
+  dashboardLayouts,
+  apiProviders,
 } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
@@ -253,7 +258,118 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
       }
     }
 
-    return { success: true, message: `Seeded: ${DEFAULT_ROLES.length} roles, ${allResources.length * 5} permissions, feature flags for ${PAGE_PERMISSIONS.length} pages, ${PAGE_REGISTRY_ENTRIES.length} page registry entries, ${AI_DEFAULTS.length} AI configs` };
+    // 8. Seed default platform settings
+    const PLATFORM_SETTINGS = [
+      { key: "platform_name", value: "\u0631\u0627\u0635\u062f", type: "string" as const, label: "\u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u0635\u0629", cat: "general", sort: 1 },
+      { key: "platform_name_en", value: "Rasid", type: "string" as const, label: "Platform Name (EN)", cat: "general", sort: 2 },
+      { key: "default_language", value: "ar", type: "string" as const, label: "\u0627\u0644\u0644\u063a\u0629 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0629", cat: "general", sort: 3 },
+      { key: "session_timeout_hours", value: "8", type: "number" as const, label: "\u0645\u062f\u0629 \u0627\u0644\u062c\u0644\u0633\u0629 (\u0633\u0627\u0639\u0627\u062a)", cat: "security", sort: 1 },
+      { key: "max_login_attempts", value: "5", type: "number" as const, label: "\u0623\u0642\u0635\u0649 \u0645\u062d\u0627\u0648\u0644\u0627\u062a \u062f\u062e\u0648\u0644", cat: "security", sort: 2 },
+      { key: "enforce_2fa", value: "false", type: "boolean" as const, label: "\u0625\u0644\u0632\u0627\u0645 \u0627\u0644\u0645\u0635\u0627\u062f\u0642\u0629 \u0627\u0644\u062b\u0646\u0627\u0626\u064a\u0629", cat: "security", sort: 3 },
+      { key: "maintenance_mode", value: "false", type: "boolean" as const, label: "\u0648\u0636\u0639 \u0627\u0644\u0635\u064a\u0627\u0646\u0629", cat: "maintenance", sort: 1 },
+      { key: "support_email", value: "support@rasid.sa", type: "string" as const, label: "\u0628\u0631\u064a\u062f \u0627\u0644\u062f\u0639\u0645", cat: "contact", sort: 1 },
+    ];
+    for (const s of PLATFORM_SETTINGS) {
+      const existing = await db.select().from(platformSettings).where(eq(platformSettings.settingKey, s.key)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(platformSettings).values({
+          settingKey: s.key,
+          settingValue: s.value,
+          settingType: s.type,
+          label: s.label,
+          category: s.cat,
+          sortOrder: s.sort,
+          isEditable: 1,
+        });
+      }
+    }
+
+    // 9. Seed default templates
+    const DEFAULT_TEMPLATES = [
+      { id: "report-monthly", name: "Monthly Report", nameAr: "\u0627\u0644\u062a\u0642\u0631\u064a\u0631 \u0627\u0644\u0634\u0647\u0631\u064a", type: "report" as const, format: "pdf" as const, isDefault: 1 },
+      { id: "report-executive", name: "Executive Brief", nameAr: "\u0627\u0644\u0645\u0644\u062e\u0635 \u0627\u0644\u062a\u0646\u0641\u064a\u0630\u064a", type: "report" as const, format: "pdf" as const, isDefault: 0 },
+      { id: "notif-new-leak", name: "New Leak Alert", nameAr: "\u062a\u0646\u0628\u064a\u0647 \u062d\u0627\u0644\u0629 \u0631\u0635\u062f \u062c\u062f\u064a\u062f\u0629", type: "notification" as const, format: "email" as const, isDefault: 1 },
+      { id: "export-full", name: "Full Export", nameAr: "\u062a\u0635\u062f\u064a\u0631 \u0643\u0627\u0645\u0644", type: "export" as const, format: "xlsx" as const, isDefault: 1 },
+    ];
+    for (const t of DEFAULT_TEMPLATES) {
+      const existing = await db.select().from(templates).where(eq(templates.templateId, t.id)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(templates).values({
+          templateId: t.id,
+          name: t.name,
+          nameAr: t.nameAr,
+          type: t.type,
+          format: t.format,
+          isDefault: t.isDefault,
+          isActive: 1,
+          content: "",
+        });
+      }
+    }
+
+    // 10. Seed default notification rules
+    const DEFAULT_NOTIF_RULES = [
+      { id: "rule-new-leak", name: "New Leak Alert", nameAr: "\u062a\u0646\u0628\u064a\u0647 \u062d\u0627\u0644\u0629 \u0631\u0635\u062f \u062c\u062f\u064a\u062f\u0629", trigger: "new_leak" },
+      { id: "rule-high-sev", name: "High Severity Alert", nameAr: "\u062a\u0646\u0628\u064a\u0647 \u062e\u0637\u0648\u0631\u0629 \u0639\u0627\u0644\u064a\u0629", trigger: "high_severity" },
+      { id: "rule-system-error", name: "System Error Alert", nameAr: "\u062a\u0646\u0628\u064a\u0647 \u062e\u0637\u0623 \u0646\u0638\u0627\u0645", trigger: "system_error" },
+    ];
+    for (const r of DEFAULT_NOTIF_RULES) {
+      const existing = await db.select().from(notificationRules).where(eq(notificationRules.ruleId, r.id)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(notificationRules).values({
+          ruleId: r.id,
+          name: r.name,
+          nameAr: r.nameAr,
+          trigger: r.trigger as any,
+          channels: JSON.stringify(["in_app", "email"]),
+          recipients: JSON.stringify(["admin"]),
+          isActive: 1,
+        });
+      }
+    }
+
+    // 11. Seed default dashboard layout
+    const existingLayout = await db.select().from(dashboardLayouts).where(eq(dashboardLayouts.name, "default-global")).limit(1);
+    if (existingLayout.length === 0) {
+      await db.insert(dashboardLayouts).values({
+        name: "default-global",
+        nameAr: "التخطيط الافتراضي",
+        dataSource: "dashboard",
+        layout: JSON.stringify([
+          { widgetId: "stats-cards", size: "full", visible: true },
+          { widgetId: "severity-chart", size: "half", visible: true },
+          { widgetId: "timeline-chart", size: "half", visible: true },
+          { widgetId: "world-heatmap", size: "full", visible: true },
+          { widgetId: "activity-feed", size: "half", visible: true },
+          { widgetId: "trend-predictions", size: "half", visible: true },
+        ]),
+        isDefault: 1,
+        isTemplate: 1,
+        isLocked: 0,
+      });
+    }
+
+    // 12. Seed page registry entries for new admin pages
+    const NEW_ADMIN_PAGES = [
+      { pageId: "admin-settings", path: "/admin/settings", nameAr: "\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u0646\u0638\u0627\u0645", nameEn: "System Settings", category: "admin" as const, sortOrder: 20 },
+      { pageId: "admin-operations", path: "/admin/operations", nameAr: "\u0645\u0631\u0643\u0632 \u0627\u0644\u0639\u0645\u0644\u064a\u0627\u062a", nameEn: "Operations Center", category: "admin" as const, sortOrder: 21 },
+    ];
+    for (const page of NEW_ADMIN_PAGES) {
+      const existing = await db.select().from(pageRegistry).where(eq(pageRegistry.pageId, page.pageId)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(pageRegistry).values({
+          pageId: page.pageId,
+          path: page.path,
+          nameAr: page.nameAr,
+          nameEn: page.nameEn,
+          category: page.category,
+          sortOrder: page.sortOrder,
+          isActive: 1,
+        });
+      }
+    }
+
+    return { success: true, message: `Seeded: ${DEFAULT_ROLES.length} roles, ${allResources.length * 5} permissions, feature flags for ${PAGE_PERMISSIONS.length} pages, ${PAGE_REGISTRY_ENTRIES.length + NEW_ADMIN_PAGES.length} page registry entries, ${AI_DEFAULTS.length} AI configs, ${PLATFORM_SETTINGS.length} platform settings, ${DEFAULT_TEMPLATES.length} templates, ${DEFAULT_NOTIF_RULES.length} notification rules, 1 dashboard layout` };
   } catch (error) {
     console.error("[AdminSeed] Error:", error);
     return { success: false, message: String(error) };
