@@ -308,8 +308,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  // التعديل 3 تابع: max_tokens حسب النموذج + thinking شرطي
-  payload.max_tokens = useForge ? 32768 : 16384;
+  payload.max_tokens = 16384;
 
 
 
