@@ -177,7 +177,7 @@ function StatsDetailModal({ open, onClose, title, leaks }: { open: boolean; onCl
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{leak.titleAr}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{leak.leakId} — {leak.sectorAr} — {leak.recordCount.toLocaleString()} سجل</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{leak.leakId} — {leak.sectorAr} — {(leak?.recordCount ?? 0).toLocaleString()} سجل</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 ${statusColor(leak.status)}`}>
@@ -442,7 +442,7 @@ export default function Leaks() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{leak.titleAr}</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {leak.leakId} — {leak.sectorAr} — {leak.recordCount.toLocaleString()} سجل
+                        {leak.leakId} — {leak.sectorAr} — {(leak?.recordCount ?? 0).toLocaleString()} سجل
                       </p>
                     </div>
 
@@ -615,7 +615,7 @@ export default function Leaks() {
                               <Database className="w-3 h-3 text-muted-foreground" />
                               <p className="text-[10px] text-muted-foreground">العدد المُدّعى</p>
                             </div>
-                            <p className="text-sm font-bold text-red-400">{leakDetail.recordCount.toLocaleString()}</p>
+                            <p className="text-sm font-bold text-red-400">{(leakDetail?.recordCount ?? 0).toLocaleString()}</p>
                           </div>
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
@@ -775,7 +775,7 @@ export default function Leaks() {
                                 <div>
                                   <p className="text-sm font-semibold text-red-400">تحذير: بيانات شخصية مسربة</p>
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    هذه عينة من البيانات الشخصية التي تم اكتشافها في حالة الرصد. تم عرض {samples.length} سجلات من أصل {leakDetail.recordCount.toLocaleString()} سجل مُدّعى.
+                                    هذه عينة من البيانات الشخصية التي تم اكتشافها في حالة الرصد. تم عرض {samples.length} سجلات من أصل {(leakDetail?.recordCount ?? 0).toLocaleString()} سجل مُدّعى.
                                     يجب التعامل مع هذه البيانات بسرية تامة وفقاً لنظام حماية البيانات الشخصية.
                                   </p>
                                 </div>
@@ -811,7 +811,7 @@ export default function Leaks() {
                                 </div>
                                 <div className="p-3 border-t border-border/30 bg-secondary/20 flex items-center justify-between">
                                   <p className="text-[10px] text-muted-foreground">
-                                    عرض {samples.length} من {leakDetail.recordCount.toLocaleString()} سجل
+                                    عرض {samples.length} من {(leakDetail?.recordCount ?? 0).toLocaleString()} سجل
                                   </p>
                                   <div className="flex items-center gap-2">
                                     <Badge variant="outline" className="text-[10px]">{columns.length} حقل</Badge>
