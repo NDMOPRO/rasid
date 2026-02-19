@@ -167,7 +167,42 @@ export const appRouter = router({
 
   dashboard: router({
     stats: publicProcedure.query(async () => {
-      return await db.getDashboardStats();
+      // Return leak-based stats for the monitoring dashboard
+      const allLeaks = await db.getLeaks();
+      const totalLeaks = allLeaks.length;
+      const totalRecords = allLeaks.reduce((s: number, l: any) => s + (l.recordCount || 0), 0);
+      const newLeaks = allLeaks.filter((l: any) => l.status === 'new').length;
+      const analyzingLeaks = allLeaks.filter((l: any) => l.status === 'analyzing').length;
+      const documentedLeaks = allLeaks.filter((l: any) => l.status === 'documented').length;
+      const completedLeaks = allLeaks.filter((l: any) => l.status === 'reported').length;
+      const enrichedLeaks = allLeaks.filter((l: any) => l.enrichedAt).length;
+      // PII distribution
+      const piiMap: Record<string, number> = {};
+      allLeaks.forEach((l: any) => { ((l.piiTypes as string[]) || []).forEach((t: string) => { piiMap[t] = (piiMap[t] || 0) + 1; }); });
+      const piiDistribution = Object.entries(piiMap).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
+      // Sector distribution
+      const secMap: Record<string, number> = {};
+      allLeaks.forEach((l: any) => { const s = l.sectorAr || l.sector || 'غير محدد'; secMap[s] = (secMap[s] || 0) + 1; });
+      const sectorDistribution = Object.entries(secMap).map(([sector, count]) => ({ sector, count })).sort((a, b) => b.count - a.count);
+      // Source distribution
+      const srcMap: Record<string, number> = {};
+      allLeaks.forEach((l: any) => { const s = l.source || 'unknown'; srcMap[s] = (srcMap[s] || 0) + 1; });
+      const sourceDistribution = Object.entries(srcMap).map(([source, count]) => ({ source, count }));
+      // Monthly trend
+      const monthMap: Record<string, number> = {};
+      allLeaks.forEach((l: any) => { const d = l.detectedAt ? new Date(l.detectedAt) : new Date(l.createdAt); const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; monthMap[key] = (monthMap[key] || 0) + 1; });
+      const monthlyTrend = Object.entries(monthMap).sort().map(([month, count]) => ({ month, count }));
+      // Recent leaks
+      const recentLeaks = allLeaks.slice(0, 10);
+      return {
+        totalLeaks, totalRecords, newLeaks, analyzingLeaks, documentedLeaks, completedLeaks, enrichedLeaks,
+        distinctPiiTypes: Object.keys(piiMap).length,
+        distinctSectors: Object.keys(secMap).length,
+        piiDistribution, sectorDistribution, sourceDistribution, monthlyTrend, recentLeaks,
+        telegramLeaks: allLeaks.filter((l: any) => l.source === 'telegram').length,
+        darkwebLeaks: allLeaks.filter((l: any) => l.source === 'darkweb').length,
+        pasteLeaks: allLeaks.filter((l: any) => l.source === 'paste').length,
+      };
     }),
     clauseStats: publicProcedure.query(async () => {
       return await db.getClauseStats();
