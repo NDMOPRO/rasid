@@ -26,6 +26,8 @@ import {
   adminFeatureFlags, adminAuditLogs, adminThemeSettings, adminMenus,
   adminMenuItems, adminUserRoles,
   customPages,
+  // CMS + Control Panel tables
+  importJobs, exportJobs, pageRegistry, aiPersonalityConfig,
 } from "../drizzle/schema";
 import type {
   InsertUser, Site, InsertSite, Scan, InsertScan, Letter, InsertLetter,

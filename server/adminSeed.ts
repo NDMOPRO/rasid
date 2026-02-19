@@ -10,16 +10,18 @@ import {
   adminFeatureFlags,
   adminUserRoles,
   platformUsers,
+  pageRegistry,
+  aiPersonalityConfig,
 } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // ─── Default Roles ───
 const DEFAULT_ROLES = [
-  { id: "role-super-admin", name: "مدير النظام الأعلى", nameEn: "Super Admin", description: "صلاحيات كاملة بدون قيود", descriptionEn: "Full unrestricted access", isSystem: true, priority: 100, color: "#ef4444" },
-  { id: "role-admin", name: "مدير النظام", nameEn: "Admin", description: "إدارة كاملة مع بعض القيود", descriptionEn: "Full management with some restrictions", isSystem: true, priority: 80, color: "#f59e0b" },
-  { id: "role-analyst", name: "محلل", nameEn: "Analyst", description: "عرض وتحليل البيانات والتقارير", descriptionEn: "View and analyze data and reports", isSystem: true, priority: 60, color: "#3b82f6" },
-  { id: "role-viewer", name: "مشاهد", nameEn: "Viewer", description: "عرض البيانات فقط بدون تعديل", descriptionEn: "View-only access", isSystem: true, priority: 40, color: "#6b7280" },
-  { id: "role-guest", name: "زائر", nameEn: "Guest", description: "وصول محدود جداً", descriptionEn: "Very limited access", isSystem: true, priority: 20, color: "#9ca3af" },
+  { id: "role-super-admin", roleName: "مدير النظام الأعلى", roleNameEn: "Super Admin", roleDescription: "صلاحيات كاملة بدون قيود", roleDescriptionEn: "Full unrestricted access", isSystem: 1, rolePriority: 100, roleColor: "#ef4444" },
+  { id: "role-admin", roleName: "مدير النظام", roleNameEn: "Admin", roleDescription: "إدارة كاملة مع بعض القيود", roleDescriptionEn: "Full management with some restrictions", isSystem: 1, rolePriority: 80, roleColor: "#f59e0b" },
+  { id: "role-analyst", roleName: "محلل", roleNameEn: "Analyst", roleDescription: "عرض وتحليل البيانات والتقارير", roleDescriptionEn: "View and analyze data and reports", isSystem: 1, rolePriority: 60, roleColor: "#3b82f6" },
+  { id: "role-viewer", roleName: "مشاهد", roleNameEn: "Viewer", roleDescription: "عرض البيانات فقط بدون تعديل", roleDescriptionEn: "View-only access", isSystem: 1, rolePriority: 40, roleColor: "#6b7280" },
+  { id: "role-guest", roleName: "زائر", roleNameEn: "Guest", roleDescription: "وصول محدود جداً", roleDescriptionEn: "Very limited access", isSystem: 1, rolePriority: 20, roleColor: "#9ca3af" },
 ];
 
 // ─── Default Permissions (all platform pages + key features) ───
@@ -81,8 +83,6 @@ const FEATURE_PERMISSIONS = [
   { resourceId: "feature:ai-enrichment", name: "إثراء بالذكاء الاصطناعي", nameEn: "AI Enrichment" },
 ];
 
-const ACTIONS = ["view", "create", "edit", "delete", "manage", "export"] as const;
-
 // ─── Role → Permission defaults ───
 const ROLE_PERMISSION_MAP: Record<string, string[]> = {
   "role-admin": ["view", "create", "edit", "delete", "manage", "export"],
@@ -103,10 +103,17 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
       const existing = await db.select().from(adminRoles).where(eq(adminRoles.id, role.id)).limit(1);
       if (existing.length === 0) {
         await db.insert(adminRoles).values({
-          ...role,
-          status: "active",
-          createdAt: now,
-          updatedAt: now,
+          id: role.id,
+          roleName: role.roleName,
+          roleNameEn: role.roleNameEn,
+          roleDescription: role.roleDescription,
+          roleDescriptionEn: role.roleDescriptionEn,
+          isSystem: role.isSystem,
+          rolePriority: role.rolePriority,
+          roleColor: role.roleColor,
+          roleStatus: "active",
+          roleCreatedAt: now,
+          roleUpdatedAt: now,
         });
       }
     }
@@ -115,7 +122,9 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
     const allResources = [...PAGE_PERMISSIONS, ...FEATURE_PERMISSIONS];
     for (const res of allResources) {
       const resourceType = res.resourceId.startsWith("page:") ? "page" : "feature";
-      const actions = resourceType === "page" ? ["view", "edit", "enable", "disable", "manage"] : ["view", "enable", "disable"];
+      const actions = resourceType === "page"
+        ? ["view", "edit", "enable", "disable", "manage"] as const
+        : ["view", "enable", "disable"] as const;
       for (const action of actions) {
         const permId = `perm-${res.resourceId}-${action}`;
         const existing = await db.select().from(adminPermissions).where(eq(adminPermissions.id, permId)).limit(1);
@@ -126,9 +135,9 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
             resourceId: res.resourceId,
             resourceName: res.name,
             resourceNameEn: res.nameEn,
-            action: action as any,
-            description: `${action} ${res.nameEn}`,
-            createdAt: now,
+            permAction: action as any,
+            permDescription: `${action} ${res.nameEn}`,
+            permCreatedAt: now,
           });
         }
       }
@@ -138,16 +147,16 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
     for (const [roleId, actions] of Object.entries(ROLE_PERMISSION_MAP)) {
       const allPerms = await db.select().from(adminPermissions);
       for (const perm of allPerms) {
-        if (actions.includes(perm.action) || (roleId === "role-admin" && perm.action === "manage")) {
+        if (actions.includes(perm.permAction) || (roleId === "role-admin" && perm.permAction === "manage")) {
           const rpId = `rp-${roleId}-${perm.id}`;
           const existing = await db.select().from(adminRolePermissions).where(eq(adminRolePermissions.id, rpId)).limit(1);
           if (existing.length === 0) {
             await db.insert(adminRolePermissions).values({
               id: rpId,
-              roleId,
-              permissionId: perm.id,
-              effect: "allow",
-              createdAt: now,
+              rpRoleId: roleId,
+              rpPermissionId: perm.id,
+              rpEffect: "allow",
+              rpCreatedAt: now,
             });
           }
         }
@@ -158,13 +167,13 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
     const rootUser = await db.select().from(platformUsers).where(eq(platformUsers.userId, "mruhaily")).limit(1);
     if (rootUser.length > 0) {
       const existing = await db.select().from(adminUserRoles)
-        .where(eq(adminUserRoles.userId, rootUser[0].id)).limit(1);
+        .where(eq(adminUserRoles.urUserId, rootUser[0].id)).limit(1);
       if (existing.length === 0) {
         await db.insert(adminUserRoles).values({
           id: `ur-${rootUser[0].id}-role-super-admin`,
-          userId: rootUser[0].id,
-          roleId: "role-super-admin",
-          assignedAt: now,
+          urUserId: rootUser[0].id,
+          urRoleId: "role-super-admin",
+          urAssignedAt: now,
         });
       }
     }
@@ -172,23 +181,79 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
     // 5. Seed Feature Flags for all pages
     for (const page of PAGE_PERMISSIONS) {
       const ffKey = page.resourceId;
-      const existing = await db.select().from(adminFeatureFlags).where(eq(adminFeatureFlags.key, ffKey)).limit(1);
+      const existing = await db.select().from(adminFeatureFlags).where(eq(adminFeatureFlags.ffKey, ffKey)).limit(1);
       if (existing.length === 0) {
         await db.insert(adminFeatureFlags).values({
           id: `ff-${ffKey}`,
-          key: ffKey,
-          displayName: page.name,
-          displayNameEn: page.nameEn,
-          description: `التحكم في إظهار/إخفاء صفحة ${page.name}`,
-          isEnabled: true,
-          targetType: "all",
-          createdAt: now,
-          updatedAt: now,
+          ffKey: ffKey,
+          ffDisplayName: page.name,
+          ffDisplayNameEn: page.nameEn,
+          ffDescription: `التحكم في إظهار/إخفاء صفحة ${page.name}`,
+          ffIsEnabled: 1,
+          ffTargetType: "all",
+          ffCreatedAt: now,
+          ffUpdatedAt: now,
         });
       }
     }
 
-    return { success: true, message: `Seeded: ${DEFAULT_ROLES.length} roles, ${allResources.length * 5} permissions, feature flags for ${PAGE_PERMISSIONS.length} pages` };
+    // 6. Seed Page Registry for CMS
+    const PAGE_REGISTRY_ENTRIES = [
+      { pageId: "national-overview", path: "/national-overview", nameAr: "النظرة الوطنية", nameEn: "National Overview", category: "main" as const, sortOrder: 1 },
+      { pageId: "leaks", path: "/leaks", nameAr: "حالات الرصد", nameEn: "Leaks", category: "main" as const, sortOrder: 2 },
+      { pageId: "leak-anatomy", path: "/leak-anatomy", nameAr: "تشريح حالة الرصد", nameEn: "Leak Anatomy", category: "analysis" as const, sortOrder: 3 },
+      { pageId: "sector-analysis", path: "/sector-analysis", nameAr: "تحليل القطاعات", nameEn: "Sector Analysis", category: "analysis" as const, sortOrder: 4 },
+      { pageId: "leak-timeline", path: "/leak-timeline", nameAr: "الجدول الزمني", nameEn: "Leak Timeline", category: "analysis" as const, sortOrder: 5 },
+      { pageId: "threat-actors-analysis", path: "/threat-actors-analysis", nameAr: "تحليل الجهات المهددة", nameEn: "Threat Actors", category: "analysis" as const, sortOrder: 6 },
+      { pageId: "impact-assessment", path: "/impact-assessment", nameAr: "تقييم الأثر", nameEn: "Impact Assessment", category: "analysis" as const, sortOrder: 7 },
+      { pageId: "source-intelligence", path: "/source-intelligence", nameAr: "استخبارات المصادر", nameEn: "Source Intelligence", category: "monitoring" as const, sortOrder: 8 },
+      { pageId: "geo-analysis", path: "/geo-analysis", nameAr: "التحليل الجغرافي", nameEn: "Geo Analysis", category: "analysis" as const, sortOrder: 9 },
+      { pageId: "incident-compare", path: "/incident-compare", nameAr: "مقارنة الحالات", nameEn: "Incident Compare", category: "analysis" as const, sortOrder: 10 },
+      { pageId: "smart-rasid", path: "/smart-rasid", nameAr: "راصد الذكي", nameEn: "Smart Rasid", category: "main" as const, sortOrder: 11 },
+      { pageId: "live-scan", path: "/live-scan", nameAr: "الفحص المباشر", nameEn: "Live Scan", category: "monitoring" as const, sortOrder: 12 },
+      { pageId: "telegram", path: "/telegram", nameAr: "مراقبة تيليجرام", nameEn: "Telegram Monitor", category: "monitoring" as const, sortOrder: 13 },
+      { pageId: "darkweb", path: "/darkweb", nameAr: "مراقبة الدارك ويب", nameEn: "Dark Web Monitor", category: "monitoring" as const, sortOrder: 14 },
+      { pageId: "paste-sites", path: "/paste-sites", nameAr: "مواقع اللصق", nameEn: "Paste Sites", category: "monitoring" as const, sortOrder: 15 },
+      { pageId: "reports", path: "/reports", nameAr: "التقارير", nameEn: "Reports", category: "main" as const, sortOrder: 16 },
+      { pageId: "settings", path: "/settings", nameAr: "الإعدادات", nameEn: "Settings", category: "admin" as const, sortOrder: 17 },
+      { pageId: "admin-cms", path: "/admin/cms", nameAr: "إدارة المحتوى", nameEn: "CMS", category: "admin" as const, sortOrder: 18 },
+      { pageId: "admin-control-panel", path: "/admin/control-panel", nameAr: "لوحة التحكم الرئيسية", nameEn: "Control Panel", category: "admin" as const, sortOrder: 19 },
+    ];
+    for (const page of PAGE_REGISTRY_ENTRIES) {
+      const existing = await db.select().from(pageRegistry).where(eq(pageRegistry.pageId, page.pageId)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(pageRegistry).values({
+          pageId: page.pageId,
+          path: page.path,
+          nameAr: page.nameAr,
+          nameEn: page.nameEn,
+          category: page.category,
+          sortOrder: page.sortOrder,
+          isActive: 1,
+        });
+      }
+    }
+
+    // 7. Seed default AI personality config
+    const AI_DEFAULTS = [
+      { key: "system_prompt", value: "أنت راصد الذكي — مساعد أمن سيبراني متخصص في رصد وتحليل حالات تسرب البيانات.", type: "string" as const, desc: "التعليمات الأساسية لراصد الذكي" },
+      { key: "personality_tone", value: "professional", type: "string" as const, desc: "نبرة الشخصية: professional / friendly / technical" },
+      { key: "language_preference", value: "ar", type: "string" as const, desc: "اللغة المفضلة" },
+      { key: "creativity_level", value: "0.3", type: "number" as const, desc: "مستوى الإبداع (temperature)" },
+    ];
+    for (const cfg of AI_DEFAULTS) {
+      const existing = await db.select().from(aiPersonalityConfig).where(eq(aiPersonalityConfig.configKey, cfg.key)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(aiPersonalityConfig).values({
+          configKey: cfg.key,
+          configValue: cfg.value,
+          configType: cfg.type,
+          description: cfg.desc,
+        });
+      }
+    }
+
+    return { success: true, message: `Seeded: ${DEFAULT_ROLES.length} roles, ${allResources.length * 5} permissions, feature flags for ${PAGE_PERMISSIONS.length} pages, ${PAGE_REGISTRY_ENTRIES.length} page registry entries, ${AI_DEFAULTS.length} AI configs` };
   } catch (error) {
     console.error("[AdminSeed] Error:", error);
     return { success: false, message: String(error) };

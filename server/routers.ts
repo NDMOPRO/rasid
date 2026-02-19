@@ -29,6 +29,8 @@ import { executeRetentionPolicies, previewRetention } from "./retention";
 import { executeScan, quickScan } from "./scanEngine";
 import { rasidAIChat } from "./rasidAI";
 import { adminRouter } from "./adminRouter";
+import { cmsRouter } from "./cmsRouter";
+import { controlPanelRouter } from "./controlPanelRouter";
 import {
   aiChatSessions, aiChatMessages, aiRatings, aiSearchLog,
   aiScenarios, aiCustomCommands, knowledgeBase,
@@ -81,6 +83,8 @@ const { logAudit, updateConversation, deleteConversation, getConversationById, g
 export const appRouter = router({
   system: systemRouter,
   admin: adminRouter,
+  cms: cmsRouter,
+  controlPanel: controlPanelRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(async ({ ctx }) => {
