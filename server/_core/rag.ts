@@ -174,7 +174,7 @@ async function matchScenario(
 
   for (const scenario of scenarios) {
     // Greeting on first message
-    if (scenario.type === "greeting" && isFirstMessage) {
+    if (scenario.scenarioType === "greeting" && isFirstMessage) {
       const conditions = scenario.conditions as any;
       if (conditions?.timeOfDay && conditions.timeOfDay !== timeOfDay) continue;
 
@@ -188,7 +188,7 @@ async function matchScenario(
     }
 
     // VIP name mentions
-    if (scenario.type === "vip_response") {
+    if (scenario.scenarioType === "vip_response") {
       const conditions = scenario.conditions as any;
       if (conditions?.mentionedNames) {
         for (const name of conditions.mentionedNames) {
@@ -303,7 +303,7 @@ export async function processSmartRasidQuery(
   // Step 4: Get persona
   const personaResults = await db.select()
     .from(aiScenarios)
-    .where(and(eq(aiScenarios.type, "persona"), eq(aiScenarios.isEnabled, true)));
+    .where(and(eq(aiScenarios.scenarioType, "persona"), eq(aiScenarios.isEnabled, true)));
   const persona = personaResults[0];
 
   // Step 5: Build final messages
