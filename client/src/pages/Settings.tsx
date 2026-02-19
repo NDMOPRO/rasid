@@ -65,7 +65,7 @@ const roleColor = (r: string) => {
 
 export default function Settings() {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "root_admin";
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const { data: usersList, isLoading: usersLoading, refetch: refetchUsers } = trpc.users.list.useQuery(

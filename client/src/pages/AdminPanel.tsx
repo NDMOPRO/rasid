@@ -103,7 +103,7 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
-  const isAdmin = currentUser?.role === "admin";
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "root_admin";
 
   const filteredMembers = useMemo(() => {
     if (!members) return [];
@@ -120,7 +120,7 @@ export default function AdminPanel() {
     members.forEach((m: any) => { roles[m.rasidRole || "monitoring_officer"] = (roles[m.rasidRole || "monitoring_officer"] || 0) + 1; });
     return {
       total: members.length,
-      admins: members.filter((m: any) => m.role === "admin").length,
+      admins: members.filter((m: any) => m.role === "admin" || m.role === "root_admin").length,
       active: members.length,
       roles,
     };
@@ -414,8 +414,8 @@ export default function AdminPanel() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <Badge variant={member.role === "admin" ? "destructive" : "secondary"} className="text-xs">
-                          {member.role === "admin" ? "مشرف" : "مستخدم"}
+                        <Badge variant={member.role === "admin" || member.role === "root_admin" ? "destructive" : "secondary"} className="text-xs">
+                          {member.role === "root_admin" ? "مدير رئيسي" : member.role === "admin" ? "مشرف" : "مستخدم"}
                         </Badge>
                       </div>
                     </div>

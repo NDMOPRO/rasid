@@ -716,7 +716,7 @@ function PremiumCard({ children, className = "", onClick, delay = 0, glow }: { c
    ═══════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const { data: rawStats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
-  const stats = rawStats ?? ({} as any);
+  const stats = rawStats ?? { totalLeaks: 0, totalRecords: 0, newLeaks: 0, analyzingLeaks: 0, documentedLeaks: 0, completedLeaks: 0, telegramLeaks: 0, darkwebLeaks: 0, pasteLeaks: 0, enrichedLeaks: 0, activeMonitors: 0, totalChannels: 0, piiDetected: 0, distinctSectors: 0, distinctPiiTypes: 0, sectorDistribution: [], sourceDistribution: [], monthlyTrend: [], piiDistribution: [], recentLeaks: [] };
   const { data: leaks = [] } = trpc.leaks.list.useQuery();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedLeak, setSelectedLeak] = useState<string | null>(null);

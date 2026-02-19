@@ -139,8 +139,8 @@ export const appRouter = router({
             displayName: pUser.displayName,
             email: pUser.email,
             mobile: pUser.mobile,
-            role: pUser.platformRole === 'root_admin' ? 'admin' as const : 'user' as const,
-            rasidRole: pUser.platformRole === 'root_admin' ? 'root' as const : 'monitoring_officer' as const,
+            role: pUser.platformRole === 'root_admin' ? 'root_admin' as const : 'user' as const,
+            rasidRole: pUser.platformRole === 'root_admin' ? 'root_admin' as const : 'monitoring_officer' as const,
             username: pUser.userId,
           },
         };

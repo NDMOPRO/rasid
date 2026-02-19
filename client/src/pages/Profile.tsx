@@ -149,7 +149,7 @@ export default function ProfilePage() {
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
                 <Badge className="bg-primary/15 text-primary border-primary/20 hover:bg-primary/25 transition-colors btn-glow">
                   <Shield className="h-3 w-3 ms-1 card-icon" />
-                  {profile?.role === "admin" ? "مسؤول النظام" : "مستخدم"}
+                  {profile?.role === "root_admin" ? "مدير رئيسي" : profile?.role === "admin" ? "مسؤول النظام" : "مستخدم"}
                 </Badge>
                 {profile?.rasidRole && (
                   <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/25 transition-colors">

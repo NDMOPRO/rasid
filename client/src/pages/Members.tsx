@@ -73,7 +73,7 @@ export default function Members() {
     onError: (err) => { toast.error(err.message); },
   });
 
-  const isAdmin = currentUser?.role === "admin";
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "root_admin";
 
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();

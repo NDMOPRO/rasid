@@ -254,7 +254,8 @@ export default function MonthlyComparison() {
 
   if (!data) return null;
 
-  const { currentMonth, previousMonth } = data;
+  const currentMonth = data?.currentMonth ?? { totalLeaks: 0, totalRecords: 0, criticalCount: 0, newCount: 0, resolvedCount: 0, telegramCount: 0, darkwebCount: 0, pasteCount: 0, name: '', nameEn: '', year: 0, sectors: [], daily: [] };
+  const previousMonth = data?.previousMonth ?? { totalLeaks: 0, totalRecords: 0, criticalCount: 0, newCount: 0, resolvedCount: 0, telegramCount: 0, darkwebCount: 0, pasteCount: 0, name: '', nameEn: '', year: 0, sectors: [], daily: [] };
 
   // KPI comparison cards
   const kpiItems = [

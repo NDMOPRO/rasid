@@ -69,12 +69,12 @@ export default function AiManagement() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Queries
-  const chatStats = trpc.ai.getChatStats.useQuery(undefined, { enabled: user?.role === "admin" });
-  const searchStats = trpc.ai.getSearchStats.useQuery(undefined, { enabled: user?.role === "admin" });
-  const knowledgeEntries = trpc.ai.getKnowledgeEntries.useQuery(undefined, { enabled: user?.role === "admin" });
-  const enhancedScenarios = trpc.ai.getEnhancedScenarios.useQuery(undefined, { enabled: user?.role === "admin" });
-  const customCommands = trpc.ai.getCustomCommands.useQuery(undefined, { enabled: user?.role === "admin" });
-  const allSessions = trpc.ai.getAllSessions.useQuery(undefined, { enabled: user?.role === "admin" && activeTab === "sessions" });
+  const chatStats = trpc.ai.getChatStats.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
+  const searchStats = trpc.ai.getSearchStats.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
+  const knowledgeEntries = trpc.ai.getKnowledgeEntries.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
+  const enhancedScenarios = trpc.ai.getEnhancedScenarios.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
+  const customCommands = trpc.ai.getCustomCommands.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
+  const allSessions = trpc.ai.getAllSessions.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" && activeTab === "sessions" });
 
   // Mutations
   const addKnowledge = trpc.ai.addKnowledge.useMutation({ onSuccess: () => { knowledgeEntries.refetch(); toast.success("تمت الإضافة"); } });

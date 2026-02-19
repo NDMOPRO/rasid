@@ -165,7 +165,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  const isAdmin = user.role === "admin" || user.role === "superadmin";
+  const isAdmin = user.role === "admin" || user.role === "superadmin" || user.role === "root_admin";
 
   return (
     <SidebarProvider

@@ -62,8 +62,8 @@ export default function AdminUsers() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{u.email || "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={u.role === "admin" || u.role === "superadmin" ? "default" : "secondary"}>
-                      {u.role === "superadmin" ? "مدير النظام" : u.role === "admin" ? "مدير" : "مستخدم"}
+                    <Badge variant={u.role === "admin" || u.role === "superadmin" || u.role === "root_admin" ? "default" : "secondary"}>
+                      {u.role === "root_admin" ? "مدير رئيسي" : u.role === "superadmin" ? "مدير النظام" : u.role === "admin" ? "مدير" : "مستخدم"}
                     </Badge>
                   </TableCell>
                   <TableCell>
