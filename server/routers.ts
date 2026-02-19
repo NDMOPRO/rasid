@@ -181,7 +181,24 @@ export const appRouter = router({
   dashboard: router({
     stats: publicProcedure.query(async () => {
       // Return leak-based stats for the monitoring dashboard
-      const [allLeaks, scanStats] = await Promise.all([db.getLeaks(), db.getDashboardStats()]);
+      let allLeaks: any[] = [];
+      let scanStats: any = null;
+      try {
+        [allLeaks, scanStats] = await Promise.all([db.getLeaks(), db.getDashboardStats()]);
+      } catch (e) {
+        console.error("[dashboard.stats] Error:", e);
+        return {
+          totalLeaks: 0, totalRecords: 0, newLeaks: 0,
+          analyzingLeaks: 0, documentedLeaks: 0, completedLeaks: 0,
+          telegramLeaks: 0, darkwebLeaks: 0, pasteLeaks: 0,
+          enrichedLeaks: 0, activeMonitors: 0, totalChannels: 0,
+          piiDetected: 0, distinctSectors: 0, distinctPiiTypes: 0,
+          sectorDistribution: [], sourceDistribution: [],
+          monthlyTrend: [], piiDistribution: [], recentLeaks: [],
+          totalSites: 0, totalScans: 0, compliant: 0,
+          nonCompliant: 0, partiallyCompliant: 0, noPolicy: 0, averageScore: 0,
+        };
+      }
       const totalLeaks = allLeaks.length;
       const totalRecords = allLeaks.reduce((s: number, l: any) => s + (l.recordCount || 0), 0);
       const newLeaks = allLeaks.filter((l: any) => l.status === 'new').length;
@@ -277,16 +294,29 @@ export const appRouter = router({
       return await db.getClauseStatsBySectorAndCategory();
     }),
     monthlyComparison: publicProcedure.query(async () => {
-      // Merge both data sources: getMonthlyComparison (for MonthlyComparison component)
-      // and getMonthlyComparisonStats (for PresentationMode component)
-      const [leakData, scanData] = await Promise.all([
-        db.getMonthlyComparison(),
-        db.getMonthlyComparisonStats(),
-      ]);
-      // Return merged object with all fields both consumers need
+      const emptyMonth = {
+        name: "", nameEn: "", year: 0,
+        totalLeaks: 0, totalRecords: 0, criticalCount: 0,
+        newCount: 0, resolvedCount: 0,
+        telegramCount: 0, darkwebCount: 0, pasteCount: 0,
+        sectors: [], daily: [],
+      };
+      let leakData: any = null;
+      let scanData: any = null;
+      try {
+        [leakData, scanData] = await Promise.all([
+          db.getMonthlyComparison(),
+          db.getMonthlyComparisonStats(),
+        ]);
+      } catch (e) {
+        console.error("[monthlyComparison] Error:", e);
+        return { currentMonth: emptyMonth, previousMonth: emptyMonth };
+      }
+      if (!leakData) {
+        return { currentMonth: emptyMonth, previousMonth: emptyMonth };
+      }
       return {
         ...leakData,
-        // Fields from scanData needed by PresentationMode
         totalSites: scanData?.totalSites ?? 0,
         newSitesThisMonth: scanData?.newSitesThisMonth ?? 0,
         newSitesLastMonth: scanData?.newSitesLastMonth ?? 0,

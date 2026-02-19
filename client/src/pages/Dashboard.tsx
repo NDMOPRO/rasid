@@ -118,7 +118,7 @@ function AnimatedNumber({ value, duration = 1500 }: { value: number; duration?: 
     };
     requestAnimationFrame(animate);
   }, [value, duration]);
-  return <>{display.toLocaleString("en-US")}</>;
+  return <>{(display ?? 0).toLocaleString("en-US")}</>;
 }
 
 /* ═══ Mini Sparkline ═══ */
@@ -323,7 +323,7 @@ function PresentationOverlay({
                       </div>
                     </div>
                     <div className="text-5xl font-black text-white mb-2 tabular-nums">
-                      {card.displayValue || (card.value as number).toLocaleString()}
+                      {card.displayValue || ((card.value as number) ?? 0).toLocaleString()}
                     </div>
                     <p className="text-base text-slate-300 font-medium">{card.label}</p>
                     <p className="text-xs text-slate-500 mt-1">{card.labelEn}</p>
@@ -349,7 +349,7 @@ function PresentationOverlay({
                     <motion.div key={sc.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + i * 0.1 }}
                       className={`p-6 rounded-2xl ${sc.bg}`} style={{ boxShadow: `0 0 20px ${sc.glow}` }}>
                       <SIcon className={`w-7 h-7 ${sc.color} mb-3`} />
-                      <p className="text-3xl font-bold text-white">{sc.value.toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-white">{(sc.value ?? 0).toLocaleString()}</p>
                       <p className="text-sm text-slate-400 mt-1">{sc.label}</p>
                     </motion.div>
                   );
@@ -518,7 +518,7 @@ function PresentationOverlay({
                     <motion.div key={st.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.1 }}
                       className="p-5 rounded-2xl bg-white/5 border border-white/5 text-center">
                       <SIcon className="w-7 h-7 text-cyan-400 mx-auto mb-3" />
-                      <p className="text-3xl font-bold text-white">{st.value.toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-white">{(st.value ?? 0).toLocaleString()}</p>
                       <p className="text-sm text-slate-400 mt-1">{st.label}</p>
                     </motion.div>
                   );
@@ -716,7 +716,30 @@ function PremiumCard({ children, className = "", onClick, delay = 0, glow }: { c
    ═══════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const { data: rawStats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
-  const stats = rawStats ?? { totalLeaks: 0, totalRecords: 0, newLeaks: 0, analyzingLeaks: 0, documentedLeaks: 0, completedLeaks: 0, telegramLeaks: 0, darkwebLeaks: 0, pasteLeaks: 0, enrichedLeaks: 0, activeMonitors: 0, totalChannels: 0, piiDetected: 0, distinctSectors: 0, distinctPiiTypes: 0, sectorDistribution: [], sourceDistribution: [], monthlyTrend: [], piiDistribution: [], recentLeaks: [] };
+
+  // ═══ حماية شاملة — يمنع كل أخطاء undefined ═══
+  const stats = rawStats ?? {
+    totalLeaks: 0,
+    totalRecords: 0,
+    newLeaks: 0,
+    analyzingLeaks: 0,
+    documentedLeaks: 0,
+    completedLeaks: 0,
+    telegramLeaks: 0,
+    darkwebLeaks: 0,
+    pasteLeaks: 0,
+    enrichedLeaks: 0,
+    activeMonitors: 0,
+    totalChannels: 0,
+    piiDetected: 0,
+    distinctSectors: 0,
+    distinctPiiTypes: 0,
+    sectorDistribution: [] as any[],
+    sourceDistribution: [] as any[],
+    monthlyTrend: [] as any[],
+    piiDistribution: [] as any[],
+    recentLeaks: [] as any[],
+  };
   const { data: leaks = [] } = trpc.leaks.list.useQuery();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedLeak, setSelectedLeak] = useState<string | null>(null);
@@ -1259,7 +1282,7 @@ export default function Dashboard() {
                         <span className="text-xs font-semibold text-foreground truncate">{sec.sector}</span>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">{sec.count} حادثة · {sec.records.toLocaleString()} سجل</p>
+                      <p className="text-[10px] text-muted-foreground">{sec.count} حادثة · {(sec.records ?? 0).toLocaleString()} سجل</p>
                       <div className="w-full h-1 bg-muted/40 rounded-full mt-1.5 overflow-hidden">
                         <motion.div
                           className="h-full rounded-full bg-primary/70"
@@ -1294,7 +1317,7 @@ export default function Dashboard() {
                       <SSIcon className="w-3.5 h-3.5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">{ss.value.toLocaleString()}</p>
+                      <p className="text-sm font-bold text-foreground">{(ss.value ?? 0).toLocaleString()}</p>
                       <p className="text-[9px] text-muted-foreground">{ss.label}</p>
                     </div>
                   </motion.div>
@@ -1595,7 +1618,7 @@ export default function Dashboard() {
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">{sec.records.toLocaleString()} سجل مكشوف</p>
+                    <p className="text-[10px] text-muted-foreground">{(sec.records ?? 0).toLocaleString()} سجل مكشوف</p>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full bg-primary/70" style={{ width: `${pct}%` }} />
                     </div>
@@ -1660,7 +1683,7 @@ export default function Dashboard() {
                     <tr key={m.yearMonth} className="border-b border-border/30 hover:bg-secondary/20 transition-colors">
                       <td className="p-2 text-foreground text-xs font-mono">{m.yearMonth}</td>
                       <td className="p-2 text-foreground font-bold text-xs">{m.count}</td>
-                      <td className="p-2 text-foreground text-xs">{m.records.toLocaleString()}</td>
+                      <td className="p-2 text-foreground text-xs">{(m.records ?? 0).toLocaleString()}</td>
                       <td className={`p-2 text-xs font-semibold ${diff > 0 ? "text-red-400" : diff < 0 ? "text-emerald-400" : "text-muted-foreground"}`}>
                         {diff > 0 ? `+${diff}` : diff}
                       </td>

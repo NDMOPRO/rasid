@@ -2582,25 +2582,7 @@ export async function rasidAIChat(
           },
           { role: "user", content: `سؤال المستخدم: ${message}\n\nرد راصد: ${content.substring(0, 500)}\n\nالأدوات المستخدمة: ${toolsUsed.join(", ") || "لا شيء"}` },
         ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "follow_up_suggestions",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                suggestions: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "3 follow-up suggestions in Arabic",
-                },
-              },
-              required: ["suggestions"],
-              additionalProperties: false,
-            },
-          },
-        },
+        response_format: { type: "json_object" },
       });
       const rawContent = followUpResponse.choices?.[0]?.message?.content;
       const contentStr = typeof rawContent === "string" ? rawContent : "{}";
@@ -2931,25 +2913,7 @@ export async function rasidAIChatStreaming(
           },
           { role: "user", content: `سؤال المستخدم: ${message}\n\nرد راصد: ${content.substring(0, 500)}\n\nالأدوات المستخدمة: ${toolsUsed.join(", ") || "لا شيء"}` },
         ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "follow_up_suggestions",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                suggestions: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "3 follow-up suggestions in Arabic",
-                },
-              },
-              required: ["suggestions"],
-              additionalProperties: false,
-            },
-          },
-        },
+        response_format: { type: "json_object" },
       });
       const rawFollowUp = followUpResponse.choices?.[0]?.message?.content;
       const contentStr = typeof rawFollowUp === "string" ? rawFollowUp : "{}";

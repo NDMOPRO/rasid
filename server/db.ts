@@ -118,28 +118,33 @@ export async function getUserByOpenId(openId: string) {
 
 // ===== Dashboard Stats =====
 export async function getDashboardStats() {
-  const db = await getDb();
-  if (!db) return null;
+  try {
+    const db = await getDb();
+    if (!db) return null;
 
-  const [totalSites] = await db.select({ count: count() }).from(sites);
-  const [activeSites] = await db.select({ count: count() }).from(sites).where(eq(sites.siteStatus, 'active'));
-  const [totalScans] = await db.select({ count: count() }).from(scans);
-  const [compliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'compliant'));
-  const [partialScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'partially_compliant'));
-  const [nonCompliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'non_compliant'));
-  const [noPolicyScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'no_policy'));
-  const [avgScore] = await db.select({ avg: avg(scans.overallScore) }).from(scans);
+    const [totalSites] = await db.select({ count: count() }).from(sites);
+    const [activeSites] = await db.select({ count: count() }).from(sites).where(eq(sites.siteStatus, 'active'));
+    const [totalScans] = await db.select({ count: count() }).from(scans);
+    const [compliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'compliant'));
+    const [partialScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'partially_compliant'));
+    const [nonCompliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'non_compliant'));
+    const [noPolicyScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'no_policy'));
+    const [avgScore] = await db.select({ avg: avg(scans.overallScore) }).from(scans);
 
-  return {
-    totalSites: totalSites.count,
-    activeSites: activeSites.count,
-    totalScans: totalScans.count,
-    compliant: compliantScans.count,
-    partiallyCompliant: partialScans.count,
-    nonCompliant: nonCompliantScans.count,
-    noPolicy: noPolicyScans.count,
-    averageScore: Number(avgScore.avg) || 0,
-  };
+    return {
+      totalSites: totalSites.count,
+      activeSites: activeSites.count,
+      totalScans: totalScans.count,
+      compliant: compliantScans.count,
+      partiallyCompliant: partialScans.count,
+      nonCompliant: nonCompliantScans.count,
+      noPolicy: noPolicyScans.count,
+      averageScore: Number(avgScore.avg) || 0,
+    };
+  } catch (error) {
+    console.error("[getDashboardStats] Error:", error);
+    return null;
+  }
 }
 
 // ===== Clause Stats =====
