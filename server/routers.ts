@@ -269,7 +269,7 @@ export const appRouter = router({
       return await db.getClauseStatsBySectorAndCategory();
     }),
     monthlyComparison: publicProcedure.query(async () => {
-      return await db.getMonthlyComparisonStats();
+      return await db.getMonthlyComparison();
     }),
     exportExcel: protectedProcedure.input(z.object({
       type: z.enum(['overview', 'clauses', 'sectors', 'categories', 'all', 'filtered']),
