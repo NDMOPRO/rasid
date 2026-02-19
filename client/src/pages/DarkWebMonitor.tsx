@@ -88,7 +88,7 @@ export default function DarkWebMonitor() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground max-w-lg">
-            مراقبة منتديات بيع البيانات وأسواق البيانات المسربة عبر شبكة Tor
+            مراقبة منتديات بيع البيانات وأسواق البيانات المكتشفة عبر شبكة Tor
           </p>
         </div>
       </motion.div>
@@ -97,7 +97,7 @@ export default function DarkWebMonitor() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { key: "sources", label: "مصادر مراقبة", value: darkWebChannels.length, color: "text-violet-400", borderColor: "border-violet-500/20", bgColor: "bg-violet-500/5" },
-          { key: "leaks", label: "تسريبات مكتشفة", value: darkWebChannels.reduce((a, c) => a + (c.leaksDetected ?? 0), 0), color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
+          { key: "leaks", label: "حالات رصد مكتشفة", value: darkWebChannels.reduce((a, c) => a + (c.leaksDetected ?? 0), 0), color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5" },
           { key: "listings", label: "عروض بيع نشطة", value: darkWebListings.length, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5" },
           { key: "records", label: "سجلات مكشوفة", value: darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0).toLocaleString(), color: "text-cyan-400", borderColor: "border-cyan-500/20", bgColor: "bg-cyan-500/5" },
         ].map((stat, i) => (
@@ -162,7 +162,7 @@ export default function DarkWebMonitor() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
-                    {source.leaksDetected ?? 0} تسريب
+                    {source.leaksDetected ?? 0} حالة رصد
                   </span>
                   <span className={`px-2 py-0.5 rounded border text-[10px] ${
                     source.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
@@ -256,7 +256,7 @@ export default function DarkWebMonitor() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} تسريب</p>
+                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد</p>
               </div>
               <span className={`text-[10px] px-2 py-0.5 rounded border ${
                 ch.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
@@ -271,15 +271,15 @@ export default function DarkWebMonitor() {
       </DetailModal>
 
       {/* Leaks Modal */}
-      <DetailModal open={activeModal === "leaks"} onClose={() => setActiveModal(null)} title="التسريبات المكتشفة من الدارك ويب" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
+      <DetailModal open={activeModal === "leaks"} onClose={() => setActiveModal(null)} title="حالات الرصد المكتشفة من الدارك ويب" icon={<AlertTriangle className="w-5 h-5 text-amber-400" />}>
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">إجمالي {darkWebChannels.reduce((a, c) => a + (c.leaksDetected ?? 0), 0)} تسريب عبر {darkWebChannels.length} مصدر</p>
+          <p className="text-xs text-muted-foreground">إجمالي {darkWebChannels.reduce((a, c) => a + (c.leaksDetected ?? 0), 0)} حالة رصد عبر {darkWebChannels.length} مصدر</p>
           {darkWebChannels.filter(c => (c.leaksDetected ?? 0) > 0).map(ch => (
             <div key={ch.id} className="bg-secondary/30 rounded-xl p-3 border border-border/30">
               <div className="flex items-center gap-2 mb-1">
                 <Globe className="w-4 h-4 text-violet-400" />
                 <span className="text-sm font-semibold text-foreground">{ch.name}</span>
-                <Badge variant="outline" className="text-[10px] mr-auto">{ch.leaksDetected ?? 0} تسريب</Badge>
+                <Badge variant="outline" className="text-[10px] mr-auto">{ch.leaksDetected ?? 0} حالة رصد</Badge>
               </div>
               <p className="text-[10px] text-muted-foreground">{ch.channelId}</p>
             </div>
@@ -311,7 +311,7 @@ export default function DarkWebMonitor() {
       </DetailModal>
 
       {/* Records Modal */}
-      <DetailModal open={activeModal === "records"} onClose={() => setActiveModal(null)} title="تفاصيل السجلات المكشوفة" icon={<Database className="w-5 h-5 text-cyan-400" />}>
+      <DetailModal open={activeModal === "records"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-cyan-400" />}>
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
@@ -368,7 +368,7 @@ export default function DarkWebMonitor() {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
                 <p className="text-xl font-bold text-amber-400">{selectedSource.leaksDetected ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">تسريبات مكتشفة</p>
+                <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <p className="text-sm font-bold text-foreground">

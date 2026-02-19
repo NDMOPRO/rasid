@@ -9,8 +9,8 @@ export async function enrichLeak(leakId: string) {
   try {
     const response = await invokeLLM({
       messages: [
-        { role: "system", content: "أنت محلل أمن سيبراني. قم بتحليل التسريب التالي وتقديم تقييم للمخاطر." },
-        { role: "user", content: `تحليل التسريب: ${leak.title || ""}\nالوصف: ${leak.description || ""}\nالنوع: ${leak.leakType || ""}` },
+        { role: "system", content: "أنت محلل أمن سيبراني. قم بتحليل حالة الرصد التالية وتقديم تقييم للمخاطر." },
+        { role: "user", content: `تحليل حالة الرصد: ${leak.title || ""}\nالوصف: ${leak.description || ""}\nالنوع: ${leak.leakType || ""}` },
       ],
     });
     

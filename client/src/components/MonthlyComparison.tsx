@@ -259,7 +259,7 @@ export default function MonthlyComparison() {
   // KPI comparison cards
   const kpiItems = [
     {
-      label: "إجمالي التسريبات",
+      label: "إجمالي حالات الرصد",
       labelEn: "Total Leaks",
       current: currentMonth.totalLeaks,
       previous: previousMonth.totalLeaks,
@@ -267,7 +267,7 @@ export default function MonthlyComparison() {
       color: "text-red-400 bg-red-500/10",
     },
     {
-      label: "السجلات المكشوفة",
+      label: "العدد المُدّعى",
       labelEn: "Exposed Records",
       current: currentMonth.totalRecords,
       previous: previousMonth.totalRecords,
@@ -275,7 +275,7 @@ export default function MonthlyComparison() {
       color: "text-amber-400 bg-amber-500/10",
     },
     {
-      label: "حوادث حرجة",
+      label: "حالات رصد واسعة النطاق",
       labelEn: "Critical Incidents",
       current: currentMonth.criticalCount,
       previous: previousMonth.criticalCount,
@@ -445,15 +445,15 @@ export default function MonthlyComparison() {
                   <div className="flex-1">
                     <p className="text-xs font-bold text-foreground">
                       {isImproving
-                        ? `تحسن بنسبة ${leakDelta.percent}% في عدد التسريبات`
+                        ? `تحسن بنسبة ${leakDelta.percent}% في عدد حالات الرصد`
                         : leakDelta.direction === "up"
-                        ? `ارتفاع بنسبة ${leakDelta.percent}% في عدد التسريبات`
-                        : "لا تغيير في عدد التسريبات"}
+                        ? `ارتفاع بنسبة ${leakDelta.percent}% في عدد حالات الرصد`
+                        : "لا تغيير في عدد حالات الرصد"}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {currentMonth.name}: {currentMonth.totalLeaks} تسريب ({formatNumber(currentMonth.totalRecords)} سجل)
+                      {currentMonth.name}: {currentMonth.totalLeaks} حالة رصد ({formatNumber(currentMonth.totalRecords)} سجل)
                       {" · "}
-                      {previousMonth.name}: {previousMonth.totalLeaks} تسريب ({formatNumber(previousMonth.totalRecords)} سجل)
+                      {previousMonth.name}: {previousMonth.totalLeaks} حالة رصد ({formatNumber(previousMonth.totalRecords)} سجل)
                     </p>
                   </div>
                   <div className={`text-2xl font-bold tabular-nums ${

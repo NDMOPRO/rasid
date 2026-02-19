@@ -95,7 +95,7 @@ interface ChatMessage {
 
 const quickCommands = [
   { label: "ملخص لوحة المعلومات", icon: BarChart3, color: "text-cyan-400", bgColor: "bg-cyan-500/10 border-cyan-500/20", query: "أعطني ملخص شامل للوحة المعلومات مع تحليل" },
-  { label: "تسريبات واسعة النطاق", icon: AlertTriangle, color: "text-red-400", bgColor: "bg-red-500/10 border-red-500/20", query: "ما هي التسريبات واسعة النطاق الحالية؟ أعطني تفاصيل كل واحد" },
+  { label: "حالات رصد واسعة النطاق", icon: AlertTriangle, color: "text-red-400", bgColor: "bg-red-500/10 border-red-500/20", query: "ما هي حالات الرصد واسعة النطاق الحالية؟ أعطني تفاصيل كل واحدة" },
   { label: "تحليل ارتباطات", icon: GitBranch, color: "text-emerald-400", bgColor: "bg-emerald-500/10 border-emerald-500/20", query: "أجرِ تحليل ارتباطات شامل: ربط البائعين بالقطاعات، أنماط زمنية، واكتشاف الأنماط غير المعتادة" },
   { label: "حالة الحماية", icon: Shield, color: "text-amber-400", bgColor: "bg-amber-500/10 border-amber-500/20", query: "ما حالة حماية البيانات الشخصية؟ وما مستوى التهديدات الحالي والتوصيات؟" },
   { label: "نشاط المستخدمين", icon: UserCheck, color: "text-purple-400", bgColor: "bg-purple-500/10 border-purple-500/20", query: "حلل نشاط المستخدمين اليوم: من فعل ماذا؟ كم عملية نُفذت؟" },
@@ -106,7 +106,7 @@ const quickCommands = [
 
 const capabilities = [
   { icon: BarChart3, label: "تحليل لوحة القيادة", desc: "إحصائيات وتقارير شاملة" },
-  { icon: Search, label: "البحث في التسريبات", desc: "بحث متقدم بكل الفلاتر" },
+  { icon: Search, label: "البحث في حالات الرصد", desc: "بحث متقدم بكل الفلاتر" },
   { icon: Shield, label: "حماية البيانات", desc: "نظام PDPL والتوصيات" },
   { icon: Globe, label: "الدارك ويب واللصق", desc: "رصد المصادر المظلمة" },
   { icon: Users, label: "البائعون والتهديدات", desc: "ملفات تعريف المهددين" },
@@ -124,8 +124,8 @@ const capabilities = [
 
 // Tool name to Arabic label mapping
 const toolLabels: Record<string, string> = {
-  query_leaks: "استعلام التسريبات",
-  get_leak_details: "تفاصيل التسريب",
+  query_leaks: "استعلام حالات الرصد",
+  get_leak_details: "تفاصيل حالة الرصد",
   get_dashboard_stats: "إحصائيات لوحة القيادة",
   get_channels_info: "معلومات القنوات",
   get_monitoring_status: "حالة المراقبة",
@@ -1785,7 +1785,7 @@ function getFollowUpSuggestions(content: string): string[] {
   const lower = content.toLowerCase();
 
   if (lower.includes("تسريب") || lower.includes("leak")) {
-    suggestions.push("تفاصيل أكثر عن التسريبات واسعة النطاق");
+    suggestions.push("تفاصيل أكثر عن حالات الرصد واسعة النطاق");
     suggestions.push("ما التوصيات الأمنية؟");
   }
   if (lower.includes("ملخص") || lower.includes("لوحة") || lower.includes("إحصائي")) {
@@ -1805,7 +1805,7 @@ function getFollowUpSuggestions(content: string): string[] {
     suggestions.push("تحليل ارتباطات البائعين بالقطاعات");
   }
   if (lower.includes("تحليل") || lower.includes("اتجاه") || lower.includes("trend") || lower.includes("ارتباط")) {
-    suggestions.push("توزيع التسريبات حسب القطاع");
+    suggestions.push("توزيع حالات الرصد حسب القطاع");
     suggestions.push("اكتشاف الأنماط غير العادية");
   }
   if (lower.includes("نشاط") || lower.includes("مستخدم") || lower.includes("موظف")) {

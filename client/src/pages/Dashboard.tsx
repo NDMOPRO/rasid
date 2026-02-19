@@ -197,7 +197,7 @@ function RadarAnimation() {
 }
 
 /* ═══ Leak List in Modal ═══ */
-function LeakListInModal({ leaks, emptyMessage = "لا توجد تسريبات" }: { leaks: any[]; emptyMessage?: string }) {
+function LeakListInModal({ leaks, emptyMessage = "لا توجد حالات رصد" }: { leaks: any[]; emptyMessage?: string }) {
   const [selectedLeak, setSelectedLeak] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const perPage = 8;
@@ -206,7 +206,7 @@ function LeakListInModal({ leaks, emptyMessage = "لا توجد تسريبات" 
   if (leaks.length === 0) return <p className="text-center text-muted-foreground text-sm py-6">{emptyMessage}</p>;
   return (
     <>
-      <p className="text-xs text-muted-foreground mb-2">{leaks.length} تسريب</p>
+      <p className="text-xs text-muted-foreground mb-2">{leaks.length} حالة رصد</p>
       <div className="space-y-2">
         {pageLeaks.map((l) => (
           <motion.div
@@ -715,7 +715,8 @@ function PremiumCard({ children, className = "", onClick, delay = 0, glow }: { c
    MAIN DASHBOARD COMPONENT
    ═══════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
-  const { data: stats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
+  const { data: rawStats, isLoading, refetch } = trpc.dashboard.stats.useQuery();
+  const stats = rawStats ?? ({} as any);
   const { data: leaks = [] } = trpc.leaks.list.useQuery();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedLeak, setSelectedLeak] = useState<string | null>(null);
@@ -734,9 +735,9 @@ export default function Dashboard() {
   const SLIDE_INTERVAL = 8000; // 8 seconds per slide
   const presentationSlides = [
     { id: "kpi", title: "مؤشرات الأداء الرئيسية", titleEn: "Key Performance Indicators", icon: BarChart3 },
-    { id: "status", title: "حالة الحوادث ومصادر الرصد", titleEn: "Incident Status & Sources", icon: Activity },
+    { id: "status", title: "حالة الرصد ومصادر الرصد", titleEn: "Incident Status & Sources", icon: Activity },
     { id: "sectors", title: "القطاعات والرادار", titleEn: "Sectors & Radar", icon: Building2 },
-    { id: "pii", title: "أنواع البيانات والحوادث الأخيرة", titleEn: "PII Types & Recent Incidents", icon: Fingerprint },
+    { id: "pii", title: "أنواع البيانات وحالات الرصد الأخيرة", titleEn: "PII Types & Recent Incidents", icon: Fingerprint },
     { id: "trends", title: "الاتجاهات والنشاط", titleEn: "Trends & Activity", icon: TrendingUp },
   ];
 
@@ -921,7 +922,7 @@ export default function Dashboard() {
   /* ─── KPI Cards Config ─── */
   const kpiCards = [
     {
-      key: "totalLeaks", label: "إجمالي حوادث التسريب", labelEn: "Total Incidents",
+      key: "totalLeaks", label: "إجمالي حالات الرصد", labelEn: "Total Incidents",
       value: stats?.totalLeaks ?? 0, icon: ShieldAlert,
       gradient: "from-blue-500/20 to-blue-600/5", iconColor: "text-blue-400",
       iconBg: "bg-blue-500/15 dark:bg-blue-500/20", glowColor: "rgba(59, 130, 246, 0.2)",
@@ -929,7 +930,7 @@ export default function Dashboard() {
       trendUp: (stats?.newLeaks ?? 0) > 0, trendLabel: "جديدة",
     },
     {
-      key: "totalRecords", label: "السجلات الشخصية المكشوفة", labelEn: "Exposed Records",
+      key: "totalRecords", label: "العدد المُدّعى للسجلات", labelEn: "Exposed Records",
       value: stats?.totalRecords ?? 0,
       displayValue: stats?.totalRecords ? stats.totalRecords >= 1000000 ? `${(stats.totalRecords / 1000000).toFixed(1)}M` : stats.totalRecords.toLocaleString() : "0",
       icon: Database,
@@ -955,7 +956,7 @@ export default function Dashboard() {
 
   /* ─── Status Cards Config ─── */
   const statusCards = [
-    { label: "تسريبات جديدة", value: stats?.newLeaks ?? 0, icon: Bell, color: "text-red-400", bg: "bg-red-500/8 dark:bg-red-500/10", glow: "rgba(239, 68, 68, 0.1)" },
+    { label: "حالات رصد جديدة", value: stats?.newLeaks ?? 0, icon: Bell, color: "text-red-400", bg: "bg-red-500/8 dark:bg-red-500/10", glow: "rgba(239, 68, 68, 0.1)" },
     { label: "قيد التحليل", value: stats?.analyzingLeaks ?? 0, icon: Activity, color: "text-amber-400", bg: "bg-amber-500/8 dark:bg-amber-500/10", glow: "rgba(245, 158, 11, 0.1)" },
     { label: "تم التوثيق", value: stats?.documentedLeaks ?? 0, icon: FileCheck, color: "text-blue-400", bg: "bg-blue-500/8 dark:bg-blue-500/10", glow: "rgba(59, 130, 246, 0.1)" },
     { label: "مكتملة", value: stats?.completedLeaks ?? 0, icon: Shield, color: "text-emerald-400", bg: "bg-emerald-500/8 dark:bg-emerald-500/10", glow: "rgba(16, 185, 129, 0.1)" },
@@ -972,7 +973,7 @@ export default function Dashboard() {
   const systemStats = [
     { label: "قنوات الرصد", value: stats?.totalChannels ?? 0, icon: Server, color: "bg-slate-600/80" },
     { label: "قنوات نشطة", value: stats?.activeMonitors ?? 0, icon: Wifi, color: "bg-emerald-600/80" },
-    { label: "تسريبات مُثرَاة بالذكاء", value: stats?.enrichedLeaks ?? 0, icon: Zap, color: "bg-amber-600/80" },
+    { label: "حالات مُثرَاة بالذكاء", value: stats?.enrichedLeaks ?? 0, icon: Zap, color: "bg-amber-600/80" },
     { label: "بيانات PII مكتشفة", value: stats?.piiDetected ?? 0, icon: ScanSearch, color: "bg-cyan-600/80" },
   ];
 
@@ -1050,7 +1051,7 @@ export default function Dashboard() {
           </motion.div>
           <div>
             <h1 className="text-xl font-bold text-foreground">لوحة مؤشرات الرصد</h1>
-            <p className="text-xs text-muted-foreground">مؤشرات أداء رصد تسريبات البيانات الشخصية</p>
+            <p className="text-xs text-muted-foreground">مؤشرات أداء رصد حالات البيانات الشخصية</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -1155,7 +1156,7 @@ export default function Dashboard() {
         {/* Status Cards */}
         <PremiumCard delay={0.35}>
           <div className="p-5">
-            <SectionHeader icon={Activity} title="حالة الحوادث" subtitle="Incident Status" />
+            <SectionHeader icon={Activity} title="حالة الرصد" subtitle="Incident Status" />
             <div className="grid grid-cols-2 gap-3">
               {statusCards.map((sc) => {
                 const SIcon = sc.icon;
@@ -1309,7 +1310,7 @@ export default function Dashboard() {
         {/* PII Types Distribution */}
         <PremiumCard delay={0.7} onClick={() => setActiveModal("piiTypes")} className="group">
           <div className="p-5">
-            <SectionHeader icon={Fingerprint} title="تصنيف البيانات الشخصية المسربة" subtitle="PII Classification" action="التفاصيل" onAction={() => setActiveModal("piiTypes")} />
+            <SectionHeader icon={Fingerprint} title="تصنيف البيانات الشخصية المكتشفة" subtitle="PII Classification" action="التفاصيل" onAction={() => setActiveModal("piiTypes")} />
             <div className="space-y-2.5">
               {piiDistribution.slice(0, 8).map((pii, i) => {
                 const PIcon = getPiiIcon(pii.type);
@@ -1360,7 +1361,7 @@ export default function Dashboard() {
         {/* Recent Leaks */}
         <PremiumCard delay={0.8}>
           <div className="p-5">
-            <SectionHeader icon={Eye} title="آخر الحوادث المرصودة" subtitle="Latest Incidents" action="عرض الكل" onAction={() => setActiveModal("allLeaks")} />
+            <SectionHeader icon={Eye} title="آخر حالات الرصد" subtitle="Latest Incidents" action="عرض الكل" onAction={() => setActiveModal("allLeaks")} />
             <div className="space-y-2">
               {recentLeaks.slice(0, 6).map((leak: any, idx: number) => {
                 const sc = sourceColor(leak.source);
@@ -1449,7 +1450,7 @@ export default function Dashboard() {
                       <SIcon className={`w-3.5 h-3.5 ${sc.text}`} />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground truncate font-medium">رصد تسريب: {leak.titleAr}</p>
+                      <p className="text-xs text-foreground truncate font-medium">حالة رصد: {leak.titleAr}</p>
                       <p className="text-[10px] text-muted-foreground">{leak.sectorAr} · {sourceLabel(leak.source)}</p>
                     </div>
                     <span className="text-[10px] text-muted-foreground shrink-0">
@@ -1502,7 +1503,7 @@ export default function Dashboard() {
          ═══════════════════════════════════════════════════════════════ */}
 
       {/* Total Leaks Modal */}
-      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="تفاصيل إجمالي حوادث التسريب" icon={<ShieldAlert className="w-5 h-5 text-blue-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="تفاصيل إجمالي حالات الرصد" icon={<ShieldAlert className="w-5 h-5 text-blue-500" />} maxWidth="max-w-4xl">
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {statusCards.map((sc) => {
@@ -1516,25 +1517,25 @@ export default function Dashboard() {
               );
             })}
           </div>
-          <h4 className="text-sm font-semibold text-foreground">جميع التسريبات</h4>
+          <h4 className="text-sm font-semibold text-foreground">جميع حالات الرصد</h4>
           <LeakListInModal leaks={leaks} />
         </div>
       </DetailModal>
 
       {/* Total Records Modal */}
-      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل السجلات الشخصية المكشوفة" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-4xl">
         <div className="space-y-4">
           <div className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/20" style={{ boxShadow: "0 0 20px rgba(16, 185, 129, 0.08)" }}>
             <p className="text-3xl font-bold text-foreground">{(stats?.totalRecords ?? 0).toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">إجمالي السجلات الشخصية المكشوفة</p>
+            <p className="text-sm text-muted-foreground">إجمالي العدد المُدّعى للسجلات</p>
           </div>
-          <h4 className="text-sm font-semibold text-foreground">أكبر التسريبات من حيث عدد السجلات</h4>
+          <h4 className="text-sm font-semibold text-foreground">أكبر حالات الرصد من حيث العدد المُدّعى</h4>
           <LeakListInModal leaks={[...leaks].sort((a, b) => (b.recordCount || 0) - (a.recordCount || 0))} />
         </div>
       </DetailModal>
 
       {/* PII Types Modal */}
-      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المسربة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المكتشفة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-4xl">
         <div className="space-y-3">
           {piiDistribution.map((pii, i) => {
             const PIcon = getPiiIcon(pii.type);
@@ -1624,7 +1625,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-foreground">{sc.label}</h4>
-                      <Badge variant="outline" className="text-[10px]">{sc.value} تسريب — {pct}%</Badge>
+                      <Badge variant="outline" className="text-[10px]">{sc.value} حالة رصد — {pct}%</Badge>
                     </div>
                     <div className="w-full h-2 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: sourceColor(sc.key).fill }} />
@@ -1646,7 +1647,7 @@ export default function Dashboard() {
               <thead>
                 <tr className="border-b border-border/50">
                   <th className="text-right p-2 text-muted-foreground font-medium text-xs">الشهر</th>
-                  <th className="text-right p-2 text-muted-foreground font-medium text-xs">التسريبات</th>
+                  <th className="text-right p-2 text-muted-foreground font-medium text-xs">حالات الرصد</th>
                   <th className="text-right p-2 text-muted-foreground font-medium text-xs">السجلات</th>
                   <th className="text-right p-2 text-muted-foreground font-medium text-xs">التغيير</th>
                 </tr>
@@ -1673,7 +1674,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* All Leaks Modal */}
-      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع الحوادث المرصودة" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع حالات الرصد" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
         <LeakListInModal leaks={leaks} />
       </DetailModal>
 

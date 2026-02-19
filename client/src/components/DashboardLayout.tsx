@@ -118,7 +118,7 @@ const leaksNavGroups: NavGroup[] = [
     labelEn: "Operational",
     icon: ShieldAlert,
     items: [
-      { label: "التسريبات", labelEn: "Leaks", icon: ShieldAlert, path: "/leaks" },
+      { label: "حالات الرصد", labelEn: "Leaks", icon: ShieldAlert, path: "/leaks" },
       { label: "ملفات المصادر", labelEn: "Seller Profiles", icon: UserX, path: "/seller-profiles" },
       { label: "قنوات التنبيه", labelEn: "Alert Channels", icon: Bell, path: "/alert-channels" },
       { label: "التقارير المجدولة", labelEn: "Scheduled Reports", icon: CalendarClock, path: "/scheduled-reports" },
@@ -701,7 +701,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 } : undefined}
               >
                 <Eye className="w-3.5 h-3.5" />
-                <span>التسريبات</span>
+                <span>حالات الرصد</span>
               </button>
               <button
                 onClick={() => switchWorkspace("privacy")}

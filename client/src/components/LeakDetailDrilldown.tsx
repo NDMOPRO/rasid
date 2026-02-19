@@ -168,7 +168,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
             </button>
             <span style="color:rgba(255,255,255,0.5);font-size:12px;">اختر \"حفظ كـ PDF\" من نافذة الطباعة</span>
           </div>
-          <span style="color:rgba(255,255,255,0.4);font-size:11px;">منصة راصد — توثيق حادثة تسريب</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:11px;">منصة راصد — توثيق حالة رصد</span>
         </div>
         <div style="height:56px;"></div>
       `;
@@ -355,7 +355,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Database className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">السجلات المكشوفة</p>
+                              <p className="text-[10px] text-muted-foreground">العدد المُدّعى</p>
                             </div>
                             <p className="text-sm font-bold text-red-400">{detail.recordCount?.toLocaleString()}</p>
                           </div>
@@ -401,7 +401,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-gradient-to-br from-violet-500/5 to-violet-500/10 rounded-xl p-4 border border-violet-500/20">
                             <h4 className="text-xs font-semibold text-violet-400 mb-3 flex items-center gap-1.5">
                               <Link2 className="w-3.5 h-3.5" />
-                              مصدر التسريب
+                              مصدر الرصد
                             </h4>
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
@@ -451,7 +451,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                             <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                               <Fingerprint className="w-3.5 h-3.5" />
-                              أنواع البيانات الشخصية المكشوفة ({piiTypes.length} نوع)
+                              أنواع البيانات الشخصية المكتشفة ({piiTypes.length} نوع)
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                               {piiTypes.map((type, i) => (
@@ -473,7 +473,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                           <>
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه عينات توضيحية من التسريب لأغراض التوثيق فقط</p>
+                              <p className="text-xs text-red-400">تنبيه: البيانات أدناه عينات توضيحية من حالة الرصد لأغراض التوثيق فقط</p>
                             </div>
                             <div className="overflow-x-auto rounded-lg border border-border">
                               <table className="w-full text-xs">
@@ -506,7 +506,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         ) : (
                           <div className="text-center py-12 text-muted-foreground">
                             <Database className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لا توجد عينات بيانات متاحة لهذا التسريب</p>
+                            <p className="text-sm">لا توجد عينات بيانات متاحة لحالة الرصد هذه</p>
                           </div>
                         )}
                       </div>
@@ -583,7 +583,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         {screenshotUrls.length === 0 && evidence.length === 0 && (
                           <div className="text-center py-12 text-muted-foreground">
                             <Shield className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لا توجد أدلة متاحة لهذا التسريب</p>
+                            <p className="text-sm">لا توجد أدلة متاحة لحالة الرصد هذه</p>
                           </div>
                         )}
                       </div>
@@ -630,7 +630,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         ) : (
                           <div className="text-center py-12 text-muted-foreground">
                             <Brain className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                            <p className="text-sm">لم يتم إثراء هذا التسريب بالذكاء الاصطناعي بعد</p>
+                            <p className="text-sm">لم يتم إثراء حالة الرصد بالذكاء الاصطناعي بعد</p>
                           </div>
                         )}
                       </div>

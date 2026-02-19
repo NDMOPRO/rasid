@@ -265,13 +265,13 @@ export default function Leaks() {
 
   const enrichMutation = trpc.enrichment.enrichLeak.useMutation({
     onSuccess: (result) => {
-      toast.success(`تم إثراء التسريب بنجاح (ثقة: ${result.aiConfidence}%)`);
+      toast.success(`تم إثراء حالة الرصد بنجاح (ثقة: ${result.aiConfidence}%)`);
       setEnrichingId(null);
       utils.leaks.list.invalidate();
       if (selectedLeak) utils.leaks.detail.invalidate({ leakId: selectedLeak });
     },
     onError: () => {
-      toast.error("فشل إثراء التسريب بالذكاء الاصطناعي");
+      toast.error("فشل إثراء حالة الرصد بالذكاء الاصطناعي");
       setEnrichingId(null);
     },
   });
@@ -314,7 +314,7 @@ export default function Leaks() {
 
   // Stats data for clickable cards
   const statsData = useMemo(() => [
-    { label: "إجمالي التسريبات", value: allLeaks.length, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5", icon: ShieldAlert, filter: () => allLeaks },
+    { label: "إجمالي حالات الرصد", value: allLeaks.length, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5", icon: ShieldAlert, filter: () => allLeaks },
     { label: "واسعة النطاق", value: allLeaks.filter((l) => l.severity === "critical").length, color: "text-red-400", borderColor: "border-red-500/20", bgColor: "bg-red-500/5", icon: AlertTriangle, filter: () => allLeaks.filter((l) => l.severity === "critical") },
     { label: "قيد التحليل", value: allLeaks.filter((l) => l.status === "analyzing").length, color: "text-amber-400", borderColor: "border-amber-500/20", bgColor: "bg-amber-500/5", icon: Clock, filter: () => allLeaks.filter((l) => l.status === "analyzing") },
     { label: "مكتملة", value: allLeaks.filter((l) => l.status === "reported").length, color: "text-emerald-400", borderColor: "border-emerald-500/20", bgColor: "bg-emerald-500/5", icon: CheckCircle, filter: () => allLeaks.filter((l) => l.status === "reported") },
@@ -368,7 +368,7 @@ export default function Leaks() {
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث في التسريبات..."
+                  placeholder="بحث في حالات الرصد..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 bg-secondary/50 border-border"
@@ -613,7 +613,7 @@ export default function Leaks() {
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Database className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">السجلات المكشوفة</p>
+                              <p className="text-[10px] text-muted-foreground">العدد المُدّعى</p>
                             </div>
                             <p className="text-sm font-bold text-red-400">{leakDetail.recordCount.toLocaleString()}</p>
                           </div>
@@ -664,7 +664,7 @@ export default function Leaks() {
                           <div className="bg-gradient-to-br from-violet-500/5 to-violet-500/10 rounded-xl p-4 border border-violet-500/20">
                             <h4 className="text-xs font-semibold text-violet-400 mb-3 flex items-center gap-1.5">
                               <Link2 className="w-3.5 h-3.5" />
-                              مصدر التسريب
+                              مصدر الرصد
                             </h4>
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
@@ -714,7 +714,7 @@ export default function Leaks() {
                           <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                             <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                               <Fingerprint className="w-3.5 h-3.5" />
-                              أنواع البيانات الشخصية المكشوفة ({(leakDetail.piiTypes as string[]).length} نوع)
+                              أنواع البيانات الشخصية المكتشفة ({(leakDetail.piiTypes as string[]).length} نوع)
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                               {((leakDetail.piiTypes as string[]) || []).map((type) => (
@@ -735,9 +735,9 @@ export default function Leaks() {
                           </h4>
                           <div className="space-y-3 relative before:absolute before:right-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                             {[
-                              { date: leakDetail.detectedAt, label: "تم اكتشاف التسريب", color: "bg-red-400" },
+                              { date: leakDetail.detectedAt, label: "تم اكتشاف حالة الرصد", color: "bg-red-400" },
                               { date: leakDetail.createdAt, label: "تم تسجيل الحادثة في النظام", color: "bg-cyan-400" },
-                              ...(leakDetail.enrichedAt ? [{ date: leakDetail.enrichedAt, label: "تم تحليل التسريب بالذكاء الاصطناعي", color: "bg-purple-400" }] : []),
+                              ...(leakDetail.enrichedAt ? [{ date: leakDetail.enrichedAt, label: "تم تحليل حالة الرصد بالذكاء الاصطناعي", color: "bg-purple-400" }] : []),
                               { date: leakDetail.updatedAt, label: `الحالة الحالية: ${statusLabel(leakDetail.status)}`, color: leakDetail.status === "reported" ? "bg-emerald-400" : "bg-amber-400" },
                             ].filter(e => e.date).map((event, idx) => (
                               <div key={idx} className="flex items-start gap-3 pr-1">
@@ -762,7 +762,7 @@ export default function Leaks() {
                             return (
                               <div className="text-center py-12">
                                 <Table className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                                <p className="text-sm text-muted-foreground">لا توجد عينات بيانات مسجلة لهذا التسريب</p>
+                                <p className="text-sm text-muted-foreground">لا توجد عينات بيانات مسجلة لحالة الرصد هذه</p>
                               </div>
                             );
                           }
@@ -775,7 +775,7 @@ export default function Leaks() {
                                 <div>
                                   <p className="text-sm font-semibold text-red-400">تحذير: بيانات شخصية مسربة</p>
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    هذه عينة من البيانات الشخصية التي تم اكتشافها في التسريب. تم عرض {samples.length} سجلات من أصل {leakDetail.recordCount.toLocaleString()} سجل مكشوف.
+                                    هذه عينة من البيانات الشخصية التي تم اكتشافها في حالة الرصد. تم عرض {samples.length} سجلات من أصل {leakDetail.recordCount.toLocaleString()} سجل مُدّعى.
                                     يجب التعامل مع هذه البيانات بسرية تامة وفقاً لنظام حماية البيانات الشخصية.
                                   </p>
                                 </div>
@@ -824,7 +824,7 @@ export default function Leaks() {
                               <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                                 <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                                   <Fingerprint className="w-3.5 h-3.5" />
-                                  تحليل الحقول المكشوفة
+                                  تحليل الحقول المكتشفة
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                                   {columns.map((col) => (
@@ -855,7 +855,7 @@ export default function Leaks() {
                               <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                                 <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                                   <Camera className="w-3.5 h-3.5" />
-                                  لقطات شاشة من مصدر التسريب ({screenshots.length})
+                                  لقطات شاشة من مصدر حالة الرصد ({screenshots.length})
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                   {screenshots.map((url, idx) => (
@@ -902,7 +902,7 @@ export default function Leaks() {
                               <span className="truncate font-mono text-xs" dir="ltr">{(leakDetail as any).sourceUrl}</span>
                             </a>
                             <p className="text-[10px] text-muted-foreground mt-2">
-                              تم اكتشاف هذا التسريب على منصة <strong>{(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</strong> بواسطة نظام المراقبة الآلي
+                              تم اكتشاف حالة الرصد هذه على منصة <strong>{(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</strong> بواسطة نظام المراقبة الآلي
                             </p>
                           </div>
                         )}
@@ -912,7 +912,7 @@ export default function Leaks() {
                           !((leakDetail as any).screenshotUrls as any[] || []).length && (
                             <div className="text-center py-12">
                               <Shield className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                              <p className="text-sm text-muted-foreground">لا توجد أدلة مسجلة لهذا التسريب</p>
+                              <p className="text-sm text-muted-foreground">لا توجد أدلة مسجلة لحالة الرصد هذه</p>
                             </div>
                           )
                         ) : (
@@ -1064,12 +1064,12 @@ export default function Leaks() {
                             {enrichingId === leakDetail.leakId ? (
                               <div className="flex flex-col items-center gap-3">
                                 <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-                                <span className="text-foreground text-sm">جاري تحليل التسريب بالذكاء الاصطناعي...</span>
+                                <span className="text-foreground text-sm">جاري تحليل حالة الرصد بالذكاء الاصطناعي...</span>
                               </div>
                             ) : (
                               <div>
                                 <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-                                <p className="text-muted-foreground text-sm mb-4">لم يتم إثراء هذا التسريب بالذكاء الاصطناعي بعد</p>
+                                <p className="text-muted-foreground text-sm mb-4">لم يتم إثراء حالة الرصد بالذكاء الاصطناعي بعد</p>
                                 <Button
                                   onClick={() => handleEnrich(leakDetail.leakId)}
                                   className="gap-2 bg-gradient-to-r from-purple-600 to-cyan-600"
@@ -1109,7 +1109,7 @@ export default function Leaks() {
       {filteredLeaks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <ShieldAlert className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">لا توجد تسريبات تطابق معايير البحث</p>
+          <p className="text-sm">لا توجد حالات رصد تطابق معايير البحث</p>
         </div>
       )}
     </div>
