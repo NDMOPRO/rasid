@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { processImport } from "../importEngine";
+import { processImport, processPrivacyImport } from "../importEngine";
 import { registerSSERoutes } from "../sseChat";
 import { initSeedData } from "../seedData";
 
@@ -59,38 +59,38 @@ async function startServer() {
 
   app.post("/api/cms/import/upload", uploadStorage.single("file"), async (req, res) => {
     try {
-      // Basic auth check via session cookie
-      if (!(req as any).session?.userId && !(req as any).user) {
-        // Try to get user from cookie-based auth
-        const ctx = await createContext({ req, res } as any);
-        if (!ctx.user || (ctx.user as any).platformRole === "viewer") {
-          res.status(403).json({ error: "Admin access required" });
-          return;
-        }
-        const file = req.file;
-        if (!file) {
-          res.status(400).json({ error: "No file uploaded" });
-          return;
-        }
-        const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
-        const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
-        const result = await processImport(
-          file.path,
-          fileType,
-          (ctx.user as any).id || 0,
-          (ctx.user as any).displayName || "Admin"
-        );
-        res.json(result);
+      // Authenticate via platform_session cookie
+      const ctx = await createContext({ req, res } as any);
+      if (!ctx.user && !ctx.platformUser) {
+        res.status(401).json({ error: "Authentication required" });
         return;
       }
+      // Check admin role
+      const role = ctx.platformUser?.platformRole || (ctx.user as any)?.platformRole || "viewer";
+      const adminRoles = ["root_admin", "director", "vice_president", "manager", "admin", "superadmin"];
+      if (!adminRoles.includes(role) && (ctx.user as any)?.rasidRole !== "root_admin") {
+        res.status(403).json({ error: "Admin access required" });
+        return;
+      }
+
       const file = req.file;
       if (!file) {
         res.status(400).json({ error: "No file uploaded" });
         return;
       }
+
+      const userId = ctx.platformUser?.id || (ctx.user as any)?.id || 0;
+      const userName = ctx.platformUser?.displayName || (ctx.user as any)?.name || "Admin";
       const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
       const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
-      const result = await processImport(file.path, fileType, 0, "Admin");
+      const platform = req.body?.platform || "leaks";
+
+      let result;
+      if (platform === "privacy") {
+        result = await processPrivacyImport(file.path, fileType as "json" | "csv" | "xlsx", userId, userName);
+      } else {
+        result = await processImport(file.path, fileType, userId, userName);
+      }
       res.json(result);
     } catch (err: any) {
       console.error("Import error:", err);

@@ -1,7 +1,7 @@
 /**
  * PrivacyImport — صفحة استيراد مواقع لمنصة رصد سياسة الخصوصية
  * تدعم: JSON, CSV, XLSX
- * مربوطة بـ API الاستيراد الفعلي
+ * مربوطة بـ API الاستيراد الفعلي عبر FormData upload
  */
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
-import { trpc } from "@/lib/trpc";
 
 type ImportStatus = "idle" | "uploading" | "processing" | "completed" | "error";
 
@@ -45,22 +44,14 @@ export default function PrivacyImport() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const importMutation = trpc.cms.importData.useMutation({
-    onSuccess: (data: any) => {
-      setStatus("completed");
-      setResult(data);
-      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} موقع بنجاح`);
-    },
-    onError: (err: any) => {
-      setStatus("error");
-      toast.error(`فشل الاستيراد: ${err.message}`);
-    },
-  });
-
   const handleFileSelect = (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!["json", "csv", "xlsx"].includes(ext || "")) {
       toast.error("صيغة ملف غير مدعومة. يرجى استخدام JSON, CSV, أو XLSX");
+      return;
+    }
+    if (file.size > 500 * 1024 * 1024) {
+      toast.error("حجم الملف يتجاوز 500 ميجابايت");
       return;
     }
     setSelectedFile(file);
@@ -79,28 +70,30 @@ export default function PrivacyImport() {
     if (!selectedFile) return;
 
     setStatus("uploading");
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        setStatus("processing");
-        const content = e.target?.result as string;
-        const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "json";
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("platform", "privacy");
 
-        await importMutation.mutateAsync({
-          fileName: selectedFile.name,
-          fileType: ext as "json" | "csv" | "xlsx" | "zip",
-          content: content.includes("base64,") ? content.split("base64,")[1] : content,
-          platform: "privacy",
-        });
-      } catch {
-        setStatus("error");
+      setStatus("processing");
+      const response = await fetch("/api/cms/import/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ error: `خطأ في الخادم (${response.status})` }));
+        throw new Error(errData.error || `خطأ في الخادم (${response.status})`);
       }
-    };
 
-    if (selectedFile.name.endsWith(".json") || selectedFile.name.endsWith(".csv")) {
-      reader.readAsText(selectedFile);
-    } else {
-      reader.readAsDataURL(selectedFile);
+      const data: ImportResult = await response.json();
+      setStatus("completed");
+      setResult(data);
+      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} موقع بنجاح`);
+    } catch (err: any) {
+      setStatus("error");
+      toast.error(`فشل الاستيراد: ${err.message}`);
     }
   };
 
@@ -116,7 +109,7 @@ export default function PrivacyImport() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button
-          onClick={() => setLocation("/privacy-operations")}
+          onClick={() => setLocation("/sites")}
           className={`p-2 rounded-xl transition-colors ${isDark ? "hover:bg-white/10" : "hover:bg-gray-100"}`}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -169,7 +162,7 @@ export default function PrivacyImport() {
                   اسحب ملف المواقع هنا أو انقر للاختيار
                 </p>
                 <p className={`text-xs mt-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
-                  يدعم: JSON, CSV, XLSX (حتى 50 ميجابايت)
+                  يدعم: JSON, CSV, XLSX (حتى 500 ميجابايت)
                 </p>
               </div>
 
@@ -187,7 +180,10 @@ export default function PrivacyImport() {
                     <div>
                       <p className={`font-medium text-sm ${isDark ? "text-white" : "text-gray-900"}`}>{selectedFile.name}</p>
                       <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {(selectedFile.size / 1024).toFixed(1)} كيلوبايت
+                        {selectedFile.size >= 1024 * 1024
+                          ? (selectedFile.size / (1024 * 1024)).toFixed(1) + " ميجابايت"
+                          : (selectedFile.size / 1024).toFixed(1) + " كيلوبايت"
+                        }
                       </p>
                     </div>
                   </div>
