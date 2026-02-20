@@ -19,6 +19,7 @@ import {
   FileBarChart, Stamp, Sparkles, BookOpen, HeartHandshake, GraduationCap,
   Activity, Crown, Layers, Eye, QrCode, Home, Import, History,
   FolderOpen, Wrench, Clock, Download, FileDown, Database, Gauge, PanelLeft,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -261,9 +262,8 @@ const roleLabels: Record<string, string> = {
 const leaksPaths = new Set(leaksNavGroups.flatMap((g) => g.items.map((i) => i.path)));
 const privacyPaths = new Set(privacyNavGroups.flatMap((g) => g.items.map((i) => i.path)));
 
-function getWorkspaceForRoute(path: string): WorkspaceId {
-  if (privacyPaths.has(path)) return "privacy";
-  if (leaksPaths.has(path)) return "leaks";
+function getWorkspaceForRoute(_path: string): WorkspaceId {
+  // Workspace is determined only by user's explicit choice (login or switch button)
   return (localStorage.getItem("rasid_workspace") as WorkspaceId) || "leaks";
 }
 
@@ -301,15 +301,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   /* ═══ WORKSPACE STATE ═══ */
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(() => getWorkspaceForRoute(location));
 
-  useEffect(() => {
-    if (privacyPaths.has(location)) {
-      setActiveWorkspace("privacy");
-      localStorage.setItem("rasid_workspace", "privacy");
-    } else if (leaksPaths.has(location)) {
-      setActiveWorkspace("leaks");
-      localStorage.setItem("rasid_workspace", "leaks");
-    }
-  }, [location]);
+  // Workspace is now only changed via login page selection or the switch button
+  // No auto-switching based on URL to ensure complete workspace isolation
 
   const ws = wsColors[activeWorkspace];
   const wsNavGroups = activeWorkspace === "privacy" ? privacyNavGroups : leaksNavGroups;
@@ -402,7 +395,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     localStorage.setItem("rasid_workspace", wsId);
     setExpandedGroups({});
     playClick();
+    // Navigate to the default page of the target workspace
+    if (wsId === "privacy") {
+      setLocation("/leadership");
+    } else {
+      setLocation("/national-overview");
+    }
   };
+
+  // ═══ WORKSPACE GUARD: redirect if user is on a page that belongs to the other workspace ═══
+  useEffect(() => {
+    const currentWs = activeWorkspace;
+    const isLeaksPage = leaksPaths.has(location);
+    const isPrivacyPage = privacyPaths.has(location);
+    // If user is on a leaks-only page but workspace is privacy, redirect
+    if (currentWs === "privacy" && isLeaksPage && !isPrivacyPage) {
+      setLocation("/leadership");
+    }
+    // If user is on a privacy-only page but workspace is leaks, redirect
+    if (currentWs === "leaks" && isPrivacyPage && !isLeaksPage) {
+      setLocation("/national-overview");
+    }
+  }, [activeWorkspace, location, setLocation]);
 
   /* ═══ Render nav item ═══ */
   const renderNavItem = (item: NavItem) => {
@@ -641,11 +655,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               )}
               {!collapsed && (
-                <Button variant="ghost" size="sm"
-                  className={`h-7 w-7 p-0 ${isDark ? 'text-[#D4DDEF]/50 hover:text-[#D4DDEF]' : 'text-[#5a6478] hover:text-[#1c2833]'}`}
-                  onClick={() => { logout(); toast("تم تسجيل الخروج"); }}>
-                  <LogOut className="w-3.5 h-3.5" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm"
+                    title={activeWorkspace === "leaks" ? "الانتقال إلى الخصوصية" : "الانتقال إلى التسريبات"}
+                    className={`h-7 w-7 p-0 ${isDark ? 'text-[#D4DDEF]/50 hover:text-[#3DB1AC]' : 'text-[#5a6478] hover:text-[#1e3a8a]'}`}
+                    onClick={() => switchWorkspace(activeWorkspace === "leaks" ? "privacy" : "leaks")}>
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="sm"
+                    title="تسجيل الخروج"
+                    className={`h-7 w-7 p-0 ${isDark ? 'text-[#D4DDEF]/50 hover:text-red-400' : 'text-[#5a6478] hover:text-red-600'}`}
+                    onClick={() => {
+                      logout();
+                      localStorage.removeItem("rasid_workspace");
+                      localStorage.removeItem("rasid_session");
+                      toast("تم تسجيل الخروج");
+                      window.location.href = "/login";
+                    }}>
+                    <LogOut className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               )}
             </div>
           ) : (
@@ -690,38 +719,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* ═══ WORKSPACE SWITCHER — pill toggle in header ═══ */}
-            <div className={`flex rounded-full overflow-hidden p-0.5 ${isDark ? 'bg-white/[0.06] border border-white/[0.08]' : 'bg-gray-100 border border-gray-200'}`}>
-              <button
-                onClick={() => switchWorkspace("leaks")}
-                className={`flex items-center gap-1.5 py-1.5 px-4 text-xs font-bold transition-all duration-300 rounded-full ${
-                  activeWorkspace === "leaks"
-                    ? "text-white shadow-lg"
-                    : isDark ? "text-[#D4DDEF]/50 hover:text-[#D4DDEF]/70" : "text-gray-500 hover:text-gray-700"
-                }`}
-                style={activeWorkspace === "leaks" ? {
-                  backgroundColor: wsColors.leaks.accent,
-                  boxShadow: `0 2px 12px ${wsColors.leaks.accent}50`,
-                } : undefined}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span>حالات الرصد</span>
-              </button>
-              <button
-                onClick={() => switchWorkspace("privacy")}
-                className={`flex items-center gap-1.5 py-1.5 px-4 text-xs font-bold transition-all duration-300 rounded-full ${
-                  activeWorkspace === "privacy"
-                    ? "text-white shadow-lg"
-                    : isDark ? "text-[#D4DDEF]/50 hover:text-[#D4DDEF]/70" : "text-gray-500 hover:text-gray-700"
-                }`}
-                style={activeWorkspace === "privacy" ? {
-                  backgroundColor: wsColors.privacy.accent,
-                  boxShadow: `0 2px 12px ${wsColors.privacy.accent}50`,
-                } : undefined}
-              >
-                <Shield className="w-3.5 h-3.5" />
-                <span>الخصوصية</span>
-              </button>
+            {/* Workspace title in header */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accent}1A` }}>
+                {activeWorkspace === "privacy" ? <Shield className="w-4 h-4" style={{ color: accent }} /> : <ShieldAlert className="w-4 h-4" style={{ color: accent }} />}
+              </div>
+              <span className={`text-sm font-bold hidden sm:inline ${isDark ? 'text-[#D4DDEF]' : 'text-[#1c2833]'}`}>
+                {activeWorkspace === "privacy" ? "رصد سياسة الخصوصية" : "حالات الرصد"}
+              </span>
             </div>
           </div>
 

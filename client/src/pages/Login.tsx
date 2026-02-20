@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Loader2, Shield, Lock, User, AlertCircle, Sun, Moon, Fingerprint, ChevronLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2, Shield, Lock, User, AlertCircle, Sun, Moon, Fingerprint, ChevronLeft, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -148,6 +148,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState("");
+  const [selectedWorkspace, setSelectedWorkspace] = useState<"leaks" | "privacy">("leaks");
   const { playClick, playSuccess, playError } = useSoundEffects();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -166,6 +167,7 @@ export default function Login() {
     onSuccess: (data) => {
       playSuccess();
       localStorage.setItem("rasid_session", JSON.stringify({ displayName: data.displayName, role: data.role }));
+      localStorage.setItem("rasid_workspace", selectedWorkspace);
       toast.success("تم تسجيل الدخول بنجاح");
       window.location.href = "/";
     },
@@ -603,6 +605,46 @@ export default function Login() {
               </button>
             </div>
 
+            {/* Workspace Selector */}
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDark ? "text-[#a8b2d1]" : "text-[#334155]"}`}>
+                اختر المنصة
+              </label>
+              <div className={`flex rounded-xl overflow-hidden p-1 ${isDark ? "bg-white/[0.04] border border-[rgba(197,165,90,0.12)]" : "bg-gray-50 border border-[rgba(197,165,90,0.15)]"}`}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedWorkspace("leaks")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-sm font-bold transition-all duration-300 rounded-lg ${
+                    selectedWorkspace === "leaks"
+                      ? "text-white shadow-lg"
+                      : isDark ? "text-[#8892b0] hover:text-[#a8b2d1]" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  style={selectedWorkspace === "leaks" ? {
+                    background: "linear-gradient(135deg, #dc2626, #ef4444)",
+                    boxShadow: "0 2px 12px rgba(220,38,38,0.4)",
+                  } : undefined}
+                >
+                  <ShieldAlert className="w-4 h-4" />
+                  <span>حالات الرصد</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedWorkspace("privacy")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 text-sm font-bold transition-all duration-300 rounded-lg ${
+                    selectedWorkspace === "privacy"
+                      ? "text-white shadow-lg"
+                      : isDark ? "text-[#8892b0] hover:text-[#a8b2d1]" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  style={selectedWorkspace === "privacy" ? {
+                    background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
+                    boxShadow: "0 2px 12px rgba(30,58,138,0.4)",
+                  } : undefined}
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>الخصوصية</span>
+                </button>
+              </div>
+            </div>
             {/* Submit Button */}
             <div
               className="pt-2"

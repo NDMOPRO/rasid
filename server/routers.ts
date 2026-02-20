@@ -110,6 +110,7 @@ export const appRouter = router({
       }
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie("platform_session", { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
     builtinLogin: publicProcedure.input(z.object({
