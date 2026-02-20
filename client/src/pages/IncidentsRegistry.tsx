@@ -35,7 +35,7 @@ export default function IncidentsRegistry() {
   if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-16 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div><h1 className="text-2xl font-bold text-foreground">سجل الحوادث</h1><p className="text-muted-foreground text-sm mt-1">قائمة شاملة بجميع حوادث التسريب</p></div>
         <Badge className="bg-gray-700 text-muted-foreground text-lg px-4 py-2">{filtered.length} حادثة</Badge>

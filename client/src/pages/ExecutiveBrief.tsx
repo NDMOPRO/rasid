@@ -37,7 +37,7 @@ export default function ExecutiveBrief() {
   if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div className="flex items-center gap-3"><FileText className="h-8 w-8 text-blue-400" /><div><h1 className="text-2xl font-bold text-foreground">الموجز التنفيذي</h1><p className="text-muted-foreground text-sm">ملخص شامل لحالة أمن البيانات</p></div></div>
       {brief && (
         <>

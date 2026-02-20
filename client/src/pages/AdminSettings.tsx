@@ -203,7 +203,7 @@ function ThemeTab() {
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState<TabId>("identity");
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div><h1 className="text-2xl font-bold text-foreground">إعدادات الإدارة</h1><p className="text-muted-foreground text-sm mt-1">الهوية البصرية والأدوار ومفاتيح API وقاعدة البيانات</p></div>
       <div className="flex gap-1 p-1 bg-card/50 rounded-xl border border-border overflow-x-auto">
         {tabs.map((tab) => { const Icon = tab.icon; return (

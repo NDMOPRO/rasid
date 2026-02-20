@@ -39,7 +39,7 @@ export default function IncidentCompare() {
   ];
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div><h1 className="text-2xl font-bold text-foreground">مقارنة الحوادث</h1><p className="text-muted-foreground text-sm mt-1">اختر حتى 4 حوادث للمقارنة</p></div>
       {compared.length >= 2 && (
         <Card className="glass-card gold-sweep">

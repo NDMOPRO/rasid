@@ -43,7 +43,7 @@ export default function PdplCompliance() {
   };
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div><h1 className="text-2xl font-bold text-foreground">امتثال نظام حماية البيانات الشخصية (PDPL)</h1><p className="text-muted-foreground text-sm mt-1">تقييم مستوى الامتثال لنظام حماية البيانات الشخصية السعودي</p></div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-card gold-sweep md:col-span-1">

@@ -30,7 +30,7 @@ export default function LeakAnatomy() {
   const leak: any = filtered[selectedIndex] || null;
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div><h1 className="text-2xl font-bold text-foreground">تشريح التسريب</h1><p className="text-muted-foreground text-sm mt-1">عرض تفصيلي لكل حادثة تسريب</p></div>
       <div className="flex items-center gap-3 flex-wrap">
         <Input placeholder="بحث عن حادثة..." value={search} onChange={(e) => { setSearch(e.target.value); setSelectedIndex(0); }} className="glass-card gold-sweep text-foreground max-w-xs" />

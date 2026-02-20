@@ -36,7 +36,7 @@ export default function SourceIntelligence() {
   if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div><h1 className="text-2xl font-bold text-foreground">استخبارات المصادر</h1><p className="text-muted-foreground text-sm mt-1">تحليل مصادر وأنواع التسريبات</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Radio className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sources.length}</div><div className="text-xs text-muted-foreground">مصدر</div></CardContent></Card>
