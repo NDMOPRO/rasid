@@ -8053,8 +8053,9 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
       return db.getCustomPages(ctx.user.id, input?.workspace);
     }),
-    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
-      return db.getCustomPageById(input.id);
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+      return db.getCustomPageById(input.id, ctx.user.id);
     }),
     create: protectedProcedure.input(z.object({
       workspace: z.string(),
@@ -8081,12 +8082,17 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       icon: z.string().optional(),
       sortOrder: z.number().optional(),
       config: z.any().optional(),
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
       const { id, ...data } = input;
-      return db.updateCustomPage(id, data);
+      const updated = await db.updateCustomPage(id, ctx.user.id, data);
+      if (!updated) throw new TRPCError({ code: 'FORBIDDEN', message: 'لا يمكنك تعديل هذه الصفحة' });
+      return updated;
     }),
-     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
-      await db.deleteCustomPage(input.id);
+     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+      const success = await db.deleteCustomPage(input.id, ctx.user.id);
+      if (!success) throw new TRPCError({ code: 'FORBIDDEN', message: 'لا يمكنك حذف هذه الصفحة' });
       return { success: true };
     }),
   }),

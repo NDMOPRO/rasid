@@ -290,6 +290,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const wsNavGroups = activeWorkspace === "privacy" ? privacyNavGroups : leaksNavGroups;
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [customSearchQuery, setCustomSearchQuery] = useState("");
 
   const allCurrentGroups = wsNavGroups;
   const activeGroupId = allCurrentGroups.find((g) => g.items.some((item) => item.path === location))?.id;
@@ -341,23 +342,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     isDeleting: isDeletingPage,
   } = useCustomPages(activeWorkspace);
 
-  const handleCreatePage = async (pageType: "dashboard" | "table" | "report", title: string) => {
+  const customPageTypesCount = new Set(customPages.map((page) => page.pageType)).size;
+
+  useEffect(() => {
+    setCustomSearchQuery("");
+  }, [activeWorkspace]);
+
+  const handleCreatePage = async (pageType: "dashboard" | "table" | "report", title: string): Promise<boolean> => {
     try {
       const result = await createCustomPage(pageType, title);
-      if (result) {
-        toast.success(`تم إنشاء "${title}" بنجاح`);
-        playClick();
-        // Navigate to the new page
-        setLocation(`/custom/${pageType}/${(result as any).id}`);
+      if (!result) {
+        toast.error("تعذر إنشاء الصفحة، حاول مرة أخرى");
+        return false;
       }
+
+      toast.success(`تم إنشاء "${title}" بنجاح`);
+      playClick();
+      setLocation(`/custom/${pageType}/${(result as any).id}`);
+      return true;
     } catch (e) {
       toast.error("فشل إنشاء الصفحة");
+      return false;
     }
   };
 
   const handleDeletePage = async (id: number) => {
+    const target = customPages.find((p) => p.id === id);
+    const confirmed = window.confirm(`هل أنت متأكد من حذف الصفحة "${target?.title || ""}"؟`);
+    if (!confirmed) return;
+
     try {
-      await deleteCustomPage(id);
+      const result = await deleteCustomPage(id);
+      if (!(result as any)?.success) {
+        toast.error("تعذر حذف الصفحة");
+        return;
+      }
+
+      if (location.startsWith(`/custom/`) && location.endsWith(`/${id}`)) {
+        setLocation(activeWorkspace === "privacy" ? "/leadership" : "/national-overview");
+      }
       toast.success("تم حذف الصفحة");
     } catch (e) {
       toast.error("فشل حذف الصفحة");
@@ -492,7 +515,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               animate={{ height: "auto", opacity: 1 }}
               exit={collapsed ? undefined : { height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden"
+              className={collapsed ? "overflow-hidden" : "overflow-visible"}
             >
               <div className={`space-y-0.5 ${collapsed ? "" : "mt-1 mr-2"}`}>
                 {visibleItems.map(renderNavItem)}
@@ -600,6 +623,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <FolderOpen className="w-3.5 h-3.5" />
                         <span>مخصص</span>
                         <span className="text-[9px] opacity-50 font-normal normal-case">Custom</span>
+                        {!collapsed && customPages.length > 0 && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full border ${
+                              isDark
+                                ? "bg-[#3DB1AC]/10 border-[#3DB1AC]/30 text-[#91e5e1]"
+                                : "bg-[#1e3a8a]/5 border-[#1e3a8a]/20 text-[#1e3a8a]"
+                            }`}
+                          >
+                            {customPages.length}
+                          </span>
+                        )}
                       </div>
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedGroups["custom_pages"] ? "" : "-rotate-90"}`} />
                     </button>
@@ -613,15 +647,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         animate={{ height: "auto", opacity: 1 }}
                         exit={collapsed ? undefined : { height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
+                        className={collapsed ? "overflow-hidden" : "overflow-visible"}
                       >
                         <div className={`space-y-0.5 ${collapsed ? "" : "mt-1 mr-2"}`}>
+                          {!collapsed && customPages.length > 0 && (
+                            <div className="px-1 pb-1">
+                              <div className="relative">
+                                <Search className={`absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 ${isDark ? "text-slate-400" : "text-[#7a859c]"}`} />
+                                <input
+                                  value={customSearchQuery}
+                                  onChange={(e) => setCustomSearchQuery(e.target.value)}
+                                  placeholder="ابحث داخل الصفحات المخصصة"
+                                  className={`w-full rounded-md text-[11px] py-1.5 pr-7 pl-2 border transition-colors focus:outline-none focus:ring-1 ${
+                                    isDark
+                                      ? "bg-white/[0.03] border-white/10 text-slate-100 placeholder:text-slate-400/70"
+                                      : "bg-[#f8faff] border-[#e6ebf5] text-[#1c2833] placeholder:text-[#7a859c]"
+                                  }`}
+                                  style={{ "--tw-ring-color": accent } as React.CSSProperties}
+                                />
+                              </div>
+                              <p className={`mt-1 text-[10px] ${isDark ? "text-slate-400/80" : "text-[#7a859c]"}`}>
+                                {customPages.length} صفحة • {customPageTypesCount} أنواع
+                              </p>
+                            </div>
+                          )}
                           <CustomPagesList
                             pages={customPages}
                             collapsed={collapsed}
                             accent={accent}
                             accentBg={isDark ? ws.accentBg : ws.accentBgLight}
                             accentBorder={isDark ? ws.accentBorder : ws.accentBorderLight}
+                            searchQuery={customSearchQuery}
                             onDeletePage={handleDeletePage}
                             onRenamePage={handleRenamePage}
                             onNavClick={handleNavClick}

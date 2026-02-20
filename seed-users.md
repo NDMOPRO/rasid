@@ -1,6 +1,6 @@
 # Platform Users
 
-## Domain: alruhaily.work
+## Domain: alruhaily.app
 
 | User ID | Name | DisplayName | Email | Role |
 |---------|------|-------------|-------|------|
