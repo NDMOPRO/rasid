@@ -1156,7 +1156,7 @@ export default function Dashboard() {
                 </div>
                 {/* Label */}
                 <p className="text-base sm:text-xs text-muted-foreground mb-0.5">{card.label}</p>
-                <p className="text-sm sm:text-[9px] text-muted-foreground/60">{card.labelEn}</p>>
+                <p className="text-sm sm:text-[9px] text-muted-foreground/60">{card.labelEn}</p>
 
                 {/* Sparkline */}
                 <div className="mt-3">
