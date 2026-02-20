@@ -401,68 +401,43 @@ export default function LeadershipDashboard() {
   return (
     <div ref={dashboardRef} className="space-y-8 pb-8 overflow-x-hidden max-w-full">
       <WatermarkLogo />
-      {/* ===== HEADER ===== */}
-      <div
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-primary/5 via-primary/10 to-transparent p-6 border border-primary/10"
-      >
-        <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-x-10 -translate-y-10 blur-2xl btn-glow" />
-        <div className="absolute bottom-0 right-0 w-24 h-24 bg-primary/8 rounded-full translate-x-8 translate-y-8 blur-xl btn-glow" />
-        <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          <div
-            className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20"
-          >
-            <BarChart3 className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-l from-primary to-foreground bg-clip-text text-transparent gradient-text">
-              لوحة المؤشرات القيادية
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              تحليل شامل لامتثال المواقع السعودية للمادة 12 من نظام حماية البيانات الشخصية
-            </p>
-          </div>
-          <div className="me-auto flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                autoRefresh
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              <div className={`w-2 h-2 rounded-full ${autoRefresh ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"}`} />
-              {autoRefresh ? 'تحديث تلقائي' : 'تحديث تلقائي'}
-            </button>
-            <button
-              onClick={exportPDF}
-              disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all disabled:opacity-50 btn-glow"
-            >
-              {exporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
-              {exporting ? '\u062c\u0627\u0631\u064a \u0627\u0644\u062a\u0635\u062f\u064a\u0631...' : '\u062a\u0635\u062f\u064a\u0631 PDF'}
-            </button>
-            <button
-              onClick={() => { setExportingPptx(true); exportLeadershipPptx.mutate(); }}
-              disabled={exportingPptx}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-sm font-medium transition-all disabled:opacity-50"
-            >
-              {exportingPptx ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
-              {exportingPptx ? 'جاري التصدير...' : 'تصدير PPTX'}
-            </button>
-            <div
-            >
-              <Sparkles className="h-5 w-5 text-primary/40" />
-            </div>
-          </div>
-        </div>
+      {/* ===== ACTION BAR ===== */}
+      <div className="flex items-center justify-end gap-2 flex-wrap">
+        <button
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+            autoRefresh
+              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+              : "bg-muted/50 text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          <div className={`w-2 h-2 rounded-full ${autoRefresh ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"}`} />
+          {autoRefresh ? 'تحديث تلقائي' : 'تحديث تلقائي'}
+        </button>
+        <button
+          onClick={exportPDF}
+          disabled={exporting}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all disabled:opacity-50 btn-glow"
+        >
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {exporting ? 'جاري التصدير...' : 'تصدير PDF'}
+        </button>
+        <button
+          onClick={() => { setExportingPptx(true); exportLeadershipPptx.mutate(); }}
+          disabled={exportingPptx}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-sm font-medium transition-all disabled:opacity-50"
+        >
+          {exportingPptx ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {exportingPptx ? 'جاري التصدير...' : 'تصدير PPTX'}
+        </button>
       </div>
 
       {/* ===== FILTER BAR ===== */}

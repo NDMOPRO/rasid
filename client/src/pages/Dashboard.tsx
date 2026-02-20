@@ -1057,72 +1057,41 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* ═══ HEADER ═══ */}
+      {/* ═══ ACTION BAR ═══ */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        className="flex items-center justify-end gap-2 flex-wrap"
       >
-        <div className="flex items-center gap-4">
-          <motion.div
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isDark ? 'bg-gradient-to-br from-[rgba(61,177,172,0.15)] to-[rgba(39,52,112,0.1)] border-[rgba(61,177,172,0.15)]' : 'bg-[#f0f3f8] border-[#e2e5ef]'}`}
-            whileHover={{ rotate: -5, scale: 1.08 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            style={{ boxShadow: isDark ? "0 0 20px rgba(61, 177, 172, 0.15)" : "0 4px 16px rgba(22, 42, 84, 0.08)" }}
-          >
-            <BarChart3 className="w-6 h-6 text-primary" />
-          </motion.div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">لوحة مؤشرات الرصد</h1>
-            <p className="text-xs text-muted-foreground">مؤشرات أداء رصد حالات البيانات الشخصية</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Export Center Button */}
-          <motion.button
-            onClick={() => setShowExportCenter(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${isDark ? 'bg-gradient-to-r from-[rgba(61,177,172,0.1)] to-[rgba(100,89,167,0.08)] border-[rgba(61,177,172,0.15)] hover:from-[rgba(61,177,172,0.2)] hover:to-[rgba(100,89,167,0.12)]' : 'bg-[#f0f3f8] border-[#d8dce8] hover:bg-[#e2e5ef] text-[#1e3a8a]'}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            title="مركز التصدير - تصدير التقارير بصيغ متعددة"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">تصدير</span>
-          </motion.button>
-          {/* Presentation Mode Button */}
-          <motion.button
-            onClick={enterPresentationMode}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-primary text-xs font-semibold border transition-all ${isDark ? 'bg-gradient-to-r from-[rgba(100,89,167,0.15)] to-[rgba(61,177,172,0.1)] border-[rgba(100,89,167,0.2)] hover:from-[rgba(100,89,167,0.25)] hover:to-[rgba(61,177,172,0.15)]' : 'bg-[#f0f3f8] border-[#d8dce8] hover:bg-[#e2e5ef]'}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            title="وضع العرض التقديمي - مثالي للشاشات الكبيرة والاجتماعات"
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">عرض تقديمي</span>
-          </motion.button>
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${isDark ? 'bg-[rgba(61,177,172,0.08)] border-[rgba(61,177,172,0.15)]' : 'bg-[rgba(16,185,129,0.06)] border-[rgba(16,185,129,0.15)]'}`}>
-            <motion.div
-              className={`w-2 h-2 rounded-full ${isDark ? 'bg-[#3DB1AC]' : 'bg-[#10b981]'}`}
-              animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              style={{ boxShadow: isDark ? "0 0 8px rgba(61, 177, 172, 0.5)" : "0 0 6px rgba(16, 185, 129, 0.4)" }}
-            />
-            <span className={`text-xs font-semibold ${isDark ? 'text-[#3DB1AC]' : 'text-[#10b981]'}`}>مباشر</span>
-          </div>
-          <span className="text-xs sm:text-[10px] text-muted-foreground hidden sm:block">
-            <Clock className="w-3 h-3 inline ml-1" />
-            آخر تحديث: الآن
-          </span>
-          <motion.button
-            onClick={handleRefresh}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${isDark ? 'bg-[rgba(61,177,172,0.1)] text-[#3DB1AC] border-[rgba(61,177,172,0.15)] hover:bg-[rgba(61,177,172,0.15)]' : 'bg-[#f0f3f8] text-[#1e3a8a] border-[#d8dce8] hover:bg-[#e2e5ef]'}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            تحديث
-          </motion.button>
-        </div>
+        <motion.button
+          onClick={() => setShowExportCenter(true)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${isDark ? 'bg-gradient-to-r from-[rgba(61,177,172,0.1)] to-[rgba(100,89,167,0.08)] border-[rgba(61,177,172,0.15)] hover:from-[rgba(61,177,172,0.2)] hover:to-[rgba(100,89,167,0.12)]' : 'bg-[#f0f3f8] border-[#d8dce8] hover:bg-[#e2e5ef] text-[#1e3a8a]'}`}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          title="مركز التصدير - تصدير التقارير بصيغ متعددة"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">تصدير</span>
+        </motion.button>
+        <motion.button
+          onClick={enterPresentationMode}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-primary text-xs font-semibold border transition-all ${isDark ? 'bg-gradient-to-r from-[rgba(100,89,167,0.15)] to-[rgba(61,177,172,0.1)] border-[rgba(100,89,167,0.2)] hover:from-[rgba(100,89,167,0.25)] hover:to-[rgba(61,177,172,0.15)]' : 'bg-[#f0f3f8] border-[#d8dce8] hover:bg-[#e2e5ef]'}`}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          title="وضع العرض التقديمي - مثالي للشاشات الكبيرة والاجتماعات"
+        >
+          <Monitor className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">عرض تقديمي</span>
+        </motion.button>
+        <motion.button
+          onClick={handleRefresh}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${isDark ? 'bg-[rgba(61,177,172,0.1)] text-[#3DB1AC] border-[rgba(61,177,172,0.15)] hover:bg-[rgba(61,177,172,0.15)]' : 'bg-[#f0f3f8] text-[#1e3a8a] border-[#d8dce8] hover:bg-[#e2e5ef]'}`}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+          تحديث
+        </motion.button>
       </motion.div>
 
       {/* ═══ KPI CARDS ROW ═══ */}
