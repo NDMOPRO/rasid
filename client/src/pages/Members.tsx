@@ -86,10 +86,10 @@ export default function Members() {
 
   return (
     <div
-      className="space-y-6 p-6" dir="rtl">
+      className="overflow-x-hidden max-w-full space-y-6 p-6" dir="rtl">
       <WatermarkLogo />
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1E3A5F] to-[#2D5F8A] flex items-center justify-center shadow-lg">
             <Users className="w-6 h-6 text-white" />
@@ -297,12 +297,12 @@ export default function Members() {
       <Card className="border-border/50 shadow-lg glass-card gold-sweep">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="p-3 sm:p-8 text-center text-muted-foreground">
               <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
               جاري التحميل...
             </div>
           ) : members?.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-4 sm:p-12 text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">لا يوجد أعضاء</h3>
               <p className="text-sm text-muted-foreground">سيظهر الأعضاء هنا عند تسجيل دخولهم</p>

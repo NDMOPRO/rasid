@@ -133,9 +133,9 @@ export default function UserManagement() {
   const mfaUsers = users.filter((u: any) => u.mfaEnabled).length;
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
             <Users className="w-7 h-7 text-emerald-400" />
@@ -305,7 +305,7 @@ export default function UserManagement() {
       {/* Search and Table */}
       <Card className="bg-secondary/50 border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <CardTitle className="text-lg">قائمة المستخدمين</CardTitle>
             <div className="relative w-64">
               <Input
@@ -321,7 +321,7 @@ export default function UserManagement() {
         <CardContent>
           <div className="space-y-4">
             {isLoading ? (
-              <div className="flex justify-center items-center p-8">
+              <div className="flex justify-center items-center p-3 sm:p-8">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : (
@@ -332,7 +332,7 @@ export default function UserManagement() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: idx * 0.05 }}
                   whileHover={{ scale: 1.01, x: -3 }}
-                  className="group cursor-pointer transition-all bg-background/50 hover:bg-background rounded-lg p-4 flex items-center justify-between"
+                  className="group cursor-pointer transition-all bg-background/50 hover:bg-background rounded-lg p-4 flex items-center justify-between flex-wrap"
                   onClick={() => setActiveModal(`user_${u.id}`)}
                 >
                   <div className="flex items-center gap-4">

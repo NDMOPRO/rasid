@@ -50,7 +50,7 @@ export default function StrategyCoverage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -64,7 +64,7 @@ export default function StrategyCoverage() {
   return (
     <div className="space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield className="h-7 w-7 text-amber-500" />
@@ -80,7 +80,7 @@ export default function StrategyCoverage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-card gold-sweep">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-muted-foreground">إجمالي عمليات الفحص</p>
                 <p className="text-3xl font-bold mt-1">{totalScans.toLocaleString()}</p>
@@ -92,7 +92,7 @@ export default function StrategyCoverage() {
 
         <Card className="glass-card gold-sweep">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-muted-foreground">تم اكتشاف سياسة خصوصية</p>
                 <p className="text-3xl font-bold mt-1 text-green-500">{withPrivacy.toLocaleString()}</p>
@@ -104,7 +104,7 @@ export default function StrategyCoverage() {
 
         <Card className="glass-card gold-sweep">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-muted-foreground">بدون سياسة خصوصية</p>
                 <p className="text-3xl font-bold mt-1 text-red-500">{withoutPrivacy.toLocaleString()}</p>
@@ -116,7 +116,7 @@ export default function StrategyCoverage() {
 
         <Card className="glass-card gold-sweep">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-muted-foreground">نسبة الاكتشاف</p>
                 <p className="text-3xl font-bold mt-1 text-amber-500">{discoveryRate}%</p>
@@ -226,7 +226,7 @@ export default function StrategyCoverage() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {coverage?.cmsCoverage.map((cms) => (
-              <div key={cms.name} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/30">
+              <div key={cms.name} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border border-border/30">
                 <span className="text-sm font-medium truncate">{cms.name}</span>
                 <Badge variant="secondary" className="mr-2 shrink-0">{cms.count.toLocaleString()}</Badge>
               </div>

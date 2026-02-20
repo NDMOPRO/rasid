@@ -13,7 +13,7 @@ const COLORS = ["#3DB1AC", "#6459A7", "#273470", "#f59e0b", "#ef4444", "#10b981"
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-4 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg text-white">
+      <div className="overflow-x-hidden max-w-full p-4 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="label font-bold text-lg">{`${label}`}</p>
         <p className="intro text-cyan-400">{`العدد : ${payload[0].value}`}</p>
@@ -70,20 +70,20 @@ const RecommendationsHub = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8 font-sans" dir="rtl">
+    <div className="min-h-screen bg-slate-900 text-white p-3 sm:p-8 font-sans" dir="rtl">
       <header className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold text-cyan-400">مركز التوصيات | Recommendations Hub</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">مركز التوصيات | Recommendations Hub</h1>
       </header>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-10">
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex items-center space-x-4 space-x-reverse">
           <div className="bg-cyan-500/20 p-4 rounded-full">
             <Layers className="h-8 w-8 text-cyan-400" />
           </div>
           <div>
             <h2 className="text-lg text-slate-300">إجمالي التوصيات الفريدة</h2>
-            <p className="text-4xl font-bold text-white">{totalUniqueRecommendations}</p>
+            <p className="text-2xl sm:text-4xl font-bold text-white">{totalUniqueRecommendations}</p>
           </div>
         </div>
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex items-center space-x-4 space-x-reverse">
@@ -114,7 +114,7 @@ const RecommendationsHub = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-10">
           {/* Recommendations by Sector Chart */}
           <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
             <h2 className="text-2xl font-bold mb-6">توزيع التوصيات حسب القطاع</h2>

@@ -64,7 +64,7 @@ export default function KnowledgeGraph() {
   }, [filteredNodes]);
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -98,7 +98,7 @@ export default function KnowledgeGraph() {
               </div>
               <div>
                 <p className="text-lg font-bold text-foreground">{stats.nodes}</p>
-                <p className="text-[10px] text-muted-foreground">عقد (Nodes)</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">عقد (Nodes)</p>
               </div>
             </div>
           </CardContent>
@@ -111,7 +111,7 @@ export default function KnowledgeGraph() {
               </div>
               <div>
                 <p className="text-lg font-bold text-foreground">{stats.edges}</p>
-                <p className="text-[10px] text-muted-foreground">علاقات (Edges)</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">علاقات (Edges)</p>
               </div>
             </div>
           </CardContent>
@@ -124,7 +124,7 @@ export default function KnowledgeGraph() {
               </div>
               <div>
                 <p className="text-lg font-bold text-foreground">{Object.keys(stats.types).length}</p>
-                <p className="text-[10px] text-muted-foreground">أنواع العقد</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">أنواع العقد</p>
               </div>
             </div>
           </CardContent>
@@ -139,7 +139,7 @@ export default function KnowledgeGraph() {
                 <p className="text-lg font-bold text-foreground">
                   {stats.nodes > 0 ? (stats.edges / stats.nodes).toFixed(1) : "0"}
                 </p>
-                <p className="text-[10px] text-muted-foreground">كثافة الشبكة</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">كثافة الشبكة</p>
               </div>
             </div>
           </CardContent>
@@ -167,7 +167,7 @@ export default function KnowledgeGraph() {
                   <Icon className={`w-4 h-4 ${config.color}`} />
                   <div className="text-right">
                     <p className="text-sm font-bold text-foreground">{count}</p>
-                    <p className="text-[10px] text-muted-foreground">{config.label}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{config.label}</p>
                   </div>
                 </button>
               );
@@ -213,7 +213,7 @@ export default function KnowledgeGraph() {
                         </div>
                         <div className="flex-1 flex items-center justify-center">
                           <div className="h-px flex-1 bg-border" />
-                          <Badge variant="outline" className="text-[10px] mx-2 bg-secondary/30">
+                          <Badge variant="outline" className="text-xs sm:text-[10px] mx-2 bg-secondary/30">
                             {edge.relationshipAr || edge.relationship}
                           </Badge>
                           <div className="h-px flex-1 bg-border" />
@@ -254,8 +254,8 @@ export default function KnowledgeGraph() {
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-semibold text-foreground truncate">{node.labelAr || node.label}</h4>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-[10px]">{config.label}</Badge>
-                            <span className="text-[10px] text-muted-foreground">{connections} علاقة</span>
+                            <Badge variant="outline" className="text-xs sm:text-[10px]">{config.label}</Badge>
+                            <span className="text-xs sm:text-[10px] text-muted-foreground">{connections} علاقة</span>
                           </div>
                         </div>
                       </div>

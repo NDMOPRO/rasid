@@ -125,7 +125,7 @@ function TreemapCell({ item, totalArea, index }: { item: PIIType; totalArea: num
           <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-[10px] opacity-60 mt-0.5"
+            className="text-xs sm:text-[10px] opacity-60 mt-0.5"
             style={{ color: item.color }}
           >
             {item.nameEn}
@@ -149,7 +149,7 @@ function TreemapCell({ item, totalArea, index }: { item: PIIType; totalArea: num
 function HorizontalBarChart({ data }: { data: typeof sectors }) {
   const maxCount = Math.max(...data.map(d => d.count));
   return (
-    <div className="space-y-3">
+    <div className="overflow-x-hidden max-w-full space-y-3">
       {data.map((sector, i) => (
         <motion.div
           key={sector.name}
@@ -173,7 +173,7 @@ function HorizontalBarChart({ data }: { data: typeof sectors }) {
             </motion.div>
           </div>
           <span className="text-xs font-mono text-amber-400/80 w-10 text-left">{sector.count}</span>
-          <span className="text-[10px] text-muted-foreground w-8">{sector.pct}%</span>
+          <span className="text-xs sm:text-[10px] text-muted-foreground w-8">{sector.pct}%</span>
         </motion.div>
       ))}
     </div>
@@ -194,7 +194,7 @@ function SensitivityChart({ data }: { data: PIIType[] }) {
   const maxCount = Math.max(...bars.map(b => b.count));
 
   return (
-    <div className="flex items-end justify-center gap-8 h-40">
+    <div className="flex items-end justify-center gap-4 sm:gap-8 h-40">
       {bars.map((bar, i) => (
         <div key={bar.label} className="flex flex-col items-center gap-2">
           <span className="text-xs font-mono" style={{ color: bar.color }}>{bar.count}</span>
@@ -207,8 +207,8 @@ function SensitivityChart({ data }: { data: PIIType[] }) {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10" />
           </motion.div>
-          <span className="text-[10px] text-muted-foreground text-center leading-tight">{bar.label}</span>
-          <span className="text-[10px] opacity-50">{bar.pct}%</span>
+          <span className="text-xs sm:text-[10px] text-muted-foreground text-center leading-tight">{bar.label}</span>
+          <span className="text-xs sm:text-[10px] opacity-50">{bar.pct}%</span>
         </div>
       ))}
     </div>
@@ -310,7 +310,7 @@ export default function PIIAtlas() {
           }} />
         </div>
 
-        <div className="relative z-10 p-8 md:p-12 text-center">
+        <div className="relative z-10 p-3 sm:p-8 md:p-12 text-center">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -360,7 +360,7 @@ export default function PIIAtlas() {
                 >
                   <Icon className="w-5 h-5 mx-auto mb-2 opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: stat.color }} />
                   <div className="text-xl font-bold text-foreground">{stat.value}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1">{stat.label}</div>
+                  <div className="text-xs sm:text-[10px] text-muted-foreground mt-1">{stat.label}</div>
                 </motion.div>
               );
             })}

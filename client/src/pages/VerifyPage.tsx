@@ -29,8 +29,8 @@ export default function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen page-bg flex items-center justify-center p-4">
-      <div className="glass-card p-8 max-w-md w-full text-center space-y-6">
+    <div className="overflow-x-hidden max-w-full min-h-screen page-bg flex items-center justify-center p-4">
+      <div className="glass-card p-3 sm:p-8 max-w-md w-full text-center space-y-6">
         <img src={LOGO_URL} alt="منصة راصد" className="h-12 mx-auto" />
         <div>
           <h1 className="text-xl font-bold mb-2">التحقق من الوثائق</h1>

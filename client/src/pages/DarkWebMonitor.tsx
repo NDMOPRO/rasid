@@ -62,7 +62,7 @@ export default function DarkWebMonitor() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -146,7 +146,7 @@ export default function DarkWebMonitor() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-foreground">{source.name}</h3>
-                      <p className="text-[10px] text-muted-foreground">{source.channelId}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{source.channelId}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -154,17 +154,17 @@ export default function DarkWebMonitor() {
                       source.status === "active" ? "bg-emerald-500" :
                       source.status === "flagged" ? "bg-red-500" : "bg-yellow-500"
                     }`} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-xs sm:text-[10px] text-muted-foreground">
                       {source.status === "active" ? "نشط" : source.status === "flagged" ? "مُعلَّم" : "متوقف"}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between flex-wrap text-xs">
                   <span className="text-muted-foreground flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
                     {source.leaksDetected ?? 0} حالة رصد
                   </span>
-                  <span className={`px-2 py-0.5 rounded border text-[10px] ${
+                  <span className={`px-2 py-0.5 rounded border text-xs sm:text-[10px] ${
                     source.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                     source.riskLevel === "medium" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                     "text-cyan-400 bg-cyan-500/10 border-cyan-500/30"
@@ -203,7 +203,7 @@ export default function DarkWebMonitor() {
                     <h3 className="text-sm font-semibold text-foreground">{listing.titleAr || listing.title}</h3>
                     <p className="text-xs text-muted-foreground">{listing.title}</p>
                   </div>
-                  <span className={`text-[10px] px-2 py-1 rounded border ${severityColor(listing.severity)}`}>
+                  <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${severityColor(listing.severity)}`}>
                     {severityLabel(listing.severity)}
                   </span>
                 </div>
@@ -256,9 +256,9 @@ export default function DarkWebMonitor() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد</p>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded border ${
+              <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${
                 ch.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                 ch.riskLevel === "medium" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                 "text-cyan-400 bg-cyan-500/10 border-cyan-500/30"
@@ -279,9 +279,9 @@ export default function DarkWebMonitor() {
               <div className="flex items-center gap-2 mb-1">
                 <Globe className="w-4 h-4 text-violet-400" />
                 <span className="text-sm font-semibold text-foreground">{ch.name}</span>
-                <Badge variant="outline" className="text-[10px] mr-auto">{ch.leaksDetected ?? 0} حالة رصد</Badge>
+                <Badge variant="outline" className="text-xs sm:text-[10px] mr-auto">{ch.leaksDetected ?? 0} حالة رصد</Badge>
               </div>
-              <p className="text-[10px] text-muted-foreground">{ch.channelId}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{ch.channelId}</p>
             </div>
           ))}
         </div>
@@ -297,10 +297,10 @@ export default function DarkWebMonitor() {
               onClick={() => { setSelectedListing(listing); setActiveModal("listingDetail"); }}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className={`text-[10px] px-2 py-0.5 rounded border ${severityColor(listing.severity)}`}>{severityLabel(listing.severity)}</span>
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColor(listing.severity)}`}>{severityLabel(listing.severity)}</span>
                 <span className="text-sm font-medium text-foreground truncate">{listing.titleAr || listing.title}</span>
               </div>
-              <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+              <div className="flex items-center gap-3 text-xs sm:text-[10px] text-muted-foreground">
                 <span>{listing.sourceName}</span>
                 <span>{(listing.recordCount ?? 0).toLocaleString()} سجل</span>
                 {listing.price && <span className="text-red-400">{listing.price}</span>}
@@ -316,21 +316,21 @@ export default function DarkWebMonitor() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
               <p className="text-xl font-bold text-cyan-400">{darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">إجمالي السجلات</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">إجمالي السجلات</p>
             </div>
             <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
               <p className="text-xl font-bold text-foreground">{darkWebListings.length > 0 ? Math.round(darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0) / darkWebListings.length).toLocaleString() : 0}</p>
-              <p className="text-[10px] text-muted-foreground">متوسط لكل عرض</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">متوسط لكل عرض</p>
             </div>
             <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20 text-center">
               <p className="text-xl font-bold text-red-400">{Math.max(...darkWebListings.map(l => l.recordCount ?? 0), 0).toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">أكبر عرض</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">أكبر عرض</p>
             </div>
           </div>
           <h4 className="text-sm font-semibold text-foreground">العروض مرتبة حسب عدد السجلات</h4>
           {[...darkWebListings].sort((a, b) => (b.recordCount ?? 0) - (a.recordCount ?? 0)).map(listing => (
             <div key={listing.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border/50">
-              <span className={`text-[10px] px-2 py-0.5 rounded border ${severityColor(listing.severity)}`}>{severityLabel(listing.severity)}</span>
+              <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColor(listing.severity)}`}>{severityLabel(listing.severity)}</span>
               <span className="text-sm text-foreground truncate flex-1">{listing.titleAr || listing.title}</span>
               <span className="text-xs font-bold text-foreground">{(listing.recordCount ?? 0).toLocaleString()} سجل</span>
             </div>
@@ -368,17 +368,17 @@ export default function DarkWebMonitor() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
                 <p className="text-xl font-bold text-amber-400">{selectedSource.leaksDetected ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <p className="text-sm font-bold text-foreground">
                   {selectedSource.lastActivity ? new Date(selectedSource.lastActivity).toLocaleDateString("ar-SA") : "—"}
                 </p>
-                <p className="text-[10px] text-muted-foreground">آخر نشاط</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">آخر نشاط</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <p className="text-sm font-bold text-foreground">{(selectedSource.subscribers ?? 0).toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground">أعضاء</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">أعضاء</p>
               </div>
             </div>
             <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">

@@ -26,7 +26,7 @@ function ComplianceGauge({ value, size = 120 }: { value: number; size?: number }
   const color = value >= 80 ? "#059669" : value >= 60 ? "#10b981" : value >= 40 ? "#f59e0b" : value >= 20 ? "#f97316" : "#ef4444";
   return (
     <div
-      className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      className="overflow-x-hidden max-w-full relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e5e7eb" strokeWidth="8" />
         <circle
@@ -107,7 +107,7 @@ export default function ExecutiveReport() {
       <div ref={reportRef} className="print:p-0">
         {/* Report Header - Print */}
         <div className="hidden print:block mb-8">
-          <div className="flex items-center justify-between border-b-4 border-blue-600 pb-4">
+          <div className="flex items-center justify-between flex-wrap border-b-4 border-blue-600 pb-4">
             <div>
               <img src={LOGO_DARK} alt="راصد" className="h-16" />
             </div>
@@ -162,7 +162,7 @@ export default function ExecutiveReport() {
                   const pct = (seg.value / total) * 100;
                   return pct > 0 ? (
                     <div key={i} className="h-full relative group" style={{ width: `${pct}%`, backgroundColor: seg.color }}>
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px] text-white font-bold">
+                      <span className="absolute inset-0 flex items-center justify-center text-xs sm:text-[10px] text-white font-bold">
                         {pct >= 8 ? `${Math.round(pct)}%` : ""}
                       </span>
                     </div>
@@ -375,7 +375,7 @@ export default function ExecutiveReport() {
 
         {/* Report Footer - Print */}
         <div className="hidden print:block mt-8 pt-4 border-t-2 border-gray-300">
-          <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center justify-between flex-wrap text-xs text-gray-500">
             <div>
               <p>منصة راصد - مكتب إدارة البيانات الوطنية</p>
               <p>تقرير تنفيذي سري - للاستخدام الداخلي فقط</p>

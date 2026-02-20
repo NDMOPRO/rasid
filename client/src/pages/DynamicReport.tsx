@@ -194,7 +194,7 @@ export default function DynamicReport() {
 
       case "stat-summary":
         return (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="overflow-x-hidden max-w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/30 text-center">
                 <p className="text-2xl font-bold text-white">0</p>
@@ -297,7 +297,7 @@ export default function DynamicReport() {
   return (
     <div className="min-h-screen" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -400,7 +400,7 @@ export default function DynamicReport() {
           </div>
         </motion.div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-1">
+        <div className="max-w-[95vw] sm:max-w-4xl mx-auto space-y-1">
           <AnimatePresence>
             {sections.map((section, index) => {
               const sectionType = SECTION_TYPES.find(t => t.id === section.typeId);
@@ -480,7 +480,7 @@ export default function DynamicReport() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
+              <div className="flex items-center justify-between flex-wrap p-5 border-b border-slate-700/50">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                     <FileText className="w-4 h-4 text-white" />

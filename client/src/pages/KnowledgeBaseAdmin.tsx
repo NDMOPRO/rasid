@@ -179,7 +179,7 @@ export default function KnowledgeBaseAdmin() {
   const isFormValid = formData.titleAr && formData.contentAr && formData.title && formData.content;
 
   return (
-    <div className="space-y-6 p-1" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1" dir="rtl">
       {/* ═══ HEADER ═══ */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -216,20 +216,20 @@ export default function KnowledgeBaseAdmin() {
         <Card className="glass-card border-white/[0.06]">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-foreground">{stats?.total || 0}</p>
-            <p className="text-[10px] text-muted-foreground">إجمالي المدخلات</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">إجمالي المدخلات</p>
           </CardContent>
         </Card>
         <Card className="glass-card border-white/[0.06]">
           <CardContent className="p-3 text-center">
             <p className="text-2xl font-bold text-emerald-400">{stats?.published || 0}</p>
-            <p className="text-[10px] text-muted-foreground">منشور</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">منشور</p>
           </CardContent>
         </Card>
         {Object.entries(categoryConfig).map(([key, cfg]) => (
           <Card key={key} className="glass-card border-white/[0.06]">
             <CardContent className="p-3 text-center">
               <p className={`text-2xl font-bold ${cfg.color}`}>{stats?.byCategory?.[key] || 0}</p>
-              <p className="text-[10px] text-muted-foreground">{cfg.label}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{cfg.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -273,12 +273,12 @@ export default function KnowledgeBaseAdmin() {
                       const pct = Math.round((count / total) * 100);
                       return (
                         <div key={star} className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] w-3">{star}</span>
+                          <span className="text-xs sm:text-[10px] w-3">{star}</span>
                           <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
                           <div className="flex-1 h-1.5 rounded-full bg-white/[0.05]">
                             <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
                           </div>
-                          <span className="text-[10px] text-muted-foreground w-6">{count}</span>
+                          <span className="text-xs sm:text-[10px] text-muted-foreground w-6">{count}</span>
                         </div>
                       );
                     })}
@@ -299,9 +299,9 @@ export default function KnowledgeBaseAdmin() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-foreground truncate">{r.userMessage || "—"}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{r.aiResponse?.slice(0, 80) || "—"}...</p>
+                            <p className="text-xs sm:text-[10px] text-muted-foreground truncate">{r.aiResponse?.slice(0, 80) || "—"}...</p>
                           </div>
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          <span className="text-xs sm:text-[10px] text-muted-foreground whitespace-nowrap">
                             {r.userName || "مستخدم"}
                           </span>
                         </div>
@@ -398,12 +398,12 @@ export default function KnowledgeBaseAdmin() {
                       </td>
                       <td className="p-3">
                         <p className="text-sm font-medium">{entry.titleAr}</p>
-                        <p className="text-[10px] text-muted-foreground">{entry.title}</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground">{entry.title}</p>
                       </td>
                       <td className="p-3 hidden md:table-cell">
                         <div className="flex flex-wrap gap-1">
                           {(entry.tags || []).slice(0, 3).map((tag: string, i: number) => (
-                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.05] text-muted-foreground">
+                            <span key={i} className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded bg-white/[0.05] text-muted-foreground">
                               {tag}
                             </span>
                           ))}
@@ -414,11 +414,11 @@ export default function KnowledgeBaseAdmin() {
                       </td>
                       <td className="p-3">
                         {entry.isPublished ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 text-xs sm:text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             <Eye className="w-3 h-3" /> منشور
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          <span className="inline-flex items-center gap-1 text-xs sm:text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                             <EyeOff className="w-3 h-3" /> مسودة
                           </span>
                         )}
@@ -479,7 +479,7 @@ export default function KnowledgeBaseAdmin() {
                       }`}
                     >
                       <Icon className={`w-4 h-4 ${cfg.color}`} />
-                      <span className="text-[10px]">{cfg.label}</span>
+                      <span className="text-xs sm:text-[10px]">{cfg.label}</span>
                     </button>
                   );
                 })}

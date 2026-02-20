@@ -106,7 +106,7 @@ export default function MobileApps() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -265,11 +265,11 @@ export default function MobileApps() {
                       <p className="text-xs text-muted-foreground mt-0.5">{app.developer || "غير محدد"}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">{platformLabels[app.platform] || app.platform}</Badge>
+                  <Badge variant="outline" className="text-xs sm:text-[10px]">{platformLabels[app.platform] || app.platform}</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <Badge className={complianceColors[app.compliance_status || "not_scanned"]}>
                     {app.compliance_status === "compliant" && <CheckCircle2 className="h-3 w-3 ms-1" />}
                     {app.compliance_status === "non_compliant" && <XCircle className="h-3 w-3 ms-1" />}

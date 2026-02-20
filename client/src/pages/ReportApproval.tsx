@@ -93,7 +93,7 @@ export default function ReportApproval() {
   };
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -124,7 +124,7 @@ export default function ReportApproval() {
               transition={{ delay: i * 0.1 }}
               className="glass-card rounded-xl p-4 gold-border-card"
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between flex-wrap mb-2">
                 <SIcon className={`w-5 h-5 ${stat.color}`} />
                 <span className="text-2xl font-bold">{stat.value}</span>
               </div>
@@ -187,11 +187,11 @@ export default function ReportApproval() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <span className="text-xs font-mono text-muted-foreground">{report.id}</span>
-                      <Badge variant="outline" className={`text-[10px] ${priorityCfg.color}`}>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${priorityCfg.color}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${priorityCfg.dot} mr-1`} />
                         {priorityCfg.label}
                       </Badge>
-                      <Badge variant="outline" className={`text-[10px] ${statusCfg.bg} ${statusCfg.color}`}>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${statusCfg.bg} ${statusCfg.color}`}>
                         <StatusIcon className="w-3 h-3 mr-1" />
                         {statusCfg.label}
                       </Badge>

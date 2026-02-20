@@ -248,7 +248,7 @@ function HeatmapLegend() {
 
   return (
     <div
-      className="flex flex-wrap gap-3 justify-center">
+      className="overflow-x-hidden max-w-full flex flex-wrap gap-3 justify-center">
       <WatermarkLogo />
       {levels.map((level) => (
         <div key={level.label} className="flex items-center gap-2">
@@ -446,7 +446,7 @@ export default function ComplianceHeatmap() {
       {viewMode === "map" ? (
         <Card className="overflow-hidden border-0 shadow-xl cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <CardTitle className="flex items-center gap-2">
                 <Map className="w-5 h-5 text-primary" />
                 خريطة المملكة العربية السعودية
@@ -467,7 +467,7 @@ export default function ComplianceHeatmap() {
                 </svg>
               </div>
 
-              <svg viewBox="0 0 600 560" className="w-full max-w-3xl mx-auto relative z-10">
+              <svg viewBox="0 0 600 560" className="w-full max-w-[95vw] sm:max-w-3xl mx-auto relative z-10">
                 <defs>
                   <style>{`
                     @keyframes fadeIn {
@@ -646,7 +646,7 @@ export default function ComplianceHeatmap() {
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between flex-wrap mb-1">
                         <span className="font-medium">{rd.name}</span>
                         <span className="text-sm font-bold" style={{ color }}>
                           {Math.round(rd.complianceRate)}%

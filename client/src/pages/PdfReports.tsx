@@ -89,9 +89,9 @@ export default function PdfReports() {
 
   return (
     <div
-      className="p-6 space-y-8" dir="rtl">
+      className="overflow-x-hidden max-w-full p-6 space-y-8" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="flex items-center justify-between flex-wrap animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-[oklch(0.48_0.14_290)] to-primary shadow-lg shadow-primary/25">
             <FileText className="h-7 w-7 text-white" />

@@ -107,12 +107,12 @@ function SettingEditor({ setting, onSave, saving }: { setting: any; onSave: (key
   const settingType = setting.settingType || "string";
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-card/30 border border-border/30 hover:border-primary/20 transition-colors">
+    <div className="overflow-x-hidden max-w-full flex items-start gap-3 p-3 rounded-lg bg-card/30 border border-border/30 hover:border-primary/20 transition-colors">
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2">
           <Label className="text-sm font-medium">{setting.label || setting.settingKey}</Label>
           {setting.labelEn && <span className="text-xs text-muted-foreground">({setting.labelEn})</span>}
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">{settingType}</Badge>
+          <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5 py-0">{settingType}</Badge>
         </div>
         {setting.description && <p className="text-xs text-muted-foreground">{setting.description}</p>}
 
@@ -255,7 +255,7 @@ function SystemOverviewTab() {
               <div key={cat} className="flex items-center gap-2 p-2.5 rounded-lg bg-card/30 border border-border/20">
                 <Icon className={`h-4 w-4 ${meta.color} shrink-0`} />
                 <span className="text-xs truncate flex-1">{meta.label}</span>
-                <Badge variant="secondary" className="text-[10px] shrink-0">{count}</Badge>
+                <Badge variant="secondary" className="text-xs sm:text-[10px] shrink-0">{count}</Badge>
               </div>
             );
           })}
@@ -368,7 +368,7 @@ function CategorySettingsPanel({ categories }: { categories: string[] }) {
                   <Icon className={`h-4.5 w-4.5 ${meta.color}`} />
                   <span className="font-semibold text-sm">{meta.label}</span>
                   <span className="text-xs text-muted-foreground">({meta.labelEn})</span>
-                  <Badge variant="outline" className="text-[10px] ml-2">{items.length}</Badge>
+                  <Badge variant="outline" className="text-xs sm:text-[10px] ml-2">{items.length}</Badge>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4">
@@ -529,7 +529,7 @@ function ThemeSettingsPanel() {
               <div className="flex items-center gap-3">
                 <Palette className="h-4 w-4 text-pink-400" />
                 <span className="font-semibold text-sm">{themeCatLabels[cat] || cat}</span>
-                <Badge variant="outline" className="text-[10px]">{items.length}</Badge>
+                <Badge variant="outline" className="text-xs sm:text-[10px]">{items.length}</Badge>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
@@ -565,7 +565,7 @@ function ThemeSettingEditor({ theme, onSave, saving }: { theme: any; onSave: (ke
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2">
           <Label className="text-sm font-medium">{theme.label || theme.themeKey}</Label>
-          {theme.cssVariable && <Badge variant="outline" className="text-[10px] px-1.5 font-mono">{theme.cssVariable}</Badge>}
+          {theme.cssVariable && <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5 font-mono">{theme.cssVariable}</Badge>}
         </div>
         {theme.themeType === "color" ? (
           <div className="flex items-center gap-2">
@@ -827,13 +827,13 @@ function DataTransferTab() {
                   {(logs || []).map((log: any) => (
                     <TableRow key={log.id}>
                       <TableCell>
-                        <Badge variant={log.transferType === "export" ? "default" : "secondary"} className="text-[10px]">
+                        <Badge variant={log.transferType === "export" ? "default" : "secondary"} className="text-xs sm:text-[10px]">
                           {log.transferType === "export" ? <><Download className="h-3 w-3 me-1" />تصدير</> : <><Upload className="h-3 w-3 me-1" />استيراد</>}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs">{log.dataSection || log.section || "—"}</TableCell>
                       <TableCell>
-                        <Badge variant={log.status === "completed" ? "default" : log.status === "failed" ? "destructive" : "secondary"} className="text-[10px]">
+                        <Badge variant={log.status === "completed" ? "default" : log.status === "failed" ? "destructive" : "secondary"} className="text-xs sm:text-[10px]">
                           {log.status === "completed" ? "مكتمل" : log.status === "failed" ? "فشل" : "قيد المعالجة"}
                         </Badge>
                       </TableCell>
@@ -918,7 +918,7 @@ function LivePreviewTab() {
                     <div className="font-bold text-sm" style={{ color: getTheme("theme_primary", "#C5A55A") }}>
                       {get("branding_platform_name_ar", "منصة راصد")}
                     </div>
-                    <div className="text-[10px] opacity-60">{get("branding_platform_name_en", "Rasid Platform")}</div>
+                    <div className="text-xs sm:text-[10px] opacity-60">{get("branding_platform_name_en", "Rasid Platform")}</div>
                   </div>
                 </div>
                 {/* Nav items */}
@@ -939,7 +939,7 @@ function LivePreviewTab() {
                 ))}
                 <div className="flex-1" />
                 {/* Footer */}
-                <div className="text-[10px] opacity-40 text-center">
+                <div className="text-xs sm:text-[10px] opacity-40 text-center">
                   {get("branding_copyright", "© 2026 جميع الحقوق محفوظة")}
                 </div>
               </div>
@@ -998,7 +998,7 @@ function LivePreviewTab() {
           {/* Header Preview */}
           {previewMode === "header" && (
             <div style={{ background: getTheme("theme_bg_main", "#0f172a") }}>
-              <div className="flex items-center justify-between px-6 py-3 border-b" style={{
+              <div className="flex items-center justify-between flex-wrap px-6 py-3 border-b" style={{
                 borderColor: getTheme("theme_border_color", "#1e293b"),
                 background: getTheme("theme_bg_card", "#1e293b"),
               }}>
@@ -1042,7 +1042,7 @@ function LivePreviewTab() {
           {/* Login Preview */}
           {previewMode === "login" && (
             <div className="flex h-[500px]">
-              <div className="flex-1 flex flex-col items-center justify-center p-8" style={{ background: getTheme("theme_bg_card", "#1e293b") }}>
+              <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-8" style={{ background: getTheme("theme_bg_card", "#1e293b") }}>
                 {get("login_page_logo") && (
                   <img src={get("login_page_logo")} alt="" className="h-16 mb-4 object-contain" />
                 )}
@@ -1162,7 +1162,7 @@ function AuditLogTab() {
                     return (
                       <TableRow key={log.id}>
                         <TableCell>
-                          <Badge variant="outline" className={`text-[10px] ${ct.color}`}>{ct.label}</Badge>
+                          <Badge variant="outline" className={`text-xs sm:text-[10px] ${ct.color}`}>{ct.label}</Badge>
                         </TableCell>
                         <TableCell className="text-xs font-mono">{log.table_name}</TableCell>
                         <TableCell className="text-xs font-mono max-w-[150px] truncate" title={log.record_key}>{log.record_key}</TableCell>
@@ -1222,7 +1222,7 @@ export default function SuperAdminPanel() {
     <PremiumPageContainer>
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border border-yellow-500/30">

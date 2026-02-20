@@ -99,7 +99,7 @@ export default function IncidentCard() {
 
   if (!incident) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-white bg-slate-900">
+      <div className="overflow-x-hidden max-w-full flex flex-col items-center justify-center h-screen text-white bg-slate-900">
         <AlertTriangle size={48} className="text-yellow-400 mb-4" />
         <h1 className="text-2xl font-bold">لم يتم العثور على الحادثة</h1>
         <p className="text-slate-400">قد تكون الحادثة التي تبحث عنها قد حُذفت أو أن الرابط غير صحيح.</p>

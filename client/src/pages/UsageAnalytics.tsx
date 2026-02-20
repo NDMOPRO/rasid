@@ -69,7 +69,7 @@ export default function UsageAnalytics() {
   };
 
   return (
-    <div className="space-y-6 p-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-6" dir="rtl">
       <WatermarkLogo />
 
       {/* Header */}
@@ -116,7 +116,7 @@ export default function UsageAnalytics() {
           <div key={item.label}>
             <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:scale-[1.02] overflow-hidden group">
               <CardContent className="p-4 relative">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <div>
                     <p className="text-sm text-muted-foreground">{item.label}</p>
                     <p className="text-2xl font-bold mt-1">{item.value.toLocaleString("ar-SA")}</p>

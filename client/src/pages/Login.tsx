@@ -66,7 +66,7 @@ function FloatingParticles() {
     opacity: 0.3 + Math.random() * 0.5,
   })), []);
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="overflow-x-hidden max-w-full absolute inset-0 overflow-hidden pointer-events-none">
       {particles.map((p) => (
         <div
           key={p.id}
@@ -272,7 +272,7 @@ export default function Login() {
         {/* ═══════════════════════════════════════════════════════════
            LEFT COLUMN — Branding / Features (Desktop only)
            ═══════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:flex lg:w-[55%] relative flex-col items-center justify-center p-12 overflow-hidden">
+        <div className="hidden lg:flex lg:w-[55%] relative flex-col items-center justify-center p-4 sm:p-12 overflow-hidden">
           {/* Glass background with deeper gradient */}
           <div
             className="absolute inset-0"
@@ -390,7 +390,7 @@ export default function Login() {
            ═══════════════════════════════════════════════════════════ */}
         <div
           ref={cardRef}
-          className="w-full lg:w-[45%] relative flex flex-col justify-center p-8 lg:p-12"
+          className="w-full lg:w-[45%] relative flex flex-col justify-center p-3 sm:p-8 lg:p-12"
           style={{
             background: isDark
               ? "linear-gradient(160deg, rgba(10,20,38,0.98) 0%, rgba(7,18,35,0.99) 50%, rgba(10,20,38,0.98) 100%)"
@@ -561,7 +561,7 @@ export default function Login() {
 
             {/* Remember me + Forgot password */}
             <div
-              className="flex items-center justify-between"
+              className="flex items-center justify-between flex-wrap"
             >
               <label className="flex items-center gap-2.5 cursor-pointer select-none group">
                 <div className="relative">

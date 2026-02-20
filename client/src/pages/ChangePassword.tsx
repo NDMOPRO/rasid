@@ -58,7 +58,7 @@ export default function ChangePassword() {
 
   return (
     <div
-      className="p-6 max-w-xl mx-auto" dir="rtl">
+      className="overflow-x-hidden max-w-full p-6 max-w-xl mx-auto" dir="rtl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1E3A5F] to-[#2D5F8A] flex items-center justify-center shadow-lg">

@@ -195,7 +195,7 @@ export default function RoleDashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="overflow-x-hidden max-w-full space-y-6">
         <div className="h-32 bg-muted rounded-xl animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 stagger-children">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -362,7 +362,7 @@ export default function RoleDashboard() {
                     {(data.myCases as any[]).map((c: any) => (
                       <div
                         key={c.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
+                        className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                         onClick={() => openDrillDown({ title: "تفاصيل الحالة", subtitle: c.title, icon: <FolderKanban /> })}
                       >
                         <div className="flex items-center gap-3 min-w-0">
@@ -407,7 +407,7 @@ export default function RoleDashboard() {
                   {(data.alerts as any[]).map((alert: any) => (
                     <div
                       key={alert.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
+                      className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                       onClick={() => openDrillDown({ title: "تفاصيل التنبيه", subtitle: alert.domain, icon: <Bell />, complianceStatus: alert.new_status })}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -459,7 +459,7 @@ export default function RoleDashboard() {
                   {(data.recentScans as any[]).map((scan: any) => (
                     <div
                       key={scan.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
+                      className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                       onClick={() => openDrillDown({ title: "تفاصيل الفحص", subtitle: scan.domain, icon: <ScanSearch /> })}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -531,7 +531,7 @@ export default function RoleDashboard() {
                   {(data.schedules as any[]).map((s: any) => (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
+                      className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-accent/30 hover:bg-accent/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                       onClick={() => openDrillDown({ title: "تفاصيل الجدولة", subtitle: s.name, icon: <CalendarClock /> })}
                     >
                       <div className="flex items-center gap-3 min-w-0">

@@ -62,9 +62,9 @@ export default function Notifications() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold gradient-text">مركز الإشعارات</h1>
           <p className="text-muted-foreground text-sm mt-1">{unreadCount > 0 ? `لديك ${unreadCount} إشعار غير مقروء` : "لا توجد إشعارات جديدة"}</p>
@@ -88,9 +88,9 @@ export default function Notifications() {
       </Tabs>
 
       {isLoading ? (
-        <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
+        <div className="p-3 sm:p-8 text-center text-muted-foreground">جاري التحميل...</div>
       ) : filteredNotifs.length === 0 ? (
-        <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"><CardContent className="p-12 text-center"><Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-30" /><h3 className="text-lg font-medium mb-2">لا توجد إشعارات</h3><p className="text-sm text-muted-foreground">{activeTab === "all" ? "ستظهر الإشعارات هنا عند وجود أحداث جديدة" : "لا توجد إشعارات في هذا التصنيف"}</p></CardContent></Card>
+        <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"><CardContent className="p-4 sm:p-12 text-center"><Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-30" /><h3 className="text-lg font-medium mb-2">لا توجد إشعارات</h3><p className="text-sm text-muted-foreground">{activeTab === "all" ? "ستظهر الإشعارات هنا عند وجود أحداث جديدة" : "لا توجد إشعارات في هذا التصنيف"}</p></CardContent></Card>
       ) : (
         <div className="space-y-2">
           {filteredNotifs.map((notif: any) => {
@@ -105,11 +105,11 @@ export default function Notifications() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-sm">{notif.title}</h3>
-                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${config.badgeClass}`}>{config.label}</Badge>
-                        {!notif.isRead && <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">جديد</Badge>}
+                        <Badge variant="outline" className={`text-xs sm:text-[10px] px-1.5 py-0 ${config.badgeClass}`}>{config.label}</Badge>
+                        {!notif.isRead && <Badge className="bg-blue-500 text-white text-xs sm:text-[10px] px-1.5 py-0">جديد</Badge>}
                       </div>
                       <p className="text-sm text-muted-foreground">{notif.message}</p>
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center justify-between flex-wrap mt-2">
                         <span className="text-xs text-muted-foreground">{formatTime(notif.createdAt)}</span>
                         <div className="flex gap-1">
                           {notif.link && <Button variant="ghost" size="sm" className="h-6 text-xs"><ExternalLink className="h-3 w-3 ms-1" /> عرض</Button>}

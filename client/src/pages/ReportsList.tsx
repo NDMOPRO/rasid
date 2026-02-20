@@ -11,7 +11,7 @@ export default function ReportsList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="overflow-x-hidden max-w-full space-y-6">
         <h1 className="text-2xl font-bold">التقارير</h1>
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -20,7 +20,7 @@ export default function ReportsList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <h1 className="text-2xl font-bold">التقارير</h1>
         <Button onClick={() => toast.info("ميزة إنشاء التقارير قيد التطوير")} className="bg-gold text-gold-foreground hover:bg-gold/90">
           <FileText className="ml-2 h-4 w-4" />

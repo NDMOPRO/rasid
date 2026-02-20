@@ -130,7 +130,7 @@ export default function AdminPanel() {
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Card className="p-8 text-center border-red-500/30 bg-red-500/5 glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+        <Card className="p-3 sm:p-8 text-center border-red-500/30 bg-red-500/5 glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-400">غير مصرح</h2>
           <p className="text-muted-foreground mt-2">هذه الصفحة متاحة فقط للمشرفين</p>

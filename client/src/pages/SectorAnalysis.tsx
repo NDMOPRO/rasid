@@ -25,7 +25,7 @@ const CustomTreemapTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         const { name, count } = payload[0].payload;
         return (
-            <div className="bg-slate-900/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
+            <div className="overflow-x-hidden max-w-full bg-slate-900/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
                 <p className="font-bold">{name}</p>
                 <p>عدد الحوادث: {count}</p>
@@ -106,7 +106,7 @@ export default function SectorAnalysis() {
     return (
         <div dir="rtl" className="p-4 md:p-8 text-white bg-slate-900 min-h-screen">
             <header className="mb-8">
-                <h1 className="text-4xl font-bold text-cyan-400">تحليل القطاعات</h1>
+                <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">تحليل القطاعات</h1>
                 <p className="text-lg text-slate-400">Sector Analysis</p>
             </header>
 
@@ -116,7 +116,7 @@ export default function SectorAnalysis() {
                 <KpiCard title="إجمالي ادعاءات البائع" value={totalRecords.toLocaleString('ar-SA')} icon={FileText} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                 <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
                     <h2 className="text-2xl font-bold mb-4 text-white">توزيع الحوادث حسب القطاع</h2>
                     <p className="text-slate-400 mb-6">Treemap of sectors by incident count</p>

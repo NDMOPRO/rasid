@@ -48,7 +48,7 @@ export default function NotFound() {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
+      className="overflow-x-hidden max-w-full min-h-screen w-full flex items-center justify-center relative overflow-hidden"
       dir="rtl"
       style={{
         background: "linear-gradient(135deg, #0D1529 0%, #0a1230 30%, #101e45 60%, #1A2550 100%)",

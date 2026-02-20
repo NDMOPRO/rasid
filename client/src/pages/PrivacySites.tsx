@@ -57,7 +57,7 @@ export default function PrivacySites() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-2 md:p-6">
+      <div className="overflow-x-hidden max-w-full space-y-6 p-2 md:p-6">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Globe className="h-6 w-6 text-primary" />المواقع السعودية</h1>
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -184,7 +184,7 @@ export default function PrivacySites() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <p className="text-sm text-muted-foreground">
             عرض {(page - 1) * limit + 1} - {Math.min(page * limit, totalCount)} من {totalCount}
           </p>

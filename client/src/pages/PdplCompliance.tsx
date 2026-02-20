@@ -49,7 +49,7 @@ const KpiCard = ({ title, value, icon: Icon, unit = '' }) => {
                 <Icon className="text-amber-400" size={28} />
             </div>
             <div>
-                <p className="text-4xl font-bold text-white text-right">{animatedValue.toLocaleString()}{unit && <span className="text-2xl ml-2">{unit}</span>}</p>
+                <p className="text-2xl sm:text-4xl font-bold text-white text-right">{animatedValue.toLocaleString()}{unit && <span className="text-2xl ml-2">{unit}</span>}</p>
             </div>
         </GlassCard>
     );
@@ -58,7 +58,7 @@ const KpiCard = ({ title, value, icon: Icon, unit = '' }) => {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-2 bg-slate-900/80 border border-slate-700 rounded-lg text-white">
+      <div className="overflow-x-hidden max-w-full p-2 bg-slate-900/80 border border-slate-700 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="label">{`${label} : ${payload[0].value.toLocaleString()}`}</p>
       </div>
@@ -92,9 +92,9 @@ export default function PdplCompliance() {
   const totalFines = useMemo(() => pdplData.totalFines, [pdplData]);
 
   return (
-    <div className="p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
+    <div className="p-3 sm:p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-amber-400">امتثال PDPL</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-amber-400">امتثال PDPL</h1>
         <p className="text-slate-400 text-lg">PDPL Compliance Analysis</p>
       </header>
 
@@ -104,7 +104,7 @@ export default function PdplCompliance() {
         <KpiCard title="الحوادث المتضمنة مخالفات" value={pdplData.incidentsWithViolations} icon={ShieldAlert} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
         <GlassCard>
           <h2 className="text-2xl font-bold mb-4 text-slate-200">تكرار المواد المخالفة</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -145,7 +145,7 @@ export default function PdplCompliance() {
         </GlassCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8">
         <GlassCard className="lg:col-span-3">
             <h2 className="text-2xl font-bold mb-4 text-slate-200">أبرز الحوادث حسب الغرامة</h2>
             <div className="overflow-x-auto">

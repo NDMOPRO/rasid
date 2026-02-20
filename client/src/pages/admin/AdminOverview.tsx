@@ -36,9 +36,9 @@ export default function AdminOverview() {
   });
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground">لوحة التحكم الإدارية</h1>
           <p className="text-muted-foreground text-sm mt-1">إدارة شاملة للأدوار والصلاحيات والميزات والمظهر</p>

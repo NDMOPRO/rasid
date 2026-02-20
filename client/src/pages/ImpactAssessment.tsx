@@ -18,7 +18,7 @@ const GlassCard = ({ children, className = '' }) => (
 
 const KpiCard = ({ title, value, icon: Icon }) => (
   <GlassCard>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap">
       <div>
         <p className="text-slate-300 text-lg">{title}</p>
         <p className="text-3xl font-bold text-white">{value}</p>
@@ -34,7 +34,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-slate-900/80 backdrop-blur-md border border-white/20 rounded-lg p-4 text-white">
+      <div className="overflow-x-hidden max-w-full bg-slate-900/80 backdrop-blur-md border border-white/20 rounded-lg p-4 text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="font-bold text-lg mb-2">{label}</p>
         {Object.entries(data).map(([key, value]) => {
@@ -91,9 +91,9 @@ export default function ImpactAssessment() {
   }, [impactData]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8 font-sans" dir="rtl">
+    <div className="min-h-screen bg-slate-900 text-white p-3 sm:p-8 font-sans" dir="rtl">
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">تحليل الأثر | Impact Assessment</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">تحليل الأثر | Impact Assessment</h1>
         <p className="text-slate-400 mt-2">نظرة شاملة على تأثير حالات الرصد</p>
       </header>
 
@@ -104,7 +104,7 @@ export default function ImpactAssessment() {
         <KpiCard title="إجمالي الغرامات التقديرية (SAR)" value={`${(kpiStats.totalFines / 1_000_000).toFixed(1)} مليون`} icon={PieChartIcon} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <GlassCard className="h-[500px]">
           <h2 className="text-2xl font-bold mb-4 text-cyan-300">أبرز 20 حادثة حسب ادعاء البائع</h2>
           <ResponsiveContainer width="100%" height="90%">

@@ -1008,7 +1008,7 @@ export default function LeadershipDashboard() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold">التوقعات المستقبلية</h3>
-                    <p className="text-[10px] text-muted-foreground">بناءً على تحليل الانحدار الخطي للبيانات التاريخية</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">بناءً على تحليل الانحدار الخطي للبيانات التاريخية</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
@@ -1016,7 +1016,7 @@ export default function LeadershipDashboard() {
                     <div key={f.monthsAhead} className="text-center p-4 rounded-xl bg-sky-500/5 border border-sky-500/10">
                       <p className="text-xs text-muted-foreground mb-1">بعد {f.monthsAhead} أشهر</p>
                       <p className="text-2xl font-bold text-sky-400">{f.predictedRate}%</p>
-                      <p className="text-[10px] text-muted-foreground">معدل امتثال متوقع</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">معدل امتثال متوقع</p>
                     </div>
                   ))}
                 </div>
@@ -1067,7 +1067,7 @@ export default function LeadershipDashboard() {
                               return (
                                 <td key={ci} className="p-1.5 text-center">
                                   <div
-                                    className={`${bg} rounded-md px-2 py-1.5 text-white font-bold text-[11px] min-w-[40px]`}
+                                    className={`${bg} rounded-md px-2 py-1.5 text-white font-bold text-xs sm:text-[11px] min-w-[40px]`}
                                     style={{ opacity }}
                                     title={`${CLAUSE_SHORT[ci]}: ${val}%`}
                                   >
@@ -1106,7 +1106,7 @@ export default function LeadershipDashboard() {
                   <>
                     <div className="text-center py-4">
                       <div
-                        className={`text-5xl font-bold ${
+                        className={`text-3xl sm:text-5xl font-bold ${
                           velocityData.data.velocity > 0 ? "text-emerald-500" : velocityData.data.velocity < 0 ? "text-red-500" : "text-muted-foreground"
                         }`}
                       >
@@ -1115,21 +1115,21 @@ export default function LeadershipDashboard() {
                       <p className="text-xs text-muted-foreground mt-2">مؤشر سرعة التحسين</p>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10">
+                      <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-emerald-500/10">
                         <div className="flex items-center gap-2">
                           <ArrowUpRight className="h-4 w-4 text-emerald-500" />
                           <span className="text-xs font-medium">تحسنت</span>
                         </div>
                         <span className="text-lg font-bold text-emerald-500">{velocityData.data.improved}</span>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/10">
+                      <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-red-500/10">
                         <div className="flex items-center gap-2">
                           <ArrowDownRight className="h-4 w-4 text-red-500" />
                           <span className="text-xs font-medium">تراجعت</span>
                         </div>
                         <span className="text-lg font-bold text-red-500">{velocityData.data.declined}</span>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                      <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-muted/50">
                         <div className="flex items-center gap-2">
                           <Minus className="h-4 w-4 text-muted-foreground" />
                           <span className="text-xs font-medium">بدون تغيير</span>
@@ -1190,7 +1190,7 @@ export default function LeadershipDashboard() {
                           <td className="p-3 text-center text-emerald-500 font-medium">{row.maxScore}</td>
                           <td className="p-3 text-center text-red-500 font-medium">{row.minScore}</td>
                           <td className="p-3 text-center">
-                            <Badge variant="outline" className={`text-[10px] ${
+                            <Badge variant="outline" className={`text-xs sm:text-[10px] ${
                               row.complianceRate >= 60 ? "border-emerald-500/30 text-emerald-500" :
                               row.complianceRate >= 40 ? "border-amber-500/30 text-amber-500" :
                               "border-red-500/30 text-red-500"
@@ -1289,7 +1289,7 @@ export default function LeadershipDashboard() {
                     </div>
                     {alert.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{alert.description}</p>}
                     {alert.suggestedAction && (
-                      <p className="text-[10px] text-primary mt-1 flex items-center gap-1">
+                      <p className="text-xs sm:text-[10px] text-primary mt-1 flex items-center gap-1">
                         <Sparkles className="h-3 w-3" />
                         {alert.suggestedAction}
                       </p>
@@ -1309,7 +1309,7 @@ export default function LeadershipDashboard() {
 
       {/* ===== DRILL-DOWN DIALOG ===== */}
       <Dialog open={drillDownOpen} onOpenChange={setDrillDownOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh]">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center btn-glow">
@@ -1417,14 +1417,14 @@ export default function LeadershipDashboard() {
                       <p className="font-semibold text-sm truncate">{siteHistory.data.site.siteName || siteHistory.data.site.domain}</p>
                       <p className="text-xs text-muted-foreground">{siteHistory.data.site.domain}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-muted-foreground">{siteHistory.data.site.classification}</span>
-                        <span className="text-[10px] text-muted-foreground">•</span>
-                        <span className="text-[10px] text-muted-foreground">{SECTOR_LABELS[siteHistory.data.site.sectorType] || siteHistory.data.site.sectorType}</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">{siteHistory.data.site.classification}</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">•</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">{SECTOR_LABELS[siteHistory.data.site.sectorType] || siteHistory.data.site.sectorType}</span>
                       </div>
                     </div>
                     <div className="text-center shrink-0">
                       <span className="text-2xl font-bold text-primary">{siteHistory.data.history.length}</span>
-                      <p className="text-[10px] text-muted-foreground">فحص</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">فحص</p>
                     </div>
                   </div>
                 )}
@@ -1459,7 +1459,7 @@ export default function LeadershipDashboard() {
                             : 'border-border/50 bg-card/50 hover:bg-accent/20'
                         }`}>
                           {/* Date & Status Row */}
-                          <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center justify-between flex-wrap mb-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-medium text-muted-foreground">
                                 {new Date(scan.scanDate).toLocaleDateString('ar-SA-u-nu-latn', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -1475,7 +1475,7 @@ export default function LeadershipDashboard() {
                                 </Badge>
                               )}
                             </div>
-                            <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${
+                            <Badge variant="outline" className={`text-xs sm:text-[10px] px-2 py-0.5 ${
                               scan.complianceStatus === 'compliant' ? 'badge-compliant' :
                               scan.complianceStatus === 'partially_compliant' ? 'badge-partial' :
                               scan.complianceStatus === 'non_compliant' ? 'badge-non-compliant' :
@@ -1521,7 +1521,7 @@ export default function LeadershipDashboard() {
                               <span className="text-xs text-muted-foreground">البنود:</span>
                               <span className="text-xs font-semibold">{scan.clausesCompliant}/8</span>
                               {!scan.isFirst && scan.clauseChange !== 0 && (
-                                <span className={`text-[10px] font-semibold ${
+                                <span className={`text-xs sm:text-[10px] font-semibold ${
                                   scan.clauseChange > 0 ? 'text-emerald-500' : 'text-red-500'
                                 }`}>
                                   ({scan.clauseChange > 0 ? '+' : ''}{scan.clauseChange})
@@ -1606,7 +1606,7 @@ function FilterChip({ label, icon, active, onClick, color, small }: {
       onClick={onClick}
       className={`
         flex items-center gap-1.5 rounded-full border transition-all duration-200
-        ${small ? "px-2.5 py-1 text-[10px]" : "px-3 py-1.5 text-xs"}
+        ${small ? "px-2.5 py-1 text-xs sm:text-[10px]" : "px-3 py-1.5 text-xs"}
         font-medium
         ${active
           ? `${c.activeBg} ${c.activeText} ${c.activeBorder} shadow-sm`
@@ -1681,7 +1681,7 @@ function MetricCard({ label, value, percentage, icon, color, onClick }: {
             )}
           </div>
           {onClick && (
-            <div className="mt-2 text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+            <div className="mt-2 text-xs sm:text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
               <ChevronLeft className="h-3 w-3" />
               اضغط للتفاصيل
             </div>
@@ -1787,7 +1787,7 @@ function ComplianceGauge({ compliant, total }: { compliant: number; total: numbe
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span
               key={rate}
-              className="text-4xl font-bold"
+              className="text-2xl sm:text-4xl font-bold"
               style={{ color: gaugeColor }}
             >
               {rate}%
@@ -1829,8 +1829,8 @@ function ClauseInfographicCard({ clause, index, onClickCompliant, onClickNonComp
       <div className={`absolute inset-0 bg-gradient-to-b ${gradients[color]} opacity-60`} />
       <CardContent className="p-5 relative">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <Badge variant="outline" className="text-[10px] px-2 py-0.5 font-bold">
+        <div className="flex items-center justify-between flex-wrap mb-3">
+          <Badge variant="outline" className="text-xs sm:text-[10px] px-2 py-0.5 font-bold">
             بند {clause.clause}
           </Badge>
           <div
@@ -1872,7 +1872,7 @@ function ClauseInfographicCard({ clause, index, onClickCompliant, onClickNonComp
           >
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <CheckCircle2 className="h-3 w-3 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
-              <span className="text-[10px] text-emerald-400 font-medium">ممتثل</span>
+              <span className="text-xs sm:text-[10px] text-emerald-400 font-medium">ممتثل</span>
             </div>
             <span className="text-sm font-bold text-emerald-400">{clause.compliant}</span>
           </button>
@@ -1882,7 +1882,7 @@ function ClauseInfographicCard({ clause, index, onClickCompliant, onClickNonComp
           >
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <XCircle className="h-3 w-3 text-red-500 group-hover/btn:scale-110 transition-transform" />
-              <span className="text-[10px] text-red-400 font-medium">غير ممتثل</span>
+              <span className="text-xs sm:text-[10px] text-red-400 font-medium">غير ممتثل</span>
             </div>
             <span className="text-sm font-bold text-red-400">{clause.nonCompliant}</span>
           </button>
@@ -1912,7 +1912,7 @@ function SectorCard({ sector, onClickCompliance, onClickClause }: {
           </div>
           <div>
             <CardTitle className="text-base font-bold">{SECTOR_LABELS[sector.sector] || sector.sector}</CardTitle>
-            <Badge variant="outline" className="text-[10px] mt-0.5">{sector.totalSites} موقع</Badge>
+            <Badge variant="outline" className="text-xs sm:text-[10px] mt-0.5">{sector.totalSites} موقع</Badge>
           </div>
         </div>
       </CardHeader>
@@ -1930,10 +1930,10 @@ function SectorCard({ sector, onClickCompliance, onClickClause }: {
               onClick={() => onClickCompliance(item.key)}
               className={`bg-${item.color}-500/10 rounded-lg p-2.5 hover:bg-${item.color}-500/20 transition-all text-end group/s`}
             >
-              <p className="text-[10px] text-muted-foreground">{item.label}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{item.label}</p>
               <div className="flex items-end gap-1">
                 <span className={`text-lg font-bold text-${item.color}-500`}>{item.value}</span>
-                <span className="text-[10px] text-muted-foreground mb-0.5">({pct(item.value)}%)</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground mb-0.5">({pct(item.value)}%)</span>
               </div>
             </button>
           ))}
@@ -1958,7 +1958,7 @@ function SectorCard({ sector, onClickCompliance, onClickClause }: {
                 onClick={() => onClickClause(c.clause, true)}
                 className="w-full flex items-center gap-2 hover:bg-muted/30 rounded-lg px-1 py-0.5 transition-colors group/c"
               >
-                <span className="text-[10px] text-muted-foreground w-24 shrink-0 truncate text-end">
+                <span className="text-xs sm:text-[10px] text-muted-foreground w-24 shrink-0 truncate text-end">
                   بند {c.clause}: {CLAUSE_SHORT[i]}
                 </span>
                 <div className="flex-1 bg-muted/50 rounded-full h-2 overflow-hidden">
@@ -1967,7 +1967,7 @@ function SectorCard({ sector, onClickCompliance, onClickClause }: {
                     style={{ width: `${clausePct}%`, backgroundColor: clausePct >= 60 ? "#22c55e" : clausePct >= 40 ? "#f59e0b" : "#ef4444", transition: "width 1s ease-out" }}
                   />
                 </div>
-                <span className="text-[10px] font-medium w-12 text-start">{clausePct}%</span>
+                <span className="text-xs sm:text-[10px] font-medium w-12 text-start">{clausePct}%</span>
               </button>
             );
           })}
@@ -2008,12 +2008,12 @@ function CategoryInfographicCard({ category, index, onClickCompliance, onClickCl
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-bold" style={{ color: rateColor }}>{complianceRate}%</span>
+              <span className="text-xs sm:text-[10px] font-bold" style={{ color: rateColor }}>{complianceRate}%</span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-bold truncate">{category.category}</h3>
-            <p className="text-[10px] text-muted-foreground">{category.totalSites} موقع</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">{category.totalSites} موقع</p>
           </div>
         </div>
 
@@ -2101,9 +2101,9 @@ function SiteDrillDownCard({ site, onNavigate, onShowHistory }: { site: any; onN
           )}
         </div>
         <div className="flex items-center gap-3 mt-0.5">
-          <span className="text-[11px] text-muted-foreground truncate">{site.domain}</span>
+          <span className="text-xs sm:text-[11px] text-muted-foreground truncate">{site.domain}</span>
           {site.classification && (
-            <span className="text-[10px] text-muted-foreground/70">{site.classification}</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground/70">{site.classification}</span>
           )}
         </div>
         {/* Clause compliance dots */}

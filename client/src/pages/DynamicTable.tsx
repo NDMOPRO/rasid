@@ -107,9 +107,9 @@ export default function DynamicTable() {
   };
 
   return (
-    <div className="min-h-screen" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -318,7 +318,7 @@ export default function DynamicTable() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
+              <div className="flex items-center justify-between flex-wrap p-5 border-b border-slate-700/50">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                     <Columns className="w-4 h-4 text-white" />

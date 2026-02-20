@@ -158,7 +158,7 @@ function StatsDetailModal({ open, onClose, title, leaks }: { open: boolean; onCl
           className="w-full max-w-2xl max-h-[80vh] overflow-y-auto bg-card border border-border rounded-2xl shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border p-4 rounded-t-2xl flex items-center justify-between">
+          <div className="sticky top-0 bg-card/95 backdrop-blur-xl border-b border-border p-4 rounded-t-2xl flex items-center justify-between flex-wrap">
             <h3 className="text-foreground font-semibold">{title}</h3>
             <button onClick={onClose} className="p-2 rounded-lg hover:bg-accent transition-colors">
               <X className="w-4 h-4 text-muted-foreground" />
@@ -172,15 +172,15 @@ function StatsDetailModal({ open, onClose, title, leaks }: { open: boolean; onCl
                 className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border/50 hover:bg-secondary/50 hover:border-primary/30 transition-all cursor-pointer group"
                 onClick={() => setDrillLeak(leak)}
               >
-                <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 ${severityColor(leak.severity)}`}>
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border shrink-0 ${severityColor(leak.severity)}`}>
                   {severityLabel(leak.severity)}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{leak.titleAr}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{leak.leakId} — {leak.sectorAr} — {leak.recordCount.toLocaleString()} سجل</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">{leak.leakId} — {leak.sectorAr} — {leak.recordCount.toLocaleString()} سجل</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 ${statusColor(leak.status)}`}>
+                  <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border shrink-0 ${statusColor(leak.status)}`}>
                     {statusLabel(leak.status)}
                   </span>
                   <Eye className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -216,7 +216,7 @@ function ScreenshotLightbox({ url, onClose }: { url: string; onClose: () => void
         initial={{ scale: 0.8 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.8 }}
-        className="relative max-w-4xl max-h-[90vh]"
+        className="relative max-w-[95vw] sm:max-w-4xl max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <button onClick={onClose} className="absolute -top-10 left-0 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
@@ -322,7 +322,7 @@ export default function Leaks() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -343,7 +343,7 @@ export default function Leaks() {
                 {/* Shimmer effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'linear-gradient(135deg, transparent 40%, rgba(61,177,172,0.08) 50%, transparent 60%)', backgroundSize: '200% 200%', animation: 'shimmer 2s infinite' }} />
                 <CardContent className="p-4 relative z-10">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <div>
                       <p className="text-xs text-muted-foreground">{stat.label}</p>
                       <p className={`text-2xl font-bold mt-1 ${stat.color}`}><AnimatedCounter value={typeof stat.value === "number" ? stat.value : 0} /></p>
@@ -352,7 +352,7 @@ export default function Leaks() {
                       <Icon className={`w-8 h-8 ${stat.color} opacity-40 group-hover:opacity-70 transition-opacity`} />
                     </motion.div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-2 group-hover:text-primary/60 transition-colors">اضغط للتفاصيل ←</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mt-2 group-hover:text-primary/60 transition-colors">اضغط للتفاصيل ←</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -435,23 +435,23 @@ export default function Leaks() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className={`text-[10px] px-2 py-0.5 rounded border ${severityColor(leak.severity)}`}>
+                    <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColor(leak.severity)}`}>
                       {severityLabel(leak.severity)}
                     </span>
 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{leak.titleAr}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">
                         {leak.leakId} — {leak.sectorAr} — {leak.recordCount.toLocaleString()} سجل
                       </p>
                     </div>
 
-                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] ${sourceColor(leak.source)}`}>
+                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs sm:text-[10px] ${sourceColor(leak.source)}`}>
                       <SourceIcon className="w-3 h-3" />
                       {sourceLabel(leak.source)}
                     </div>
 
-                    <span className={`text-[10px] px-2 py-1 rounded border ${statusColor(leak.status)} lg:w-24 text-center`}>
+                    <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${statusColor(leak.status)} lg:w-24 text-center`}>
                       {statusLabel(leak.status)}
                     </span>
 
@@ -461,7 +461,7 @@ export default function Leaks() {
 
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       {leak.enrichedAt && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                        <span className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                           <Sparkles className="w-3 h-3" /> AI
                         </span>
                       )}
@@ -493,7 +493,7 @@ export default function Leaks() {
 
                   <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border/50">
                     {((leak.piiTypes as string[]) || []).map((type) => (
-                      <Badge key={type} variant="outline" className="text-[10px] bg-primary/5 border-primary/20 text-primary">
+                      <Badge key={type} variant="outline" className="text-xs sm:text-[10px] bg-primary/5 border-primary/20 text-primary">
                         {type}
                       </Badge>
                     ))}
@@ -519,7 +519,7 @@ export default function Leaks() {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-card border border-border rounded-2xl shadow-2xl"
+              className="w-full max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-card border border-border rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {detailLoading || !leakDetail ? (
@@ -531,7 +531,7 @@ export default function Leaks() {
                 <>
                   {/* ── Modal Header ── */}
                   <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-xl border-b border-border p-5 rounded-t-2xl">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500/20 to-amber-500/20 border border-red-500/30">
                           <ShieldAlert className="w-6 h-6 text-red-400" />
@@ -540,19 +540,19 @@ export default function Leaks() {
                           <h3 className="text-foreground font-bold text-lg">{leakDetail.titleAr}</h3>
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
                             <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded">{leakDetail.leakId}</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded border ${severityColor(leakDetail.severity)}`}>
+                            <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColor(leakDetail.severity)}`}>
                               {severityLabel(leakDetail.severity)}
                             </span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded border ${statusColor(leakDetail.status)}`}>
+                            <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${statusColor(leakDetail.status)}`}>
                               {statusLabel(leakDetail.status)}
                             </span>
                             {(leakDetail as any).threatActor && (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30 flex items-center gap-1">
+                              <span className="text-xs sm:text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/30 flex items-center gap-1">
                                 <Skull className="w-3 h-3" /> {(leakDetail as any).threatActor}
                               </span>
                             )}
                             {(leakDetail as any).price && (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                              <span className="text-xs sm:text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
                                 <DollarSign className="w-3 h-3" /> {(leakDetail as any).price}
                               </span>
                             )}
@@ -600,37 +600,37 @@ export default function Leaks() {
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Globe className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">المصدر</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground">المصدر</p>
                             </div>
                             <div className={`flex items-center gap-1.5 ${sourceColor(leakDetail.source)}`}>
                               {(() => { const Icon = sourceIcon(leakDetail.source); return <Icon className="w-3.5 h-3.5" />; })()}
                               <span className="text-sm font-medium">{sourceLabel(leakDetail.source)}</span>
                             </div>
                             {(leakDetail as any).sourcePlatform && (
-                              <p className="text-[10px] text-muted-foreground mt-1">{(leakDetail as any).sourcePlatform}</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">{(leakDetail as any).sourcePlatform}</p>
                             )}
                           </div>
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Database className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">العدد المُدّعى</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground">العدد المُدّعى</p>
                             </div>
                             <p className="text-sm font-bold text-red-400">{leakDetail.recordCount.toLocaleString()}</p>
                           </div>
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Zap className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">طريقة الاختراق</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground">طريقة الاختراق</p>
                             </div>
                             <p className="text-sm text-foreground font-medium">{(leakDetail as any).breachMethodAr || "غير محدد"}</p>
                             {(leakDetail as any).breachMethod && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5 font-mono" dir="ltr">{(leakDetail as any).breachMethod}</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5 font-mono" dir="ltr">{(leakDetail as any).breachMethod}</p>
                             )}
                           </div>
                           <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
                             <div className="flex items-center gap-1.5 mb-1.5">
                               <Calendar className="w-3 h-3 text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground">تاريخ الاكتشاف</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground">تاريخ الاكتشاف</p>
                             </div>
                             <p className="text-sm text-foreground">{leakDetail.detectedAt ? new Date(leakDetail.detectedAt).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" }) : "—"}</p>
                           </div>
@@ -645,15 +645,15 @@ export default function Leaks() {
                               معلومات المهاجم / البائع
                             </h4>
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between flex-wrap">
                                 <span className="text-xs text-muted-foreground">الاسم المستعار</span>
                                 <span className="text-sm font-mono text-red-400 font-bold">{(leakDetail as any).threatActor || "مجهول"}</span>
                               </div>
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between flex-wrap">
                                 <span className="text-xs text-muted-foreground">السعر المطلوب</span>
                                 <span className="text-sm font-mono text-amber-400 font-bold">{(leakDetail as any).price || "غير محدد"}</span>
                               </div>
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between flex-wrap">
                                 <span className="text-xs text-muted-foreground">المنصة</span>
                                 <span className="text-sm text-foreground">{(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</span>
                               </div>
@@ -667,12 +667,12 @@ export default function Leaks() {
                               مصدر الرصد
                             </h4>
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between flex-wrap">
                                 <span className="text-xs text-muted-foreground">القطاع</span>
                                 <span className="text-sm text-foreground">{leakDetail.sectorAr}</span>
                               </div>
                               {leakDetail.regionAr && (
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between flex-wrap">
                                   <span className="text-xs text-muted-foreground">المنطقة</span>
                                   <span className="text-sm text-foreground">{leakDetail.regionAr} {leakDetail.cityAr ? `— ${leakDetail.cityAr}` : ""}</span>
                                 </div>
@@ -703,7 +703,7 @@ export default function Leaks() {
                           <p className="text-sm text-foreground leading-relaxed">{leakDetail.descriptionAr || "لا يوجد وصف متاح"}</p>
                           {leakDetail.description && leakDetail.description !== leakDetail.descriptionAr && (
                             <div className="mt-3 pt-3 border-t border-border/30">
-                              <p className="text-[10px] text-muted-foreground mb-1">English Description</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">English Description</p>
                               <p className="text-xs text-muted-foreground leading-relaxed" dir="ltr">{leakDetail.description}</p>
                             </div>
                           )}
@@ -744,7 +744,7 @@ export default function Leaks() {
                                 <div className={`w-3.5 h-3.5 rounded-full ${event.color} shrink-0 mt-0.5 ring-2 ring-card z-10`} />
                                 <div>
                                   <p className="text-xs text-foreground">{event.label}</p>
-                                  <p className="text-[10px] text-muted-foreground">{new Date(event.date!).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                                  <p className="text-xs sm:text-[10px] text-muted-foreground">{new Date(event.date!).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                                 </div>
                               </div>
                             ))}
@@ -787,9 +787,9 @@ export default function Leaks() {
                                   <table className="w-full text-sm" dir="rtl">
                                     <thead>
                                       <tr className="border-b border-border bg-secondary/50">
-                                        <th className="text-right text-[10px] font-semibold text-muted-foreground p-3 w-8">#</th>
+                                        <th className="text-right text-xs sm:text-[10px] font-semibold text-muted-foreground p-3 w-8">#</th>
                                         {columns.map((col) => (
-                                          <th key={col} className="text-right text-[10px] font-semibold text-muted-foreground p-3 whitespace-nowrap">
+                                          <th key={col} className="text-right text-xs sm:text-[10px] font-semibold text-muted-foreground p-3 whitespace-nowrap">
                                             {col}
                                           </th>
                                         ))}
@@ -798,7 +798,7 @@ export default function Leaks() {
                                     <tbody>
                                       {samples.map((row, idx) => (
                                         <tr key={idx} className="border-b border-border/30 hover:bg-secondary/40 transition-colors">
-                                          <td className="p-3 text-[10px] text-muted-foreground font-mono">{idx + 1}</td>
+                                          <td className="p-3 text-xs sm:text-[10px] text-muted-foreground font-mono">{idx + 1}</td>
                                           {columns.map((col) => (
                                             <td key={col} className="p-3 text-xs text-foreground whitespace-nowrap font-mono">
                                               {row[col] || "—"}
@@ -809,13 +809,13 @@ export default function Leaks() {
                                     </tbody>
                                   </table>
                                 </div>
-                                <div className="p-3 border-t border-border/30 bg-secondary/20 flex items-center justify-between">
-                                  <p className="text-[10px] text-muted-foreground">
+                                <div className="p-3 border-t border-border/30 bg-secondary/20 flex items-center justify-between flex-wrap">
+                                  <p className="text-xs sm:text-[10px] text-muted-foreground">
                                     عرض {samples.length} من {leakDetail.recordCount.toLocaleString()} سجل
                                   </p>
                                   <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-[10px]">{columns.length} حقل</Badge>
-                                    <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-400 border-red-500/30">بيانات حساسة</Badge>
+                                    <Badge variant="outline" className="text-xs sm:text-[10px]">{columns.length} حقل</Badge>
+                                    <Badge variant="outline" className="text-xs sm:text-[10px] bg-red-500/10 text-red-400 border-red-500/30">بيانات حساسة</Badge>
                                   </div>
                                 </div>
                               </div>
@@ -832,7 +832,7 @@ export default function Leaks() {
                                       <Lock className="w-3 h-3 text-red-400 shrink-0" />
                                       <div>
                                         <p className="text-xs text-foreground font-medium">{col}</p>
-                                        <p className="text-[10px] text-muted-foreground">{samples.length} قيمة مكشوفة</p>
+                                        <p className="text-xs sm:text-[10px] text-muted-foreground">{samples.length} قيمة مكشوفة</p>
                                       </div>
                                     </div>
                                   ))}
@@ -874,7 +874,7 @@ export default function Leaks() {
                                         <Eye className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                                       </div>
                                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                                        <p className="text-[10px] text-white/80">لقطة {idx + 1} — {(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</p>
+                                        <p className="text-xs sm:text-[10px] text-white/80">لقطة {idx + 1} — {(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</p>
                                       </div>
                                     </div>
                                   ))}
@@ -901,7 +901,7 @@ export default function Leaks() {
                               <ExternalLink className="w-4 h-4 shrink-0" />
                               <span className="truncate font-mono text-xs" dir="ltr">{(leakDetail as any).sourceUrl}</span>
                             </a>
-                            <p className="text-[10px] text-muted-foreground mt-2">
+                            <p className="text-xs sm:text-[10px] text-muted-foreground mt-2">
                               تم اكتشاف حالة الرصد هذه على منصة <strong>{(leakDetail as any).sourcePlatform || sourceLabel(leakDetail.source)}</strong> بواسطة نظام المراقبة الآلي
                             </p>
                           </div>
@@ -926,7 +926,7 @@ export default function Leaks() {
                                   <div key={type} className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                                     <Icon className="w-4 h-4 mx-auto mb-1 text-primary" />
                                     <p className="text-lg font-bold text-foreground">{count}</p>
-                                    <p className="text-[10px] text-muted-foreground">{evidenceTypeLabel(type)}</p>
+                                    <p className="text-xs sm:text-[10px] text-muted-foreground">{evidenceTypeLabel(type)}</p>
                                   </div>
                                 );
                               })}
@@ -946,15 +946,15 @@ export default function Leaks() {
                                       <div className="flex-1">
                                         <div className="flex items-center gap-2">
                                           <span className="text-xs font-mono text-primary">{ev.evidenceId}</span>
-                                          <Badge variant="outline" className="text-[10px]">{evidenceTypeLabel(ev.evidenceType)}</Badge>
+                                          <Badge variant="outline" className="text-xs sm:text-[10px]">{evidenceTypeLabel(ev.evidenceType)}</Badge>
                                           {ev.isVerified && (
-                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5">
+                                            <span className="text-xs sm:text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5">
                                               <CheckCircle className="w-2.5 h-2.5" /> موثّق
                                             </span>
                                           )}
-                                          <span className="text-[10px] text-muted-foreground mr-auto">Block #{ev.blockIndex}</span>
+                                          <span className="text-xs sm:text-[10px] text-muted-foreground mr-auto">Block #{ev.blockIndex}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+                                        <div className="flex items-center gap-2 mt-1 text-xs sm:text-[10px] text-muted-foreground">
                                           <User className="w-3 h-3" />
                                           {ev.capturedBy || "غير محدد"}
                                           <span className="mx-1">•</span>
@@ -966,13 +966,13 @@ export default function Leaks() {
 
                                     {/* Hash Info */}
                                     <div className="bg-card/50 rounded-lg p-2.5 border border-border/30 mb-2">
-                                      <div className="flex items-center gap-2 text-[10px]">
+                                      <div className="flex items-center gap-2 text-xs sm:text-[10px]">
                                         <Hash className="w-3 h-3 text-muted-foreground shrink-0" />
                                         <span className="text-muted-foreground">SHA-256:</span>
                                         <span className="font-mono text-foreground truncate">{ev.contentHash}</span>
                                       </div>
                                       {ev.previousHash && (
-                                        <div className="flex items-center gap-2 text-[10px] mt-1">
+                                        <div className="flex items-center gap-2 text-xs sm:text-[10px] mt-1">
                                           <Link2 className="w-3 h-3 text-muted-foreground shrink-0" />
                                           <span className="text-muted-foreground">السابق:</span>
                                           <span className="font-mono text-muted-foreground truncate">{ev.previousHash}</span>
@@ -986,7 +986,7 @@ export default function Leaks() {
                                         {Object.entries(meta).map(([key, value]) => (
                                           <div key={key} className="bg-card/30 rounded-lg p-2 border border-border/20">
                                             <p className="text-[9px] text-muted-foreground mb-0.5">{key}</p>
-                                            <p className="text-[11px] text-foreground truncate" dir={typeof value === 'string' && /^[a-zA-Z]/.test(value) ? 'ltr' : 'rtl'}>
+                                            <p className="text-xs sm:text-[11px] text-foreground truncate" dir={typeof value === 'string' && /^[a-zA-Z]/.test(value) ? 'ltr' : 'rtl'}>
                                               {typeof value === 'boolean' ? (value ? 'نعم' : 'لا') : String(value)}
                                             </p>
                                           </div>
@@ -1012,21 +1012,21 @@ export default function Leaks() {
                               <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-4 border border-purple-500/20 text-center">
                                 <Brain className="w-5 h-5 mx-auto mb-2 text-purple-400" />
                                 <p className="text-2xl font-bold text-purple-400">{leakDetail.aiConfidence}%</p>
-                                <p className="text-[10px] text-muted-foreground mt-1">مستوى الثقة</p>
+                                <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">مستوى الثقة</p>
                               </div>
                               <div className="bg-secondary/50 rounded-xl p-4 border border-border/50 text-center">
                                 <AlertTriangle className="w-5 h-5 mx-auto mb-2 text-amber-400" />
                                 <p className={`text-lg font-bold ${severityColor(leakDetail.aiSeverity || leakDetail.severity).split(' ')[0]}`}>
                                   {severityLabel(leakDetail.aiSeverity || leakDetail.severity)}
                                 </p>
-                                <p className="text-[10px] text-muted-foreground mt-1">تقييم التأثير AI</p>
+                                <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">تقييم التأثير AI</p>
                               </div>
                               <div className="bg-secondary/50 rounded-xl p-4 border border-border/50 text-center">
                                 <Calendar className="w-5 h-5 mx-auto mb-2 text-cyan-400" />
                                 <p className="text-sm font-medium text-foreground">
                                   {leakDetail.enrichedAt ? new Date(leakDetail.enrichedAt).toLocaleDateString("ar-SA", { month: "short", day: "numeric" }) : "—"}
                                 </p>
-                                <p className="text-[10px] text-muted-foreground mt-1">تاريخ التحليل</p>
+                                <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">تاريخ التحليل</p>
                               </div>
                             </div>
 
@@ -1050,7 +1050,7 @@ export default function Leaks() {
                                   {((leakDetail.aiRecommendationsAr as string[]) || (leakDetail.aiRecommendations as string[]) || []).map((rec, i) => (
                                     <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15">
                                       <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="text-[10px] font-bold text-emerald-400">{i + 1}</span>
+                                        <span className="text-xs sm:text-[10px] font-bold text-emerald-400">{i + 1}</span>
                                       </div>
                                       <p className="text-xs text-foreground leading-relaxed">{rec}</p>
                                     </div>

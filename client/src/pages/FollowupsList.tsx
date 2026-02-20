@@ -30,7 +30,7 @@ export default function FollowupsList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="overflow-x-hidden max-w-full space-y-6">
         <h1 className="text-2xl font-bold">المتابعات</h1>
         <Skeleton className="h-96 rounded-xl" />
       </div>

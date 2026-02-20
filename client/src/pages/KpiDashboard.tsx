@@ -144,7 +144,7 @@ export default function KpiDashboard() {
   });
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
       <WatermarkLogo />
       {/* Header */}
       <div>
@@ -261,7 +261,7 @@ export default function KpiDashboard() {
                           <div>
                             <div className="font-medium">{kpi.nameAr}</div>
                             <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-                              <Badge variant="outline" className="text-[10px] px-1.5">{PERIOD_LABELS[kpi.period] || kpi.period}</Badge>
+                              <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5">{PERIOD_LABELS[kpi.period] || kpi.period}</Badge>
                               <span>{kpi.direction === "higher_is_better" ? "↑ أعلى أفضل" : "↓ أقل أفضل"}</span>
                             </div>
                           </div>
@@ -300,7 +300,7 @@ export default function KpiDashboard() {
                         </div>
 
                         {/* Thresholds */}
-                        <div className="flex gap-2 text-[10px] text-muted-foreground">
+                        <div className="flex gap-2 text-xs sm:text-[10px] text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-emerald-500" />
                             أخضر: {kpi.thresholdGreen}{kpi.unit}

@@ -194,7 +194,7 @@ export default function ScanHistory() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -338,13 +338,13 @@ export default function ScanHistory() {
                         <h3 className="font-semibold text-sm truncate">{jobName}</h3>
                         <Badge
                           variant="outline"
-                          className={`text-[10px] shrink-0 ${config.color} border-current/20 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all`}
+                          className={`text-xs sm:text-[10px] shrink-0 ${config.color} border-current/20 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all`}
                           onClick={(e) => { e.stopPropagation(); openDrillDown({ title: `الفحوصات بحالة: ${config.label}` }); }}
                         >
                           {config.label}
                         </Badge>
                         {isRunning && (
-                          <span className="text-[10px] text-amber-500 animate-pulse font-medium">● مباشر</span>
+                          <span className="text-xs sm:text-[10px] text-amber-500 animate-pulse font-medium">● مباشر</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -416,28 +416,28 @@ export default function ScanHistory() {
                           onClick={(e) => { e.stopPropagation(); openDrillDown({ title: `المواقع الناجحة في الفحص: ${jobName}`, complianceStatus: 'compliant' }); }}
                         >
                           <div className="text-lg font-bold text-emerald-600">{completedUrls}</div>
-                          <div className="text-[10px] text-muted-foreground">ناجح</div>
+                          <div className="text-xs sm:text-[10px] text-muted-foreground">ناجح</div>
                         </div>
                         <div
                           className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                           onClick={(e) => { e.stopPropagation(); openDrillDown({ title: `المواقع الفاشلة في الفحص: ${jobName}`, complianceStatus: 'non_compliant' }); }}
                         >
                           <div className="text-lg font-bold text-red-600">{failedUrls}</div>
-                          <div className="text-[10px] text-muted-foreground">فاشل</div>
+                          <div className="text-xs sm:text-[10px] text-muted-foreground">فاشل</div>
                         </div>
                         <div
                           className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                           onClick={(e) => { e.stopPropagation(); openDrillDown({ title: `كل المواقع في الفحص: ${jobName}` }); }}
                         >
                           <div className="text-lg font-bold text-blue-600">{totalUrls}</div>
-                          <div className="text-[10px] text-muted-foreground">الإجمالي</div>
+                          <div className="text-xs sm:text-[10px] text-muted-foreground">الإجمالي</div>
                         </div>
                         <div
                           className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
                           onClick={(e) => { e.stopPropagation(); openDrillDown({ title: `نسبة الإنجاز للفحص: ${jobName}` }); }}
                         >
                           <div className="text-lg font-bold text-primary">{progressPct}%</div>
-                          <div className="text-[10px] text-muted-foreground">نسبة الإنجاز</div>
+                          <div className="text-xs sm:text-[10px] text-muted-foreground">نسبة الإنجاز</div>
                         </div>
                       </div>
 

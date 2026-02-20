@@ -18,11 +18,11 @@ const GlassCard = ({ children, className = '' }) => (
 
 const KpiCard = ({ title, value, icon: Icon, subtext }) => (
   <GlassCard>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap">
       <p className="text-lg text-slate-300">{title}</p>
       <Icon className="w-8 h-8 text-amber-400" />
     </div>
-    <p className="text-4xl font-bold text-white mt-2">{value}</p>
+    <p className="text-2xl sm:text-4xl font-bold text-white mt-2">{value}</p>
     {subtext && <p className="text-sm text-slate-400 mt-1">{subtext}</p>}
   </GlassCard>
 );
@@ -75,10 +75,10 @@ export default function LeakAnatomy() {
   }, [piiCoOccurrence]);
 
   return (
-    <div className="p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
+    <div className="overflow-x-hidden max-w-full p-3 sm:p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
       <div className="mb-4"><GlobalFilterBar /></div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-amber-400">تشريح حالات الرصد | Leak Anatomy</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-amber-400">تشريح حالات الرصد | Leak Anatomy</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -87,7 +87,7 @@ export default function LeakAnatomy() {
         <KpiCard title="متوسط الأنواع لكل حادثة" value={kpis.avgTypesPerIncident} icon={BarChart3} subtext="متوسط عدد أنواع البيانات لكل حالة رصد" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8">
         <GlassCard className="lg:col-span-3 h-[600px]">
           <h2 className="text-2xl font-bold mb-4 text-amber-300">تكرار أنواع البيانات الشخصية (أعلى 30)</h2>
           <ResponsiveContainer width="100%" height="90%">

@@ -142,7 +142,7 @@ export default function ScanLibrary() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm">
@@ -353,7 +353,7 @@ export default function ScanLibrary() {
         </>
       ) : (
         <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-          <CardContent className="p-12 text-center">
+          <CardContent className="p-4 sm:p-12 text-center">
             <ScanSearch className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-1">لا توجد نتائج</h3>
             <p className="text-sm text-muted-foreground">
@@ -436,7 +436,7 @@ function ScanCard({ scan, index, onView, onSiteClick, onImageClick }: {
 
         {/* Domain overlay on screenshot */}
         <div className="absolute bottom-0 right-0 left-0 p-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-bold truncate ${screenshotUrl && !imgError ? "text-white" : "text-foreground"}`}>
                 {scan.domain}
@@ -447,7 +447,7 @@ function ScanCard({ scan, index, onView, onSiteClick, onImageClick }: {
                 </p>
               )}
             </div>
-            <Badge variant="outline" className={`shrink-0 text-[10px] border-white/30 ${screenshotUrl && !imgError ? "text-white bg-black/30 backdrop-blur-sm" : STATUS_COLORS[scan.complianceStatus] || ""}`}>
+            <Badge variant="outline" className={`shrink-0 text-xs sm:text-[10px] border-white/30 ${screenshotUrl && !imgError ? "text-white bg-black/30 backdrop-blur-sm" : STATUS_COLORS[scan.complianceStatus] || ""}`}>
               {STATUS_LABELS[scan.complianceStatus] || scan.complianceStatus}
             </Badge>
           </div>
@@ -498,7 +498,7 @@ function ScanCard({ scan, index, onView, onSiteClick, onImageClick }: {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-[rgba(197,165,90,0.10)]/50">
+        <div className="flex items-center justify-between flex-wrap text-xs sm:text-[10px] text-muted-foreground pt-2 border-t border-[rgba(197,165,90,0.10)]/50">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {scan.scanDate ? new Date(scan.scanDate).toLocaleDateString("ar-SA-u-nu-latn") : "-"}
@@ -536,7 +536,7 @@ function ScanDetailDialog({ scan, open, onClose, onSiteClick, onImageClick }: {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0">
         {/* Screenshot Header */}
         {screenshotUrl && !imgError ? (
           <div className="relative h-56 overflow-hidden rounded-t-lg">
@@ -622,7 +622,7 @@ function ScanDetailDialog({ scan, open, onClose, onSiteClick, onImageClick }: {
                         <ShieldX className="h-4 w-4 text-red-500 shrink-0" />
                       )}
                       <span className="text-sm font-medium">بند {i}: {CLAUSE_NAMES[i - 1]}</span>
-                      <Badge variant="outline" className={`me-auto text-[10px] ${isCompliant ? "badge-compliant" : "badge-non-compliant"}`}>
+                      <Badge variant="outline" className={`me-auto text-xs sm:text-[10px] ${isCompliant ? "badge-compliant" : "badge-non-compliant"}`}>
                         {isCompliant ? "ممتثل" : "غير ممتثل"}
                       </Badge>
                     </div>

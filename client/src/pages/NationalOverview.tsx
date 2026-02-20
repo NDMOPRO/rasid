@@ -148,7 +148,7 @@ export default function NationalOverview() {
   ];
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       <GlobalFilterBar />
 
       {/* Page Title */}
@@ -165,14 +165,14 @@ export default function NationalOverview() {
             <motion.div key={kpi.label} custom={i} variants={cardVariants} initial="hidden" animate="visible">
               <Card className={`relative overflow-hidden border ${isDark ? "border-[rgba(61,177,172,0.15)] bg-[rgba(13,21,41,0.6)]" : "border-[#e2e5ef] bg-white"} backdrop-blur-xl`}>
                 <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between flex-wrap mb-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${kpi.color}15` }}>
                       <Icon className="w-5 h-5" style={{ color: kpi.color }} />
                     </div>
                   </div>
                   <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
                   <p className="text-xs text-muted-foreground mt-1">{kpi.label}</p>
-                  <p className="text-[10px] text-muted-foreground/60">{kpi.labelEn}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground/60">{kpi.labelEn}</p>
                 </CardContent>
                 {/* Decorative gradient */}
                 <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${kpi.color}, transparent)` }} />
@@ -192,7 +192,7 @@ export default function NationalOverview() {
                 <CardContent className="p-4">
                   <Icon className="w-5 h-5 mx-auto mb-2" style={{ color: stat.color }} />
                   <div className="text-xl font-bold text-foreground">{stat.value}</div>
-                  <p className="text-[10px] text-muted-foreground mt-1">{stat.label}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">{stat.label}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -209,17 +209,17 @@ export default function NationalOverview() {
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Shield className="w-4 h-4 text-[#3DB1AC]" />
                 توزيع مستوى التأثير
-                <span className="text-[10px] text-muted-foreground font-normal">Severity Distribution</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground font-normal">Severity Distribution</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {severityData.map((item) => (
                 <div key={item.name} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between flex-wrap text-sm">
                     <span className="font-medium">{severityLabels[item.name] || item.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.count}</span>
-                      <Badge variant="outline" className="text-[10px] px-1.5" style={{ borderColor: severityColors[item.name], color: severityColors[item.name] }}>
+                      <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5" style={{ borderColor: severityColors[item.name], color: severityColors[item.name] }}>
                         {item.pct}%
                       </Badge>
                     </div>
@@ -246,7 +246,7 @@ export default function NationalOverview() {
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Network className="w-4 h-4 text-[#6459A7]" />
                 أكثر القطاعات تضرراً
-                <span className="text-[10px] text-muted-foreground font-normal">Most Affected Sectors</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground font-normal">Most Affected Sectors</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2.5">
@@ -256,7 +256,7 @@ export default function NationalOverview() {
                 const colors = ["#3DB1AC", "#6459A7", "#ef4444", "#f59e0b", "#3b82f6", "#22c55e", "#ec4899", "#8b5cf6"];
                 return (
                   <div key={item.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between flex-wrap text-sm">
                       <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                       <span className="text-muted-foreground font-mono">{item.count}</span>
                     </div>
@@ -283,7 +283,7 @@ export default function NationalOverview() {
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Target className="w-4 h-4 text-[#ef4444]" />
                 أساليب حالة الرصد
-                <span className="text-[10px] text-muted-foreground font-normal">Leak Methods</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground font-normal">Leak Methods</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -293,11 +293,11 @@ export default function NationalOverview() {
                 const colors = ["#ef4444", "#f59e0b", "#3b82f6", "#22c55e"];
                 return (
                   <div key={item.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between flex-wrap text-sm">
                       <span className="font-medium">{item.name}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">{item.count}</span>
-                        <Badge variant="outline" className="text-[10px] px-1.5" style={{ borderColor: colors[idx % colors.length], color: colors[idx % colors.length] }}>
+                        <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5" style={{ borderColor: colors[idx % colors.length], color: colors[idx % colors.length] }}>
                           {Math.round((item.count / records.length) * 100)}%
                         </Badge>
                       </div>
@@ -325,7 +325,7 @@ export default function NationalOverview() {
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#3b82f6]" />
                 منصات حالة الرصد
-                <span className="text-[10px] text-muted-foreground font-normal">Leak Platforms</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground font-normal">Leak Platforms</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -335,11 +335,11 @@ export default function NationalOverview() {
                 const colors = ["#3b82f6", "#6459A7", "#3DB1AC", "#f59e0b"];
                 return (
                   <div key={item.name} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between flex-wrap text-sm">
                       <span className="font-medium">{item.name}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">{item.count}</span>
-                        <Badge variant="outline" className="text-[10px] px-1.5" style={{ borderColor: colors[idx % colors.length], color: colors[idx % colors.length] }}>
+                        <Badge variant="outline" className="text-xs sm:text-[10px] px-1.5" style={{ borderColor: colors[idx % colors.length], color: colors[idx % colors.length] }}>
                           {Math.round((item.count / records.length) * 100)}%
                         </Badge>
                       </div>
@@ -368,26 +368,26 @@ export default function NationalOverview() {
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-[#ef4444]" />
               أحدث الحوادث
-              <span className="text-[10px] text-muted-foreground font-normal">Latest Incidents</span>
+              <span className="text-xs sm:text-[10px] text-muted-foreground font-normal">Latest Incidents</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {records.slice(0, 5).map((r) => (
                 <Link key={r.id} href={`/incident/${r.id}`}>
-                  <div className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${isDark ? "hover:bg-[rgba(61,177,172,0.08)]" : "hover:bg-gray-50"}`}>
+                  <div className={`flex items-center justify-between flex-wrap p-3 rounded-lg cursor-pointer transition-colors ${isDark ? "hover:bg-[rgba(61,177,172,0.08)]" : "hover:bg-gray-50"}`}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${severityColors[r.overview?.severity] || "#6b7280"}15` }}>
                         <Database className="w-4 h-4" style={{ color: severityColors[r.overview?.severity] || "#6b7280" }} />
                       </div>
                       <div>
                         <p className="text-sm font-medium line-clamp-1">{r.title_ar}</p>
-                        <p className="text-[10px] text-muted-foreground">{r.sector} · {r.overview?.source_platform}</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground">{r.sector} · {r.overview?.source_platform}</p>
                       </div>
                     </div>
                     <div className="text-left">
                       <p className="text-xs text-muted-foreground">{r.overview?.discovery_date}</p>
-                      <Badge variant="outline" className="text-[10px]" style={{ borderColor: severityColors[r.overview?.severity], color: severityColors[r.overview?.severity] }}>
+                      <Badge variant="outline" className="text-xs sm:text-[10px]" style={{ borderColor: severityColors[r.overview?.severity], color: severityColors[r.overview?.severity] }}>
                         {severityLabels[r.overview?.severity] || r.overview?.severity}
                       </Badge>
                     </div>
@@ -418,7 +418,7 @@ export default function NationalOverview() {
                         <Icon className="w-5 h-5" style={{ color: nav.color }} />
                       </div>
                       <p className="text-sm font-medium">{nav.label}</p>
-                      <p className="text-[10px] text-muted-foreground">{nav.labelEn}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{nav.labelEn}</p>
                     </CardContent>
                   </Card>
                 </Link>

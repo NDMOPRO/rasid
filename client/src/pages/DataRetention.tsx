@@ -53,9 +53,9 @@ export default function DataRetention() {
   };
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between flex-wrap">
         <div 
           className="group cursor-pointer hover:scale-[1.02] transition-all"
           onClick={() => setActiveModal("main_header")}

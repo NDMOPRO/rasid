@@ -44,7 +44,7 @@ export default function ClauseDetail() {
     list.filter((s: any) => !search || s.domain?.includes(search));
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       <Button variant="ghost" size="sm" onClick={() => setLocation("/clauses")} className="gap-2">
         <ArrowRight className="h-4 w-4" />
         العودة للبنود
@@ -115,7 +115,7 @@ export default function ClauseDetail() {
 
 function SiteList({ sites, compliant, onNavigate }: { sites: any[]; compliant: boolean; onNavigate: (path: string) => void }) {
   if (sites.length === 0) {
-    return <div className="p-8 text-center text-muted-foreground">لا توجد مواقع</div>;
+    return <div className="p-3 sm:p-8 text-center text-muted-foreground">لا توجد مواقع</div>;
   }
 
   return (

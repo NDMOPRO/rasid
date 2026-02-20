@@ -160,7 +160,7 @@ const typeColor = (t: string) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-card border border-border rounded-lg p-3 text-sm shadow-lg">
+      <div className="overflow-x-hidden max-w-full bg-card border border-border rounded-lg p-3 text-sm shadow-lg">
         <p className="text-foreground font-semibold mb-1">{label}</p>
         {payload.map((entry: any, idx: number) => (
           <p key={idx} style={{ color: entry.color }} className="text-xs">
@@ -351,11 +351,11 @@ export default function Reports() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="text-sm font-semibold text-foreground">{gap.title}</h3>
-                    <p className="text-[10px] text-muted-foreground">{gap.titleEn}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{gap.titleEn}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px] bg-secondary border-border">{gap.sector}</Badge>
-                    <span className={`text-[10px] px-2 py-1 rounded border ${
+                    <Badge variant="outline" className="text-xs sm:text-[10px] bg-secondary border-border">{gap.sector}</Badge>
+                    <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${
                       gap.urgency === "critical" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                       gap.urgency === "high" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                       "text-yellow-400 bg-yellow-500/10 border-yellow-500/30"
@@ -366,9 +366,9 @@ export default function Reports() {
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">{gap.description}</p>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-muted-foreground">التقدم:</span>
+                  <span className="text-xs sm:text-[10px] text-muted-foreground">التقدم:</span>
                   <Progress value={gap.progress} className="flex-1 h-1.5" />
-                  <span className="text-[10px] text-foreground font-medium">{gap.progress}%</span>
+                  <span className="text-xs sm:text-[10px] text-foreground font-medium">{gap.progress}%</span>
                 </div>
                 <p className="text-[9px] text-primary/50 mt-2">اضغط للتفاصيل والتوصيات ←</p>
               </motion.div>
@@ -414,7 +414,7 @@ export default function Reports() {
                         <Calendar className="w-3 h-3" />
                         {report.createdAt ? new Date(report.createdAt).toLocaleDateString("ar-SA") : "—"}
                       </span>
-                      <Badge variant="outline" className={`text-[10px] ${typeColor(report.type)}`}>{typeLabel(report.type)}</Badge>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${typeColor(report.type)}`}>{typeLabel(report.type)}</Badge>
                       {report.pageCount && <span>{report.pageCount} صفحة</span>}
                     </div>
                   </div>
@@ -444,9 +444,9 @@ export default function Reports() {
                 <FileText className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-foreground">{report.titleAr || report.title}</span>
               </div>
-              <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+              <div className="flex items-center gap-3 text-xs sm:text-[10px] text-muted-foreground">
                 <span>{report.createdAt ? new Date(report.createdAt).toLocaleDateString("ar-SA") : "—"}</span>
-                <Badge variant="outline" className={`text-[10px] ${typeColor(report.type)}`}>{typeLabel(report.type)}</Badge>
+                <Badge variant="outline" className={`text-xs sm:text-[10px] ${typeColor(report.type)}`}>{typeLabel(report.type)}</Badge>
               </div>
             </div>
           ))}
@@ -463,7 +463,7 @@ export default function Reports() {
               onClick={() => { setSelectedGap(gap); setActiveModal("gapDetail"); }}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className={`text-[10px] px-2 py-0.5 rounded border ${
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${
                   gap.urgency === "critical" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                   gap.urgency === "high" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                   "text-yellow-400 bg-yellow-500/10 border-yellow-500/30"
@@ -475,7 +475,7 @@ export default function Reports() {
               <p className="text-xs text-muted-foreground">{gap.description}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Progress value={gap.progress} className="flex-1 h-1" />
-                <span className="text-[10px] text-foreground">{gap.progress}%</span>
+                <span className="text-xs sm:text-[10px] text-foreground">{gap.progress}%</span>
               </div>
             </div>
           ))}
@@ -488,30 +488,30 @@ export default function Reports() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 text-center">
               <p className="text-xl font-bold text-emerald-400">{recommendations.filter(r => r.status === "مكتمل").length}</p>
-              <p className="text-[10px] text-muted-foreground">مكتملة</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">مكتملة</p>
             </div>
             <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
               <p className="text-xl font-bold text-cyan-400">{recommendations.filter(r => r.status === "قيد التنفيذ").length}</p>
-              <p className="text-[10px] text-muted-foreground">قيد التنفيذ</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">قيد التنفيذ</p>
             </div>
             <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
               <p className="text-xl font-bold text-amber-400">{recommendations.filter(r => r.status === "مخطط").length}</p>
-              <p className="text-[10px] text-muted-foreground">مخطط</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">مخطط</p>
             </div>
           </div>
           {recommendations.map(rec => (
             <div key={rec.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50">
               <div className="flex items-center gap-2 mb-1">
-                <span className={`text-[10px] px-2 py-0.5 rounded border ${
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${
                   rec.status === "مكتمل" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" :
                   rec.status === "قيد التنفيذ" ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/30" :
                   rec.status === "قيد المراجعة" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                   "text-muted-foreground bg-secondary/50 border-border"
                 }`}>{rec.status}</span>
-                <Badge variant="outline" className="text-[10px]">{rec.sector}</Badge>
+                <Badge variant="outline" className="text-xs sm:text-[10px]">{rec.sector}</Badge>
               </div>
               <p className="text-sm text-foreground">{rec.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">الأولوية: {rec.priority}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">الأولوية: {rec.priority}</p>
             </div>
           ))}
         </div>
@@ -522,14 +522,14 @@ export default function Reports() {
         <div className="space-y-3">
           {radarData.map(sector => (
             <div key={sector.subject} className="p-4 rounded-lg bg-secondary/30 border border-border/50">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between flex-wrap mb-2">
                 <h4 className="text-sm font-semibold text-foreground">{sector.subject}</h4>
                 <span className={`text-sm font-bold ${
                   sector.A >= 70 ? "text-red-400" : sector.A >= 50 ? "text-amber-400" : "text-emerald-400"
                 }`}>{sector.A}%</span>
               </div>
               <Progress value={sector.A} className="h-2" />
-              <p className="text-[10px] text-muted-foreground mt-2">
+              <p className="text-xs sm:text-[10px] text-muted-foreground mt-2">
                 {sector.A >= 70 ? "مستوى مخاطر عالي — يتطلب إجراءات فورية" :
                  sector.A >= 50 ? "مستوى مخاطر متوسط — يتطلب مراقبة مكثفة" :
                  "مستوى مخاطر منخفض — المراقبة الدورية كافية"}
@@ -540,7 +540,7 @@ export default function Reports() {
       </DetailModal>
 
       {/* Radar Chart Detail Modal */}
-      <DetailModal open={activeModal === "radarChart"} onClose={() => setActiveModal(null)} title="تفاصيل مخاطر القطاعات" icon={<Shield className="w-5 h-5 text-cyan-400" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "radarChart"} onClose={() => setActiveModal(null)} title="تفاصيل مخاطر القطاعات" icon={<Shield className="w-5 h-5 text-cyan-400" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-4">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -563,7 +563,7 @@ export default function Reports() {
                 <p className={`text-2xl font-bold ${
                   sector.A >= 70 ? "text-red-400" : sector.A >= 50 ? "text-amber-400" : "text-emerald-400"
                 }`}>{sector.A}%</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs sm:text-[10px] text-muted-foreground">
                   {sector.A >= 70 ? "تأثير عالي" : sector.A >= 50 ? "تأثير متوسط" : "تأثير محدود"}
                 </p>
               </div>
@@ -573,7 +573,7 @@ export default function Reports() {
       </DetailModal>
 
       {/* Bar Chart Detail Modal */}
-      <DetailModal open={activeModal === "barChart"} onClose={() => setActiveModal(null)} title="تفاصيل السجلات المكشوفة شهرياً" icon={<BarChart3 className="w-5 h-5 text-cyan-400" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "barChart"} onClose={() => setActiveModal(null)} title="تفاصيل السجلات المكشوفة شهرياً" icon={<BarChart3 className="w-5 h-5 text-cyan-400" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-4">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -629,7 +629,7 @@ export default function Reports() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">{selectedGap.sector}</Badge>
-              <span className={`text-[10px] px-2 py-1 rounded border ${
+              <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${
                 selectedGap.urgency === "critical" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                 selectedGap.urgency === "high" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                 "text-yellow-400 bg-yellow-500/10 border-yellow-500/30"
@@ -657,7 +657,7 @@ export default function Reports() {
               <h4 className="text-xs font-semibold text-muted-foreground mb-2">الجهات المتأثرة</h4>
               <div className="flex flex-wrap gap-1.5">
                 {selectedGap.affectedEntities.map(entity => (
-                  <Badge key={entity} variant="outline" className="text-[10px]">{entity}</Badge>
+                  <Badge key={entity} variant="outline" className="text-xs sm:text-[10px]">{entity}</Badge>
                 ))}
               </div>
             </div>

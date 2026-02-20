@@ -88,8 +88,8 @@ export default function AdminFeatureFlags() {
   }, [flags]);
 
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex items-center justify-between">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <ToggleLeft className="w-6 h-6 text-green-400" />
@@ -198,7 +198,7 @@ export default function AdminFeatureFlags() {
         <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       ) : filteredFlags.length === 0 ? (
         <Card className="border border-dashed border-border/50">
-          <CardContent className="p-12 text-center text-muted-foreground">
+          <CardContent className="p-4 sm:p-12 text-center text-muted-foreground">
             <ToggleLeft className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p>لا توجد مفاتيح ميزات</p>
           </CardContent>
@@ -220,12 +220,12 @@ export default function AdminFeatureFlags() {
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-foreground">{flag.displayName}</h3>
                           <span className="text-xs text-muted-foreground">({flag.displayNameEn})</span>
-                          <Badge variant="outline" className="text-[10px] gap-1">
+                          <Badge variant="outline" className="text-xs sm:text-[10px] gap-1">
                             <cat.icon className="w-3 h-3" /> {cat.ar}
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{flag.description}</p>
-                        <code className="text-[10px] text-muted-foreground/70 font-mono">{flag.key}</code>
+                        <code className="text-xs sm:text-[10px] text-muted-foreground/70 font-mono">{flag.key}</code>
                       </div>
                       <div className="flex items-center gap-2">
                         {flag.isEnabled ? (

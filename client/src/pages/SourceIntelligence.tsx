@@ -18,11 +18,11 @@ const GlassCard = ({ children, className = '' }) => (
 
 const KpiCard = ({ title, value, icon: Icon, subtext }) => (
   <GlassCard>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap">
       <p className="text-lg text-slate-300">{title}</p>
       <Icon className="h-8 w-8 text-slate-400" />
     </div>
-    <p className="text-4xl font-bold text-white mt-2">{value}</p>
+    <p className="text-2xl sm:text-4xl font-bold text-white mt-2">{value}</p>
     {subtext && <p className="text-sm text-slate-400 mt-1">{subtext}</p>}
   </GlassCard>
 );
@@ -45,10 +45,10 @@ export default function SourceIntelligence() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-8 font-sans" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen bg-slate-900 text-white p-3 sm:p-8 font-sans" dir="rtl">
       <div className="mb-4"><GlobalFilterBar /></div>
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">استخبارات المصادر | Source Intelligence</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">استخبارات المصادر | Source Intelligence</h1>
         <p className="text-slate-400 mt-2">تحليل منصات رصد البيانات وأسعارها.</p>
       </header>
 
@@ -58,7 +58,7 @@ export default function SourceIntelligence() {
         <KpiCard title="حالات رصد مسعّرة" value={incidentsWithPricing} icon={CircleDollarSign} subtext="عدد حالات الرصد التي لها سعر محدد" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8 mb-8">
         <GlassCard className="lg:col-span-2">
           <h2 className="text-2xl font-bold mb-4 text-amber-400">توزيع المنصات</h2>
           <ResponsiveContainer width="100%" height={300}>

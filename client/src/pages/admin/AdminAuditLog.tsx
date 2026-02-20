@@ -80,7 +80,7 @@ export default function AdminAuditLog() {
   };
 
   return (
-    <div className="space-y-6 p-1">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <ScrollText className="w-6 h-6 text-amber-400" />
@@ -116,7 +116,7 @@ export default function AdminAuditLog() {
         <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       ) : logs.length === 0 ? (
         <Card className="border border-dashed border-border/50">
-          <CardContent className="p-12 text-center text-muted-foreground">
+          <CardContent className="p-4 sm:p-12 text-center text-muted-foreground">
             <ScrollText className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p>لا توجد سجلات</p>
           </CardContent>
@@ -140,9 +140,9 @@ export default function AdminAuditLog() {
                             {ACTION_LABELS[log.action] ?? log.action}
                           </span>
                           {log.resourceName && (
-                            <Badge variant="outline" className="text-[10px]">{log.resourceName}</Badge>
+                            <Badge variant="outline" className="text-xs sm:text-[10px]">{log.resourceName}</Badge>
                           )}
-                          <Badge variant="secondary" className="text-[10px]">{log.resourceType}</Badge>
+                          <Badge variant="secondary" className="text-xs sm:text-[10px]">{log.resourceType}</Badge>
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function AdminAuditLog() {
                           {log.oldValue && (
                             <div>
                               <p className="font-semibold text-red-400 mb-1">القيمة السابقة</p>
-                              <pre className="bg-muted/30 p-2 rounded text-muted-foreground overflow-auto max-h-40 text-[10px]">
+                              <pre className="bg-muted/30 p-2 rounded text-muted-foreground overflow-auto max-h-40 text-xs sm:text-[10px]">
                                 {JSON.stringify(log.oldValue, null, 2)}
                               </pre>
                             </div>
@@ -182,7 +182,7 @@ export default function AdminAuditLog() {
                           {log.newValue && (
                             <div>
                               <p className="font-semibold text-green-400 mb-1">القيمة الجديدة</p>
-                              <pre className="bg-muted/30 p-2 rounded text-muted-foreground overflow-auto max-h-40 text-[10px]">
+                              <pre className="bg-muted/30 p-2 rounded text-muted-foreground overflow-auto max-h-40 text-xs sm:text-[10px]">
                                 {JSON.stringify(log.newValue, null, 2)}
                               </pre>
                             </div>
@@ -194,7 +194,7 @@ export default function AdminAuditLog() {
                           </p>
                         )}
                         {log.ipAddress && (
-                          <p className="mt-1 text-[10px] text-muted-foreground/60">IP: {log.ipAddress}</p>
+                          <p className="mt-1 text-xs sm:text-[10px] text-muted-foreground/60">IP: {log.ipAddress}</p>
                         )}
                       </motion.div>
                     )}

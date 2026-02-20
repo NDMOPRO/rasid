@@ -57,7 +57,7 @@ function ComplianceOverviewWidget({ stats }: { stats: any }) {
   const total = items.reduce((s, i) => s + i.value, 0);
   return (
     <div
-      className="space-y-3">
+      className="overflow-x-hidden max-w-full space-y-3">
       <WatermarkLogo />
       <div className="text-center p-3 rounded-xl bg-gradient-to-l from-emerald-500/10 to-blue-800/10">
         <div className="text-3xl font-black text-emerald-600">{toAr(total > 0 ? Math.round((items[0].value / total) * 100) : 0)}٪</div>
@@ -67,7 +67,7 @@ function ComplianceOverviewWidget({ stats }: { stats: any }) {
         {items.map((item, i) => (
           <div key={i} className={`p-2 rounded-lg ${item.bg} text-center`}>
             <div className={`text-lg font-bold ${item.color}`}>{toAr(item.value)}</div>
-            <div className="text-[10px] text-muted-foreground">{item.label}</div>
+            <div className="text-xs sm:text-[10px] text-muted-foreground">{item.label}</div>
           </div>
         ))}
       </div>
@@ -88,7 +88,7 @@ function SectorComparisonWidget({ stats }: { stats: any }) {
             <sector.icon className={`w-4 h-4 text-${sector.color}-600`} />
             <span className="text-sm font-bold">{sector.label}</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <span className="text-xs text-muted-foreground">الامتثال</span>
             <span className={`text-lg font-black text-${sector.color}-600`}>
               {toAr(sector.data?.complianceRate || 0)}٪
@@ -107,7 +107,7 @@ function ClauseStatsWidget({ clauseStats }: { clauseStats: any }) {
     <div className="space-y-2">
       {clauses.slice(0, 8).map((clause: any, i: number) => (
         <div key={i} className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gradient-to-br from-[oklch(0.48_0.14_290)] to-primary flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+          <div className="w-6 h-6 rounded bg-gradient-to-br from-[oklch(0.48_0.14_290)] to-primary flex items-center justify-center text-white text-xs sm:text-[10px] font-bold flex-shrink-0">
             {toAr(i + 1)}
           </div>
           <div className="flex-1 h-2 rounded-full bg-muted/30 overflow-hidden">
@@ -143,11 +143,11 @@ function RecentScansWidget({ scans }: { scans: any }) {
       {recentList.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">لا توجد فحوصات حديثة</p>
       ) : recentList.map((scan: any, i: number) => (
-        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
+        <div key={i} className="flex items-center justify-between flex-wrap p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
           <div className="flex-1 min-w-0">
             <div className="text-xs font-medium truncate">{scan.domain || scan.url}</div>
           </div>
-          <Badge className={`text-[10px] ${statusColors[scan.complianceStatus] || 'bg-gray-100'}`}>
+          <Badge className={`text-xs sm:text-[10px] ${statusColors[scan.complianceStatus] || 'bg-gray-100'}`}>
             {statusLabels[scan.complianceStatus] || scan.complianceStatus}
           </Badge>
         </div>
@@ -174,7 +174,7 @@ function AlertsSummaryWidget({ alertStats }: { alertStats: any }) {
         {items.map((item, i) => (
           <div key={i} className={`p-2 rounded-lg ${item.color} text-center`}>
             <div className="text-lg font-bold">{toAr(item.value)}</div>
-            <div className="text-[10px]">{item.label}</div>
+            <div className="text-xs sm:text-[10px]">{item.label}</div>
           </div>
         ))}
       </div>
@@ -191,13 +191,13 @@ function TimeComparisonWidget({ comparison }: { comparison: any }) {
   ];
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between flex-wrap text-xs text-muted-foreground">
         <span>{comparison.monthLabel?.current || 'الحالي'}</span>
         <span>مقابل</span>
         <span>{comparison.monthLabel?.previous || 'السابق'}</span>
       </div>
       {items.map((item, i) => (
-        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/20">
+        <div key={i} className="flex items-center justify-between flex-wrap p-2 rounded-lg bg-muted/20">
           <span className="text-sm font-medium">{item.label}</span>
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold">{toAr(item.current)}</span>
@@ -224,7 +224,7 @@ function TopCompliantWidget({ stats }: { stats: any }) {
       <div className="space-y-1">
         {[1,2,3].map(i => (
           <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-muted/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xs sm:text-[10px] font-bold">
               {toAr(i)}
             </div>
             <div className="flex-1">
@@ -246,9 +246,9 @@ function CategoryStatsWidget({ stats }: { stats: any }) {
       {categories.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">لا توجد بيانات</p>
       ) : categories.map((cat: any, i: number) => (
-        <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
+        <div key={i} className="flex items-center justify-between flex-wrap p-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
           <span className="text-xs font-medium truncate flex-1">{cat.classification || cat.category}</span>
-          <Badge variant="outline" className="text-[10px]">{toAr(cat.total || 0)} موقع</Badge>
+          <Badge variant="outline" className="text-xs sm:text-[10px]">{toAr(cat.total || 0)} موقع</Badge>
         </div>
       ))}
     </div>
@@ -422,7 +422,7 @@ export default function MyDashboard() {
   return (
     <div className="p-6 space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[oklch(0.48_0.14_290)] to-primary flex items-center justify-center text-white shadow-lg">
@@ -509,7 +509,7 @@ export default function MyDashboard() {
                 isEditing ? 'border-dashed border-2 border-primary/30' : 'border-border/50'
               }`}>
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <div className="flex items-center gap-3">
                       {isEditing && <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />}
                       <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${catalog.color} flex items-center justify-center text-white shadow-sm`}>

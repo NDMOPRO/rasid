@@ -156,7 +156,7 @@ export default function Letters() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -191,7 +191,7 @@ export default function Letters() {
                     </div>
                     <div>
                       <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
-                      <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -238,9 +238,9 @@ export default function Letters() {
       <Card className="glass-card gold-sweep cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
+            <div className="p-3 sm:p-8 text-center text-muted-foreground">جاري التحميل...</div>
           ) : data?.letters?.length === 0 ? (
-            <div className="p-12 text-center">
+            <div className="p-4 sm:p-12 text-center">
               <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">لا توجد خطابات</h3>
               <p className="text-sm text-muted-foreground">
@@ -284,7 +284,7 @@ export default function Letters() {
                             {letter.notes && (
                               <div className="flex items-center gap-1 mt-0.5">
                                 <StickyNote className="h-3 w-3 text-amber-500" />
-                                <span className="text-[10px] text-amber-500 truncate">{letter.notes}</span>
+                                <span className="text-xs sm:text-[10px] text-amber-500 truncate">{letter.notes}</span>
                               </div>
                             )}
                           </td>
@@ -306,9 +306,9 @@ export default function Letters() {
                                   {overdue ? <Timer className="h-3 w-3" /> : <Calendar className="h-3 w-3" />}
                                   {new Date(letter.deadline).toLocaleDateString("ar-SA-u-nu-latn")}
                                 </div>
-                                {overdue && <span className="text-[10px]">متأخر</span>}
+                                {overdue && <span className="text-xs sm:text-[10px]">متأخر</span>}
                                 {!overdue && daysLeft !== null && daysLeft <= 7 && (
-                                  <span className="text-[10px]">باقي {daysLeft} يوم</span>
+                                  <span className="text-xs sm:text-[10px]">باقي {daysLeft} يوم</span>
                                 )}
                               </div>
                             ) : (

@@ -228,8 +228,8 @@ export default function ComponentsShowcase() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="container max-w-6xl mx-auto">
+    <div className="overflow-x-hidden max-w-full min-h-screen bg-background text-foreground">
+      <main className="container max-w-[95vw] sm:max-w-6xl mx-auto">
         <div className="space-y-2 justify-between flex">
           <h2 className="text-3xl font-bold tracking-tight mb-6">
             Shadcn/ui Component Library
@@ -1195,7 +1195,7 @@ export default function ComponentsShowcase() {
                         <div className="p-1">
                           <Card>
                             <CardContent className="flex aspect-square items-center justify-center p-6">
-                              <span className="text-4xl font-semibold">
+                              <span className="text-2xl sm:text-4xl font-semibold">
                                 {index + 1}
                               </span>
                             </CardContent>

@@ -72,9 +72,9 @@ function SortableSlide({ slide, index, isActive, onClick }: {
               </span>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground">{index + 1}</span>
-            <span className="text-[10px] text-muted-foreground capitalize">{slide.type}</span>
+          <div className="flex items-center justify-between flex-wrap">
+            <span className="text-xs sm:text-[10px] text-muted-foreground">{index + 1}</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground capitalize">{slide.type}</span>
           </div>
         </div>
       </div>
@@ -86,10 +86,10 @@ function SortableSlide({ slide, index, isActive, onClick }: {
 function SlidePreview({ slide, scale = 1 }: { slide: SlideData; scale?: number }) {
   return (
     <div
-      className="aspect-[16/9] rounded-xl overflow-hidden shadow-xl border border-border/50"
+      className="overflow-x-hidden max-w-full aspect-[16/9] rounded-xl overflow-hidden shadow-xl border border-border/50"
       style={{ backgroundColor: slide.bgColor, transform: `scale(${scale})`, transformOrigin: "top center" }}
     >
-      <div className={`w-full h-full flex flex-col p-8 ${slide.layout === "center" ? "items-center justify-center text-center" : "items-start justify-start"}`} dir="rtl">
+      <div className={`w-full h-full flex flex-col p-3 sm:p-8 ${slide.layout === "center" ? "items-center justify-center text-center" : "items-start justify-start"}`} dir="rtl">
         {slide.title && (
           <h2
             className={`font-bold mb-3 ${slide.type === "cover" ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"}`}
@@ -116,7 +116,7 @@ function SlidePreview({ slide, scale = 1 }: { slide: SlideData; scale?: number }
         )}
         {/* Footer */}
         <div className="absolute bottom-3 left-0 right-0 text-center">
-          <span className="text-[10px] opacity-30" style={{ color: slide.textColor }}>
+          <span className="text-xs sm:text-[10px] opacity-30" style={{ color: slide.textColor }}>
             منصة راصد - الهيئة السعودية للبيانات والذكاء الاصطناعي
           </span>
         </div>
@@ -159,14 +159,14 @@ function TemplateCard({ template, onSelect }: { template: any; onSelect: () => v
           </div>
         </div>
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <h3 className="font-bold text-sm">{template.name}</h3>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${categoryColors[template.category] || categoryColors.custom}`}>
+            <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded-full font-medium ${categoryColors[template.category] || categoryColors.custom}`}>
               {categoryLabels[template.category] || template.category}
             </span>
           </div>
           <p className="text-xs text-muted-foreground line-clamp-2">{template.description}</p>
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center justify-between flex-wrap text-xs text-muted-foreground">
             <span>{slides?.length || 0} شرائح</span>
             <Button size="sm" variant="ghost" className="h-7 text-xs gap-1">
               <Plus className="w-3 h-3" /> استخدام
@@ -410,7 +410,7 @@ export default function PresentationBuilder() {
   if (mode === "templates") {
     return (
       <div className="p-6 space-y-6" dir="rtl">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3 gradient-text">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-[oklch(0.48_0.14_290)] flex items-center justify-center">
@@ -427,7 +427,7 @@ export default function PresentationBuilder() {
 
         {/* Templates Section */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <h2 className="text-lg font-bold">القوالب الجاهزة</h2>
             <div className="flex gap-2">
               {[
@@ -492,7 +492,7 @@ export default function PresentationBuilder() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap">
                         <div>
                           <h3 className="font-bold text-sm">{pres.title}</h3>
                           <p className="text-xs text-muted-foreground">{presSlides?.length || 0} شرائح</p>
@@ -519,12 +519,12 @@ export default function PresentationBuilder() {
       <div className="fixed inset-0 bg-black z-50 flex flex-col" dir="rtl">
         <div className="flex-1 flex items-center justify-center p-4">
           {previewSlide && (
-            <div className="w-full max-w-5xl">
+            <div className="w-full max-w-[95vw] sm:max-w-5xl">
               <SlidePreview slide={previewSlide} />
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between px-6 py-3 bg-black/80 border-t border-white/10">
+        <div className="flex items-center justify-between flex-wrap px-6 py-3 bg-black/80 border-t border-white/10">
           <div className="flex items-center gap-2">
             {slides.map((_, i) => (
               <button key={i} onClick={() => setPreviewSlideIndex(i)} className={`w-2 h-2 rounded-full transition-all ${i === previewSlideIndex ? "bg-primary w-6" : "bg-white/30 hover:bg-white/50"}`} />
@@ -556,7 +556,7 @@ export default function PresentationBuilder() {
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col" dir="rtl">
       {/* Top Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50 backdrop-blur-sm">
+      <div className="flex items-center justify-between flex-wrap px-4 py-2 border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => { setMode("templates"); setPresentationId(null); }} className="gap-1">
             <ArrowLeft className="w-4 h-4" /> القوالب
@@ -617,9 +617,9 @@ export default function PresentationBuilder() {
         </div>
 
         {/* Center: Slide Preview */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 overflow-auto">
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-8 bg-muted/30 overflow-auto">
           {activeSlide ? (
-            <div className="w-full max-w-3xl">
+            <div className="w-full max-w-[95vw] sm:max-w-3xl">
               <SlidePreview slide={activeSlide} />
             </div>
           ) : (
@@ -633,7 +633,7 @@ export default function PresentationBuilder() {
         {/* Right: Properties Panel */}
         {activeSlide && (
           <div className="w-80 border-r border-border bg-card/30 overflow-y-auto p-4 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <h3 className="font-bold text-sm">خصائص الشريحة</h3>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={duplicateSlide} title="نسخ">
@@ -717,17 +717,17 @@ export default function PresentationBuilder() {
               </div>
               <div className="flex gap-2 mt-2">
                 <div className="flex-1 space-y-1">
-                  <label className="text-[10px] text-muted-foreground">خلفية</label>
+                  <label className="text-xs sm:text-[10px] text-muted-foreground">خلفية</label>
                   <div className="flex items-center gap-1">
                     <input type="color" value={activeSlide.bgColor} onChange={(e) => updateSlide("bgColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-                    <Input value={activeSlide.bgColor} onChange={(e) => updateSlide("bgColor", e.target.value)} className="h-7 text-[10px] font-mono" />
+                    <Input value={activeSlide.bgColor} onChange={(e) => updateSlide("bgColor", e.target.value)} className="h-7 text-xs sm:text-[10px] font-mono" />
                   </div>
                 </div>
                 <div className="flex-1 space-y-1">
-                  <label className="text-[10px] text-muted-foreground">النص</label>
+                  <label className="text-xs sm:text-[10px] text-muted-foreground">النص</label>
                   <div className="flex items-center gap-1">
                     <input type="color" value={activeSlide.textColor} onChange={(e) => updateSlide("textColor", e.target.value)} className="w-6 h-6 rounded cursor-pointer" />
-                    <Input value={activeSlide.textColor} onChange={(e) => updateSlide("textColor", e.target.value)} className="h-7 text-[10px] font-mono" />
+                    <Input value={activeSlide.textColor} onChange={(e) => updateSlide("textColor", e.target.value)} className="h-7 text-xs sm:text-[10px] font-mono" />
                   </div>
                 </div>
               </div>

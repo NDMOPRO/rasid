@@ -39,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-slate-900/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-white text-sm">
+      <div className="overflow-x-hidden max-w-full bg-slate-900/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-white text-sm">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="font-bold">{label || data.name}</p>
         {Object.entries(data).map(([key, value]) => {
@@ -67,7 +67,7 @@ const KpiCard = ({ title, value, icon: Icon }) => (
       <h3 className="text-lg text-slate-300">{title}</h3>
       <Icon className="text-amber-400" size={28} />
     </div>
-    <p className="text-4xl font-bold text-white mt-4">{value}</p>
+    <p className="text-2xl sm:text-4xl font-bold text-white mt-4">{value}</p>
   </GlassCard>
 );
 
@@ -130,9 +130,9 @@ export default function GeoAnalysis() {
   const allSectors = useMemo(() => [...new Set(sectorsByCategory.flatMap(d => Object.keys(d).filter(k => k !== 'category')))], [sectorsByCategory]);
 
   return (
-    <div dir="rtl" className="p-8 text-white min-h-screen bg-slate-900">
+    <div dir="rtl" className="p-3 sm:p-8 text-white min-h-screen bg-slate-900">
       <header className="mb-8">
-        <h1 className="text-4xl font-bold">التحليل الجغرافي</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold">التحليل الجغرافي</h1>
         <p className="text-slate-400 text-lg">Geographic Analysis</p>
       </header>
 
@@ -142,7 +142,7 @@ export default function GeoAnalysis() {
         <KpiCard title="إجمالي الحوادث" value={filteredRecords.length} icon={MapPin} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <GlassCard>
           <h2 className="text-2xl font-bold mb-4">القطاعات حسب الفئة</h2>
           <ResponsiveContainer width="100%" height={400}>

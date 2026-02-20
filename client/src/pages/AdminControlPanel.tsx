@@ -40,7 +40,7 @@ function UsersTab() {
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-400" /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="overflow-x-hidden max-w-full space-y-4">
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -97,14 +97,14 @@ function GroupsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <h3 className="text-lg font-semibold text-white">المجموعات والصلاحيات</h3>
         <Button size="sm" className="bg-blue-600 hover:bg-blue-700"><Plus className="h-4 w-4 ml-2" /> إنشاء مجموعة</Button>
       </div>
       <div className="space-y-3">
         {(groups || []).map((group: any) => (
           <Card key={group.id} className="bg-gray-800/50 border-gray-700 overflow-hidden">
-            <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-700/30 transition-colors" onClick={() => setExpandedGroup(expandedGroup === group.id ? null : group.id)}>
+            <div className="flex items-center justify-between flex-wrap p-4 cursor-pointer hover:bg-gray-700/30 transition-colors" onClick={() => setExpandedGroup(expandedGroup === group.id ? null : group.id)}>
               <div className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${group.isSystem ? "bg-red-500" : "bg-green-500"}`} />
                 <span className="text-white font-medium">{group.groupName}</span>
@@ -198,7 +198,7 @@ function AuditTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <h3 className="text-lg font-semibold text-white">سجل التدقيق</h3>
         <Badge variant="outline" className="border-gray-600 text-gray-400">آخر {(logs || []).length} إجراء</Badge>
       </div>
@@ -260,7 +260,7 @@ function TrainingTab() {
         <CardHeader><CardTitle className="text-white text-base">إعدادات شخصية راصد الذكي</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {configs.length > 0 ? configs.map((config: any) => (
-            <div key={config.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+            <div key={config.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
               <div>
                 <div className="text-white text-sm font-medium">{config.configKey}</div>
                 <div className="text-gray-400 text-xs">{config.description || "—"}</div>
@@ -308,7 +308,7 @@ export default function AdminControlPanel() {
 
   return (
     <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">لوحة التحكم الرئيسية</h1>
           <p className="text-gray-400 text-sm mt-1">إدارة المستخدمين والمجموعات والصلاحيات ومركز التدريب</p>

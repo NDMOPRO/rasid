@@ -80,7 +80,7 @@ export default function ThreatMap() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-96">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -218,7 +218,7 @@ export default function ThreatMap() {
                     }`}
                     onClick={() => { setSelectedRegionDetail(region); setActiveModal("regionDetail"); }}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between flex-wrap mb-1">
                       <span className="text-xs font-medium text-foreground">{region.regionAr}</span>
                       <span className="text-xs text-muted-foreground">{region.count} حالة رصد</span>
                     </div>
@@ -233,9 +233,9 @@ export default function ThreatMap() {
                       />
                     </div>
                     <div className="flex gap-2 mt-1">
-                      {region.critical > 0 && <span className="text-[10px] text-red-400">{region.critical} واسع النطاق</span>}
-                      {region.high > 0 && <span className="text-[10px] text-amber-400">{region.high} عالي</span>}
-                      {region.medium > 0 && <span className="text-[10px] text-cyan-400">{region.medium} متوسط</span>}
+                      {region.critical > 0 && <span className="text-xs sm:text-[10px] text-red-400">{region.critical} واسع النطاق</span>}
+                      {region.high > 0 && <span className="text-xs sm:text-[10px] text-amber-400">{region.high} عالي</span>}
+                      {region.medium > 0 && <span className="text-xs sm:text-[10px] text-cyan-400">{region.medium} متوسط</span>}
                     </div>
                   </motion.div>
                 );
@@ -269,11 +269,11 @@ export default function ThreatMap() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-foreground truncate">{leak.titleAr}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                        <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">
                           {leak.cityAr} • {leak.sectorAr} • {leak.recordCount?.toLocaleString()} سجل
                         </p>
                       </div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${colors.bg}/20 ${colors.text} font-medium flex-shrink-0`}>
+                      <span className={`text-xs sm:text-[10px] px-1.5 py-0.5 rounded-full ${colors.bg}/20 ${colors.text} font-medium flex-shrink-0`}>
                         {sevLabels[leak.severity] || leak.severity}
                       </span>
                     </div>
@@ -301,7 +301,7 @@ export default function ThreatMap() {
             {(["critical", "high", "medium", "low"] as const).map(sev => (
               <div key={sev} className={`rounded-xl p-3 border text-center ${severityColors[sev].bg}/10 ${severityColors[sev].text} border-current/20`}>
                 <p className="text-xl font-bold">{data?.leaks?.filter(l => l.severity === sev).length || 0}</p>
-                <p className="text-[10px]">{sevLabels[sev]}</p>
+                <p className="text-xs sm:text-[10px]">{sevLabels[sev]}</p>
               </div>
             ))}
           </div>
@@ -318,7 +318,7 @@ export default function ThreatMap() {
           {data?.leaks?.filter(l => l.severity === "critical").map(leak => (
             <div key={leak.leakId} className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 cursor-pointer hover:bg-red-500/10 transition-colors" onClick={() => { setSelectedLeak(leak); setActiveModal("leakDetail"); }}>
               <p className="text-sm font-medium text-foreground">{leak.titleAr}</p>
-              <p className="text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr} • {leak.recordCount?.toLocaleString()} سجل</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr} • {leak.recordCount?.toLocaleString()} سجل</p>
             </div>
           ))}
         </div>
@@ -333,14 +333,14 @@ export default function ThreatMap() {
           </div>
           {regionStats.map(region => (
             <div key={region.region} className="p-3 rounded-lg bg-secondary/30 border border-border/50 cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { setSelectedRegionDetail(region); setActiveModal("regionDetail"); }}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <span className="text-sm text-foreground">{region.regionAr}</span>
                 <span className="text-sm font-bold text-foreground">{region.count}</span>
               </div>
               <div className="flex gap-2 mt-1">
-                {region.critical > 0 && <span className="text-[10px] text-red-400">{region.critical} واسع النطاق</span>}
-                {region.high > 0 && <span className="text-[10px] text-amber-400">{region.high} عالي</span>}
-                {region.medium > 0 && <span className="text-[10px] text-cyan-400">{region.medium} متوسط</span>}
+                {region.critical > 0 && <span className="text-xs sm:text-[10px] text-red-400">{region.critical} واسع النطاق</span>}
+                {region.high > 0 && <span className="text-xs sm:text-[10px] text-amber-400">{region.high} عالي</span>}
+                {region.medium > 0 && <span className="text-xs sm:text-[10px] text-cyan-400">{region.medium} متوسط</span>}
               </div>
             </div>
           ))}
@@ -355,10 +355,10 @@ export default function ThreatMap() {
             <p className="text-xs text-muted-foreground">سجل متأثر</p>
           </div>
           {data?.leaks?.sort((a, b) => b.recordCount - a.recordCount).slice(0, 10).map(leak => (
-            <div key={leak.leakId} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { setSelectedLeak(leak); setActiveModal("leakDetail"); }}>
+            <div key={leak.leakId} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between flex-wrap cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { setSelectedLeak(leak); setActiveModal("leakDetail"); }}>
               <div>
                 <p className="text-sm text-foreground">{leak.titleAr}</p>
-                <p className="text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr}</p>
               </div>
               <span className="text-lg font-bold text-emerald-400">{leak.recordCount.toLocaleString()}</span>
             </div>
@@ -404,9 +404,9 @@ export default function ThreatMap() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="text-xs font-medium text-foreground">{leak.titleAr}</p>
-                          <p className="text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr} • {leak.recordCount?.toLocaleString()} سجل</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.cityAr} • {leak.sectorAr} • {leak.recordCount?.toLocaleString()} سجل</p>
                         </div>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${colors.bg}/20 ${colors.text}`}>{sevLabels[leak.severity]}</span>
+                        <span className={`text-xs sm:text-[10px] px-1.5 py-0.5 rounded-full ${colors.bg}/20 ${colors.text}`}>{sevLabels[leak.severity]}</span>
                       </div>
                     </div>
                   );

@@ -34,7 +34,7 @@ function HealthTab() {
     { name: "محرك البذر (Seed)", status: "online", uptime: "100%", responseTime: "2ms" },
   ];
   return (
-    <div className="space-y-4">
+    <div className="overflow-x-hidden max-w-full space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><CheckCircle className="h-8 w-8 text-emerald-400 mx-auto mb-2" /><div className="text-2xl font-bold text-emerald-400">7/7</div><div className="text-xs text-gray-400">خدمات نشطة</div></CardContent></Card>
         <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Zap className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-blue-400">45ms</div><div className="text-xs text-gray-400">متوسط الاستجابة</div></CardContent></Card>
@@ -42,7 +42,7 @@ function HealthTab() {
       </div>
       <div className="space-y-2">
         {services.map((s, i) => (
-          <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+          <div key={i} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
             <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-white text-sm">{s.name}</span></div>
             <div className="flex items-center gap-4">
               <span className="text-gray-400 text-xs">استجابة: {s.responseTime}</span>
@@ -81,7 +81,7 @@ function JobsTab() {
   };
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex gap-2">
           {(["all", "running", "completed", "failed"] as const).map((f) => (
             <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)}
@@ -96,7 +96,7 @@ function JobsTab() {
         {filtered.map((job) => (
           <Card key={job.id} className="bg-gray-800/50 border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between flex-wrap mb-2">
                 <div className="flex items-center gap-3">
                   {statusIcon(job.status)}
                   <div>
@@ -164,7 +164,7 @@ function AlertsTab() {
       <div className="space-y-2">
         {alerts.map((alert) => (
           <div key={alert.id} className={`p-3 rounded-lg border-r-4 border border-gray-700/50 ${severityColors[alert.severity]} ${!alert.read ? "ring-1 ring-white/10" : ""}`}>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div className="flex items-center gap-3">
                 {alert.severity === "critical" ? <AlertTriangle className="h-4 w-4 text-red-400" /> :
                  alert.severity === "high" ? <AlertTriangle className="h-4 w-4 text-amber-400" /> :
@@ -247,7 +247,7 @@ function PerformanceTab() {
         ].map((m, i) => (
           <Card key={i} className="bg-gray-800/50 border-gray-700">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between flex-wrap mb-2">
                 <span className="text-gray-400 text-sm">{m.label}</span>
                 <span className={`text-lg font-bold ${m.color}`}>{m.value}</span>
               </div>
@@ -270,7 +270,7 @@ function PerformanceTab() {
               { tool: "generate_report", avgTime: "2.1s", calls: 45, success: "95.5%" },
               { tool: "get_dashboard_stats", avgTime: "85ms", calls: 2100, success: "99.8%" },
             ].map((t, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-900/30">
+              <div key={i} className="flex items-center justify-between flex-wrap p-2 rounded bg-gray-900/30">
                 <span className="text-sm text-white font-mono">{t.tool}</span>
                 <div className="flex items-center gap-4 text-xs text-gray-400">
                   <span>متوسط: {t.avgTime}</span>

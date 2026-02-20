@@ -312,9 +312,9 @@ export default function LiveScan() {
   const lowCount = scanResults.filter((r) => r.severity === "low" || r.severity === "info").length;
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-purple-500/20">
@@ -429,7 +429,7 @@ export default function LiveScan() {
 
           {/* Sources Selection */}
           <div className="glass-card rounded-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Database className="w-5 h-5 text-blue-400" />
                 مصادر المسح
@@ -504,7 +504,7 @@ export default function LiveScan() {
         <TabsContent value="results" className="space-y-4 mt-4" ref={resultsRef}>
           {/* Scanning Animation */}
           {isScanning && (
-            <div className="glass-card rounded-2xl p-8 text-center space-y-4">
+            <div className="glass-card rounded-2xl p-3 sm:p-8 text-center space-y-4">
               <div className="relative w-24 h-24 mx-auto">
                 <div className="absolute inset-0 rounded-full border-4 border-purple-500/20 animate-ping" />
                 <div className="absolute inset-2 rounded-full border-4 border-purple-500/30 animate-pulse" />
@@ -600,7 +600,7 @@ export default function LiveScan() {
 
               {/* Results List */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <Eye className="w-5 h-5 text-purple-400" />
                   النتائج المفصّلة ({scanResults.length})
@@ -818,7 +818,7 @@ export default function LiveScan() {
 
           {/* No Results */}
           {scanCompleted && scanResults.length === 0 && !isScanning && (
-            <div className="glass-card rounded-2xl p-12 text-center">
+            <div className="glass-card rounded-2xl p-4 sm:p-12 text-center">
               <ShieldCheck className="w-16 h-16 text-green-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white">لم يتم اكتشاف أي حالات رصد</h3>
               <p className="text-sm text-white/50 mt-2">لم يتم العثور على أي بيانات مسربة مرتبطة بالهدف المحدد</p>
@@ -827,7 +827,7 @@ export default function LiveScan() {
 
           {/* Empty State */}
           {!scanCompleted && !isScanning && scanResults.length === 0 && (
-            <div className="glass-card rounded-2xl p-12 text-center">
+            <div className="glass-card rounded-2xl p-4 sm:p-12 text-center">
               <Radar className="w-16 h-16 text-purple-400/30 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white/50">لم يتم إجراء أي مسح بعد</h3>
               <p className="text-sm text-white/30 mt-2">انتقل إلى تبويب "إعداد المسح" لبدء فحص جديد</p>

@@ -83,7 +83,7 @@ export default function ThreatRules() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -119,7 +119,7 @@ export default function ThreatRules() {
                   </div>
                   <div>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
               </CardContent>
@@ -199,11 +199,11 @@ export default function ThreatRules() {
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold text-foreground">{rule.nameAr}</h3>
-                          <p className="text-[10px] text-muted-foreground">{rule.name}</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground">{rule.name}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={`text-[10px] ${severityColors[rule.severity]}`}>
+                        <Badge variant="outline" className={`text-xs sm:text-[10px] ${severityColors[rule.severity]}`}>
                           {rule.severity === "critical" ? "واسع النطاق" : rule.severity === "high" ? "مرتفع" : rule.severity === "medium" ? "متوسط" : "محدود"}
                         </Badge>
                         {rule.isEnabled ? (
@@ -220,15 +220,15 @@ export default function ThreatRules() {
 
                     {/* Patterns */}
                     <div className="space-y-1.5 mb-3">
-                      <p className="text-[10px] text-muted-foreground font-medium">أنماط الكشف:</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground font-medium">أنماط الكشف:</p>
                       <div className="flex flex-wrap gap-1">
                         {(rule.patterns as string[] || []).slice(0, 4).map((pattern, pi) => (
-                          <code key={pi} className="text-[10px] font-mono bg-black/30 text-primary/80 px-1.5 py-0.5 rounded border border-border" dir="ltr">
+                          <code key={pi} className="text-xs sm:text-[10px] font-mono bg-black/30 text-primary/80 px-1.5 py-0.5 rounded border border-border" dir="ltr">
                             {pattern.length > 30 ? pattern.slice(0, 30) + "..." : pattern}
                           </code>
                         ))}
                         {(rule.patterns as string[] || []).length > 4 && (
-                          <span className="text-[10px] text-muted-foreground">+{(rule.patterns as string[]).length - 4} أنماط أخرى</span>
+                          <span className="text-xs sm:text-[10px] text-muted-foreground">+{(rule.patterns as string[]).length - 4} أنماط أخرى</span>
                         )}
                       </div>
                     </div>
@@ -236,10 +236,10 @@ export default function ThreatRules() {
                     {/* Keywords */}
                     {rule.keywords && (rule.keywords as string[]).length > 0 && (
                       <div className="space-y-1.5 mb-3">
-                        <p className="text-[10px] text-muted-foreground font-medium">كلمات مفتاحية:</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground font-medium">كلمات مفتاحية:</p>
                         <div className="flex flex-wrap gap-1">
                           {(rule.keywords as string[]).slice(0, 6).map((kw, ki) => (
-                            <Badge key={ki} variant="outline" className="text-[10px] bg-secondary/50">
+                            <Badge key={ki} variant="outline" className="text-xs sm:text-[10px] bg-secondary/50">
                               {kw}
                             </Badge>
                           ))}
@@ -248,16 +248,16 @@ export default function ThreatRules() {
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border mt-auto">
+                    <div className="flex items-center justify-between flex-wrap pt-2 border-t border-border mt-auto">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px] bg-secondary/30">
+                        <Badge variant="outline" className="text-xs sm:text-[10px] bg-secondary/30">
                           {catConfig.label}
                         </Badge>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">
                           {rule.matchCount || 0} تطابق
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-mono">{rule.ruleId}</span>
+                      <span className="text-xs sm:text-[10px] text-muted-foreground font-mono">{rule.ruleId}</span>
                     </div>
                      <p className="text-[9px] text-primary/50 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
                   </CardContent>

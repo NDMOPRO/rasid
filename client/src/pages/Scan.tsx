@@ -50,7 +50,7 @@ export default function Scan() {
   const result = scanMutation.data;
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
       <div>
         <h1 className="text-2xl font-bold gradient-text">فحص جديد</h1>
@@ -78,7 +78,7 @@ export default function Scan() {
               onClick={handleScan}
               disabled={scanMutation.isPending}
               size="lg"
-              className="h-12 px-8 gap-2"
+              className="h-12 px-3 sm:px-8 gap-2"
             >
               {scanMutation.isPending ? (
                 <>
@@ -114,7 +114,7 @@ export default function Scan() {
         <div className="space-y-4">
           <Card className="glass-card gold-sweep">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between flex-wrap mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center btn-glow">
                     <Globe className="h-6 w-6 text-primary" />
@@ -129,7 +129,7 @@ export default function Scan() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold" style={{ color: getScoreColor(result.score) }}>
+                  <div className="text-2xl sm:text-4xl font-bold" style={{ color: getScoreColor(result.score) }}>
                     {Math.round(result.score)}%
                   </div>
                   <Badge variant="outline" className={getStatusBadgeClass(result.status)}>

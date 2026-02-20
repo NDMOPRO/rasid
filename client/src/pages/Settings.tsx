@@ -107,7 +107,7 @@ export default function Settings() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function Settings() {
                 { key: "pasteEnabled" as const, label: "رصد مواقع اللصق", desc: "مراقبة Pastebin وبدائله", icon: "📋" },
                 { key: "autoClassify" as const, label: "التصنيف التلقائي", desc: "تصنيف PII تلقائياً عند الرصد", icon: "🔍" },
               ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border">
+                <div key={item.key} className="flex items-center justify-between flex-wrap p-4 rounded-lg bg-secondary/20 border border-border">
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{item.icon}</span>
                     <div>
@@ -278,7 +278,7 @@ export default function Settings() {
                 { key: "dailyDigest" as const, label: "ملخص يومي", desc: "تقرير يومي بحالات الرصد", color: "text-cyan-400" },
                 { key: "weeklyReport" as const, label: "تقرير أسبوعي", desc: "تقرير أسبوعي شامل بالإحصائيات", color: "text-violet-400" },
               ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-4 rounded-lg bg-secondary/20 border border-border">
+                <div key={item.key} className="flex items-center justify-between flex-wrap p-4 rounded-lg bg-secondary/20 border border-border">
                   <div className="flex-1 pr-4">
                     <Label className={`text-sm font-medium ${item.color}`}>{item.label}</Label>
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
@@ -395,12 +395,12 @@ export default function Settings() {
                             </td>
                             <td className="py-3 px-4 text-xs text-muted-foreground">{u.email || "—"}</td>
                             <td className="py-3 px-4">
-                              <Badge variant="outline" className={`text-[10px] ${roleColor(u.role)}`}>
+                              <Badge variant="outline" className={`text-xs sm:text-[10px] ${roleColor(u.role)}`}>
                                 {roleLabel(u.role)}
                               </Badge>
                             </td>
                             <td className="py-3 px-4">
-                              <Badge variant="outline" className={`text-[10px] ${roleColor(u.ndmoRole || "viewer")}`}>
+                              <Badge variant="outline" className={`text-xs sm:text-[10px] ${roleColor(u.ndmoRole || "viewer")}`}>
                                 {roleLabel(u.ndmoRole || "viewer")}
                               </Badge>
                             </td>

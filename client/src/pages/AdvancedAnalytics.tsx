@@ -49,9 +49,9 @@ export default function AdvancedAnalytics() {
 
   return (
     <div
-      className="space-y-6" dir="rtl">
+      className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       <WatermarkLogo />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">التحليلات المتقدمة</h1>
           <p className="text-muted-foreground mt-1">اتجاهات الامتثال الشهرية مع مقارنة بين القطاعات والتصنيفات</p>
@@ -115,7 +115,7 @@ export default function AdvancedAnalytics() {
                             <div style={{ flex: nonComp, backgroundColor: STATUS_COLORS.nonCompliant }} />
                             <div style={{ flex: noPolicy, backgroundColor: STATUS_COLORS.noPolicy }} />
                           </div>
-                          <span className="text-[10px] text-muted-foreground rotate-[-45deg] origin-top-right whitespace-nowrap">{t.month}</span>
+                          <span className="text-xs sm:text-[10px] text-muted-foreground rotate-[-45deg] origin-top-right whitespace-nowrap">{t.month}</span>
                           {/* Tooltip */}
                           <div className="absolute bottom-full mb-2 bg-popover text-popover-foreground border rounded-lg p-2 text-xs hidden group-hover:block z-10 min-w-32 shadow-lg">
                             <div className="font-bold mb-1">{t.month}</div>
@@ -204,7 +204,7 @@ export default function AdvancedAnalytics() {
                                 <div className="w-[45%] bg-blue-500 rounded-t transition-all" style={{ height: `${pubRate}%`, minHeight: pubTotal > 0 ? "4px" : "0" }} />
                                 <div className="w-[45%] bg-primary/50 rounded-t transition-all btn-glow" style={{ height: `${privRate}%`, minHeight: privTotal > 0 ? "4px" : "0" }} />
                               </div>
-                              <span className="text-[10px] text-muted-foreground">{month.slice(5)}</span>
+                              <span className="text-xs sm:text-[10px] text-muted-foreground">{month.slice(5)}</span>
                               <div className="absolute bottom-full mb-2 bg-popover text-popover-foreground border rounded-lg p-2 text-xs hidden group-hover:block z-10 min-w-36 shadow-lg">
                                 <div className="font-bold mb-1">{month}</div>
                                 <div className="text-blue-500">عام: {pubCompliant}/{pubTotal} ({pubRate.toFixed(0)}%)</div>
@@ -389,7 +389,7 @@ export default function AdvancedAnalytics() {
                                 <span className="text-xs w-48 shrink-0">{CLAUSE_NAMES[`clause${clauseNum}`]}</span>
                                 <div className="flex-1 bg-muted rounded-full h-5 overflow-hidden">
                                   <div className={`h-full ${color} rounded-full transition-all flex items-center justify-end px-2`} style={{ width: `${pct}%` }}>
-                                    <span className="text-[10px] text-white font-bold">{pct}%</span>
+                                    <span className="text-xs sm:text-[10px] text-white font-bold">{pct}%</span>
                                   </div>
                                 </div>
                               </div>

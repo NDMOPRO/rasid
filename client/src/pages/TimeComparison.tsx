@@ -147,7 +147,7 @@ function ComparisonCard({
 
       <div className="relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap mb-4">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl ${c.iconBg} flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
               <Icon className="w-5 h-5 transition-transform duration-300 hover:scale-110" />
@@ -176,7 +176,7 @@ function ComparisonCard({
         {/* Visual bar comparison */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-muted-foreground w-14 text-start">الحالي</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground w-14 text-start">الحالي</span>
             <div className="flex-1 h-3 rounded-full bg-muted/30 overflow-hidden">
               <div
                 className={`h-full rounded-full ${c.barCurrent} transition-all duration-1000 ease-out`}
@@ -185,7 +185,7 @@ function ComparisonCard({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-muted-foreground w-14 text-start">السابق</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground w-14 text-start">السابق</span>
             <div className="flex-1 h-3 rounded-full bg-muted/30 overflow-hidden">
               <div
                 className={`h-full rounded-full ${c.barPrevious} transition-all duration-1000 ease-out`}
@@ -249,7 +249,7 @@ function ClauseComparisonRow({
       className={`group p-4 rounded-xl border border-border/30 bg-card/50 hover:bg-card hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 ${onClick ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all' : ''}`}
      
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between flex-wrap mb-3">
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors[clauseIndex]} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>
             {toArabicNumerals(clauseIndex + 1)}
@@ -261,7 +261,7 @@ function ClauseComparisonRow({
 
       <div className="grid grid-cols-2 gap-3 stagger-children">
         <div>
-          <div className="text-[10px] text-muted-foreground mb-1">الحالي</div>
+          <div className="text-xs sm:text-[10px] text-muted-foreground mb-1">الحالي</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 rounded-full bg-muted/30 overflow-hidden">
               <div
@@ -273,7 +273,7 @@ function ClauseComparisonRow({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-muted-foreground mb-1">السابق</div>
+          <div className="text-xs sm:text-[10px] text-muted-foreground mb-1">السابق</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 rounded-full bg-muted/30 overflow-hidden">
               <div
@@ -296,7 +296,7 @@ export default function TimeComparison() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6" dir="rtl">
+      <div className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
         <Skeleton className="h-12 w-64" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
@@ -319,7 +319,7 @@ export default function TimeComparison() {
   return (
     <div className="p-6 space-y-8" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
@@ -362,7 +362,7 @@ export default function TimeComparison() {
         className="overflow-hidden border-0 shadow-xl cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all"
       >
         <div className="bg-gradient-to-l from-blue-600 via-indigo-600 to-[oklch(0.42_0.14_290)] p-6 text-white">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <div>
               <h2 className="text-lg font-bold opacity-90">نسبة الامتثال الإجمالية</h2>
               <p className="text-sm opacity-70 mt-1">مقارنة معدل الامتثال بين الشهرين</p>
@@ -372,13 +372,13 @@ export default function TimeComparison() {
           <div className="grid grid-cols-2 gap-6 mt-6 stagger-children">
             <div className="text-center p-4 rounded-xl bg-[#C5A55A]/[0.05] dark:bg-white/10 backdrop-blur-sm">
               <div className="text-sm opacity-80 mb-2">{data.monthLabel.current}</div>
-              <div className="text-5xl font-black">
+              <div className="text-3xl sm:text-5xl font-black">
                 <AnimatedCounter value={data.current.complianceRate} suffix="٪" />
               </div>
             </div>
             <div className="text-center p-4 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5">
               <div className="text-sm opacity-80 mb-2">{data.monthLabel.previous}</div>
-              <div className="text-5xl font-black opacity-60">
+              <div className="text-3xl sm:text-5xl font-black opacity-60">
                 {toArabicNumerals(data.previous.complianceRate)}٪
               </div>
             </div>

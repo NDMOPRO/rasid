@@ -109,9 +109,9 @@ export default function AuditLog() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-foreground">سجل المراجعة</h1>
           <p className="text-sm text-muted-foreground mt-1">Audit Log — تتبع جميع الإجراءات للامتثال</p>
@@ -175,7 +175,7 @@ export default function AuditLog() {
             className="glass-card rounded-lg p-3 text-center cursor-pointer hover:scale-[1.02] transition-all group"
           >
             <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
-            <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+            <p className="text-xs sm:text-[11px] text-muted-foreground">{stat.label}</p>
             <p className="text-[9px] text-primary/50 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
               اضغط للتفاصيل ←
             </p>
@@ -224,7 +224,7 @@ export default function AuditLog() {
                         {formatDate(log.createdAt)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium ${catConfig.color}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs sm:text-[11px] font-medium ${catConfig.color}`}>
                           <CatIcon className="w-3 h-3" />
                           {catConfig.label}
                         </span>

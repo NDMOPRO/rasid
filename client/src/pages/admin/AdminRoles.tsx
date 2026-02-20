@@ -145,8 +145,8 @@ export default function AdminRoles() {
   };
 
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex items-center justify-between">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Shield className="w-6 h-6 text-blue-400" />
@@ -225,7 +225,7 @@ export default function AdminRoles() {
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-foreground">{role.name}</h3>
                             <span className="text-xs text-muted-foreground">({role.nameEn})</span>
-                            {role.isSystem && <Badge variant="secondary" className="text-[10px]">نظامي</Badge>}
+                            {role.isSystem && <Badge variant="secondary" className="text-xs sm:text-[10px]">نظامي</Badge>}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">{role.description}</p>
                         </div>
@@ -254,7 +254,7 @@ export default function AdminRoles() {
         <TabsContent value="matrix" className="space-y-4">
           {selectedRoleId && (
             <>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <h2 className="text-lg font-semibold">
                   مصفوفة الصلاحيات — {roles?.find((r) => r.id === selectedRoleId)?.name}
                 </h2>
@@ -359,10 +359,10 @@ function PermissionGroup({
   return (
     <Card className="border border-border/50">
       <CardHeader className="p-3 cursor-pointer" onClick={() => setExpanded(!expanded)}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             {label}
-            <Badge variant="outline" className="text-[10px]">{permissions.length}</Badge>
+            <Badge variant="outline" className="text-xs sm:text-[10px]">{permissions.length}</Badge>
           </CardTitle>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
@@ -375,7 +375,7 @@ function PermissionGroup({
                 {Array.from(byResource.entries()).map(([resourceId, perms]) => (
                   <div key={resourceId} className="flex items-center gap-2 py-1.5 border-b border-border/30 last:border-0">
                     <span className="text-sm min-w-[140px] text-foreground">{perms[0].resourceName}</span>
-                    <span className="text-[10px] text-muted-foreground min-w-[100px]">{perms[0].resourceNameEn}</span>
+                    <span className="text-xs sm:text-[10px] text-muted-foreground min-w-[100px]">{perms[0].resourceNameEn}</span>
                     <div className="flex gap-1 mr-auto">
                       {perms.map((p) => {
                         const effect = effectivePerms.get(p.id);
@@ -383,7 +383,7 @@ function PermissionGroup({
                           <button
                             key={p.id}
                             onClick={() => onToggle(p.id)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                            className={`px-2 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-all ${
                               effect === "allow"
                                 ? "bg-green-500/20 border-green-500/50 text-green-400"
                                 : effect === "deny"

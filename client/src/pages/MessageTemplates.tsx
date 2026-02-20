@@ -134,7 +134,7 @@ export default function MessageTemplates() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -216,7 +216,7 @@ export default function MessageTemplates() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-sm">{t.name_ar || t.name}</h3>
-                      <Badge variant="outline" className={`text-[10px] ${typeColors[t.category] || typeColors.general}`}>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${typeColors[t.category] || typeColors.general}`}>
                         {typeLabels[t.category] || t.category || "عام"}
                       </Badge>
                     </div>
@@ -241,7 +241,7 @@ export default function MessageTemplates() {
                 {t.variables && t.variables.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {t.variables.map((v: string) => (
-                      <Badge key={v} variant="secondary" className="text-[10px]">{`{{${v}}}`}</Badge>
+                      <Badge key={v} variant="secondary" className="text-xs sm:text-[10px]">{`{{${v}}}`}</Badge>
                     ))}
                   </div>
                 )}

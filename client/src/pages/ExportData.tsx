@@ -211,7 +211,7 @@ export default function ExportData() {
                 {recentExports.map((exp, i) => (
                   <div
                     key={`${exp.id}-${i}`}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/50"
                   >
                     <div className="flex items-center gap-3">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />

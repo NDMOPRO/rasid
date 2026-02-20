@@ -65,7 +65,7 @@ function ConsoleLine({
   }, [text]);
 
   return (
-    <div className="flex items-start gap-2 font-mono text-xs leading-relaxed">
+    <div className="overflow-x-hidden max-w-full flex items-start gap-2 font-mono text-xs leading-relaxed">
       <span className="text-blue-900/40 shrink-0 select-none">{prefix}</span>
       <span className={color}>
         {displayed}
@@ -496,7 +496,7 @@ export default function PublicVerify() {
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between px-6 py-4">
+      <div className="relative z-10 flex items-center justify-between flex-wrap px-6 py-4">
         <div className="flex items-center gap-3">
           <img src={RASID_LOGO_DARK} alt="راصد" className="h-10 object-contain" />
           <div>
@@ -535,7 +535,7 @@ export default function PublicVerify() {
                   border: "1px solid rgba(59, 130, 246, 0.2)",
                 }}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between flex-wrap mb-3">
                   <h3 className="text-sm font-medium text-blue-200">مسح رمز QR بالكاميرا</h3>
                   <button
                     onClick={() => {
@@ -643,7 +643,7 @@ export default function PublicVerify() {
               {/* Console Window */}
               <div className="rounded-2xl overflow-hidden border border-blue-500/20 shadow-2xl shadow-black/40">
                 {/* Title Bar */}
-                <div className="bg-[#0a1628]/90 px-4 py-2.5 flex items-center justify-between border-b border-blue-500/15">
+                <div className="bg-[#0a1628]/90 px-4 py-2.5 flex items-center justify-between flex-wrap border-b border-blue-500/15">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -662,7 +662,7 @@ export default function PublicVerify() {
                         style={{ animation: "blink 1s step-end infinite" }}
                       />
                     )}
-                    <span className="text-[10px] text-blue-300/40 font-mono">
+                    <span className="text-xs sm:text-[10px] text-blue-300/40 font-mono">
                       {isProcessing ? "PROCESSING..." : "COMPLETE"}
                     </span>
                   </div>
@@ -698,7 +698,7 @@ export default function PublicVerify() {
                         />
                       );
                     })}
-                    <span className="text-[10px] text-blue-300/40 font-mono mr-auto">
+                    <span className="text-xs sm:text-[10px] text-blue-300/40 font-mono mr-auto">
                       {stepIndex >= 0
                         ? `${Math.min(stepIndex + 1, VERIFY_STEPS.length)}/${VERIFY_STEPS.length}`
                         : "0/5"}
@@ -755,8 +755,8 @@ export default function PublicVerify() {
                         </div>
                         {result.document.contentHash && (
                           <div className="pt-3 border-t border-blue-500/10">
-                            <p className="text-[10px] text-blue-300/40 mb-1">بصمة المحتوى (SHA-256)</p>
-                            <p className="text-[10px] font-mono text-blue-300/30 break-all">
+                            <p className="text-xs sm:text-[10px] text-blue-300/40 mb-1">بصمة المحتوى (SHA-256)</p>
+                            <p className="text-xs sm:text-[10px] font-mono text-blue-300/30 break-all">
                               {result.document.contentHash}
                             </p>
                           </div>

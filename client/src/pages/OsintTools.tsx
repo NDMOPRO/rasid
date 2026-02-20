@@ -69,7 +69,7 @@ export default function OsintTools() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -108,7 +108,7 @@ export default function OsintTools() {
                 </div>
                 <div>
                   <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                 </div>
               </div>
               <p className="text-[9px] text-primary/50 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
@@ -181,13 +181,13 @@ export default function OsintTools() {
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold text-foreground">{query.nameAr}</h3>
-                          <p className="text-[10px] text-muted-foreground">{query.name}</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground">{query.name}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{config.label}</Badge>
+                        <Badge variant="outline" className="text-xs sm:text-[10px]">{config.label}</Badge>
                         {query.categoryAr && (
-                          <Badge variant="outline" className="text-[10px] bg-secondary/30">{query.categoryAr}</Badge>
+                          <Badge variant="outline" className="text-xs sm:text-[10px] bg-secondary/30">{query.categoryAr}</Badge>
                         )}
                       </div>
                     </div>
@@ -209,10 +209,10 @@ export default function OsintTools() {
                       </Button>
                     </div>
 
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-muted-foreground font-mono">{query.queryId}</span>
+                    <div className="flex items-center justify-between flex-wrap mt-2">
+                      <span className="text-xs sm:text-[10px] text-muted-foreground font-mono">{query.queryId}</span>
                       {query.resultsCount !== null && query.resultsCount > 0 && (
-                        <span className="text-[10px] text-muted-foreground">{query.resultsCount} نتيجة</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">{query.resultsCount} نتيجة</span>
                       )}
                     </div>
                     <p className="text-[9px] text-primary/50 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
@@ -234,7 +234,7 @@ export default function OsintTools() {
           icon={<stat.icon className={`w-5 h-5 ${stat.color}`} />}
         >
           <div className="p-4 text-center">
-            <p className="text-4xl font-bold">{stat.value}</p>
+            <p className="text-2xl sm:text-4xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted-foreground mt-2">{stat.description}</p>
           </div>
         </DetailModal>

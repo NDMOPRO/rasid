@@ -22,7 +22,7 @@ const KpiCard = ({ title, value, icon: Icon }) => (
       <h3 className="text-lg font-semibold text-slate-300">{title}</h3>
       <Icon className="text-slate-400" size={24} />
     </div>
-    <p className="text-4xl font-bold text-white mt-2">{value}</p>
+    <p className="text-2xl sm:text-4xl font-bold text-white mt-2">{value}</p>
   </GlassCard>
 );
 
@@ -79,10 +79,10 @@ export default function CampaignTracker() {
   };
 
   return (
-    <div className="p-8 bg-slate-900 text-white min-h-screen font-sans" dir="rtl">
+    <div className="overflow-x-hidden max-w-full p-3 sm:p-8 bg-slate-900 text-white min-h-screen font-sans" dir="rtl">
       <div className="mb-4"><GlobalFilterBar /></div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">تتبع الحملات | Campaign Tracker</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">تتبع الحملات | Campaign Tracker</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -90,7 +90,7 @@ export default function CampaignTracker() {
         <KpiCard title="الحملة الأضخم (حسب السجلات)" value={largestCampaign.actor} icon={Users} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8">
         <div className="lg:col-span-3">
             <h2 className="text-2xl font-semibold text-slate-200 mb-4">قائمة الحملات</h2>
             <div className="max-h-[600px] overflow-y-auto pr-2">

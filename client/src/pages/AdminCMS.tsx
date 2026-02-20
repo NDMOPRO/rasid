@@ -81,7 +81,7 @@ function LeaksTab() {
   if (isLoading) return <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-400" /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="overflow-x-hidden max-w-full space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
@@ -253,7 +253,7 @@ function ReportsTab() {
       <h3 className="text-lg font-semibold text-white">التقارير المحفوظة</h3>
       <div className="space-y-2">
         {(reports || []).map((r: any) => (
-          <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+          <div key={r.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
             <div className="flex items-center gap-3">
               <FileText className="h-5 w-5 text-blue-400" />
               <div>
@@ -287,7 +287,7 @@ function KBTab() {
       <h3 className="text-lg font-semibold text-white">قاعدة المعرفة</h3>
       <div className="space-y-2">
         {(articles || []).map((a: any) => (
-          <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+          <div key={a.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5 text-purple-400" />
               <div>
@@ -340,7 +340,7 @@ function ImportTab() {
     <div className="space-y-6">
       {/* Upload Zone */}
       <Card className="bg-gray-800/50 border-gray-700 border-dashed border-2">
-        <CardContent className="p-8 text-center">
+        <CardContent className="p-3 sm:p-8 text-center">
           <Upload className="h-12 w-12 text-blue-400 mx-auto mb-4 opacity-60" />
           <h3 className="text-white font-semibold mb-2">رفع ملف للاستيراد</h3>
           <p className="text-gray-400 text-sm mb-4">يُقبل: ZIP, JSON, XLSX, CSV — حتى 500 MB</p>
@@ -357,7 +357,7 @@ function ImportTab() {
         <h3 className="text-lg font-semibold text-white mb-3">سجل الاستيراد</h3>
         <div className="space-y-2">
           {(jobs || []).map((job: any) => (
-            <div key={job.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+            <div key={job.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
               <div className="flex items-center gap-3">
                 {job.status === "completed" ? <CheckCircle className="h-5 w-5 text-emerald-400" /> :
                  job.status === "failed" ? <AlertTriangle className="h-5 w-5 text-red-400" /> :
@@ -431,7 +431,7 @@ function ExportTab() {
         <h3 className="text-lg font-semibold text-white mb-3">سجل التصدير</h3>
         <div className="space-y-2">
           {(jobs || []).map((job: any) => (
-            <div key={job.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+            <div key={job.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
               <div className="flex items-center gap-3">
                 {job.status === "completed" ? <CheckCircle className="h-5 w-5 text-emerald-400" /> :
                  job.status === "failed" ? <AlertTriangle className="h-5 w-5 text-red-400" /> :
@@ -471,7 +471,7 @@ function LogTab() {
       <h3 className="text-lg font-semibold text-white">سجل العمليات</h3>
       <div className="space-y-2">
         {allOps.map((op, i) => (
-          <div key={`${op.opType}-${op.id || i}`} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
+          <div key={`${op.opType}-${op.id || i}`} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-800/30 border border-gray-700/50">
             <div className="flex items-center gap-3">
               {op.opType === "import" ? <Upload className="h-5 w-5 text-blue-400" /> : <Download className="h-5 w-5 text-purple-400" />}
               <div>

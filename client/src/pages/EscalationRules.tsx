@@ -150,7 +150,7 @@ export default function EscalationRules() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -286,7 +286,7 @@ export default function EscalationRules() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger-children">
           <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div>
                   <p className="text-sm text-muted-foreground">قواعد نشطة</p>
                   <p className="text-2xl font-bold">{stats.activeRules}</p>
@@ -297,7 +297,7 @@ export default function EscalationRules() {
           </Card>
           <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div>
                   <p className="text-sm text-muted-foreground">إجمالي التصعيدات</p>
                   <p className="text-2xl font-bold">{stats.totalEscalations}</p>
@@ -308,7 +308,7 @@ export default function EscalationRules() {
           </Card>
           <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div>
                   <p className="text-sm text-muted-foreground">آخر 24 ساعة</p>
                   <p className="text-2xl font-bold">{stats.last24h}</p>
@@ -319,7 +319,7 @@ export default function EscalationRules() {
           </Card>
           <Card className="glass-card-scan">
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div>
                   <p className="text-sm text-muted-foreground">آخر 7 أيام</p>
                   <p className="text-2xl font-bold">{stats.last7d}</p>

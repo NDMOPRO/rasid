@@ -98,9 +98,9 @@ export default function DocumentsRegistry() {
   const hasFilters = search || employeeFilter || leakIdFilter || typeFilter !== "all" || dateFrom || dateTo;
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30">
@@ -254,7 +254,7 @@ export default function DocumentsRegistry() {
                 ))
               ) : paged.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-12 text-center">
+                  <td colSpan={9} className="p-4 sm:p-12 text-center">
                     <FileText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
                     <p className="text-muted-foreground">
                       {hasFilters ? "لا توجد وثائق تطابق معايير البحث" : "لم يتم إصدار أي وثائق بعد"}
@@ -278,7 +278,7 @@ export default function DocumentsRegistry() {
                       <span className="text-sm font-medium line-clamp-1">{doc.titleAr || doc.title}</span>
                     </td>
                     <td className="p-3">
-                      <Badge variant="outline" className={`text-[10px] ${docTypeColors[doc.documentType] || ""}`}>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${docTypeColors[doc.documentType] || ""}`}>
                         {docTypeLabels[doc.documentType] || doc.documentType}
                       </Badge>
                     </td>
@@ -295,7 +295,7 @@ export default function DocumentsRegistry() {
                     </td>
                     <td className="p-3">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center text-[10px] font-bold text-teal-300">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center text-xs sm:text-[10px] font-bold text-teal-300">
                           {(doc.generatedByName || "?")[0]}
                         </div>
                         <span className="text-xs">{doc.generatedByName || "غير معروف"}</span>
@@ -308,12 +308,12 @@ export default function DocumentsRegistry() {
                     </td>
                     <td className="p-3">
                       {doc.isVerified !== false ? (
-                        <Badge variant="outline" className="text-[10px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                        <Badge variant="outline" className="text-xs sm:text-[10px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
                           <CheckCircle2 className="h-3 w-3 ml-1" />
                           موثق
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] bg-red-500/15 text-red-400 border-red-500/30">
+                        <Badge variant="outline" className="text-xs sm:text-[10px] bg-red-500/15 text-red-400 border-red-500/30">
                           <XCircle className="h-3 w-3 ml-1" />
                           ملغي
                         </Badge>
@@ -353,7 +353,7 @@ export default function DocumentsRegistry() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-3 border-t border-border/50">
+          <div className="flex items-center justify-between flex-wrap p-3 border-t border-border/50">
             <span className="text-xs text-muted-foreground">
               عرض {page * PAGE_SIZE + 1} - {Math.min((page + 1) * PAGE_SIZE, documents.length)} من {documents.length}
             </span>
@@ -411,21 +411,21 @@ export default function DocumentsRegistry() {
                 {/* Document Info */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">رقم الوثيقة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">رقم الوثيقة</p>
                     <p className="font-mono text-sm text-teal-400">{selectedDoc.documentId}</p>
                   </div>
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">كود التحقق</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">كود التحقق</p>
                     <p className="font-mono text-sm">{selectedDoc.verificationCode}</p>
                   </div>
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">نوع الوثيقة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">نوع الوثيقة</p>
                     <Badge variant="outline" className={`text-xs ${docTypeColors[selectedDoc.documentType] || ""}`}>
                       {docTypeLabels[selectedDoc.documentType] || selectedDoc.documentType}
                     </Badge>
                   </div>
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">الحالة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">الحالة</p>
                     {selectedDoc.isVerified !== false ? (
                       <Badge variant="outline" className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
                         <CheckCircle2 className="h-3 w-3 ml-1" />
@@ -442,14 +442,14 @@ export default function DocumentsRegistry() {
 
                 {/* Title */}
                 <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                  <p className="text-[10px] text-muted-foreground mb-1">عنوان الوثيقة</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">عنوان الوثيقة</p>
                   <p className="text-sm font-medium">{selectedDoc.titleAr || selectedDoc.title}</p>
                 </div>
 
                 {/* Details */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">المُصدر</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">المُصدر</p>
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center text-xs font-bold text-teal-300">
                         {(selectedDoc.generatedByName || "?")[0]}
@@ -458,7 +458,7 @@ export default function DocumentsRegistry() {
                     </div>
                   </div>
                   <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                    <p className="text-[10px] text-muted-foreground mb-1">تاريخ الإصدار</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">تاريخ الإصدار</p>
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-sm">
@@ -473,7 +473,7 @@ export default function DocumentsRegistry() {
 
                 {/* Leak Reference */}
                 <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                  <p className="text-[10px] text-muted-foreground mb-1">الحادثة المرتبطة</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">الحادثة المرتبطة</p>
                   <button
                     onClick={() => { setSelectedDoc(null); setDrillLeakId(selectedDoc.leakId); }}
                     className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
@@ -485,8 +485,8 @@ export default function DocumentsRegistry() {
 
                 {/* Content Hash */}
                 <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                  <p className="text-[10px] text-muted-foreground mb-1">بصمة المحتوى (Hash)</p>
-                  <p className="font-mono text-[10px] text-muted-foreground break-all">{selectedDoc.contentHash}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">بصمة المحتوى (Hash)</p>
+                  <p className="font-mono text-xs sm:text-[10px] text-muted-foreground break-all">{selectedDoc.contentHash}</p>
                 </div>
 
                 {/* Actions */}

@@ -73,7 +73,7 @@ export default function SellerProfiles() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -117,7 +117,7 @@ export default function SellerProfiles() {
                   </div>
                   <div>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
                 <p className="text-[9px] text-primary/50 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
@@ -194,11 +194,11 @@ export default function SellerProfiles() {
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-foreground">{seller.name}</h3>
-                        <p className="text-[10px] text-muted-foreground font-mono">{seller.sellerId}</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground font-mono">{seller.sellerId}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`text-[10px] ${riskColors[seller.riskLevel]}`}>
+                      <Badge variant="outline" className={`text-xs sm:text-[10px] ${riskColors[seller.riskLevel]}`}>
                         {riskLabels[seller.riskLevel]}
                       </Badge>
                       {seller.isActive && (
@@ -209,8 +209,8 @@ export default function SellerProfiles() {
 
                   {/* Risk Score Bar */}
                   <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] text-muted-foreground">حجم التأثير</span>
+                    <div className="flex items-center justify-between flex-wrap mb-1">
+                      <span className="text-xs sm:text-[10px] text-muted-foreground">حجم التأثير</span>
                       <span className="text-xs font-bold text-foreground">{seller.riskScore}/100</span>
                     </div>
                     <div className="w-full h-1.5 rounded-full bg-secondary/50 overflow-hidden">
@@ -229,8 +229,8 @@ export default function SellerProfiles() {
                   </div>
 
                   {/* Footer Stats */}
-                  <div className="flex items-center justify-between pt-2 border-t border-border">
-                    <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+                  <div className="flex items-center justify-between flex-wrap pt-2 border-t border-border">
+                    <div className="flex items-center gap-4 text-xs sm:text-[10px] text-muted-foreground">
                       <span>{seller.totalLeaks || 0} تسريب</span>
                       <span>{(seller.totalRecords || 0).toLocaleString()} سجل</span>
                     </div>
@@ -256,7 +256,7 @@ export default function SellerProfiles() {
             {["critical", "high", "medium", "low"].map(level => (
               <div key={level} className={`rounded-xl p-3 border text-center ${riskColors[level]}`}>
                 <p className="text-xl font-bold">{sellers?.filter(s => s.riskLevel === level).length || 0}</p>
-                <p className="text-[10px]">{riskLabels[level]}</p>
+                <p className="text-xs sm:text-[10px]">{riskLabels[level]}</p>
               </div>
             ))}
           </div>
@@ -272,11 +272,11 @@ export default function SellerProfiles() {
               className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 cursor-pointer hover:bg-red-500/10 transition-colors"
               onClick={() => { setSelectedSeller(seller); setActiveModal("sellerDetail"); }}
             >
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between flex-wrap mb-1">
                 <span className="text-sm font-medium text-foreground">{seller.name}</span>
                 <span className="text-sm font-bold text-red-400">{seller.riskScore}/100</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">{seller.totalLeaks} حالة رصد • {(seller.totalRecords || 0).toLocaleString()} سجل</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{seller.totalLeaks} حالة رصد • {(seller.totalRecords || 0).toLocaleString()} سجل</p>
             </div>
           ))}
         </div>
@@ -295,12 +295,12 @@ export default function SellerProfiles() {
               className="p-3 rounded-lg bg-secondary/30 border border-border/50 cursor-pointer hover:bg-secondary/50 transition-colors"
               onClick={() => { setSelectedSeller(seller); setActiveModal("sellerDetail"); }}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-sm text-foreground">{seller.name}</span>
                 </div>
-                <Badge variant="outline" className={`text-[10px] ${riskColors[seller.riskLevel]}`}>{riskLabels[seller.riskLevel]}</Badge>
+                <Badge variant="outline" className={`text-xs sm:text-[10px] ${riskColors[seller.riskLevel]}`}>{riskLabels[seller.riskLevel]}</Badge>
               </div>
             </div>
           ))}
@@ -315,10 +315,10 @@ export default function SellerProfiles() {
             <p className="text-xs text-muted-foreground">حالة رصد مرتبطة</p>
           </div>
           {sellers?.sort((a, b) => (b.totalLeaks || 0) - (a.totalLeaks || 0)).slice(0, 10).map(seller => (
-            <div key={seller.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between">
+            <div key={seller.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-foreground">{seller.name}</p>
-                <p className="text-[10px] text-muted-foreground">{(seller.totalRecords || 0).toLocaleString()} سجل</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{(seller.totalRecords || 0).toLocaleString()} سجل</p>
               </div>
               <span className="text-lg font-bold text-amber-400">{seller.totalLeaks || 0}</span>
             </div>
@@ -353,11 +353,11 @@ export default function SellerProfiles() {
                 <h3 className="text-lg font-bold text-foreground">{selectedSeller.name}</h3>
                 <p className="text-xs text-muted-foreground font-mono">{selectedSeller.sellerId}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className={`text-[10px] ${riskColors[selectedSeller.riskLevel]}`}>
+                  <Badge variant="outline" className={`text-xs sm:text-[10px] ${riskColors[selectedSeller.riskLevel]}`}>
                     {riskLabels[selectedSeller.riskLevel]}
                   </Badge>
                   {selectedSeller.isActive && (
-                    <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+                    <span className="text-xs sm:text-[10px] text-emerald-400 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       نشط
                     </span>

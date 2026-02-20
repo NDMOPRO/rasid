@@ -149,10 +149,10 @@ export default function CustomReports() {
   };
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
       {/* Header */}
       <div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3 gradient-text">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-[oklch(0.48_0.14_290)] flex items-center justify-center">

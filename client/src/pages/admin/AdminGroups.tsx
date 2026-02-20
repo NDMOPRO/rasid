@@ -80,8 +80,8 @@ export default function AdminGroups() {
   }, [groups, search]);
 
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex items-center justify-between">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Layers className="w-6 h-6 text-purple-400" />
@@ -133,7 +133,7 @@ export default function AdminGroups() {
             <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
           ) : filteredGroups.length === 0 ? (
             <Card className="border border-dashed border-border/50">
-              <CardContent className="p-8 text-center text-muted-foreground">
+              <CardContent className="p-3 sm:p-8 text-center text-muted-foreground">
                 <Layers className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p>لا توجد مجموعات بعد</p>
               </CardContent>
@@ -146,7 +146,7 @@ export default function AdminGroups() {
                   onClick={() => setSelectedGroupId(group.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div>
                         <h3 className="font-semibold text-foreground">{group.name}</h3>
                         <p className="text-xs text-muted-foreground">{group.nameEn}</p>
@@ -172,7 +172,7 @@ export default function AdminGroups() {
           {selectedGroupId && groupDetail ? (
             <Card className="border border-border/50">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between flex-wrap">
                   <span className="flex items-center gap-2">
                     <Layers className="w-5 h-5 text-purple-400" />
                     {groupDetail.name}
@@ -218,14 +218,14 @@ export default function AdminGroups() {
                       groupDetail.members.map((member) => {
                         const user = allUsers?.find((u: any) => u.id === member.userId);
                         return (
-                          <div key={member.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/30">
+                          <div key={member.id} className="flex items-center justify-between flex-wrap p-2 rounded-lg bg-muted/30 border border-border/30">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
                                 {(user?.name ?? "?").charAt(0)}
                               </div>
                               <div>
                                 <p className="text-sm font-medium">{user?.name ?? `User #${member.userId}`}</p>
-                                <p className="text-[10px] text-muted-foreground">{user?.email ?? ""}</p>
+                                <p className="text-xs sm:text-[10px] text-muted-foreground">{user?.email ?? ""}</p>
                               </div>
                             </div>
                             <Button
@@ -256,7 +256,7 @@ export default function AdminGroups() {
                         <Badge
                           key={gp.id}
                           variant={gp.effect === "allow" ? "default" : "destructive"}
-                          className="text-[10px]"
+                          className="text-xs sm:text-[10px]"
                         >
                           {gp.permissionId.replace("perm-", "").replace(/-/g, " ")}
                         </Badge>
@@ -268,7 +268,7 @@ export default function AdminGroups() {
             </Card>
           ) : (
             <Card className="border border-dashed border-border/50">
-              <CardContent className="p-12 text-center text-muted-foreground">
+              <CardContent className="p-4 sm:p-12 text-center text-muted-foreground">
                 <Layers className="w-16 h-16 mx-auto mb-4 opacity-20" />
                 <p className="text-lg">اختر مجموعة لعرض التفاصيل</p>
               </CardContent>

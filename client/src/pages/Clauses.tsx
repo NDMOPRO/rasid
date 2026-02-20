@@ -42,7 +42,7 @@ export default function Clauses() {
 
   return (
     <div
-      className="relative space-y-6"
+      className="overflow-x-hidden max-w-full relative space-y-6"
     >
       <ParticleField count={30} opacity={0.3} />
       <WatermarkLogo />

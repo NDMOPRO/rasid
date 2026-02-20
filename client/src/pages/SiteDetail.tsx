@@ -94,7 +94,7 @@ export default function SiteDetail() {
 
   if (isLoading) {
     return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
         <div className="h-8 w-32 bg-muted rounded animate-pulse" />
         <Card className="glass-card gold-sweep animate-pulse"><CardContent className="p-6"><div className="h-40 bg-muted rounded" /></CardContent></Card>
@@ -109,7 +109,7 @@ export default function SiteDetail() {
 
   if (!site) {
     return (
-      <div className="p-12 text-center">
+      <div className="p-4 sm:p-12 text-center">
         <AlertTriangle className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-1">الموقع غير موجود</h3>
         <Button variant="outline" size="sm" onClick={() => setLocation("/sites")} className="mt-4 gap-2">
@@ -372,7 +372,7 @@ export default function SiteDetail() {
                 <div className={`text-lg font-bold ${compliant ? "text-emerald-500" : "text-red-500"}`}>
                   {compliant ? <CheckCircle className="h-5 w-5 mx-auto" /> : <XCircle className="h-5 w-5 mx-auto" />}
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1">بند {num}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground mt-1">بند {num}</p>
               </div>
             );
           })}
@@ -413,7 +413,7 @@ export default function SiteDetail() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
                           <h3 className="font-semibold text-sm">البند {num}: {name}</h3>
                           <Badge variant="outline" className={`shrink-0 ${compliant ? "badge-compliant" : "badge-non-compliant"}`}>
                             {compliant ? "ممتثل" : "غير ممتثل"}
@@ -646,7 +646,7 @@ export default function SiteDetail() {
                           {isYes ? <CheckCircle className="h-5 w-5 mx-auto" /> : <XCircle className="h-5 w-5 mx-auto" />}
                         </div>
                         <p className="text-xs font-medium">{item.label}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{isYes ? 'مذكور' : 'غير مذكور'}</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">{isYes ? 'مذكور' : 'غير مذكور'}</p>
                       </div>
                     );
                   })}
@@ -758,7 +758,7 @@ export default function SiteDetail() {
                                 <span className="text-sm font-medium">
                                   {scan.scanDate ? new Date(scan.scanDate).toLocaleDateString("ar-SA-u-nu-latn", { year: "numeric", month: "long", day: "numeric" }) : "-"}
                                 </span>
-                                {idx === 0 && <Badge className="text-[10px]">الأحدث</Badge>}
+                                {idx === 0 && <Badge className="text-xs sm:text-[10px]">الأحدث</Badge>}
                               </div>
                               <Badge variant="outline" className={getStatusBadgeClass(scan.complianceStatus || "")}>
                                 {statusLabels[scan.complianceStatus || ""] || "-"}
@@ -804,7 +804,7 @@ export default function SiteDetail() {
       {/* No scans message */}
       {!latestScan && (
         <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-          <CardContent className="p-12 text-center">
+          <CardContent className="p-4 sm:p-12 text-center">
             <ShieldAlert className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-1">لم يتم فحص هذا الموقع بعد</h3>
             <p className="text-sm text-muted-foreground mb-4">قم بإجراء فحص جديد لتحليل مدى امتثال الموقع</p>
@@ -864,7 +864,7 @@ export default function SiteDetail() {
       {/* Report Customizer */}
       {showReportCustomizer && latestScan && (
         <Dialog open={showReportCustomizer} onOpenChange={setShowReportCustomizer}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>إصدار وثيقة رسمية</DialogTitle>
             </DialogHeader>
@@ -918,7 +918,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
   if (isLoading) {
     return (
       <Card className="glass-card gold-sweep">
-        <CardContent className="p-8">
+        <CardContent className="p-3 sm:p-8">
           <div className="flex items-center justify-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <span className="text-muted-foreground">جاري تحميل لقطات الشاشة...</span>
@@ -932,7 +932,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
   if (items.length === 0) {
     return (
       <Card className="glass-card gold-sweep">
-        <CardContent className="p-12 text-center">
+        <CardContent className="p-4 sm:p-12 text-center">
           <Images className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-1">لا توجد لقطات شاشة للمقارنة</h3>
           <p className="text-sm text-muted-foreground">سيتم التقاط لقطات شاشة عند إجراء فحوصات جديدة</p>
@@ -1024,7 +1024,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
                 <img src={item.screenshotUrl} alt="" className="w-full h-full object-cover object-top" loading="lazy" />
               )}
             </div>
-            <div className="text-[10px] text-center">
+            <div className="text-xs sm:text-[10px] text-center">
               <div className="font-medium">{formatDate(item.scanDate)}</div>
               <div className={`mt-0.5 ${item.complianceStatus === 'compliant' ? 'text-emerald-500' : item.complianceStatus === 'partially_compliant' ? 'text-amber-500' : 'text-red-500'}`}>
                 {Math.round(item.overallScore || 0)}%
@@ -1042,7 +1042,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
           {/* Left (Before) */}
           <Card className="glass-card gold-sweep border-blue-500/30">
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-blue-500" />
                   <CardTitle className="text-sm">قبل - {formatDate(left?.scanDate)}</CardTitle>
@@ -1076,7 +1076,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
           {/* Right (After) */}
           <Card className="glass-card gold-sweep border-amber-500/30">
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-amber-500" />
                   <CardTitle className="text-sm">بعد - {formatDate(right?.scanDate)}</CardTitle>
@@ -1111,7 +1111,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
         /* Slider Comparison Mode */
         <Card className="glass-card gold-sweep">
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5">
                   <div className="h-3 w-3 rounded-full bg-blue-500" />
@@ -1226,7 +1226,7 @@ function ScreenshotComparison({ siteId, domain }: { siteId: number; domain: stri
 
       {/* Fullscreen Preview */}
       <Dialog open={!!showFullscreen} onOpenChange={() => setShowFullscreen(null)}>
-        <DialogContent className="max-w-5xl p-2">
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl p-2">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-sm">
               <Camera className="h-4 w-4 text-primary" />

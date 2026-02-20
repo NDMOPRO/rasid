@@ -329,14 +329,14 @@ export default function AdvancedScan() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm truncate">{site.siteName || site.domain}</span>
-          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getStatusColor(site.complianceStatus)}`}>
+          <Badge variant="outline" className={`text-xs sm:text-[10px] px-1.5 py-0 ${getStatusColor(site.complianceStatus)}`}>
             {getStatusLabel(site.complianceStatus)}
           </Badge>
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs text-muted-foreground truncate">{site.domain}</span>
           {site.classification && (
-            <span className="text-[10px] text-muted-foreground">• {site.classification}</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground">• {site.classification}</span>
           )}
         </div>
       </div>
@@ -350,9 +350,9 @@ export default function AdvancedScan() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3 gradient-text">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
@@ -439,7 +439,7 @@ export default function AdvancedScan() {
                         className="gap-1.5"
                       >
                         الكل
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="secondary" className="text-xs sm:text-[10px] px-1.5 py-0">
                           {totalSitesInDb}
                         </Badge>
                       </Button>
@@ -453,7 +453,7 @@ export default function AdvancedScan() {
                         >
                           <Building2 className="h-3.5 w-3.5" />
                           {SECTOR_LABELS[s.sectorType] || s.sectorType}
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          <Badge variant="secondary" className="text-xs sm:text-[10px] px-1.5 py-0">
                             {s.siteCount}
                           </Badge>
                         </Button>
@@ -481,7 +481,7 @@ export default function AdvancedScan() {
                           className="gap-1.5"
                         >
                           {CLASSIFICATION_LABELS[g.classification] || g.classification}
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          <Badge variant="secondary" className="text-xs sm:text-[10px] px-1.5 py-0">
                             {selectedSector ? (selectedSector === 'public' ? g.public : g.private) : g.total}
                           </Badge>
                         </Button>
@@ -492,7 +492,7 @@ export default function AdvancedScan() {
                   {/* Sites List */}
                   {(selectedSector || selectedClassification) && (
                     <div className="border rounded-lg">
-                      <div className="flex items-center justify-between p-3 bg-muted/30 border-b">
+                      <div className="flex items-center justify-between flex-wrap p-3 bg-muted/30 border-b">
                         <div className="flex items-center gap-2">
                           <Checkbox
                             checked={selectAllCategory}
@@ -564,7 +564,7 @@ export default function AdvancedScan() {
 
                   {searchQuery && (
                     <div className="border rounded-lg">
-                      <div className="flex items-center justify-between p-3 bg-muted/30 border-b">
+                      <div className="flex items-center justify-between flex-wrap p-3 bg-muted/30 border-b">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">
                             نتائج البحث عن "{searchQuery}"
@@ -615,7 +615,7 @@ export default function AdvancedScan() {
                       className="min-h-[200px] font-mono text-sm"
                       dir="ltr"
                     />
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center justify-between flex-wrap mt-2">
                       <p className="text-xs text-muted-foreground">
                         أدخل رابط واحد في كل سطر. يمكنك إدخال النطاق فقط أو الرابط الكامل.
                       </p>
@@ -636,7 +636,7 @@ export default function AdvancedScan() {
           {/* Scan Options */}
           <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <CardHeader className="pb-3 cursor-pointer" onClick={() => setShowOptions(!showOptions)}>
-              <CardTitle className="text-lg flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center justify-between flex-wrap">
                 <span className="flex items-center gap-2">
                   <Settings2 className="h-5 w-5 text-primary" />
                   خيارات الفحص
@@ -647,14 +647,14 @@ export default function AdvancedScan() {
             {showOptions && (
               <CardContent className="space-y-4">
                 {/* Deep Scan */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-blue-900/30 flex items-center justify-center">
                       <Layers className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">فحص عميق</Label>
-                      <p className="text-[11px] text-muted-foreground">البحث في مسارات إضافية عن صفحة الخصوصية</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">البحث في مسارات إضافية عن صفحة الخصوصية</p>
                     </div>
                   </div>
                   <Switch
@@ -664,14 +664,14 @@ export default function AdvancedScan() {
                 </div>
 
                 {/* Parallel Scan */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center btn-glow">
                       <Zap className="h-4 w-4 text-primary" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">مسح متوازي</Label>
-                      <p className="text-[11px] text-muted-foreground">فحص 5 مواقع في نفس الوقت لتسريع العملية</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">فحص 5 مواقع في نفس الوقت لتسريع العملية</p>
                     </div>
                   </div>
                   <Switch
@@ -681,14 +681,14 @@ export default function AdvancedScan() {
                 </div>
 
                 {/* Screenshots */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-emerald-900/30 flex items-center justify-center">
                       <Camera className="h-4 w-4 text-emerald-600" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">لقطات الشاشة</Label>
-                      <p className="text-[11px] text-muted-foreground">التقاط صورة للموقع أثناء الفحص</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">التقاط صورة للموقع أثناء الفحص</p>
                     </div>
                   </div>
                   <Switch
@@ -698,14 +698,14 @@ export default function AdvancedScan() {
                 </div>
 
                 {/* Extract Text */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-900/30 flex items-center justify-center">
                       <FileText className="h-4 w-4 text-amber-600" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">استخراج النصوص</Label>
-                      <p className="text-[11px] text-muted-foreground">استخراج محتوى صفحة الخصوصية النصي</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">استخراج محتوى صفحة الخصوصية النصي</p>
                     </div>
                   </div>
                   <Switch
@@ -715,14 +715,14 @@ export default function AdvancedScan() {
                 </div>
 
                 {/* Scan Apps */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-pink-900/30 flex items-center justify-center">
                       <Monitor className="h-4 w-4 text-pink-600" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">فحص التطبيقات</Label>
-                      <p className="text-[11px] text-muted-foreground">البحث عن تطبيقات الموقع في المتاجر</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">البحث عن تطبيقات الموقع في المتاجر</p>
                     </div>
                   </div>
                   <Switch
@@ -732,14 +732,14 @@ export default function AdvancedScan() {
                 </div>
 
                 {/* Bypass Dynamic */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-muted/30 border">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-red-900/30 flex items-center justify-center">
                       <Shield className="h-4 w-4 text-red-600" />
                     </div>
                     <div>
                       <Label className="text-sm font-medium">تجاوز المواقع الديناميكية</Label>
-                      <p className="text-[11px] text-muted-foreground">محاولة تحميل المحتوى الديناميكي (SPA)</p>
+                      <p className="text-xs sm:text-[11px] text-muted-foreground">محاولة تحميل المحتوى الديناميكي (SPA)</p>
                     </div>
                   </div>
                   <Switch
@@ -751,7 +751,7 @@ export default function AdvancedScan() {
                 <Separator />
 
                 {/* Timeout */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <Label className="text-sm">مهلة الاتصال (ثانية)</Label>
                   <div className="flex items-center gap-2">
                     <Button
@@ -776,7 +776,7 @@ export default function AdvancedScan() {
           {/* Action Card */}
           <Card className="glass-card gold-sweep border-primary/20">
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <span className="text-sm font-medium">المواقع المحددة</span>
                 <Badge variant={getSelectedCount() > 0 ? "default" : "secondary"} className="text-lg px-3 py-1">
                   {getSelectedCount()}
@@ -785,12 +785,12 @@ export default function AdvancedScan() {
 
               {/* Active options summary */}
               <div className="flex flex-wrap gap-1.5">
-                {options.deepScan && <Badge variant="outline" className="text-[10px] gap-1"><Layers className="h-2.5 w-2.5" /> عميق</Badge>}
-                {options.parallelScan && <Badge variant="outline" className="text-[10px] gap-1"><Zap className="h-2.5 w-2.5" /> متوازي</Badge>}
-                {options.captureScreenshots && <Badge variant="outline" className="text-[10px] gap-1"><Camera className="h-2.5 w-2.5" /> لقطات</Badge>}
-                {options.extractText && <Badge variant="outline" className="text-[10px] gap-1"><FileText className="h-2.5 w-2.5" /> نصوص</Badge>}
-                {options.scanApps && <Badge variant="outline" className="text-[10px] gap-1"><Monitor className="h-2.5 w-2.5" /> تطبيقات</Badge>}
-                {options.bypassDynamic && <Badge variant="outline" className="text-[10px] gap-1"><Shield className="h-2.5 w-2.5" /> ديناميكي</Badge>}
+                {options.deepScan && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><Layers className="h-2.5 w-2.5" /> عميق</Badge>}
+                {options.parallelScan && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><Zap className="h-2.5 w-2.5" /> متوازي</Badge>}
+                {options.captureScreenshots && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><Camera className="h-2.5 w-2.5" /> لقطات</Badge>}
+                {options.extractText && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><FileText className="h-2.5 w-2.5" /> نصوص</Badge>}
+                {options.scanApps && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><Monitor className="h-2.5 w-2.5" /> تطبيقات</Badge>}
+                {options.bypassDynamic && <Badge variant="outline" className="text-xs sm:text-[10px] gap-1"><Shield className="h-2.5 w-2.5" /> ديناميكي</Badge>}
               </div>
 
               <Button

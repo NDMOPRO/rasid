@@ -220,9 +220,9 @@ function LeakListInModal({ leaks, emptyMessage = "لا توجد حالات رص�
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{l.titleAr || l.title}</p>
-              <p className="text-[10px] text-muted-foreground">{l.sectorAr} · {(l.recordCount || 0).toLocaleString()} سجل</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{l.sectorAr} · {(l.recordCount || 0).toLocaleString()} سجل</p>
             </div>
-            <Badge variant="outline" className="text-[10px] shrink-0">{sourceLabel(l.source)}</Badge>
+            <Badge variant="outline" className="text-xs sm:text-[10px] shrink-0">{sourceLabel(l.source)}</Badge>
           </motion.div>
         ))}
       </div>
@@ -241,7 +241,7 @@ function LeakListInModal({ leaks, emptyMessage = "لا توجد حالات رص�
 /* ═══ Premium Section Header ═══ */
 function SectionHeader({ icon: Icon, title, subtitle, action, onAction }: { icon: React.ElementType; title: string; subtitle?: string; action?: string; onAction?: () => void }) {
   return (
-    <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center justify-between flex-wrap mb-5">
       <div className="flex items-center gap-3">
         <motion.div
           className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-primary/15 flex items-center justify-center premium-icon-hover"
@@ -252,7 +252,7 @@ function SectionHeader({ icon: Icon, title, subtitle, action, onAction }: { icon
         </motion.div>
         <div>
           <h2 className="text-sm font-bold text-foreground">{title}</h2>
-          {subtitle && <p className="text-[10px] text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="text-xs sm:text-[10px] text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
       {action && (
@@ -294,7 +294,7 @@ function PresentationOverlay({
     switch (slide.id) {
       case "kpi":
         return (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-7xl">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 w-full max-w-7xl">
             {kpiCards.map((card, idx) => {
               const Icon = card.icon;
               return (
@@ -303,7 +303,7 @@ function PresentationOverlay({
                   initial={{ opacity: 0, y: 40, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: idx * 0.15, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="rounded-3xl p-8 relative overflow-hidden"
+                  className="rounded-3xl p-3 sm:p-8 relative overflow-hidden"
                   style={{
                     background: "rgba(26, 37, 80, 0.8)",
                     backdropFilter: "blur(24px)",
@@ -313,7 +313,7 @@ function PresentationOverlay({
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-40 pointer-events-none`} />
                   <div className="relative">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between flex-wrap mb-4">
                       <div className="flex items-center gap-2">
                         <span className={`text-lg font-bold ${card.trendUp ? "text-emerald-400" : "text-red-400"}`}>{card.trend}</span>
                         {card.trendUp ? <TrendingUp className="w-5 h-5 text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
@@ -322,7 +322,7 @@ function PresentationOverlay({
                         <Icon className={`w-8 h-8 ${card.iconColor}`} />
                       </div>
                     </div>
-                    <div className="text-5xl font-black text-white mb-2 tabular-nums">
+                    <div className="text-3xl sm:text-5xl font-black text-white mb-2 tabular-nums">
                       {card.displayValue || ((card.value as number) ?? 0).toLocaleString()}
                     </div>
                     <p className="text-base text-slate-300 font-medium">{card.label}</p>
@@ -336,9 +336,9 @@ function PresentationOverlay({
 
       case "status":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 w-full max-w-[95vw] sm:max-w-6xl">
             <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Activity className="w-6 h-6 text-cyan-400" /> \u062d\u0627\u0644\u0629 \u0627\u0644\u062d\u0648\u0627\u062f\u062b
               </h3>
@@ -357,7 +357,7 @@ function PresentationOverlay({
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Radio className="w-6 h-6 text-cyan-400" /> \u0645\u0635\u0627\u062f\u0631 \u0627\u0644\u0631\u0635\u062f
               </h3>
@@ -369,7 +369,7 @@ function PresentationOverlay({
                   return (
                     <motion.div key={sc.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
                       className={`p-5 rounded-2xl ${sc.bg} border ${sc.border}`}>
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between flex-wrap mb-3">
                         <div className="flex items-center gap-3">
                           <SIcon className={`w-6 h-6 ${sc.color}`} />
                           <span className="text-base text-white font-medium">{sc.label}</span>
@@ -390,9 +390,9 @@ function PresentationOverlay({
 
       case "sectors":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 w-full max-w-[95vw] sm:max-w-6xl">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Building2 className="w-6 h-6 text-cyan-400" /> \u0627\u0644\u0642\u0637\u0627\u0639\u0627\u062a \u0627\u0644\u0645\u062a\u0623\u062b\u0631\u0629
               </h3>
@@ -423,7 +423,7 @@ function PresentationOverlay({
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-3xl p-8 flex items-center justify-center" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8 flex items-center justify-center" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <RadarAnimation />
             </motion.div>
           </div>
@@ -431,9 +431,9 @@ function PresentationOverlay({
 
       case "pii":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 w-full max-w-[95vw] sm:max-w-6xl">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Fingerprint className="w-6 h-6 text-cyan-400" /> \u0623\u0646\u0648\u0627\u0639 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0634\u062e\u0635\u064a\u0629
               </h3>
@@ -454,7 +454,7 @@ function PresentationOverlay({
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Bell className="w-6 h-6 text-cyan-400" /> \u0622\u062e\u0631 \u0627\u0644\u062d\u0648\u0627\u062f\u062b
               </h3>
@@ -482,9 +482,9 @@ function PresentationOverlay({
 
       case "trends":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 w-full max-w-[95vw] sm:max-w-6xl">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <TrendingUp className="w-6 h-6 text-cyan-400" /> \u0627\u0644\u0627\u062a\u062c\u0627\u0647 \u0627\u0644\u0634\u0647\u0631\u064a
               </h3>
@@ -507,7 +507,7 @@ function PresentationOverlay({
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-3xl p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
+              className="rounded-3xl p-3 sm:p-8" style={{ background: "rgba(26, 37, 80, 0.8)", backdropFilter: "blur(24px)", border: "1px solid rgba(61, 177, 172, 0.12)" }}>
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                 <Server className="w-6 h-6 text-cyan-400" /> \u0625\u062d\u0635\u0627\u0626\u064a\u0627\u062a \u0627\u0644\u0646\u0638\u0627\u0645
               </h3>
@@ -561,7 +561,7 @@ function PresentationOverlay({
       />
 
       {/* Top Bar */}
-      <div className="relative z-10 flex items-center justify-between px-8 py-4" style={{ borderBottom: "1px solid rgba(61, 177, 172, 0.1)" }}>
+      <div className="relative z-10 flex items-center justify-between flex-wrap px-3 sm:px-8 py-4" style={{ borderBottom: "1px solid rgba(61, 177, 172, 0.1)" }}>
         <div className="flex items-center gap-4">
           <img src={RASID_LOGO_LIGHT} alt="\u0631\u0627\u0635\u062f" className="h-8 object-contain" style={{ filter: "drop-shadow(0 2px 8px rgba(61, 177, 172, 0.15))" }} />
           <div className="h-6 w-px bg-white/10" />
@@ -614,7 +614,7 @@ function PresentationOverlay({
       </div>
 
       {/* Slide Content */}
-      <div className="presentation-slide-content flex-1 flex items-center justify-center px-8 pb-4 relative z-10 overflow-auto">
+      <div className="presentation-slide-content flex-1 flex items-center justify-center px-3 sm:px-8 pb-4 relative z-10 overflow-auto">
         <AnimatePresence mode="wait">
           <motion.div key={currentSlide} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.4 }} className="w-full flex justify-center">
@@ -624,7 +624,7 @@ function PresentationOverlay({
       </div>
 
       {/* Bottom Navigation */}
-      <div className="relative z-10 flex items-center justify-between px-8 py-4" style={{ borderTop: "1px solid rgba(61, 177, 172, 0.1)" }}>
+      <div className="relative z-10 flex items-center justify-between flex-wrap px-3 sm:px-8 py-4" style={{ borderTop: "1px solid rgba(61, 177, 172, 0.1)" }}>
         {/* Prev button */}
         <button onClick={onPrev}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10 transition-all border border-white/10">
@@ -669,7 +669,7 @@ function PresentationOverlay({
       )}
 
       {/* Keyboard hints */}
-      <div className="absolute bottom-6 left-8 z-10 flex items-center gap-3 text-[10px] text-slate-600">
+      <div className="absolute bottom-6 left-8 z-10 flex items-center gap-3 text-xs sm:text-[10px] text-slate-600">
         <span>\u2190\u2192 \u0627\u0644\u062a\u0646\u0642\u0644</span>
         <span>\u00b7</span>
         <span>P \u062a\u062f\u0648\u064a\u0631</span>
@@ -1007,7 +1007,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white dark:bg-[rgba(26,37,80,0.7)] rounded-2xl border border-[#e2e5ef] dark:border-[rgba(61,177,172,0.1)] p-6 animate-pulse">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between flex-wrap mb-4">
                 <div className="w-20 h-4 bg-muted/50 rounded-lg" />
                 <div className="w-11 h-11 bg-muted/30 rounded-xl" />
               </div>
@@ -1109,7 +1109,7 @@ export default function Dashboard() {
             />
             <span className={`text-xs font-semibold ${isDark ? 'text-[#3DB1AC]' : 'text-[#10b981]'}`}>مباشر</span>
           </div>
-          <span className="text-[10px] text-muted-foreground hidden sm:block">
+          <span className="text-xs sm:text-[10px] text-muted-foreground hidden sm:block">
             <Clock className="w-3 h-3 inline ml-1" />
             آخر تحديث: الآن
           </span>
@@ -1134,7 +1134,7 @@ export default function Dashboard() {
               <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50 pointer-events-none`} />
               <div className="relative p-5">
                 {/* Top: trend + icon */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between flex-wrap mb-3">
                   <div className="flex items-center gap-1.5">
                     <span className={`text-sm sm:text-xs font-bold ${card.trendUp ? "text-emerald-400" : "text-red-400"}`}>{card.trend}</span>
                     {card.trendUp ? <TrendingUp className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-emerald-400" /> : <TrendingDown className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-red-400" />}
@@ -1193,7 +1193,7 @@ export default function Dashboard() {
                       <motion.div whileHover={{ rotate: -10 }}>
                         <SIcon className={`w-4.5 h-4.5 ${sc.color}`} />
                       </motion.div>
-                      <span className="text-[11px] text-muted-foreground font-medium">{sc.label}</span>
+                      <span className="text-xs sm:text-[11px] text-muted-foreground font-medium">{sc.label}</span>
                     </div>
                     <p className="text-2xl font-bold text-foreground"><AnimatedNumber value={sc.value} /></p>
                   </motion.div>
@@ -1226,7 +1226,7 @@ export default function Dashboard() {
                       <SIcon className={`w-5 h-5 ${sc.color}`} />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between flex-wrap mb-1">
                         <div>
                           <span className="text-sm font-semibold text-foreground">{sc.label}</span>
                           <span className="text-[9px] text-muted-foreground/60 mr-2">{sc.labelEn}</span>
@@ -1242,7 +1242,7 @@ export default function Dashboard() {
                           transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
                         />
                       </div>
-                      <span className="text-[10px] text-muted-foreground mt-0.5">{pct}%</span>
+                      <span className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">{pct}%</span>
                     </div>
                   </motion.div>
                 );
@@ -1277,11 +1277,11 @@ export default function Dashboard() {
                       <SIcon className="w-5 h-5 text-primary" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap">
                         <span className="text-xs font-semibold text-foreground truncate">{sec.sector}</span>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">{sec.count} حادثة · {(sec.records ?? 0).toLocaleString()} سجل</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{sec.count} حادثة · {(sec.records ?? 0).toLocaleString()} سجل</p>
                       <div className="w-full h-1 bg-muted/40 rounded-full mt-1.5 overflow-hidden">
                         <motion.div
                           className="h-full rounded-full bg-primary/70"
@@ -1354,7 +1354,7 @@ export default function Dashboard() {
                       <PIcon className="w-3.5 h-3.5 text-muted-foreground" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
+                      <div className="flex items-center justify-between flex-wrap mb-0.5">
                         <span className="text-xs text-foreground truncate font-medium">{getPiiLabel(pii.type)}</span>
                         <span className="text-xs font-bold text-foreground">{pii.count}</span>
                       </div>
@@ -1372,7 +1372,7 @@ export default function Dashboard() {
                 );
               })}
               {piiDistribution.length > 8 && (
-                <p className="text-[10px] text-primary/60 text-center pt-1 flex items-center justify-center gap-1">
+                <p className="text-xs sm:text-[10px] text-primary/60 text-center pt-1 flex items-center justify-center gap-1">
                   <Sparkles className="w-3 h-3" /> + {piiDistribution.length - 8} نوع آخر
                 </p>
               )}
@@ -1403,7 +1403,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground truncate">{leak.titleAr}</p>
-                      <p className="text-[10px] text-muted-foreground">{leak.sectorAr} · {(leak.recordCount || 0).toLocaleString()} سجل</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.sectorAr} · {(leak.recordCount || 0).toLocaleString()} سجل</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <Badge variant="outline" className="text-[9px]">{sourceLabel(leak.source)}</Badge>
@@ -1431,7 +1431,7 @@ export default function Dashboard() {
                 const pct = Math.round((m.count / maxCount) * 100);
                 return (
                   <div key={m.yearMonth} className="flex items-center gap-3">
-                    <span className="text-[10px] text-muted-foreground w-16 shrink-0 text-left font-mono">{m.yearMonth}</span>
+                    <span className="text-xs sm:text-[10px] text-muted-foreground w-16 shrink-0 text-left font-mono">{m.yearMonth}</span>
                     <div className="flex-1 h-2 bg-muted/30 rounded-full overflow-hidden">
                       <motion.div
                         className="h-full rounded-full bg-gradient-to-l from-primary to-primary/60"
@@ -1473,9 +1473,9 @@ export default function Dashboard() {
                     </motion.div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-foreground truncate font-medium">حالة رصد: {leak.titleAr}</p>
-                      <p className="text-[10px] text-muted-foreground">{leak.sectorAr} · {sourceLabel(leak.source)}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.sectorAr} · {sourceLabel(leak.source)}</p>
                     </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
+                    <span className="text-xs sm:text-[10px] text-muted-foreground shrink-0">
                       {leak.detectedAt ? new Date(leak.detectedAt).toLocaleDateString("ar-SA", { month: "short", day: "numeric" }) : ""}
                     </span>
                   </motion.div>
@@ -1525,7 +1525,7 @@ export default function Dashboard() {
          ═══════════════════════════════════════════════════════════════ */}
 
       {/* Total Leaks Modal */}
-      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="تفاصيل إجمالي حالات الرصد" icon={<ShieldAlert className="w-5 h-5 text-blue-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "totalLeaks"} onClose={() => setActiveModal(null)} title="تفاصيل إجمالي حالات الرصد" icon={<ShieldAlert className="w-5 h-5 text-blue-500" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {statusCards.map((sc) => {
@@ -1534,7 +1534,7 @@ export default function Dashboard() {
                 <div key={sc.label} className={`p-4 rounded-xl ${sc.bg} text-center`} style={{ boxShadow: `0 0 12px ${sc.glow}` }}>
                   <SIcon className={`w-5 h-5 ${sc.color} mx-auto mb-1`} />
                   <p className="text-xl font-bold text-foreground">{sc.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{sc.label}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground">{sc.label}</p>
                 </div>
               );
             })}
@@ -1545,7 +1545,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* Total Records Modal */}
-      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "totalRecords"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-emerald-500" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-4">
           <div className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/20" style={{ boxShadow: "0 0 20px rgba(16, 185, 129, 0.08)" }}>
             <p className="text-3xl font-bold text-foreground">{(stats?.totalRecords ?? 0).toLocaleString()}</p>
@@ -1557,7 +1557,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* PII Types Modal */}
-      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المكتشفة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "piiTypes"} onClose={() => setActiveModal(null)} title="تفاصيل أنواع البيانات الشخصية المكتشفة" icon={<Fingerprint className="w-5 h-5 text-amber-500" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-3">
           {piiDistribution.map((pii, i) => {
             const PIcon = getPiiIcon(pii.type);
@@ -1572,9 +1572,9 @@ export default function Dashboard() {
                     <PIcon className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <h4 className="text-sm font-semibold text-foreground">{getPiiLabel(pii.type)}</h4>
-                      <Badge variant="outline" className="text-[10px]">{pii.count} حادثة</Badge>
+                      <Badge variant="outline" className="text-xs sm:text-[10px]">{pii.count} حادثة</Badge>
                     </div>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: colors[i % colors.length] }} />
@@ -1584,9 +1584,9 @@ export default function Dashboard() {
                 {piiLeaks.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {piiLeaks.slice(0, 3).map(l => (
-                      <p key={l.leakId} className="text-[10px] text-muted-foreground truncate">• {l.titleAr} — {l.sectorAr}</p>
+                      <p key={l.leakId} className="text-xs sm:text-[10px] text-muted-foreground truncate">• {l.titleAr} — {l.sectorAr}</p>
                     ))}
-                    {piiLeaks.length > 3 && <p className="text-[10px] text-primary">+ {piiLeaks.length - 3} حادثة أخرى</p>}
+                    {piiLeaks.length > 3 && <p className="text-xs sm:text-[10px] text-primary">+ {piiLeaks.length - 3} حادثة أخرى</p>}
                   </div>
                 )}
               </div>
@@ -1596,7 +1596,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* Sectors Modal */}
-      <DetailModal open={activeModal === "sectors"} onClose={() => setActiveModal(null)} title="تفاصيل القطاعات المتأثرة" icon={<Building2 className="w-5 h-5 text-violet-500" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "sectors"} onClose={() => setActiveModal(null)} title="تفاصيل القطاعات المتأثرة" icon={<Building2 className="w-5 h-5 text-violet-500" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-3">
           {sectorDistribution.map((sec) => {
             const SIcon = getSectorIcon(sec.sector || "");
@@ -1610,14 +1610,14 @@ export default function Dashboard() {
                     <SIcon className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <h4 className="text-sm font-semibold text-foreground">{sec.sector}</h4>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{sec.count} حادثة</Badge>
+                        <Badge variant="outline" className="text-xs sm:text-[10px]">{sec.count} حادثة</Badge>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">{(sec.records ?? 0).toLocaleString()} سجل مكشوف</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{(sec.records ?? 0).toLocaleString()} سجل مكشوف</p>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full bg-primary/70" style={{ width: `${pct}%` }} />
                     </div>
@@ -1631,7 +1631,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* Source Distribution Modal */}
-      <DetailModal open={activeModal === "sourceDist"} onClose={() => setActiveModal(null)} title="تفاصيل مصادر الرصد" icon={<Radio className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "sourceDist"} onClose={() => setActiveModal(null)} title="تفاصيل مصادر الرصد" icon={<Radio className="w-5 h-5 text-primary" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <div className="space-y-4">
           {sourceCards.map((sc) => {
             const SIcon = sc.icon;
@@ -1645,9 +1645,9 @@ export default function Dashboard() {
                     <SIcon className={`w-5 h-5 ${sc.color}`} />
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <h4 className="text-sm font-semibold text-foreground">{sc.label}</h4>
-                      <Badge variant="outline" className="text-[10px]">{sc.value} حالة رصد — {pct}%</Badge>
+                      <Badge variant="outline" className="text-xs sm:text-[10px]">{sc.value} حالة رصد — {pct}%</Badge>
                     </div>
                     <div className="w-full h-2 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: sourceColor(sc.key).fill }} />
@@ -1696,7 +1696,7 @@ export default function Dashboard() {
       </DetailModal>
 
       {/* All Leaks Modal */}
-      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع حالات الرصد" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-4xl">
+      <DetailModal open={activeModal === "allLeaks"} onClose={() => setActiveModal(null)} title="جميع حالات الرصد" icon={<Eye className="w-5 h-5 text-primary" />} maxWidth="max-w-[95vw] sm:max-w-4xl">
         <LeakListInModal leaks={leaks} />
       </DetailModal>
 

@@ -108,7 +108,7 @@ export default function Cases() {
 
   return (
     <div
-      className="space-y-6">
+      className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -170,7 +170,7 @@ export default function Cases() {
           >
             <CardContent className="p-3 text-center">
               <div className={`text-xl font-bold ${statusColors[key]?.split(" ")[1] || ""}`}>{statusCounts[key] || 0}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">{label}</div>
             </CardContent>
           </Card>
         ))}
@@ -232,7 +232,7 @@ export default function Cases() {
                       {statusLabels[c.status] || c.status}
                     </Badge>
                     {c.status === 'escalated' && (
-                      <span className="flex items-center gap-1 text-[10px] text-red-500 font-medium">
+                      <span className="flex items-center gap-1 text-xs sm:text-[10px] text-red-500 font-medium">
                         <AlertTriangle className="h-3 w-3" />
                         تصعيد تلقائي
                       </span>

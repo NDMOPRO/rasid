@@ -273,7 +273,7 @@ export default function PIIClassifier() {
   const hasSQLPatterns = detectedPII.some(p => p.category === "code");
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -312,7 +312,7 @@ export default function PIIClassifier() {
             onClick={() => setActiveModal(stat.key)}
           >
             <p className={`text-2xl font-bold ${stat.color}`}><AnimatedCounter value={typeof stat.value === "number" ? stat.value : 0} /></p>
-            <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
             <p className="text-[9px] text-primary/50 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
           </div>
         ))}
@@ -332,7 +332,7 @@ export default function PIIClassifier() {
             {/* Input */}
             <Card className="border-border">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center justify-between flex-wrap">
                   <span className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" />
                     النص المدخل
@@ -400,7 +400,7 @@ export default function PIIClassifier() {
                   <div className="space-y-4">
                     {/* Risk score + alerts */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-border">
+                      <div className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-secondary/20 border border-border">
                         <span className="text-sm text-foreground">درجة التأثير</span>
                         <div className="flex items-center gap-3">
                           <div className="w-24 h-2 rounded-full bg-secondary/50 overflow-hidden">
@@ -427,7 +427,7 @@ export default function PIIClassifier() {
                           <Bug className="w-5 h-5 text-red-500 flex-shrink-0" />
                           <div>
                             <p className="text-xs font-semibold text-red-400">تحذير: بيانات InfoStealer مكتشفة!</p>
-                            <p className="text-[10px] text-red-400/70">تم اكتشاف بيانات تسجيل دخول مسروقة — يُحتمل أنها من برمجيات RedLine/Vidar</p>
+                            <p className="text-xs sm:text-[10px] text-red-400/70">تم اكتشاف بيانات تسجيل دخول مسروقة — يُحتمل أنها من برمجيات RedLine/Vidar</p>
                           </div>
                         </motion.div>
                       )}
@@ -442,7 +442,7 @@ export default function PIIClassifier() {
                           <Database className="w-5 h-5 text-purple-400 flex-shrink-0" />
                           <div>
                             <p className="text-xs font-semibold text-purple-400">تحذير: أنماط SQL مكتشفة!</p>
-                            <p className="text-[10px] text-purple-400/70">تم اكتشاف استعلامات SQL تحتوي على أسماء أعمدة بيانات شخصية</p>
+                            <p className="text-xs sm:text-[10px] text-purple-400/70">تم اكتشاف استعلامات SQL تحتوي على أسماء أعمدة بيانات شخصية</p>
                           </div>
                         </motion.div>
                       )}
@@ -477,7 +477,7 @@ export default function PIIClassifier() {
                             <Icon className={`w-4 h-4 ${pii.color} flex-shrink-0`} />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-foreground">{pii.typeAr}</p>
-                              <p className="text-[10px] text-muted-foreground">سطر {pii.line} • ثقة {Math.round(pii.confidence * 100)}%</p>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground">سطر {pii.line} • ثقة {Math.round(pii.confidence * 100)}%</p>
                             </div>
                             <code className="text-xs font-mono text-primary bg-primary/5 px-2 py-0.5 rounded truncate max-w-[200px]">
                               {pii.value}
@@ -520,7 +520,7 @@ export default function PIIClassifier() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-semibold text-foreground truncate">{pattern.typeAr}</h3>
-                          <p className="text-[10px] text-muted-foreground">{pattern.type}</p>
+                          <p className="text-xs sm:text-[10px] text-muted-foreground">{pattern.type}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 mb-2">
@@ -532,7 +532,7 @@ export default function PIIClassifier() {
                         </Badge>
                       </div>
                       <div className="p-2 rounded bg-black/30 border border-border">
-                        <code className="text-[10px] font-mono text-primary break-all" dir="ltr">{pattern.regex.source}</code>
+                        <code className="text-xs sm:text-[10px] font-mono text-primary break-all" dir="ltr">{pattern.regex.source}</code>
                       </div>
                     </CardContent>
                   </Card>
@@ -555,9 +555,9 @@ export default function PIIClassifier() {
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
                       <Icon className="w-4 h-4" />
                       {info.label}
-                      <Badge variant="outline" className="text-[10px] mr-auto">{patterns.length} أنماط</Badge>
+                      <Badge variant="outline" className="text-xs sm:text-[10px] mr-auto">{patterns.length} أنماط</Badge>
                     </CardTitle>
-                    <p className="text-[10px] text-muted-foreground">{info.labelEn}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{info.labelEn}</p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -600,7 +600,7 @@ export default function PIIClassifier() {
                     <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
                       <span>{cat.icon}</span> {cat.category}
                     </h4>
-                    <p className="text-[10px] text-muted-foreground mb-2">{cat.categoryEn}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground mb-2">{cat.categoryEn}</p>
                     <ul className="space-y-1">
                       {cat.items.map((item) => (
                         <li key={item} className="text-xs text-muted-foreground flex items-center gap-2">
@@ -651,7 +651,7 @@ export default function PIIClassifier() {
                             <td className="py-3 px-4 text-xs text-foreground">{scan.inputText.length} حرف</td>
                             <td className="py-3 px-4 text-xs text-foreground font-medium">{mc} نتيجة</td>
                             <td className="py-3 px-4">
-                              <span className={`text-[10px] px-2 py-1 rounded border ${
+                              <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${
                                 risk >= 80 ? "text-red-400 bg-red-500/10 border-red-500/30" :
                                 risk >= 50 ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                                 "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
@@ -690,7 +690,7 @@ export default function PIIClassifier() {
               if (count === 0) return null;
               const Icon = info.icon;
               return (
-                <div key={key} className={`p-3 rounded-lg border ${info.color} flex items-center justify-between`}>
+                <div key={key} className={`p-3 rounded-lg border ${info.color} flex items-center justify-between flex-wrap`}>
                   <div className="flex items-center gap-2"><Icon className="w-4 h-4" /><span className="text-sm text-foreground">{info.label}</span></div>
                   <span className="text-sm font-bold text-foreground">{count}</span>
                 </div>
@@ -707,8 +707,8 @@ export default function PIIClassifier() {
             return (
               <div key={p.type} className="p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                 <div className="flex items-center gap-2 mb-1"><Icon className={`w-4 h-4 ${p.color}`} /><span className="text-sm font-medium text-foreground">{p.typeAr}</span></div>
-                <p className="text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
-                <code className="text-[10px] font-mono text-primary mt-1 block" dir="ltr">{p.regex.source}</code>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
+                <code className="text-xs sm:text-[10px] font-mono text-primary mt-1 block" dir="ltr">{p.regex.source}</code>
               </div>
             );
           })}
@@ -722,8 +722,8 @@ export default function PIIClassifier() {
             return (
               <div key={p.type} className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
                 <div className="flex items-center gap-2 mb-1"><Icon className={`w-4 h-4 ${p.color}`} /><span className="text-sm font-medium text-foreground">{p.typeAr}</span></div>
-                <p className="text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
-                <code className="text-[10px] font-mono text-primary mt-1 block" dir="ltr">{p.regex.source}</code>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
+                <code className="text-xs sm:text-[10px] font-mono text-primary mt-1 block" dir="ltr">{p.regex.source}</code>
               </div>
             );
           })}
@@ -740,7 +740,7 @@ export default function PIIClassifier() {
             return (
               <div key={p.type} className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
                 <div className="flex items-center gap-2 mb-1"><Icon className={`w-4 h-4 ${p.color}`} /><span className="text-sm font-medium text-foreground">{p.typeAr}</span></div>
-                <p className="text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
               </div>
             );
           })}
@@ -755,7 +755,7 @@ export default function PIIClassifier() {
             return (
               <div key={p.type} className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
                 <div className="flex items-center gap-2 mb-1"><Icon className={`w-4 h-4 ${p.color}`} /><span className="text-sm font-medium text-foreground">{p.typeAr}</span></div>
-                <p className="text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{p.type} • ثقة {Math.round(p.confidence * 100)}%</p>
               </div>
             );
           })}

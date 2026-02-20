@@ -37,7 +37,7 @@ const SLIDE_DURATION = 12000; // 12 seconds per slide
 // ─── Animated Background ───────────────────────────────────
 function PresentationBackground() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+    <div className="overflow-x-hidden max-w-full fixed inset-0 overflow-hidden pointer-events-none">
       <WatermarkLogo />
       {/* Deep dark base */}
       <div className="absolute inset-0 bg-[#030712]" />
@@ -129,7 +129,7 @@ function SlideHeroOverview({ data, mc }: { data: any; mc: any }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-full px-8 py-6"
+      className="flex flex-col items-center justify-center h-full px-3 sm:px-8 py-6"
       dir="rtl"
     >
       {/* Title */}
@@ -143,7 +143,7 @@ function SlideHeroOverview({ data, mc }: { data: any; mc: any }) {
             <Eye className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-l from-white via-blue-200 to-blue-300 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black bg-gradient-to-l from-white via-blue-200 to-blue-300 bg-clip-text text-transparent">
               منصة راصد الذكي
             </h1>
             <p className="text-lg text-white/50 font-medium">لوحة المؤشرات القيادية — المادة ١٢ من نظام حماية البيانات الشخصية</p>
@@ -164,7 +164,7 @@ function SlideHeroOverview({ data, mc }: { data: any; mc: any }) {
                 className={`absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br ${kpi.gradient} rounded-full blur-2xl opacity-20`}
               />
               <div className="relative">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between flex-wrap mb-3">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${kpi.gradient} flex items-center justify-center shadow-lg`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
@@ -183,7 +183,7 @@ function SlideHeroOverview({ data, mc }: { data: any; mc: any }) {
       {/* Monthly comparison */}
       {mc && (
         <div
-          className="mt-8 px-6 py-4 rounded-2xl bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl border border-[#C5A55A]/10 dark:border-white/10 max-w-4xl w-full"
+          className="mt-8 px-6 py-4 rounded-2xl bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl border border-[#C5A55A]/10 dark:border-white/10 max-w-[95vw] sm:max-w-4xl w-full"
         >
           <div className="flex items-center justify-center gap-6 text-sm text-white/70">
             <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ function SlideComplianceDistribution({ data }: { data: any }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-full px-8 py-6"
+      className="flex flex-col items-center justify-center h-full px-3 sm:px-8 py-6"
       dir="rtl"
     >
       <h2
@@ -224,7 +224,7 @@ function SlideComplianceDistribution({ data }: { data: any }) {
       </h2>
       <p className="text-white/50 mb-10">نظرة شاملة على حالة امتثال المواقع السعودية</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl w-full stagger-children">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-[95vw] sm:max-w-5xl w-full stagger-children">
         {statuses.map((s, i) => {
           const config = STATUS_CONFIG[s.key];
           const pct = (s.value / totalScans) * 100;
@@ -255,7 +255,7 @@ function SlideComplianceDistribution({ data }: { data: any }) {
 function SlideArticle12({ clauseStats }: { clauseStats: any[] }) {
   return (
     <div
-      className="flex flex-col items-center justify-center h-full px-8 py-6"
+      className="flex flex-col items-center justify-center h-full px-3 sm:px-8 py-6"
       dir="rtl"
     >
       <h2
@@ -266,7 +266,7 @@ function SlideArticle12({ clauseStats }: { clauseStats: any[] }) {
       </h2>
       <p className="text-white/50 mb-8">تحليل مستوى الامتثال لكل بند من بنود المادة الثانية عشرة</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl w-full stagger-children">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-[95vw] sm:max-w-6xl w-full stagger-children">
         {(clauseStats || []).map((clause: any, i: number) => {
           const pct = Number(clause.percentage) || 0;
           const total = Number(clause.total) || 0;
@@ -280,7 +280,7 @@ function SlideArticle12({ clauseStats }: { clauseStats: any[] }) {
               key={i}
               className={`relative overflow-hidden rounded-2xl border border-[#C5A55A]/10 dark:border-white/10 bg-gradient-to-br ${bgColor} backdrop-blur-xl p-5`}
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between flex-wrap mb-3">
                 <Badge variant="outline" className="border-[#C5A55A]/20 dark:border-white/20 text-white/70 text-xs">
                   بند {i + 1}
                 </Badge>
@@ -311,7 +311,7 @@ function SlideArticle12({ clauseStats }: { clauseStats: any[] }) {
 function SlideSectorComparison({ sectorData }: { sectorData: any[] }) {
   return (
     <div
-      className="flex flex-col items-center justify-center h-full px-8 py-6"
+      className="flex flex-col items-center justify-center h-full px-3 sm:px-8 py-6"
       dir="rtl"
     >
       <h2
@@ -322,7 +322,7 @@ function SlideSectorComparison({ sectorData }: { sectorData: any[] }) {
       </h2>
       <p className="text-white/50 mb-8">تحليل مقارن بين القطاع العام والقطاع الخاص</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full stagger-children">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 max-w-[95vw] sm:max-w-5xl w-full stagger-children">
         {(sectorData || []).map((sector: any, i: number) => {
           const SectorIcon = SECTOR_ICONS[sector.sectorType] || Building;
           const total = Number(sector.total) || 1;
@@ -335,7 +335,7 @@ function SlideSectorComparison({ sectorData }: { sectorData: any[] }) {
           return (
             <div
               key={sector.sectorType}
-              className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-8 relative overflow-hidden"
+              className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-3 sm:p-8 relative overflow-hidden"
             >
               <div
                 className={`absolute -top-10 ${i === 0 ? "-right-10" : "-left-10"} w-40 h-40 bg-gradient-to-br ${i === 0 ? "from-blue-500/15" : "from-[oklch(0.48_0.14_290)]/15"} rounded-full blur-3xl`}
@@ -350,7 +350,7 @@ function SlideSectorComparison({ sectorData }: { sectorData: any[] }) {
                     <p className="text-white/50">{total.toLocaleString()} موقع</p>
                   </div>
                   <div className="me-auto">
-                    <span className={`text-4xl font-black ${complianceRate >= 50 ? "text-emerald-400" : "text-rose-400"}`}>
+                    <span className={`text-2xl sm:text-4xl font-black ${complianceRate >= 50 ? "text-emerald-400" : "text-rose-400"}`}>
                       {complianceRate}%
                     </span>
                     <p className="text-xs text-white/50 text-center">نسبة الامتثال</p>
@@ -408,7 +408,7 @@ function SlideSummary({ data, mc }: { data: any; mc: any }) {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-full px-8 py-6"
+      className="flex flex-col items-center justify-center h-full px-3 sm:px-8 py-6"
       dir="rtl"
     >
       <h2
@@ -419,10 +419,10 @@ function SlideSummary({ data, mc }: { data: any; mc: any }) {
       </h2>
       <p className="text-white/50 mb-8">نتائج الرصد والتوصيات التنفيذية</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full stagger-children">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 max-w-[95vw] sm:max-w-5xl w-full stagger-children">
         {/* Summary Card */}
         <div
-          className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-8"
+          className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-3 sm:p-8"
         >
           <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-primary" />
@@ -437,17 +437,17 @@ function SlideSummary({ data, mc }: { data: any; mc: any }) {
             <p className="text-white/60 mt-2">نسبة الامتثال الكلية</p>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
+            <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
               <span className="text-white/70">الاتجاه العام</span>
               <span className={`font-bold ${isImproving ? "text-emerald-400" : "text-rose-400"}`}>
                 {isImproving ? "↑ تحسن" : "↓ تراجع"}
               </span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
+            <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
               <span className="text-white/70">مواقع جديدة هذا الشهر</span>
               <span className="font-bold text-blue-400">{mc?.newSitesThisMonth || 0}</span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
+            <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-[#C5A55A]/[0.03] dark:bg-white/5 border border-[#C5A55A]/10 dark:border-white/10">
               <span className="text-white/70">فحوصات جديدة هذا الشهر</span>
               <span className="font-bold text-primary">{mc?.newScansThisMonth || 0}</span>
             </div>
@@ -456,7 +456,7 @@ function SlideSummary({ data, mc }: { data: any; mc: any }) {
 
         {/* Recommendations Card */}
         <div
-          className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-8"
+          className="rounded-3xl border border-[#C5A55A]/10 dark:border-white/10 bg-[#C5A55A]/[0.03] dark:bg-white/5 backdrop-blur-xl p-3 sm:p-8"
         >
           <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
             <Zap className="w-6 h-6 text-amber-400" />
@@ -671,7 +671,7 @@ export default function PresentationMode() {
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between px-6 py-3 bg-black/60 backdrop-blur-xl border-t border-[#C5A55A]/10 dark:border-white/10">
+        <div className="flex items-center justify-between flex-wrap px-6 py-3 bg-black/60 backdrop-blur-xl border-t border-[#C5A55A]/10 dark:border-white/10">
           {/* Left: Slide indicators */}
           <div className="flex items-center gap-2">
             {slideNames.map((name, i) => (

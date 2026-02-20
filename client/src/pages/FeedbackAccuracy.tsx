@@ -32,7 +32,7 @@ export default function FeedbackAccuracy() {
   const isLoading = statsLoading || entriesLoading;
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -79,7 +79,7 @@ export default function FeedbackAccuracy() {
                     </div>
                     <div>
                       <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                      <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -108,7 +108,7 @@ export default function FeedbackAccuracy() {
                       className={`h-full rounded-full ${metric.bg}`}
                     />
                   </div>
-                  <p className="text-[10px] text-muted-foreground text-center">{metric.description}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground text-center">{metric.description}</p>
                 </CardContent>
               </Card>
             ))}

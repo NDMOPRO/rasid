@@ -27,7 +27,7 @@ const tabs: { id: TabId; label: string; icon: any }[] = [
 
 function IdentityTab() {
   return (
-    <div className="space-y-4">
+    <div className="overflow-x-hidden max-w-full space-y-4">
       <Card className="bg-gray-800/50 border-gray-700">
         <CardHeader><CardTitle className="text-white text-base">إعدادات الهوية البصرية</CardTitle></CardHeader>
         <CardContent className="space-y-4">
@@ -94,7 +94,7 @@ function MenusTab() {
     <div className="space-y-4">
       {menus.map((menu, i) => (
         <Card key={i} className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-4 flex items-center justify-between flex-wrap">
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-blue-400" />
               <div>
@@ -126,7 +126,7 @@ function RolesTab() {
     <div className="space-y-4">
       {roles.map((role, i) => (
         <Card key={i} className="bg-gray-800/50 border-gray-700">
-          <CardContent className="p-4 flex items-center justify-between">
+          <CardContent className="p-4 flex items-center justify-between flex-wrap">
             <div className="flex items-center gap-3">
               <Shield className={`h-5 w-5 ${role.color}`} />
               <div>
@@ -156,7 +156,7 @@ function NotificationsTab() {
         <CardHeader><CardTitle className="text-white text-base">قنوات الإشعارات</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {channels.map((ch, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+            <div key={i} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
               <div className="flex items-center gap-3">
                 <ch.icon className={`h-4 w-4 ${ch.enabled ? "text-emerald-400" : "text-gray-500"}`} />
                 <div>
@@ -184,7 +184,7 @@ function NotificationsTab() {
               { rule: "فشل فحص مجدول", action: "إشعار + Webhook", active: true },
               { rule: "محاولة دخول مشبوهة", action: "إشعار فوري + SMS", active: false },
             ].map((r, i) => (
-              <div key={i} className="flex items-center justify-between p-2 rounded bg-gray-900/30">
+              <div key={i} className="flex items-center justify-between flex-wrap p-2 rounded bg-gray-900/30">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${r.active ? "bg-emerald-400" : "bg-gray-500"}`} />
                   <span className="text-sm text-white">{r.rule}</span>
@@ -211,7 +211,7 @@ function BackupsTab() {
     <div className="space-y-4">
       <Card className="bg-gray-800/50 border-gray-700">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <CardTitle className="text-white text-base">جدولة النسخ الاحتياطي</CardTitle>
             <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">نشط</Badge>
           </div>
@@ -245,7 +245,7 @@ function BackupsTab() {
         <CardContent>
           <div className="space-y-2">
             {backups.map((b, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+              <div key={i} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
                 <div className="flex items-center gap-3">
                   {b.status === "success" ? <CheckCircle className="h-4 w-4 text-emerald-400" /> : <AlertTriangle className="h-4 w-4 text-red-400" />}
                   <div>
@@ -282,14 +282,14 @@ function SessionsTab() {
       </div>
       <Card className="bg-gray-800/50 border-gray-700">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <CardTitle className="text-white text-base">الجلسات النشطة</CardTitle>
             <Button variant="outline" size="sm" className="border-red-500/50 text-red-400 hover:bg-red-500/10">إنهاء جميع الجلسات</Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {sessions.map((s, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+            <div key={i} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
               <div className="flex items-center gap-3">
                 <div className={`w-2.5 h-2.5 rounded-full ${s.status === "active" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
                 <div>
@@ -328,7 +328,7 @@ function SeedingTab() {
         </CardHeader>
         <CardContent className="space-y-3">
           {seedCategories.map((cat) => (
-            <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+            <div key={cat.id} className="flex items-center justify-between flex-wrap p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
               <div className="flex items-center gap-3">
                 <span className="text-xl">{cat.icon}</span>
                 <div>
@@ -388,7 +388,7 @@ export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState<TabId>("identity");
   return (
     <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Settings className="h-6 w-6 text-amber-400" />

@@ -62,7 +62,7 @@ function StatCard({ icon, label, value, color, delay, onClick }: {
       <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 h-full">
         <div className={`absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity`} style={{ background: `linear-gradient(135deg, ${color}, transparent)` }} />
         <CardContent className="p-5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <div>
               <p className="text-sm text-muted-foreground mb-1">{label}</p>
               <p
@@ -84,7 +84,7 @@ function StatCard({ icon, label, value, color, delay, onClick }: {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-xl p-3 text-sm" dir="rtl">
+    <div className="overflow-x-hidden max-w-full bg-popover text-popover-foreground border border-border rounded-lg shadow-xl p-3 text-sm" dir="rtl">
       <p className="font-semibold mb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function DocumentStats() {
                     {pieData.map((entry: any, i: number) => (
                       <div
                         key={entry.type}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer hover:shadow-md hover:scale-[1.01] ${
+                        className={`flex items-center justify-between flex-wrap p-2.5 rounded-lg border transition-all cursor-pointer hover:shadow-md hover:scale-[1.01] ${
                           activeType === entry.type ? "border-primary bg-primary/5 shadow-sm" : "border-transparent hover:bg-muted/50"
                         }`}
                         onMouseEnter={() => setActiveType(entry.type)}
@@ -378,7 +378,7 @@ export default function DocumentStats() {
                     {stats.recentDocuments.slice(0, 8).map((doc: any, i: number) => (
                       <div
                         key={doc.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/30 transition-all cursor-pointer group hover:shadow-md hover:scale-[1.01]"
+                        className="flex items-center justify-between flex-wrap p-3 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/30 transition-all cursor-pointer group hover:shadow-md hover:scale-[1.01]"
                         onClick={() => openDrillDown({ title: `تفاصيل وثيقة: ${doc.titleAr || doc.documentId}` })}
                       >
                         <div className="flex items-center gap-3 min-w-0">

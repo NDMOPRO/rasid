@@ -103,7 +103,7 @@ export default function EmailNotifications() {
 
   if (isLoading) {
     return (
-    <div className="p-6 space-y-6">
+    <div className="overflow-x-hidden max-w-full p-6 space-y-6">
       <WatermarkLogo />
         <div className="h-8 w-64 bg-muted/50 rounded-lg animate-pulse" />
         <div className="h-96 bg-muted/30 rounded-2xl animate-pulse" />
@@ -114,7 +114,7 @@ export default function EmailNotifications() {
   return (
     <div className="p-6 space-y-8" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="flex items-center justify-between flex-wrap animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/25">
             <Mail className="h-7 w-7 text-white" />
@@ -158,7 +158,7 @@ export default function EmailNotifications() {
                 </Button>
               </div>
               
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+              <div className="flex items-center justify-between flex-wrap p-3 rounded-xl bg-muted/30">
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-amber-500" />
                   <Label>تفعيل الإشعارات</Label>
@@ -178,7 +178,7 @@ export default function EmailNotifications() {
               <CardDescription>اختر الأحداث التي تريد تلقي إشعارات عنها</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="flex items-center justify-between flex-wrap p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-red-950/30">
                     <ShieldAlert className="h-5 w-5 text-red-600" />
@@ -191,7 +191,7 @@ export default function EmailNotifications() {
                 <Switch checked={notifyStatusChange} onCheckedChange={setNotifyStatusChange} />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="flex items-center justify-between flex-wrap p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-amber-950/30">
                     <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -204,7 +204,7 @@ export default function EmailNotifications() {
                 <Switch checked={notifyScoreChange} onCheckedChange={setNotifyScoreChange} />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="flex items-center justify-between flex-wrap p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-blue-950/30">
                     <Shield className="h-5 w-5 text-blue-600" />
@@ -217,7 +217,7 @@ export default function EmailNotifications() {
                 <Switch checked={notifyNewScan} onCheckedChange={setNotifyNewScan} />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="flex items-center justify-between flex-wrap p-4 rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/15 btn-glow">
                     <Filter className="h-5 w-5 text-primary" />
@@ -243,7 +243,7 @@ export default function EmailNotifications() {
                 <CardDescription>الحد الأدنى لتغيير الدرجة لإرسال إشعار</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <span className="text-sm text-muted-foreground">الحد الأدنى للتغيير</span>
                   <Badge variant="outline" className="font-bold text-lg px-4 py-1">
                     {formatNumber(threshold)}٪

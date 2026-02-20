@@ -113,7 +113,7 @@ function KnowledgeTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-slate-800/50 border-slate-700">
@@ -334,7 +334,7 @@ function ActionsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-white">الإجراءات المخصصة</h3>
           <p className="text-sm text-slate-400">أضف إجراءات مخصصة يستجيب لها راصد الذكي تلقائياً</p>
@@ -466,7 +466,7 @@ function DocumentsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-white">مستندات التدريب</h3>
           <p className="text-sm text-slate-400">ارفع مستندات لتدريب راصد الذكي عليها</p>
@@ -738,7 +738,7 @@ function PersonalityTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h3 className="text-lg font-semibold text-white">سيناريوهات الشخصية</h3>
           <p className="text-sm text-slate-400">إدارة ردود وسلوكيات راصد الذكي التلقائية</p>

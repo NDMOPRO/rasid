@@ -159,7 +159,7 @@ export default function ComplianceComparison() {
 
   return (
     <div
-      className="p-6 space-y-6" dir="rtl">
+      className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
       <WatermarkLogo />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -256,7 +256,7 @@ export default function ComplianceComparison() {
         <div className="lg:col-span-3 space-y-6">
           {selectedSiteIds.length < 2 ? (
             <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-4 sm:p-12 text-center">
                 <GitCompare className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
                 <p className="text-lg font-medium mb-2">اختر جهتين على الأقل</p>
                 <p className="text-sm text-muted-foreground">حدد الجهات من القائمة الجانبية لعرض المقارنة التفصيلية</p>
@@ -369,7 +369,7 @@ export default function ComplianceComparison() {
             </>
           ) : (
             <Card className="glass-card gold-sweep">
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-4 sm:p-12 text-center">
                 <p>لم يتم العثور على بيانات للمقارنة.</p>
               </CardContent>
             </Card>

@@ -17,10 +17,10 @@ const GlassCard = ({ children, className = '' }) => (
 
 const KpiCard = ({ title, value, icon: Icon, subtitle }) => (
   <GlassCard>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap">
       <div>
         <p className="text-lg text-slate-300">{title}</p>
-        <p className="text-4xl font-bold text-white">{value}</p>
+        <p className="text-2xl sm:text-4xl font-bold text-white">{value}</p>
         <p className="text-sm text-slate-400">{subtitle}</p>
       </div>
       <div className="bg-slate-700/50 p-4 rounded-full">
@@ -53,7 +53,7 @@ export default function ThreatActorsAnalysis() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-800/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
+        <div className="overflow-x-hidden max-w-full bg-slate-800/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
           <p className="label font-bold">{`${label}`}</p>
           <p className="intro">{`عدد الحوادث: ${payload[0].value}`}</p>

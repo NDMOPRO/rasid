@@ -340,7 +340,7 @@ export default function PlatformLogin() {
 
         {/* ═══ MAIN CARD — Two-column design matching design.rasid.vip ═══ */}
         <div
-          className="relative z-10 w-full max-w-5xl"
+          className="relative z-10 w-full max-w-[95vw] sm:max-w-5xl"
           style={{
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0)" : "translateY(20px)",
@@ -357,7 +357,7 @@ export default function PlatformLogin() {
           >
             {/* ─── RIGHT PANEL: Login Form (RTL = appears on right) ─── */}
             <div
-              className="p-10 lg:p-12 flex flex-col justify-center relative"
+              className="p-4 sm:p-10 lg:p-12 flex flex-col justify-center relative"
               style={{
                 background: isDark ? "rgba(26, 37, 80, 0.85)" : "#FFFFFF",
                 backdropFilter: isDark ? "blur(24px)" : "none",
@@ -489,7 +489,7 @@ export default function PlatformLogin() {
                   </div>
 
                   {/* Remember me + Forgot password */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -555,7 +555,7 @@ export default function PlatformLogin() {
 
             {/* ─── LEFT PANEL: Character + Branding (RTL = appears on left) ─── */}
             <div
-              className="hidden lg:flex flex-col items-center justify-center p-12 relative overflow-hidden"
+              className="hidden lg:flex flex-col items-center justify-center p-4 sm:p-12 relative overflow-hidden"
               style={{
                 background: isDark
                   ? `linear-gradient(135deg, #0a1230 0%, ${SDAIA.bgDark} 50%, #101e45 100%)`

@@ -10,7 +10,7 @@ export default function AdminUsers() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="overflow-x-hidden max-w-full space-y-6">
         <h1 className="text-2xl font-bold">المستخدمون</h1>
         <Skeleton className="h-96 rounded-xl" />
       </div>
@@ -19,7 +19,7 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <Users className="h-6 w-6 text-gold" />
           <h1 className="text-2xl font-bold">المستخدمون</h1>

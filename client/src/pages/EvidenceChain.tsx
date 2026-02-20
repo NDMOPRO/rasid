@@ -47,7 +47,7 @@ export default function EvidenceChain() {
   const { data: stats } = trpc.evidence.stats.useQuery();
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -91,7 +91,7 @@ export default function EvidenceChain() {
                   </div>
                   <div>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</p>
                   </div>
                 </div>
                 <p className="text-[9px] text-primary/50 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
@@ -121,7 +121,7 @@ export default function EvidenceChain() {
                     <Icon className={`w-4 h-4 ${config.color}`} />
                     <div>
                       <p className="text-sm font-bold text-foreground">{count as number}</p>
-                      <p className="text-[10px] text-muted-foreground">{config.label}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{config.label}</p>
                     </div>
                   </div>
                 );
@@ -179,7 +179,7 @@ export default function EvidenceChain() {
                           <div className="flex items-center gap-2 mb-1">
                             <Icon className={`w-4 h-4 ${config.color}`} />
                             <span className="text-sm font-semibold text-foreground">{config.label}</span>
-                            <Badge variant="outline" className="text-[10px]">{entry.leakId}</Badge>
+                            <Badge variant="outline" className="text-xs sm:text-[10px]">{entry.leakId}</Badge>
                           </div>
                           <div className="flex items-center gap-2">
                             {entry.isVerified ? (
@@ -187,15 +187,15 @@ export default function EvidenceChain() {
                             ) : (
                               <XCircle className="w-3 h-3 text-red-400" />
                             )}
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs sm:text-[10px] text-muted-foreground">
                               {entry.isVerified ? "تم التحقق" : "فشل التحقق"}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs sm:text-[10px] text-muted-foreground">
                               {entry.capturedBy && `• ${entry.capturedBy}`}
                             </span>
                           </div>
                           {(entry as any).metadata?.description && (
-                            <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">{(entry as any).metadata.description}</p>
+                            <p className="text-xs sm:text-[10px] text-muted-foreground mt-1 line-clamp-1">{(entry as any).metadata.description}</p>
                           )}
                         </div>
                       </div>
@@ -218,16 +218,16 @@ export default function EvidenceChain() {
                       >
                         <div className="grid grid-cols-1 gap-2">
                           <div className="p-2 rounded bg-secondary/50 border border-border">
-                            <p className="text-[10px] text-muted-foreground mb-1">Content Hash (SHA-256):</p>
-                            <code className="text-[10px] font-mono text-primary break-all" dir="ltr">{entry.contentHash}</code>
+                            <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">Content Hash (SHA-256):</p>
+                            <code className="text-xs sm:text-[10px] font-mono text-primary break-all" dir="ltr">{entry.contentHash}</code>
                           </div>
                           {entry.previousHash && (
                             <div className="p-2 rounded bg-secondary/50 border border-border">
-                              <p className="text-[10px] text-muted-foreground mb-1">Previous Hash:</p>
-                              <code className="text-[10px] font-mono text-amber-400 break-all" dir="ltr">{entry.previousHash}</code>
+                              <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">Previous Hash:</p>
+                              <code className="text-xs sm:text-[10px] font-mono text-amber-400 break-all" dir="ltr">{entry.previousHash}</code>
                             </div>
                           )}
-                          <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+                          <div className="flex items-center gap-4 text-xs sm:text-[10px] text-muted-foreground">
                             <span>Evidence ID: <code className="font-mono text-foreground">{entry.evidenceId}</code></span>
                             <span>التقاط: {new Date(entry.capturedAt).toLocaleString("ar-SA")}</span>
                           </div>
@@ -260,7 +260,7 @@ export default function EvidenceChain() {
                   <Icon className={`w-4 h-4 ${config.color}`} />
                   <div>
                     <p className="text-sm font-bold text-foreground">{count as number}</p>
-                    <p className="text-[10px] text-muted-foreground">{config.label}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{config.label}</p>
                   </div>
                 </div>
               );
@@ -278,11 +278,11 @@ export default function EvidenceChain() {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 text-center">
               <p className="text-2xl font-bold text-emerald-400"><AnimatedCounter value={stats?.verified || 0} /></p>
-              <p className="text-[10px] text-muted-foreground">موثقة</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">موثقة</p>
             </div>
             <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/20 text-center">
               <p className="text-2xl font-bold text-red-400">{(stats?.total || 0) - (stats?.verified || 0)}</p>
-              <p className="text-[10px] text-muted-foreground">غير موثقة</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">غير موثقة</p>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -367,14 +367,14 @@ export default function EvidenceChain() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-mono text-primary">#{entry.blockIndex}</span>
-                    <Badge variant="outline" className="text-[10px]">{entry.leakId}</Badge>
+                    <Badge variant="outline" className="text-xs sm:text-[10px]">{entry.leakId}</Badge>
                     {entry.isVerified ? (
                       <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                     ) : (
                       <XCircle className="w-3 h-3 text-red-400" />
                     )}
                   </div>
-                  <p className="text-[10px] text-muted-foreground">{new Date(entry.capturedAt).toLocaleString("ar-SA")}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground">{new Date(entry.capturedAt).toLocaleString("ar-SA")}</p>
                 </div>
               ))}
             </div>
@@ -427,13 +427,13 @@ export default function EvidenceChain() {
             <div className="bg-secondary/30 rounded-xl p-4 border border-border/30 space-y-3">
               <h4 className="text-xs font-semibold text-muted-foreground">التشفير والتحقق</h4>
               <div className="p-2 rounded bg-secondary/50 border border-border">
-                <p className="text-[10px] text-muted-foreground mb-1">Content Hash (SHA-256):</p>
-                <code className="text-[10px] font-mono text-primary break-all" dir="ltr">{selectedEvidence.contentHash}</code>
+                <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">Content Hash (SHA-256):</p>
+                <code className="text-xs sm:text-[10px] font-mono text-primary break-all" dir="ltr">{selectedEvidence.contentHash}</code>
               </div>
               {selectedEvidence.previousHash && (
                 <div className="p-2 rounded bg-secondary/50 border border-border">
-                  <p className="text-[10px] text-muted-foreground mb-1">Previous Hash:</p>
-                  <code className="text-[10px] font-mono text-amber-400 break-all" dir="ltr">{selectedEvidence.previousHash}</code>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">Previous Hash:</p>
+                  <code className="text-xs sm:text-[10px] font-mono text-amber-400 break-all" dir="ltr">{selectedEvidence.previousHash}</code>
                 </div>
               )}
             </div>
@@ -454,9 +454,9 @@ export default function EvidenceChain() {
                 <h4 className="text-xs font-semibold text-muted-foreground mb-2">البيانات الوصفية</h4>
                 <div className="space-y-2">
                   {Object.entries((selectedEvidence as any).metadata).filter(([k]) => k !== "description").map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between text-xs">
+                    <div key={key} className="flex items-center justify-between flex-wrap text-xs">
                       <span className="text-muted-foreground">{key}</span>
-                      <span className="text-foreground font-mono text-[10px]">{String(value)}</span>
+                      <span className="text-foreground font-mono text-xs sm:text-[10px]">{String(value)}</span>
                     </div>
                   ))}
                 </div>

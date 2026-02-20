@@ -55,7 +55,7 @@ export default function ScanExecution() {
 
   if (!jobId) {
     return (
-    <div className="fixed inset-0 bg-[#0a0e1a] flex items-center justify-center text-white" dir="rtl">
+    <div className="overflow-x-hidden max-w-full fixed inset-0 bg-[#0a0e1a] flex items-center justify-center text-white" dir="rtl">
         <div className="text-center">
           <p className="text-xl mb-4">⚠️ لم يتم العثور على معرف الفحص</p>
           <button onClick={handleClose} className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">

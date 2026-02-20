@@ -179,9 +179,9 @@ export default function DeepScan() {
   const progressPercent = stats ? Math.round(((stats.completed + stats.failed + stats.skipped) / Math.max(stats.total, 1)) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold gradient-text">المسح العميق الشامل</h1>
           <p className="text-muted-foreground mt-1">مسح فعلي عميق وذكي لجميع المواقع مع استخراج سياسات الخصوصية وتحليل الامتثال</p>
@@ -255,7 +255,7 @@ export default function DeepScan() {
                 <Card key={job.id} className={`glass-card gold-sweep cursor-pointer transition-all hover:shadow-lg ${selectedJobId === job.id ? 'ring-2 ring-primary' : ''}`}
                   onClick={() => { setSelectedJobId(job.id); setActiveTab('dashboard'); }}>
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${job.status === 'running' ? 'bg-blue-500/20' : job.status === 'completed' ? 'bg-emerald-500/20' : 'bg-muted'}`}>
                           {job.status === 'running' ? <Loader2 className="h-5 w-5 text-blue-500 animate-spin" /> :
@@ -458,7 +458,7 @@ export default function DeepScan() {
               {stats && stats.avgScore > 0 && (
                 <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
                   <CardContent className="p-6 text-center">
-                    <div className="text-4xl font-bold gradient-text mb-2">{Math.round(stats.avgScore)}%</div>
+                    <div className="text-2xl sm:text-4xl font-bold gradient-text mb-2">{Math.round(stats.avgScore)}%</div>
                     <div className="text-muted-foreground">متوسط درجة الامتثال</div>
                   </CardContent>
                 </Card>
@@ -468,7 +468,7 @@ export default function DeepScan() {
               {llmStatusQuery.data && (
                 <Card className="glass-card gold-sweep border-purple-500/20">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div className="flex items-center gap-2">
                         <Brain className="h-5 w-5 text-purple-500" />
                         <CardTitle className="text-lg">تحليل الامتثال بالذكاء الاصطناعي</CardTitle>
@@ -518,7 +518,7 @@ export default function DeepScan() {
               {stats && stats.failed > 0 && (
                 <Card className="glass-card gold-sweep border-red-500/20">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div className="flex items-center gap-2">
                         <FileWarning className="h-5 w-5 text-red-500" />
                         <CardTitle className="text-lg">المواقع الفاشلة</CardTitle>
@@ -642,7 +642,7 @@ export default function DeepScan() {
                   </div>
 
                   {/* Pagination */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <span className="text-sm text-muted-foreground">
                       إجمالي: {resultsQuery.data?.total?.toLocaleString() || 0} نتيجة
                     </span>

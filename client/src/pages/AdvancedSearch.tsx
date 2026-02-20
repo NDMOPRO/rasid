@@ -200,9 +200,9 @@ export default function AdvancedSearch() {
 
   return (
     <div
-      className="space-y-6" dir="rtl">
+      className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold gradient-text">البحث والتصفية المتقدمة</h1>
           <p className="text-muted-foreground mt-1">بحث متقدم في قاعدة بيانات الجهات مع إمكانية حفظ قوالب التصفية</p>
@@ -254,7 +254,7 @@ export default function AdvancedSearch() {
       {showFilters && (
         <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <CardTitle className="text-base flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 فلاتر البحث
@@ -418,7 +418,7 @@ export default function AdvancedSearch() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleApplyFilters} className="px-8">
+              <Button onClick={handleApplyFilters} className="px-3 sm:px-8">
                 <Search className="h-4 w-4 ms-2" />
                 بحث
               </Button>
@@ -430,7 +430,7 @@ export default function AdvancedSearch() {
       {/* Results */}
       <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <CardTitle className="text-base">
               نتائج البحث
               {searchResults && (
@@ -508,7 +508,7 @@ export default function AdvancedSearch() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between flex-wrap mt-4 pt-4 border-t">
                   <div className="text-sm text-muted-foreground">
                     صفحة {page} من {totalPages}
                   </div>

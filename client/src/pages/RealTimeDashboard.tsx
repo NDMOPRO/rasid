@@ -56,7 +56,7 @@ function AnimatedCounter({ value, duration = 1000 }: { value: number; duration?:
 function LiveStatusIndicator({ isConnected }: { isConnected: boolean }) {
   return (
     <div
-      className="flex items-center gap-2">
+      className="overflow-x-hidden max-w-full flex items-center gap-2">
       <WatermarkLogo />
       {isConnected ? (
         <>
@@ -261,7 +261,7 @@ export default function RealTimeDashboard() {
         {/* Recent Scans Feed */}
         <Card className="border-0 shadow-lg overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between flex-wrap">
               <div className="flex items-center gap-2">
                 <ScanSearch className="w-5 h-5 text-primary" />
                 آخر الفحوصات
@@ -313,7 +313,7 @@ export default function RealTimeDashboard() {
                   );
                 })
               ) : (
-                <div className="p-8 text-center text-muted-foreground">
+                <div className="p-3 sm:p-8 text-center text-muted-foreground">
                   <ScanSearch className="w-10 h-10 mx-auto mb-2 opacity-30" />
                   <p>لا توجد فحوصات حديثة</p>
                 </div>
@@ -325,7 +325,7 @@ export default function RealTimeDashboard() {
         {/* Live Alerts Feed */}
         <Card className="border-0 shadow-lg overflow-hidden cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between flex-wrap">
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary" />
                 التنبيهات المباشرة
@@ -385,7 +385,7 @@ export default function RealTimeDashboard() {
                   );
                 })
               ) : (
-                <div className="p-8 text-center text-muted-foreground">
+                <div className="p-3 sm:p-8 text-center text-muted-foreground">
                   <Bell className="w-10 h-10 mx-auto mb-2 opacity-30" />
                   <p>لا توجد تنبيهات حديثة</p>
                 </div>
@@ -406,17 +406,17 @@ export default function RealTimeDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">وقت التشغيل</span>
               <span className="text-sm font-medium">{systemHealth?.server?.uptimeFormatted || "—"}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">الذاكرة المستخدمة</span>
               <span className="text-sm font-medium">
                 {systemHealth?.server?.memoryUsed || 0} / {systemHealth?.server?.memoryTotal || 0} MB
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">إصدار Node.js</span>
               <span className="text-sm font-medium">{systemHealth?.server?.nodeVersion || "—"}</span>
             </div>
@@ -440,7 +440,7 @@ export default function RealTimeDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">الحالة</span>
               <div className="flex items-center gap-2">
                 <PulsingDot color={cronStatus?.running ? "#10b981" : "#ef4444"} />
@@ -449,13 +449,13 @@ export default function RealTimeDashboard() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">آخر فحص</span>
               <span className="text-sm font-medium">
                 {cronStatus?.lastCheck ? formatDateTime(cronStatus.lastCheck) : "—"}
               </span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">الفاصل الزمني</span>
               <span className="text-sm font-medium">كل 5 دقائق</span>
             </div>
@@ -471,19 +471,19 @@ export default function RealTimeDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">إجمالي المواقع</span>
               <span className="text-sm font-bold">{formatNumber(systemHealth?.database?.totalSites || stats?.totalSites || 0)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">إجمالي الفحوصات</span>
               <span className="text-sm font-bold">{formatNumber(systemHealth?.database?.totalScans || stats?.totalScans || 0)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">إجمالي المستخدمين</span>
               <span className="text-sm font-bold">{formatNumber(systemHealth?.database?.totalUsers || 0)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <span className="text-sm text-muted-foreground">الحالات النشطة</span>
               <span className="text-sm font-bold">{formatNumber(systemHealth?.database?.totalCases || 0)}</span>
             </div>
@@ -512,7 +512,7 @@ export default function RealTimeDashboard() {
               const pct = Math.round((item.value / total) * 100);
               return (
                 <div key={item.label} style={{ animation: `fadeIn 0.5s ease-out ${i * 0.1}s both` }}>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between flex-wrap mb-1">
                     <div className="flex items-center gap-2">
                       <span className={`w-3 h-3 rounded-full ${item.bg}`} />
                       <span className="text-sm font-medium">{item.label}</span>

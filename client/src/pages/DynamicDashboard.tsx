@@ -185,9 +185,9 @@ export default function DynamicDashboard() {
     : WIDGET_CATALOG.filter(w => w.category === catalogFilter);
 
   return (
-    <div className="min-h-screen" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen" dir="rtl">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
           <p className="text-slate-400 text-sm mt-1">
@@ -301,7 +301,7 @@ export default function DynamicDashboard() {
                   }}
                 >
                   {/* Widget Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-slate-700/30">
+                  <div className="flex items-center justify-between flex-wrap p-4 border-b border-slate-700/30">
                     <div className="flex items-center gap-2">
                       {isEditMode && (
                         <GripVertical className="w-4 h-4 text-slate-600 cursor-grab" />
@@ -396,7 +396,7 @@ export default function DynamicDashboard() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
+              <div className="flex items-center justify-between flex-wrap p-5 border-b border-slate-700/50">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                     <LayoutGrid className="w-4 h-4 text-white" />

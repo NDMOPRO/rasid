@@ -118,7 +118,7 @@ export default function ScanSchedules() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -224,7 +224,7 @@ export default function ScanSchedules() {
       <div>
         <Card className="border-2 border-primary/20 bg-gradient-to-l from-primary/5 to-transparent glass-card gold-sweep">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div className="flex items-center gap-4">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${cronStatus?.running ? "bg-green-500/10" : "bg-red-500/10"}`}>
                   <Server className={`h-7 w-7 ${cronStatus?.running ? "text-green-500" : "text-red-500"}`} />
@@ -295,7 +295,7 @@ export default function ScanSchedules() {
               >
                 <Card className="hover:shadow-md transition-all duration-200 glass-card gold-sweep">
                   <CardContent className="p-5">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${s.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                           <RefreshCw className={`h-6 w-6 ${s.is_active ? "animate-spin-slow" : ""}`} />
@@ -403,7 +403,7 @@ export default function ScanSchedules() {
                 >
                   <Card className="hover:shadow-sm transition-shadow glass-card gold-sweep">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap">
                         <div className="flex items-center gap-3">
                           {exec.status === "completed" ? (
                             <CheckCircle2 className="h-5 w-5 text-green-500" />

@@ -55,7 +55,7 @@ function ProgressRing({ value, size = 120, strokeWidth = 10, color = "#2563eb", 
 
   return (
     <div
-      className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      className="overflow-x-hidden max-w-full relative flex items-center justify-center" style={{ width: size, height: size }}>
       <WatermarkLogo />
       <svg width={size} height={size} className="-rotate-90">
         <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke={bgColor} strokeWidth={strokeWidth} />
@@ -81,7 +81,7 @@ function ComparisonBar({ publicValue, privateValue, label, publicColor = "#1e3a5
   
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between flex-wrap text-sm">
         <span className="font-medium text-muted-foreground">{label}</span>
         <span className="font-bold">{formatArabicNumber(total)}</span>
       </div>
@@ -192,7 +192,7 @@ function ClauseComparisonCard({ clauseNum, publicRate, privateRate, delay = 0 }:
     <div className="animate-in fade-in slide-in-from-bottom-3" style={{ animationDelay: `${delay}ms`, animationFillMode: 'both', animationDuration: '500ms' }}>
       <Card className="border border-border/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
         <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <Badge variant="outline" className="font-bold">البند {formatArabicNumber(clauseNum)}</Badge>
             {winner === 'public' && <Badge className="bg-[#1e3a5f] text-white text-xs">العام أفضل</Badge>}
             {winner === 'private' && <Badge className="bg-[#2563eb] text-white text-xs">الخاص أفضل</Badge>}
@@ -206,7 +206,7 @@ function ClauseComparisonCard({ clauseNum, publicRate, privateRate, delay = 0 }:
               <div className="flex-1 h-5 bg-muted/30 rounded-full overflow-hidden">
                 <div className="h-full bg-[#1e3a5f] rounded-full transition-all duration-1000 ease-out flex items-center justify-end pe-2"
                   style={{ width: `${Math.max(publicRate, 3)}%` }}>
-                  {publicRate > 15 && <span className="text-[10px] text-white font-bold">{formatArabicNumber(publicRate)}٪</span>}
+                  {publicRate > 15 && <span className="text-xs sm:text-[10px] text-white font-bold">{formatArabicNumber(publicRate)}٪</span>}
                 </div>
               </div>
               {publicRate <= 15 && <span className="text-xs font-bold text-[#1e3a5f]">{formatArabicNumber(publicRate)}٪</span>}
@@ -218,7 +218,7 @@ function ClauseComparisonCard({ clauseNum, publicRate, privateRate, delay = 0 }:
               <div className="flex-1 h-5 bg-muted/30 rounded-full overflow-hidden">
                 <div className="h-full bg-[#2563eb] rounded-full transition-all duration-1000 ease-out flex items-center justify-end pe-2"
                   style={{ width: `${Math.max(privateRate, 3)}%` }}>
-                  {privateRate > 15 && <span className="text-[10px] text-white font-bold">{formatArabicNumber(privateRate)}٪</span>}
+                  {privateRate > 15 && <span className="text-xs sm:text-[10px] text-white font-bold">{formatArabicNumber(privateRate)}٪</span>}
                 </div>
               </div>
               {privateRate <= 15 && <span className="text-xs font-bold text-[#2563eb]">{formatArabicNumber(privateRate)}٪</span>}
@@ -281,7 +281,7 @@ export default function SectorComparison() {
   return (
     <div className="p-6 space-y-8" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="flex items-center justify-between flex-wrap animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg shadow-indigo-500/25">
             <Scale className="h-7 w-7 text-white" />
@@ -425,7 +425,7 @@ export default function SectorComparison() {
           
           {/* Legend */}
           <Card className="border-0 shadow-md animate-in fade-in duration-500 glass-card gold-sweep" style={{ animationDelay: '700ms', animationFillMode: 'both' }}>
-            <CardContent className="p-4 flex items-center justify-center gap-8">
+            <CardContent className="p-4 flex items-center justify-center gap-4 sm:gap-8">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-[#1e3a5f]" />
                 <span className="text-sm">القطاع العام</span>
@@ -453,7 +453,7 @@ export default function SectorComparison() {
               <CardContent className="space-y-2 max-h-80 overflow-y-auto">
                 {publicStats.categories && publicStats.categories.length > 0 ? (
                   publicStats.categories.map((cat: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={i} className="flex items-center justify-between flex-wrap p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
                       <span className="text-sm">{cat.classification || 'غير مصنف'}</span>
                       <Badge variant="outline" className="font-bold">{formatArabicNumber(Number(cat.count))}</Badge>
                     </div>
@@ -475,7 +475,7 @@ export default function SectorComparison() {
               <CardContent className="space-y-2 max-h-80 overflow-y-auto">
                 {privateStats.categories && privateStats.categories.length > 0 ? (
                   privateStats.categories.map((cat: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={i} className="flex items-center justify-between flex-wrap p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
                       <span className="text-sm">{cat.classification || 'غير مصنف'}</span>
                       <Badge variant="outline" className="font-bold">{formatArabicNumber(Number(cat.count))}</Badge>
                     </div>

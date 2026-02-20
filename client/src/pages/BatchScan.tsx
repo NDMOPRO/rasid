@@ -105,7 +105,7 @@ export default function BatchScan() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -180,7 +180,7 @@ export default function BatchScan() {
             {data.jobs.map((job: any, i: number) => (
               <Card key={job.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between flex-wrap mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${statusColors[job.status] || statusColors.pending}`}>
                         {job.status === "completed" && <CheckCircle2 className="h-5 w-5" />}

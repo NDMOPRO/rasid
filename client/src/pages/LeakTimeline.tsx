@@ -19,7 +19,7 @@ const SEVERITY_COLORS = {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg p-3 text-sm text-white">
+      <div className="overflow-x-hidden max-w-full bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-lg p-3 text-sm text-white">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="label font-bold">{`${label}`}</p>
         {payload.map((p, i) => (
@@ -39,7 +39,7 @@ const GlassCard = ({ children, className = '' }) => (
 
 const KpiCard = ({ title, value, icon: Icon, subtext }) => (
   <GlassCard>
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between flex-wrap">
       <p className="text-slate-300 text-md">{title}</p>
       <Icon className="text-slate-400" size={24} />
     </div>
@@ -96,9 +96,9 @@ export default function LeakTimeline() {
   }, [timelineData]);
 
   return (
-    <div className="p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">الخط الزمني والتوجهات</h1>
+    <div className="p-3 sm:p-8 bg-slate-900 text-white min-h-screen" dir="rtl">
+      <header className="flex items-center justify-between flex-wrap mb-8">
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">الخط الزمني والتوجهات</h1>
         <p className="text-xl text-slate-300">Timeline & Trends</p>
       </header>
 
@@ -109,7 +109,7 @@ export default function LeakTimeline() {
         <KpiCard title="متوسط الحوادث شهرياً" value={kpiData.avg} icon={BarChart3} subtext="Avg. Incidents / Month" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <GlassCard className="h-[400px]">
           <h2 className="text-xl font-bold mb-4 text-cyan-300">الحوادث الشهرية (Monthly Incidents)</h2>
           <ResponsiveContainer width="100%" height="100%">

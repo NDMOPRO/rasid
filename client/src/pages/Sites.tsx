@@ -57,7 +57,7 @@ export default function Sites() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       <WatermarkLogo />
       <div>
         <h1 className="text-2xl font-bold" style={{ background: 'linear-gradient(135deg, #C5A55A, #F5E6A3, #C5A55A)', backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', animation: 'gold-shimmer-sweep 5s ease-in-out infinite' }}>المواقع</h1>
@@ -117,7 +117,7 @@ export default function Sites() {
       <Card className="glass-card gold-sweep">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">جاري التحميل...</div>
+            <div className="p-3 sm:p-8 text-center text-muted-foreground">جاري التحميل...</div>
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -201,7 +201,7 @@ export default function Sites() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between p-4 border-t border-[rgba(197,165,90,0.10)]">
+              <div className="flex items-center justify-between flex-wrap p-4 border-t border-[rgba(197,165,90,0.10)]">
                 <span className="text-sm text-muted-foreground">
                   صفحة {page} من {totalPages}
                 </span>

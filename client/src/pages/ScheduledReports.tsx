@@ -70,7 +70,7 @@ export default function ScheduledReports() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-96">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -207,10 +207,10 @@ export default function ScheduledReports() {
                     <span className="text-xl">{tmpl.icon}</span>
                     <div>
                       <h4 className="text-sm font-bold text-foreground">{report.nameAr || report.name}</h4>
-                      <p className="text-[10px] text-muted-foreground">{report.name}</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{report.name}</p>
                     </div>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded-full font-medium ${
                     report.isEnabled ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-500/20 text-zinc-400"
                   }`}>
                     {report.isEnabled ? "نشط" : "متوقف"}

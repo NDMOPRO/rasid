@@ -78,10 +78,10 @@ const IncidentsRegistry = () => {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-slate-900 text-white p-8 font-sans">
+    <div dir="rtl" className="min-h-screen bg-slate-900 text-white p-3 sm:p-8 font-sans">
       <div className="mb-4"><GlobalFilterBar /></div>
       <header className="mb-8">
-        <h1 className="text-4xl font-bold text-cyan-400">سجل الحالات المتقدم</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">سجل الحالات المتقدم</h1>
         <p className="text-slate-400">Advanced Incidents Registry</p>
       </header>
 
@@ -126,7 +126,7 @@ const IncidentsRegistry = () => {
       </div>
 
       {/* Stats Bar */}
-      <div className="flex items-center justify-between bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 mb-8">
+      <div className="flex items-center justify-between flex-wrap bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 mb-8">
         <div>
           <span className="text-slate-400">الحوادث المعروضة: </span>
           <span className="font-bold text-cyan-400 text-lg">{formatNumber(filteredData.length)}</span>

@@ -131,8 +131,8 @@ export default function AdminTheme() {
   };
 
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex items-center justify-between">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Palette className="w-6 h-6 text-pink-400" />
@@ -180,7 +180,7 @@ export default function AdminTheme() {
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.labelEn}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{item.labelEn}</p>
                   </div>
                   <Input
                     value={config[item.key]}
@@ -254,10 +254,10 @@ export default function AdminTheme() {
                 { key: "enableGlassmorphism" as const, label: "تأثير الزجاج", desc: "تفعيل تأثير الشفافية الزجاجية" },
                 { key: "enableParticles" as const, label: "تأثير الجسيمات", desc: "تفعيل خلفية الجسيمات المتحركة" },
               ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between">
+                <div key={item.key} className="flex items-center justify-between flex-wrap">
                   <div>
                     <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{item.desc}</p>
                   </div>
                   <Switch checked={config[item.key]} onCheckedChange={(v) => handleChange(item.key, v)} />
                 </div>
@@ -321,7 +321,7 @@ export default function AdminTheme() {
                 }}
               >
                 {/* Mini header */}
-                <div className="flex items-center justify-between p-3 border-b" style={{ backgroundColor: config.surfaceColor, height: config.headerHeight * 0.6 }}>
+                <div className="flex items-center justify-between flex-wrap p-3 border-b" style={{ backgroundColor: config.surfaceColor, height: config.headerHeight * 0.6 }}>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded" style={{ backgroundColor: config.primaryColor }} />
                     <span style={{ color: config.textColor, fontSize: 12 }}>منصة راصد</span>

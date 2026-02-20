@@ -133,7 +133,7 @@ export default function PrivacyDashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="overflow-x-hidden max-w-full space-y-6 p-6">
         <h1 className="text-2xl font-bold">لوحة الخصوصية</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -214,7 +214,7 @@ export default function PrivacyDashboard() {
                 onClick={() => card.filter && drillDown(card.filter)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between flex-wrap mb-2">
                     <Icon className={`h-5 w-5 ${card.color}`} />
                     {card.percent !== null && (
                       <Badge variant="outline" className={`${card.color} text-xs`}>{card.percent}%</Badge>
@@ -273,7 +273,7 @@ export default function PrivacyDashboard() {
               <Card key={clause.number} className="cursor-pointer hover:scale-[1.02] transition-transform border-primary/20 hover:border-primary/50"
                 onClick={() => drillDownClause(clause.number)}>
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between flex-wrap mb-2">
                     <Badge variant="outline" className="text-xs">بند {clause.number}</Badge>
                     <div className="flex items-center gap-1">
                       <Hash className="h-3 w-3 text-muted-foreground" />

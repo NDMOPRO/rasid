@@ -111,7 +111,7 @@ export default function TelegramMonitor() {
 
   if (channelsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -236,24 +236,24 @@ export default function TelegramMonitor() {
                   <div className="text-center p-2 rounded-lg bg-secondary/30">
                     <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
                     <p className="text-xs font-medium text-foreground">{(channel.subscribers ?? 0).toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground">مشترك</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">مشترك</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-secondary/30">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-400 mx-auto mb-1" />
                     <p className="text-xs font-medium text-foreground">{channel.leaksDetected ?? 0}</p>
-                    <p className="text-[10px] text-muted-foreground">حالة رصد</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">حالة رصد</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-secondary/30">
                     <Eye className="w-3.5 h-3.5 text-cyan-400 mx-auto mb-1" />
                     <p className="text-xs font-medium text-foreground">
                       {channel.lastActivity ? new Date(channel.lastActivity).toLocaleDateString("ar-SA", { month: "short", day: "numeric" }) : "—"}
                     </p>
-                    <p className="text-[10px] text-muted-foreground">آخر نشاط</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">آخر نشاط</p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] px-2 py-1 rounded border ${riskColor(channel.riskLevel)}`}>
+                <div className="flex items-center justify-between flex-wrap">
+                  <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${riskColor(channel.riskLevel)}`}>
                     {riskLabel(channel.riskLevel)}
                   </span>
                   <p className="text-[9px] text-primary/50">اضغط للتفاصيل ←</p>
@@ -297,7 +297,7 @@ export default function TelegramMonitor() {
                       <td className="py-3 px-4 text-muted-foreground">{leak.sectorAr}</td>
                       <td className="py-3 px-4 text-foreground font-medium">{leak.recordCount.toLocaleString()}</td>
                       <td className="py-3 px-4">
-                        <span className={`text-[10px] px-2 py-1 rounded border ${severityColor(leak.severity)}`}>
+                        <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${severityColor(leak.severity)}`}>
                           {severityLabel(leak.severity)}
                         </span>
                       </td>
@@ -346,12 +346,12 @@ export default function TelegramMonitor() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {(ch.subscribers ?? 0).toLocaleString()} مشترك</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{ch.channelId} • {(ch.subscribers ?? 0).toLocaleString()} مشترك</p>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded border ${riskColor(ch.riskLevel)}`}>{riskLabel(ch.riskLevel)}</span>
+              <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${riskColor(ch.riskLevel)}`}>{riskLabel(ch.riskLevel)}</span>
               <div className="flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${statusColor(ch.status)}`} />
-                <span className="text-[10px] text-muted-foreground">{statusLabel(ch.status)}</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground">{statusLabel(ch.status)}</span>
               </div>
             </div>
           ))}
@@ -373,9 +373,9 @@ export default function TelegramMonitor() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{ch.channelId} • {ch.leaksDetected ?? 0} حالة رصد</p>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded border ${riskColor(ch.riskLevel)}`}>{riskLabel(ch.riskLevel)}</span>
+              <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${riskColor(ch.riskLevel)}`}>{riskLabel(ch.riskLevel)}</span>
             </div>
           ))}
         </div>
@@ -391,10 +391,10 @@ export default function TelegramMonitor() {
               className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border/50 cursor-pointer hover:bg-secondary/50 transition-colors"
               onClick={() => { setSelectedLeak(leak); setActiveModal("leakDetail"); }}
             >
-              <span className={`text-[10px] px-2 py-0.5 rounded border shrink-0 ${severityColor(leak.severity)}`}>{severityLabel(leak.severity)}</span>
+              <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border shrink-0 ${severityColor(leak.severity)}`}>{severityLabel(leak.severity)}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{leak.titleAr}</p>
-                <p className="text-[10px] text-muted-foreground">{leak.leakId} • {leak.sectorAr} • {leak.recordCount.toLocaleString()} سجل</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{leak.leakId} • {leak.sectorAr} • {leak.recordCount.toLocaleString()} سجل</p>
               </div>
             </div>
           ))}
@@ -422,7 +422,7 @@ export default function TelegramMonitor() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{ch.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{(ch.subscribers ?? 0).toLocaleString()} مشترك • {ch.leaksDetected ?? 0} حالة رصد</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">{(ch.subscribers ?? 0).toLocaleString()} مشترك • {ch.leaksDetected ?? 0} حالة رصد</p>
                   </div>
                 </div>
               ))}
@@ -451,7 +451,7 @@ export default function TelegramMonitor() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`w-2 h-2 rounded-full ${statusColor(selectedChannel.status)}`} />
                   <span className="text-xs text-muted-foreground">{statusLabel(selectedChannel.status)}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded border ${riskColor(selectedChannel.riskLevel)}`}>{riskLabel(selectedChannel.riskLevel)}</span>
+                  <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${riskColor(selectedChannel.riskLevel)}`}>{riskLabel(selectedChannel.riskLevel)}</span>
                 </div>
               </div>
             </div>
@@ -461,26 +461,26 @@ export default function TelegramMonitor() {
               <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
                 <Users className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
                 <p className="text-xl font-bold text-cyan-400">{(selectedChannel.subscribers ?? 0).toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground">مشترك</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">مشترك</p>
               </div>
               <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
                 <AlertTriangle className="w-5 h-5 text-amber-400 mx-auto mb-1" />
                 <p className="text-xl font-bold text-amber-400">{selectedChannel.leaksDetected ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <Clock className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
                 <p className="text-sm font-bold text-foreground">
                   {selectedChannel.lastActivity ? new Date(selectedChannel.lastActivity).toLocaleDateString("ar-SA") : "—"}
                 </p>
-                <p className="text-[10px] text-muted-foreground">آخر نشاط</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">آخر نشاط</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <MessageSquare className="w-5 h-5 text-muted-foreground mx-auto mb-1" />
                 <p className="text-sm font-bold text-foreground">
                   {selectedChannel.createdAt ? new Date(selectedChannel.createdAt).toLocaleDateString("ar-SA") : "—"}
                 </p>
-                <p className="text-[10px] text-muted-foreground">تاريخ الإضافة</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">تاريخ الإضافة</p>
               </div>
             </div>
 
@@ -501,7 +501,7 @@ export default function TelegramMonitor() {
                     <div key={leak.id} className="flex items-center gap-2 p-2 rounded bg-card/50 border border-border/20">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded border ${severityColor(leak.severity)}`}>{severityLabel(leak.severity)}</span>
                       <span className="text-xs text-foreground truncate flex-1">{leak.titleAr}</span>
-                      <span className="text-[10px] text-muted-foreground">{leak.recordCount.toLocaleString()} سجل</span>
+                      <span className="text-xs sm:text-[10px] text-muted-foreground">{leak.recordCount.toLocaleString()} سجل</span>
                     </div>
                   ))}
                 </div>

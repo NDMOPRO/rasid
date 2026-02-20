@@ -103,9 +103,9 @@ export default function MonitoringJobs() {
   const totalLeaksFound = jobs?.reduce((sum, j) => sum + (j.leaksFound ?? 0), 0) ?? 0;
 
   return (
-    <div className="space-y-6">
+    <div className="overflow-x-hidden max-w-full space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-foreground">مهام الرصد المجدولة</h1>
           <p className="text-sm text-muted-foreground mt-1">Monitoring Jobs — إدارة مهام الفحص التلقائي</p>
@@ -145,7 +145,7 @@ export default function MonitoringJobs() {
                 </div>
                 <div>
                   <p className={`text-xl font-bold text-foreground`}>{stat.value}</p>
-                  <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+                  <p className="text-xs sm:text-[11px] text-muted-foreground">{stat.label}</p>
                 </div>
               </div>
               <p className="text-[9px] text-primary/50 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">اضغط للتفاصيل ←</p>
@@ -160,7 +160,7 @@ export default function MonitoringJobs() {
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
       ) : !jobs || jobs.length === 0 ? (
-        <div className="bg-secondary/30 border border-border rounded-xl p-12 text-center">
+        <div className="bg-secondary/30 border border-border rounded-xl p-4 sm:p-12 text-center">
           <Radio className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-30" />
           <p className="text-sm text-muted-foreground">لا توجد مهام مجدولة</p>
         </div>
@@ -192,15 +192,15 @@ export default function MonitoringJobs() {
                       <h3 className="text-sm font-bold text-foreground">{job.nameAr}</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">{job.name}</p>
                       <div className="flex flex-wrap items-center gap-3 mt-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${statusConf.color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs sm:text-[11px] font-medium border ${statusConf.color}`}>
                           <StatusIcon className={`w-3 h-3 ${isRunning ? "animate-spin" : ""}`} />
                           {statusConf.label}
                         </span>
-                        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <span className="text-xs sm:text-[11px] text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {platLabel.ar}
                         </span>
-                        <span className="text-[11px] text-muted-foreground font-mono">
+                        <span className="text-xs sm:text-[11px] text-muted-foreground font-mono">
                           {job.cronExpression}
                         </span>
                       </div>
@@ -257,19 +257,19 @@ export default function MonitoringJobs() {
                 {/* Job details */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border/30">
                   <div>
-                    <p className="text-[10px] text-muted-foreground">آخر تشغيل</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">آخر تشغيل</p>
                     <p className="text-xs text-foreground mt-0.5">{formatDate(job.lastRunAt)}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground">إجمالي التشغيلات</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">إجمالي التشغيلات</p>
                     <p className="text-xs text-foreground mt-0.5 font-bold">{job.totalRuns ?? 0}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>
                     <p className="text-xs text-amber-400 mt-0.5 font-bold">{job.leaksFound ?? 0}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground">آخر نتيجة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">آخر نتيجة</p>
                     <p className="text-xs text-foreground mt-0.5 truncate">{job.lastResult || "—"}</p>
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function MonitoringJobs() {
                   <PIcon className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium text-foreground">{job.nameAr}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground">{platformLabels[job.platform]?.ar} • {job.cronExpression}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{platformLabels[job.platform]?.ar} • {job.cronExpression}</p>
               </div>
             );
           })}
@@ -311,10 +311,10 @@ export default function MonitoringJobs() {
             <p className="text-xs text-muted-foreground">تشغيل إجمالي</p>
           </div>
           {jobs?.sort((a, b) => (b.totalRuns ?? 0) - (a.totalRuns ?? 0)).map(job => (
-            <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between">
+            <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-foreground">{job.nameAr}</p>
-                <p className="text-[10px] text-muted-foreground">آخر تشغيل: {formatDate(job.lastRunAt)}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">آخر تشغيل: {formatDate(job.lastRunAt)}</p>
               </div>
               <span className="text-lg font-bold text-cyan-400">{job.totalRuns ?? 0}</span>
             </div>
@@ -330,10 +330,10 @@ export default function MonitoringJobs() {
             <p className="text-xs text-muted-foreground">حالة رصد مكتشفة</p>
           </div>
           {jobs?.filter(j => (j.leaksFound ?? 0) > 0).sort((a, b) => (b.leaksFound ?? 0) - (a.leaksFound ?? 0)).map(job => (
-            <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between">
+            <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-sm text-foreground">{job.nameAr}</p>
-                <p className="text-[10px] text-muted-foreground">{platformLabels[job.platform]?.ar}</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground">{platformLabels[job.platform]?.ar}</p>
               </div>
               <span className="text-lg font-bold text-amber-400">{job.leaksFound ?? 0}</span>
             </div>
@@ -347,20 +347,20 @@ export default function MonitoringJobs() {
           <div className="grid grid-cols-2 gap-3 mb-2">
             <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 text-center">
               <p className="text-xl font-bold text-emerald-400">{jobs?.filter(j => j.status === "active").length ?? 0}</p>
-              <p className="text-[10px] text-muted-foreground">نشطة</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">نشطة</p>
             </div>
             <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
               <p className="text-xl font-bold text-amber-400">{jobs?.filter(j => j.status === "paused").length ?? 0}</p>
-              <p className="text-[10px] text-muted-foreground">متوقفة</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">متوقفة</p>
             </div>
           </div>
           {jobs?.map(job => {
             const sc = statusConfig[job.status] || statusConfig.active;
             return (
               <div key={job.id} className="p-3 rounded-lg bg-secondary/30 border border-border/50 cursor-pointer hover:bg-secondary/50 transition-colors" onClick={() => { setSelectedJob(job); setActiveModal("jobDetail"); }}>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap">
                   <span className="text-sm text-foreground">{job.nameAr}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded border ${sc.color}`}>{sc.label}</span>
+                  <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${sc.color}`}>{sc.label}</span>
                 </div>
               </div>
             );

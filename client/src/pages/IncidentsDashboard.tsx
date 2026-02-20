@@ -10,7 +10,7 @@ export default function IncidentsDashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="overflow-x-hidden max-w-full space-y-6">
         <h1 className="text-2xl font-bold">لوحة حالات الرصد</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -36,7 +36,7 @@ export default function IncidentsDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <h1 className="text-2xl font-bold">لوحة حالات الرصد</h1>
         <Badge variant="outline" className="text-gold border-gold/30">وقائع تسرب البيانات الشخصية</Badge>
       </div>
@@ -50,7 +50,7 @@ export default function IncidentsDashboard() {
               className="stat-card gold-edge"
               onClick={() => setLocation(`/app/incidents/list${card.filter ? `?status=${card.filter}` : ""}`)}
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between flex-wrap mb-3">
                 <span className="text-sm text-muted-foreground">{card.label}</span>
                 <div className={`p-2 rounded-lg ${card.bgColor}`}>
                   <card.icon className={`h-4 w-4 ${card.color}`} />
@@ -71,7 +71,7 @@ export default function IncidentsDashboard() {
               className="stat-card gold-edge"
               onClick={() => setLocation(`/app/incidents/list?${card.param}`)}
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between flex-wrap mb-3">
                 <span className="text-sm text-muted-foreground">{card.label}</span>
                 <div className={`p-2 rounded-lg ${card.bgColor}`}>
                   <card.icon className={`h-4 w-4 ${card.color}`} />

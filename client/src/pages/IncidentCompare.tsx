@@ -23,7 +23,7 @@ const severityToNumber = (severity) => {
 const ComparisonCard = ({ incident }) => {
   if (!incident) {
     return (
-      <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex items-center justify-center h-full">
+      <div className="overflow-x-hidden max-w-full bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex items-center justify-center h-full">
       <div className="mb-4"><GlobalFilterBar /></div>
         <p className="text-slate-400">اختر حادثة لعرض التفاصيل</p>
       </div>
@@ -103,12 +103,12 @@ export default function IncidentCompare() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-8">
         <ComparisonCard incident={incidents[0]} />
         <ComparisonCard incident={incidents[1]} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
           <h2 className="text-xl font-semibold mb-4 text-white">مقارنة المقاييس (Radar Chart)</h2>
           <ResponsiveContainer width="100%" height={300}>

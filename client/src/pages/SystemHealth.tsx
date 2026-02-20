@@ -27,7 +27,7 @@ export default function SystemHealth() {
 
   if (isLoading) {
     return (
-    <div className="p-6 space-y-6">
+    <div className="overflow-x-hidden max-w-full p-6 space-y-6">
         <div className="flex items-center gap-3">
           <Server className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold">صحة النظام</h1>
@@ -63,7 +63,7 @@ export default function SystemHealth() {
   return (
     <div className="p-6 space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <Server className="h-7 w-7 text-primary" />
           <div>
@@ -81,7 +81,7 @@ export default function SystemHealth() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
         <Card className="border-green-500/30 bg-green-500/5 glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-xs text-muted-foreground">حالة الخادم</p>
                 <p className="text-lg font-bold text-green-600">يعمل</p>
@@ -96,7 +96,7 @@ export default function SystemHealth() {
 
         <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-xs text-muted-foreground">وقت التشغيل</p>
                 <p className="text-lg font-bold">{server.uptimeFormatted}</p>
@@ -111,7 +111,7 @@ export default function SystemHealth() {
 
         <Card className={memStatus === "danger" ? "border-red-500/30 bg-red-500/5" : memStatus === "warning" ? "border-yellow-500/30 bg-yellow-500/5" : ""}>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-xs text-muted-foreground">استخدام الذاكرة</p>
                 <p className="text-lg font-bold">{server.memoryUsed} MB / {server.memoryTotal} MB</p>
@@ -131,7 +131,7 @@ export default function SystemHealth() {
 
         <Card className="glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap">
               <div>
                 <p className="text-xs text-muted-foreground">RSS الذاكرة</p>
                 <p className="text-lg font-bold">{server.memoryRss} MB</p>
@@ -244,7 +244,7 @@ export default function SystemHealth() {
 
           <Card className="glass-card gold-sweep">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap">
                 <CardTitle className="gradient-text text-base">نشاط الفحوصات اليومي</CardTitle>
                 <Select value={String(scanDays)} onValueChange={(v) => setScanDays(Number(v))}>
                   <SelectTrigger className="w-32">

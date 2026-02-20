@@ -552,7 +552,7 @@ export default function VerifyDocument() {
   const isProcessing = stage === "verifying";
 
   return (
-    <div className="min-h-screen bg-[#030712] text-foreground overflow-hidden" dir="rtl">
+    <div className="overflow-x-hidden max-w-full min-h-screen bg-[#030712] text-foreground overflow-hidden" dir="rtl">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -582,7 +582,7 @@ export default function VerifyDocument() {
       <input ref={fileInputRef} type="file" accept="image/*,.pdf,.html,.htm" className="hidden" onChange={handleFileUpload} />
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="relative z-10 container max-w-3xl mx-auto px-4 py-8">
+      <div className="relative z-10 container max-w-[95vw] sm:max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -728,7 +728,7 @@ export default function VerifyDocument() {
               {/* Console Window */}
               <div className="rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl shadow-black/40">
                 {/* Console Title Bar */}
-                <div className="bg-slate-800/90 px-4 py-2.5 flex items-center justify-between border-b border-slate-700/50">
+                <div className="bg-slate-800/90 px-4 py-2.5 flex items-center justify-between flex-wrap border-b border-slate-700/50">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -748,7 +748,7 @@ export default function VerifyDocument() {
                         transition={{ duration: 1, repeat: Infinity }}
                       />
                     )}
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-xs sm:text-[10px] text-slate-500 font-mono">
                       {isProcessing ? "PROCESSING..." : stage === "result" ? "COMPLETE" : "READY"}
                     </span>
                   </div>
@@ -819,7 +819,7 @@ export default function VerifyDocument() {
                       );
                     })}
                     <div className="flex-1" />
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-xs sm:text-[10px] text-slate-500 font-mono">
                       {currentStep >= 0
                         ? `${Math.min(currentStep + 1, VERIFY_STEPS.length)}/${VERIFY_STEPS.length}`
                         : "0/5"}
@@ -846,7 +846,7 @@ export default function VerifyDocument() {
               {verifyResult.valid ? (
                 <Card className="bg-emerald-500/5 border-emerald-500/25 backdrop-blur-2xl overflow-hidden shadow-2xl shadow-emerald-500/5">
                   {/* Success Header */}
-                  <div className="relative bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 p-8 text-center border-b border-emerald-500/20 overflow-hidden">
+                  <div className="relative bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 p-3 sm:p-8 text-center border-b border-emerald-500/20 overflow-hidden">
                     {Array.from({ length: 8 }).map((_, i) => (
                       <motion.div
                         key={i}
@@ -923,7 +923,7 @@ export default function VerifyDocument() {
                               >
                                 <div className="flex items-center gap-1.5 mb-1.5">
                                   <Icon className="w-3 h-3 text-slate-400" />
-                                  <span className="text-[10px] text-slate-400">{item.label}</span>
+                                  <span className="text-xs sm:text-[10px] text-slate-400">{item.label}</span>
                                 </div>
                                 <p className={`text-xs font-mono ${item.color}`}>{item.value}</p>
                               </motion.div>
@@ -937,7 +937,7 @@ export default function VerifyDocument() {
                           transition={{ delay: 1.2 }}
                           className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30"
                         >
-                          <p className="text-[10px] text-slate-400 mb-1.5">عنوان الحادثة</p>
+                          <p className="text-xs sm:text-[10px] text-slate-400 mb-1.5">عنوان الحادثة</p>
                           <p className="text-sm font-semibold text-white">{verifyResult.document.titleAr}</p>
                         </motion.div>
 
@@ -989,11 +989,11 @@ export default function VerifyDocument() {
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Fingerprint className="w-3.5 h-3.5 text-indigo-400" />
-                            <span className="text-[10px] text-slate-400 font-semibold">
+                            <span className="text-xs sm:text-[10px] text-slate-400 font-semibold">
                               بصمة المحتوى الرقمية (SHA-256)
                             </span>
                           </div>
-                          <p className="text-[10px] font-mono text-indigo-400/80 break-all leading-relaxed bg-slate-950/50 rounded-lg p-2">
+                          <p className="text-xs sm:text-[10px] font-mono text-indigo-400/80 break-all leading-relaxed bg-slate-950/50 rounded-lg p-2">
                             {verifyResult.document.contentHash}
                           </p>
                         </motion.div>
@@ -1004,7 +1004,7 @@ export default function VerifyDocument() {
                           transition={{ delay: 1.5 }}
                           className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/15 text-center"
                         >
-                          <p className="text-[10px] text-emerald-400/70">
+                          <p className="text-xs sm:text-[10px] text-emerald-400/70">
                             ✓ تم التحقق من تطابق المحتوى مع النسخة المحفوظة في قاعدة البيانات المشفرة
                           </p>
                         </motion.div>
@@ -1025,7 +1025,7 @@ export default function VerifyDocument() {
                 </Card>
               ) : (
                 <Card className="bg-red-500/5 border-red-500/25 backdrop-blur-2xl shadow-2xl">
-                  <CardContent className="p-10 text-center">
+                  <CardContent className="p-4 sm:p-10 text-center">
                     <motion.div
                       initial={{ scale: 0, rotate: 180 }}
                       animate={{ scale: 1, rotate: 0 }}
@@ -1070,7 +1070,7 @@ export default function VerifyDocument() {
           className="mt-12 text-center"
         >
           <p className="text-xs text-teal-500/50 font-semibold mb-1">❝ حماية البيانات الشخصية متطلب وطني ❞</p>
-          <p className="text-[10px] text-slate-600">منصة راصد — مكتب إدارة البيانات الوطنية (NDMO)</p>
+          <p className="text-xs sm:text-[10px] text-slate-600">منصة راصد — مكتب إدارة البيانات الوطنية (NDMO)</p>
           <p className="text-[9px] text-slate-700 mt-1">NDMO_RASID_VERIFY_ENGINE v4.0</p>
         </motion.div>
       </div>

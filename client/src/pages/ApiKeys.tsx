@@ -80,7 +80,7 @@ export default function ApiKeys() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-96">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -281,7 +281,7 @@ GET /api/v1/leaks?source=telegram`}
                       onClick={() => togglePermission(perm.id)}
                     >
                       <p className="font-medium">{perm.labelAr}</p>
-                      <p className="text-[10px] opacity-70">{perm.label}</p>
+                      <p className="text-xs sm:text-[10px] opacity-70">{perm.label}</p>
                     </button>
                   ))}
                 </div>
@@ -398,7 +398,7 @@ function StatCard({ title, value, icon, onClick }: { title: string; value: strin
       className="bg-card/50 border border-border/50 rounded-xl p-4 group cursor-pointer hover:scale-[1.02] transition-all"
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between flex-wrap mb-1">
         <p className="text-xs text-muted-foreground">{title}</p>
         {icon}
       </div>
@@ -422,7 +422,7 @@ function ApiKeyCard({ apiKey, onUpdate, onDelete, onViewDetails }: {
       onClick={onViewDetails}
     >
       {/* Card Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <div className={`w-2 h-2 rounded-full ${apiKey.enabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
           <p className="font-mono text-sm text-foreground">{apiKey.name}</p>

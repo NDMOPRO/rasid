@@ -105,8 +105,8 @@ export default function ScenarioManagement() {
 
   return (
     <div
-      className="p-6 max-w-6xl mx-auto space-y-6" dir="rtl">
-      <div className="flex items-center justify-between">
+      className="overflow-x-hidden max-w-full p-6 max-w-[95vw] sm:max-w-6xl mx-auto space-y-6" dir="rtl">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2 gradient-text">
             <Brain className="w-6 h-6 text-primary" />

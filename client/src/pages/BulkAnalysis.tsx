@@ -214,10 +214,10 @@ export default function BulkAnalysis() {
   // ─── Job List View ───
   if (!selectedJobId) {
     return (
-    <div className="space-y-6 p-1">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
       <WatermarkLogo />
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div>
             <h1 className="text-2xl font-bold gradient-text flex items-center gap-3">
               <FileSearch className="h-7 w-7 text-primary" />
@@ -282,7 +282,7 @@ export default function BulkAnalysis() {
                     dir="rtl"
                   />
                   <div
-                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
+                    className={`border-2 border-dashed rounded-xl p-3 sm:p-8 text-center transition-colors cursor-pointer
                       ${csvUrls.length > 0 ? "border-emerald-500/50 bg-emerald-500/5" : "border-border hover:border-primary/50"}`}
                     onClick={() => fileRef.current?.click()}
                   >
@@ -377,7 +377,7 @@ export default function BulkAnalysis() {
                 onClick={() => { setSelectedJobId(job.id); setPage(0); setStatusFilter("all"); }}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                         <FileSearch className="h-6 w-6 text-primary" />
@@ -437,7 +437,7 @@ export default function BulkAnalysis() {
   return (
     <div className="space-y-6 p-1">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => setSelectedJobId(null)}>
             <ArrowRight className="h-5 w-5" />
@@ -514,12 +514,12 @@ export default function BulkAnalysis() {
       {job && (job.status === "running" || job.status === "paused") && (
         <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between flex-wrap mb-2">
               <span className="text-sm font-medium">تقدم التحليل</span>
               <span className="text-sm text-muted-foreground">{progressPercent}%</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
-            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between flex-wrap mt-2 text-xs text-muted-foreground">
               <span>تم تحليل {((job.analyzedUrls || 0) + (job.failedUrls || 0)).toLocaleString()} من {job.totalUrls?.toLocaleString()}</span>
               {job.status === "running" && (
                 <span className="flex items-center gap-1">
@@ -538,43 +538,43 @@ export default function BulkAnalysis() {
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-blue-400">{job.totalUrls?.toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">إجمالي المواقع</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">إجمالي المواقع</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-primary">{(job.analyzedUrls || 0).toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">تم تحليلها</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">تم تحليلها</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-emerald-400">{(job.compliantCount || 0).toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">ممتثل</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">ممتثل</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-amber-400">{(job.partialCount || 0).toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">ممتثل جزئياً</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">ممتثل جزئياً</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-red-400">{(job.nonCompliantCount || 0).toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">غير ممتثل</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">غير ممتثل</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-gray-400">{(job.noPolicyCount || 0).toLocaleString()}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">لا يوجد سياسة</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">لا يوجد سياسة</div>
             </CardContent>
           </Card>
           <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
             <CardContent className="p-3 text-center">
               <div className="text-2xl font-bold text-primary">{Math.round(job.avgScore || 0)}%</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">متوسط النتيجة</div>
+              <div className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">متوسط النتيجة</div>
             </CardContent>
           </Card>
         </div>
@@ -596,7 +596,7 @@ export default function BulkAnalysis() {
                 const pct = cs.total > 0 ? Math.round((val / cs.total) * 100) : 0;
                 return (
                   <div key={i} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between flex-wrap text-xs">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -614,7 +614,7 @@ export default function BulkAnalysis() {
                       </span>
                     </div>
                     <Progress value={pct} className="h-2" />
-                    <div className="text-[10px] text-muted-foreground">{val} من {cs.total}</div>
+                    <div className="text-xs sm:text-[10px] text-muted-foreground">{val} من {cs.total}</div>
                   </div>
                 );
               })}
@@ -626,7 +626,7 @@ export default function BulkAnalysis() {
       {/* Results Table */}
       <Card className="glass-card gold-sweep bg-card/50 border-border/50 elev-2">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <CardTitle className="text-base flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
               نتائج التحليل
@@ -671,7 +671,7 @@ export default function BulkAnalysis() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
-                                <span className="text-[10px]">ب{i + 1}</span>
+                                <span className="text-xs sm:text-[10px]">ب{i + 1}</span>
                               </TooltipTrigger>
                               <TooltipContent side="top">
                                 <p className="text-xs">{clauseNames[i]}</p>
@@ -705,7 +705,7 @@ export default function BulkAnalysis() {
                           </span>
                         </td>
                         <td className="text-center py-2.5 px-2">
-                          <Badge variant="outline" className={`text-[10px] ${complianceColors[r.complianceStatus] || ""}`}>
+                          <Badge variant="outline" className={`text-xs sm:text-[10px] ${complianceColors[r.complianceStatus] || ""}`}>
                             {complianceLabels[r.complianceStatus] || r.complianceStatus}
                           </Badge>
                         </td>
@@ -735,7 +735,7 @@ export default function BulkAnalysis() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-[rgba(197,165,90,0.10)]/30">
+              <div className="flex items-center justify-between flex-wrap mt-4 pt-3 border-t border-[rgba(197,165,90,0.10)]/30">
                 <div className="text-xs text-muted-foreground">
                   صفحة {page + 1} من {totalPages}
                 </div>

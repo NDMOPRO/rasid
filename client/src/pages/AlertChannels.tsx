@@ -67,9 +67,9 @@ export default function AlertChannels() {
   ];
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full space-y-6" dir="rtl">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30">
@@ -339,7 +339,7 @@ export default function AlertChannels() {
                 <CheckCircle className="w-3 h-3 text-emerald-400" />
                 <span className="text-sm text-foreground">{entry.subject}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">{entry.contactName} • {entry.sentAt ? new Date(entry.sentAt).toLocaleString("ar-SA") : "—"}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{entry.contactName} • {entry.sentAt ? new Date(entry.sentAt).toLocaleString("ar-SA") : "—"}</p>
             </div>
           ))}
         </div>
@@ -358,7 +358,7 @@ export default function AlertChannels() {
                 <XCircle className="w-3 h-3 text-red-400" />
                 <span className="text-sm text-foreground">{entry.subject}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">{entry.contactName} • {entry.sentAt ? new Date(entry.sentAt).toLocaleString("ar-SA") : "—"}</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">{entry.contactName} • {entry.sentAt ? new Date(entry.sentAt).toLocaleString("ar-SA") : "—"}</p>
             </div>
           ))}
           {history.filter(h => h.status === "failed").length === 0 && (
@@ -377,10 +377,10 @@ export default function AlertChannels() {
                 <span className="text-sm font-medium text-foreground">{rule.nameAr || rule.name}</span>
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`text-[10px] px-2 py-0.5 rounded border ${severityColors[rule.severityThreshold]}`}>
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColors[rule.severityThreshold]}`}>
                   {rule.severityThreshold === "critical" ? "واسع النطاق" : rule.severityThreshold === "high" ? "مرتفع" : "متوسط"} وأعلى
                 </span>
-                <span className="text-[10px] text-muted-foreground">{((rule.recipients as number[]) || []).length} مستلم</span>
+                <span className="text-xs sm:text-[10px] text-muted-foreground">{((rule.recipients as number[]) || []).length} مستلم</span>
               </div>
             </div>
           ))}
@@ -398,10 +398,10 @@ export default function AlertChannels() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">{contact.nameAr || contact.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{contact.roleAr || contact.role}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground">{contact.roleAr || contact.role}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    {contact.email && <span className="text-[10px] text-muted-foreground">{contact.email}</span>}
-                    {contact.phone && <span className="text-[10px] text-muted-foreground">{contact.phone}</span>}
+                    {contact.email && <span className="text-xs sm:text-[10px] text-muted-foreground">{contact.email}</span>}
+                    {contact.phone && <span className="text-xs sm:text-[10px] text-muted-foreground">{contact.phone}</span>}
                   </div>
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function AlertChannels() {
               <div>
                 <h3 className="text-lg font-bold text-foreground">{selectedEntry.nameAr || selectedEntry.name}</h3>
                 <p className="text-sm text-muted-foreground">{selectedEntry.roleAr || selectedEntry.role}</p>
-                <span className={`text-[10px] px-2 py-0.5 rounded border mt-1 inline-block ${
+                <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border mt-1 inline-block ${
                   selectedEntry.isActive ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-red-400 bg-red-500/10 border-red-500/30"
                 }`}>{selectedEntry.isActive ? "نشط" : "غير نشط"}</span>
               </div>
@@ -533,7 +533,7 @@ export default function AlertChannels() {
               <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors" onClick={() => setDrillLeakId(selectedEntry.leakId)}>
                 <p className="text-xs text-muted-foreground">حالة الرصد المرتبطة</p>
                 <p className="text-sm font-mono text-primary mt-1">{selectedEntry.leakId}</p>
-                <p className="text-[10px] text-primary/60 mt-1">اضغط لعرض تفاصيل حالة الرصد</p>
+                <p className="text-xs sm:text-[10px] text-primary/60 mt-1">اضغط لعرض تفاصيل حالة الرصد</p>
               </div>
             )}
           </div>

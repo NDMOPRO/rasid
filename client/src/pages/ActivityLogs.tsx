@@ -65,9 +65,9 @@ export default function ActivityLogs() {
 
   return (
     <div
-      className="p-6 space-y-6" dir="rtl">
+      className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1E3A5F] to-[#2D5F8A] flex items-center justify-center shadow-lg">
             <Activity className="w-6 h-6 text-white" />

@@ -178,15 +178,17 @@
     width: 100%;
   }
   /* ═══ Mobile Responsive Global Fixes ═══ */
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     html, body, #root {
       overflow-x: hidden !important;
       max-width: 100vw !important;
       width: 100% !important;
     }
-    /* Prevent any element from exceeding viewport width */
-    *, *::before, *::after {
-      max-width: 100vw;
+    /* Allow vertical scrolling everywhere */
+    body {
+      overflow-y: auto !important;
+      min-height: 100vh;
+      -webkit-overflow-scrolling: touch;
     }
     /* Make tables scrollable on mobile */
     table {
@@ -195,15 +197,13 @@
       -webkit-overflow-scrolling: touch;
       max-width: 100%;
     }
-    /* Ensure all containers respect viewport */
-    main, section, article, aside, div {
-      max-width: 100vw;
-    }
     /* Fix text overflow on mobile */
     h1, h2, h3, h4, h5, h6, p, span, a, label {
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
+  }
+  @media (max-width: 768px) {
     /* Reduce padding on mobile */
     .p-6 { padding: 0.75rem !important; }
     .p-8 { padding: 1rem !important; }
@@ -211,22 +211,40 @@
     .gap-6 { gap: 1rem !important; }
     .gap-8 { gap: 1.25rem !important; }
 
-    /* ═══ Mobile Card Font Size Increase ═══ */
-    /* Card titles */
-    .text-xs { font-size: 0.9375rem !important; line-height: 1.375rem !important; }
-    .text-sm { font-size: 1rem !important; line-height: 1.5rem !important; }
-    .text-\[10px\] { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-    .text-\[11px\] { font-size: 0.9375rem !important; line-height: 1.375rem !important; }
-    .text-base { font-size: 1.0625rem !important; line-height: 1.625rem !important; }
-    .text-lg { font-size: 1.25rem !important; line-height: 1.75rem !important; }
-    .text-xl { font-size: 1.375rem !important; line-height: 1.875rem !important; }
-    .text-2xl { font-size: 1.625rem !important; line-height: 2rem !important; }
-    .text-3xl { font-size: 2rem !important; line-height: 2.5rem !important; }
-    .text-4xl { font-size: 2.5rem !important; line-height: 3rem !important; }
-    /* Stat numbers in cards */
-    .text-5xl { font-size: 3rem !important; line-height: 3.5rem !important; }
-    /* Muted foreground text should also be readable */
-    .text-muted-foreground { font-size: inherit; }
+    /* ═══ Mobile Card & Content Font Size Increase ═══ */
+    /* Only increase font sizes in the main content area, NOT sidebar */
+    [data-scroll-container] .text-xs,
+    main .text-xs { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+    [data-scroll-container] .text-sm,
+    main .text-sm { font-size: 0.9375rem !important; line-height: 1.375rem !important; }
+    [data-scroll-container] .text-\[10px\],
+    main .text-\[10px\] { font-size: 0.8125rem !important; line-height: 1.125rem !important; }
+    [data-scroll-container] .text-\[11px\],
+    main .text-\[11px\] { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+    [data-scroll-container] .text-base,
+    main .text-base { font-size: 1.0625rem !important; line-height: 1.625rem !important; }
+    [data-scroll-container] .text-lg,
+    main .text-lg { font-size: 1.1875rem !important; line-height: 1.75rem !important; }
+    [data-scroll-container] .text-xl,
+    main .text-xl { font-size: 1.375rem !important; line-height: 1.875rem !important; }
+    [data-scroll-container] .text-2xl,
+    main .text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+    [data-scroll-container] .text-3xl,
+    main .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+    [data-scroll-container] .text-4xl,
+    main .text-4xl { font-size: 2.25rem !important; line-height: 2.75rem !important; }
+    [data-scroll-container] .text-5xl,
+    main .text-5xl { font-size: 2.75rem !important; line-height: 3.25rem !important; }
+
+    /* ═══ Mobile Touch Targets ═══ */
+    button, [role="button"], a {
+      min-height: 36px;
+      min-width: 36px;
+    }
+    /* Improve card readability */
+    .rounded-xl, .rounded-2xl {
+      padding: 0.5rem;
+    }
   }
   /* ═══ Global Font Size Increase ═══ */
   .text-xs { font-size: 0.8125rem !important; line-height: 1.25rem !important; }

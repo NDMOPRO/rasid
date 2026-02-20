@@ -98,13 +98,13 @@ function AlertCard({ alert, onMarkRead, onDismiss }: {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <Badge variant="outline" className={`text-[10px] ${config.color} border-current`}>
+            <Badge variant="outline" className={`text-xs sm:text-[10px] ${config.color} border-current`}>
               {config.label}
             </Badge>
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="text-xs sm:text-[10px]">
               {ALERT_TYPE_LABELS[alert.alertType] || alert.alertType}
             </Badge>
-            <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+            <span className="text-xs sm:text-[10px] text-muted-foreground">{timeAgo}</span>
           </div>
 
           <h3 className="font-bold text-sm text-foreground mb-1">
@@ -118,11 +118,11 @@ function AlertCard({ alert, onMarkRead, onDismiss }: {
           {/* Status change visual */}
           {alert.alertType === 'status_change' && alert.previousStatus && alert.newStatus && (
             <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-background/50">
-              <Badge variant="outline" className="text-[10px]">
+              <Badge variant="outline" className="text-xs sm:text-[10px]">
                 {STATUS_LABELS[alert.previousStatus] || alert.previousStatus}
               </Badge>
               <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
-              <Badge variant="outline" className="text-[10px] font-bold">
+              <Badge variant="outline" className="text-xs sm:text-[10px] font-bold">
                 {STATUS_LABELS[alert.newStatus] || alert.newStatus}
               </Badge>
             </div>
@@ -236,7 +236,7 @@ export default function VisualAlerts() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6" dir="rtl">
+      <div className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
         <Skeleton className="h-12 w-64" />
         <div className="flex gap-2">
           {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-9 w-20 rounded-lg" />)}
@@ -251,7 +251,7 @@ export default function VisualAlerts() {
   return (
     <div className="p-6 space-y-6" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-black text-foreground flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-lg relative">
@@ -304,7 +304,7 @@ export default function VisualAlerts() {
                 </div>
                 <div>
                   <div className="text-2xl font-black text-foreground">{toAr(stat.value)}</div>
-                  <div className="text-[10px] text-muted-foreground">{stat.label}</div>
+                  <div className="text-xs sm:text-[10px] text-muted-foreground">{stat.label}</div>
                 </div>
               </div>
             </CardContent>
@@ -325,7 +325,7 @@ export default function VisualAlerts() {
             }`}
           >
             <span className={btn.color || ''}>{btn.label}</span>
-            <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+            <Badge variant="outline" className="text-xs sm:text-[10px] h-5 px-1.5">
               {toAr(btn.count)}
             </Badge>
           </button>

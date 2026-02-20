@@ -25,7 +25,7 @@ function StatCard({ title, value, icon: Icon, color, subtitle }: { title: string
   return (
     <Card className="glass-card gold-sweep relative overflow-hidden">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
           <div>
             <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold mt-1">{value}</p>
@@ -144,8 +144,8 @@ export default function AiManagement() {
 
   if (user?.role !== "admin") {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <Card className="glass-card gold-sweep p-8 text-center">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-[60vh]">
+        <Card className="glass-card gold-sweep p-3 sm:p-8 text-center">
           <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">صلاحيات غير كافية</h2>
           <p className="text-muted-foreground">هذه الصفحة متاحة فقط للمشرفين</p>
@@ -160,7 +160,7 @@ export default function AiManagement() {
       dir="rtl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
             <Brain className="w-6 h-6 text-primary" />
@@ -264,7 +264,7 @@ export default function AiManagement() {
               <CardContent>
                 <div className="space-y-2">
                   {chatStats.data.recentSessions.map((s: any) => (
-                    <div key={s.sessionId} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 text-sm">
+                    <div key={s.sessionId} className="flex items-center justify-between flex-wrap p-2 rounded-lg bg-muted/30 text-sm">
                       <div>
                         <span className="font-medium">{s.title || "محادثة"}</span>
                         <span className="text-muted-foreground ms-2">({s.userName})</span>
@@ -283,7 +283,7 @@ export default function AiManagement() {
 
         {/* ===== Knowledge Base Tab ===== */}
         <TabsContent value="knowledge" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <BookOpen className="w-5 h-5" />
               قاعدة المعرفة ({knowledgeEntries.data?.length || 0} مدخل)
@@ -326,7 +326,7 @@ export default function AiManagement() {
 
         {/* ===== Scenarios Tab ===== */}
         <TabsContent value="scenarios" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
               السيناريوهات المحسّنة ({enhancedScenarios.data?.length || 0})
@@ -374,7 +374,7 @@ export default function AiManagement() {
 
         {/* ===== Custom Commands Tab ===== */}
         <TabsContent value="commands" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Command className="w-5 h-5" />
               الأوامر المخصصة ({customCommands.data?.length || 0})
@@ -429,7 +429,7 @@ export default function AiManagement() {
             <div className="space-y-2">
               {allSessions.data?.map((session: any) => (
                 <Card key={session.sessionId} className="p-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-sm">{session.title || "محادثة"}</span>

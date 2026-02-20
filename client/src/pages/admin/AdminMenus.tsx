@@ -63,8 +63,8 @@ export default function AdminMenus() {
   };
 
   return (
-    <div className="space-y-6 p-1">
-      <div className="flex items-center justify-between">
+    <div className="overflow-x-hidden max-w-full space-y-6 p-1">
+      <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <MenuIcon className="w-6 h-6 text-cyan-400" />
@@ -120,7 +120,7 @@ export default function AdminMenus() {
             <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
           ) : !menus || menus.length === 0 ? (
             <Card className="border border-dashed border-border/50">
-              <CardContent className="p-8 text-center text-muted-foreground">
+              <CardContent className="p-3 sm:p-8 text-center text-muted-foreground">
                 <MenuIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p>لا توجد قوائم مخصصة</p>
                 <p className="text-xs mt-1">القوائم الافتراضية تُدار من الكود</p>
@@ -134,11 +134,11 @@ export default function AdminMenus() {
                   onClick={() => setSelectedMenuId(menu.id)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap">
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-foreground">{menu.name}</h3>
-                          {!menu.isActive && <Badge variant="secondary" className="text-[10px]">معطل</Badge>}
+                          {!menu.isActive && <Badge variant="secondary" className="text-xs sm:text-[10px]">معطل</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground">{MENU_TYPE_LABELS[menu.location] ?? menu.location}</p>
                       </div>
@@ -158,7 +158,7 @@ export default function AdminMenus() {
           {selectedMenuId && menuDetail ? (
             <Card className="border border-border/50">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between flex-wrap">
                   <span className="flex items-center gap-2">
                     <MenuIcon className="w-5 h-5 text-cyan-400" />
                     {(menuDetail as any).name}
@@ -186,7 +186,7 @@ export default function AdminMenus() {
                           <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium">{item.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{item.path ?? item.url ?? ""}</p>
+                            <p className="text-xs sm:text-[10px] text-muted-foreground">{item.path ?? item.url ?? ""}</p>
                           </div>
                           {item.isVisible ? (
                             <Eye className="w-4 h-4 text-green-400" />
@@ -204,7 +204,7 @@ export default function AdminMenus() {
             </Card>
           ) : (
             <Card className="border border-dashed border-border/50">
-              <CardContent className="p-12 text-center text-muted-foreground">
+              <CardContent className="p-4 sm:p-12 text-center text-muted-foreground">
                 <MenuIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
                 <p className="text-lg">اختر قائمة لعرض التفاصيل</p>
                 <p className="text-xs mt-2">أو أنشئ قائمة جديدة لتخصيص التنقل</p>

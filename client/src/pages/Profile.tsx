@@ -98,7 +98,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-    <div className="flex items-center justify-center h-64">
+    <div className="overflow-x-hidden max-w-full flex items-center justify-center h-64">
       <WatermarkLogo />
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping btn-glow" />
@@ -114,7 +114,7 @@ export default function ProfilePage() {
     : "---";
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-[95vw] sm:max-w-5xl">
       {/* ─── Hero Profile Card ─── */}
       <div className="relative overflow-hidden rounded-2xl glass-card gold-sweep border-primary/10">
         {/* Background gradient */}
@@ -436,7 +436,7 @@ function ActivityStatCard({ icon: Icon, label, value, color, bgColor }: {
         <Icon className={`h-4 w-4 ${color} card-icon`} />
       </div>
       <p className="text-lg font-bold stat-number">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-xs sm:text-[11px] text-muted-foreground">{label}</p>
     </div>
   );
 }
@@ -458,7 +458,7 @@ function ActivityLog() {
   if (isLoading) {
     return (
       <Card className="glass-card gold-sweep border-primary/10">
-        <CardContent className="p-8 text-center text-muted-foreground">
+        <CardContent className="p-3 sm:p-8 text-center text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
           جاري تحميل سجل النشاط...
         </CardContent>
@@ -495,7 +495,7 @@ function ActivityLog() {
                   <Zap className="h-4 w-4 text-primary card-icon" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap">
                     <span className="font-medium text-sm">{log.action}</span>
                     <span className="text-xs text-muted-foreground">
                       {log.createdAt ? new Date(log.createdAt).toLocaleDateString("ar-SA-u-nu-latn", {
@@ -540,7 +540,7 @@ function NotificationPreferences() {
         <CardDescription>التحكم في إشعارات البريد الإلكتروني التلقائية</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between p-4 rounded-xl glass-surface border-primary/5 hover:border-primary/15 transition-all">
+        <div className="flex items-center justify-between flex-wrap p-4 rounded-xl glass-surface border-primary/5 hover:border-primary/15 transition-all">
           <div className="flex items-center gap-3">
             <div className={`p-2.5 rounded-xl transition-colors ${emailEnabled ? 'bg-emerald-500/15' : 'bg-muted/50'}`}>
               {emailEnabled ? <Bell className="h-5 w-5 text-emerald-400 card-icon" /> : <BellOff className="h-5 w-5 text-muted-foreground" />}
@@ -612,7 +612,7 @@ function SessionManagement() {
   if (isLoading) {
     return (
       <Card className="glass-card gold-sweep border-primary/10">
-        <CardContent className="p-8 text-center text-muted-foreground">
+        <CardContent className="p-3 sm:p-8 text-center text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-primary" />
           جاري تحميل الجلسات...
         </CardContent>
@@ -643,7 +643,7 @@ function SessionManagement() {
     <div className="space-y-4">
       <Card className="glass-card gold-sweep border-primary/10">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Monitor className="h-5 w-5 text-primary card-icon" />
@@ -678,7 +678,7 @@ function SessionManagement() {
           ) : (
             <div className="space-y-2">
               {sessionList.map((session: any) => (
-                <div key={session.id} className="flex items-center justify-between p-4 rounded-xl glass-surface border-primary/5 hover:border-primary/15 transition-all duration-300 group">
+                <div key={session.id} className="flex items-center justify-between flex-wrap p-4 rounded-xl glass-surface border-primary/5 hover:border-primary/15 transition-all duration-300 group">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors btn-glow">
                       {getDeviceIcon(session.deviceInfo)}

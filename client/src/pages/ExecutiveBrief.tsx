@@ -23,14 +23,14 @@ const KpiCard = ({ title, value, icon: Icon, unit = '' }) => (
       <h3 className="text-lg font-medium text-slate-300">{title}</h3>
       <Icon className="text-slate-400" size={28} />
     </div>
-    <p className="text-4xl font-bold text-white mt-4">{value} <span className="text-2xl text-slate-300">{unit}</span></p>
+    <p className="text-2xl sm:text-4xl font-bold text-white mt-4">{value} <span className="text-2xl text-slate-300">{unit}</span></p>
   </GlassCard>
 );
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
+      <div className="overflow-x-hidden max-w-full bg-slate-900/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
         <p className="label">{`${label} : ${payload[0].value}`}</p>
       </div>
     );
@@ -86,9 +86,9 @@ export default function ExecutiveBrief() {
         </button>
       </div>
 
-      <div id="executive-brief-content" className="p-8 bg-slate-900 text-white rounded-2xl">
+      <div id="executive-brief-content" className="p-3 sm:p-8 bg-slate-900 text-white rounded-2xl">
         <header className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-cyan-400">الملخص التنفيذي</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">الملخص التنفيذي</h1>
           <p className="text-xl text-slate-300">Executive Brief</p>
         </header>
 
@@ -101,7 +101,7 @@ export default function ExecutiveBrief() {
           <KpiCard title="الغرامات التقديرية" value={formatCurrency(summary.estimatedFines)} icon={Scale} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-10">
           <GlassCard className="lg:col-span-1">
             <h2 className="text-2xl font-semibold mb-4 text-cyan-300">توزيع مستوى التأثير</h2>
             <ResponsiveContainer width="100%" height={300}>
@@ -131,7 +131,7 @@ export default function ExecutiveBrief() {
           </GlassCard>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 mb-10">
           <GlassCard className="lg:col-span-2">
             <h2 className="text-2xl font-semibold mb-4 text-cyan-300">أبرز 5 جهات مهاجمة</h2>
             <ResponsiveContainer width="100%" height={300}>

@@ -337,8 +337,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleNavClick = useCallback(() => {
-    if (mobileOpen) setMobileOpen(false);
-  }, [mobileOpen]);
+    setMobileOpen(false);
+  }, []);
+  // Auto-close mobile sidebar on any route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
 
   const isItemVisible = (item: NavItem) => {
     if (item.rootAdminOnly && !isRootAdmin) return false;
@@ -486,7 +490,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <button
             onClick={() => toggleGroup(group.id)}
             className={`
-              sidebar-group-header w-full flex items-center justify-between px-3 py-2 rounded-lg
+              sidebar-group-header w-full flex items-center justify-between flex-wrap px-3 py-2 rounded-lg
               text-xs font-semibold uppercase tracking-wider transition-colors duration-150
               ${isActive
                 ? isDark ? "text-[#3DB1AC] bg-[rgba(61,177,172,0.08)]" : "text-[#1e3a8a] bg-[rgba(30,58,138,0.06)]"
@@ -526,7 +530,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="flex h-screen lg:overflow-hidden overflow-x-hidden bg-background" style={{ maxWidth: '100vw' }}>
+    <div className="flex min-h-screen lg:h-screen lg:overflow-hidden overflow-x-hidden bg-background" style={{ maxWidth: '100vw' }}>
       {/* ═══ AURORA BACKGROUND ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0 dark:block hidden">
         <div className="absolute top-0 right-0 w-[60%] h-[50%] opacity-25" style={{ background: `radial-gradient(ellipse at 70% 20%, ${ws.accent}4D, transparent 70%)` }} />
@@ -655,7 +659,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <p className={`text-xs font-medium ${isDark ? 'text-[#D4DDEF]' : 'text-[#1c2833]'} truncate`}>{user.name || "مستخدم"}</p>
-                  <p className={`text-[10px] ${isDark ? 'text-[#D4DDEF]/50' : 'text-[#5a6478]'} truncate`}>
+                  <p className={`text-xs sm:text-[10px] ${isDark ? 'text-[#D4DDEF]/50' : 'text-[#5a6478]'} truncate`}>
                     {isRootAdmin ? "مدير النظام الرئيسي" : roleLabels[ndmoRole] || ndmoRole}
                     {isAdmin && !isRootAdmin && " (مشرف)"}
                     {isRootAdmin && " (Root)"}
@@ -713,10 +717,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ═══ MAIN CONTENT AREA ═══ */}
-      <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto lg:overflow-hidden relative z-10" style={{ maxWidth: '100%' }}>
+      <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto relative z-10" style={{ maxWidth: '100%' }}>
         {/* Top header with WORKSPACE SWITCHER */}
         <header
-          className="h-14 flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
+          className="h-14 flex items-center justify-between flex-wrap px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
           style={{
             backgroundColor: isDark ? 'rgba(13,21,41,0.85)' : 'rgba(255,255,255,0.95)',
             borderBottom: `1px solid ${isDark ? `${accent}14` : '#e2e5ef'}`,
@@ -747,7 +751,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {/* Date */}
-            <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] ${isDark ? 'text-[#D4DDEF]/60' : 'text-[#5a6478]'}`}>
+            <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs sm:text-[10px] ${isDark ? 'text-[#D4DDEF]/60' : 'text-[#5a6478]'}`}>
               <Clock className="w-3 h-3" />
               <span>{new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
@@ -794,7 +798,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <div>
             <h2 className="text-sm font-bold text-foreground">{ws.title}</h2>
-            <p className="text-[10px] text-muted-foreground">{ws.titleEn}</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">{ws.titleEn}</p>
           </div>
         </div>
 

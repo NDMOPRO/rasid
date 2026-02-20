@@ -192,7 +192,7 @@ export default function PasteSites() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="overflow-x-hidden max-w-full flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -273,7 +273,7 @@ export default function PasteSites() {
                 >
                   <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-lg ${item.color}`} style={{ opacity: Math.min(1, item.count / Math.max(1, pasteEntries.length) + 0.2) }} />
                   <p className={`text-xl font-bold ${item.textColor}`}>{item.count}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -310,7 +310,7 @@ export default function PasteSites() {
                     transition={{ delay: i * 0.05 }}
                     className="flex items-center gap-3"
                   >
-                    <span className="text-[10px] text-muted-foreground min-w-[80px] text-left font-mono">{date}</span>
+                    <span className="text-xs sm:text-[10px] text-muted-foreground min-w-[80px] text-left font-mono">{date}</span>
                     <div className="flex-1 h-5 bg-secondary/20 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
@@ -341,7 +341,7 @@ export default function PasteSites() {
               <Card className="border-border group-hover:border-amber-500/30 transition-colors h-full">
                 <CardContent className="p-4 flex flex-col justify-between h-full">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between flex-wrap mb-3">
                       <div className="flex items-center gap-2">
                         <FileText className="w-5 h-5 text-amber-400" />
                         <h3 className="text-sm font-semibold text-foreground">{source.name}</h3>
@@ -352,12 +352,12 @@ export default function PasteSites() {
                           transition={{ duration: 2, repeat: Infinity }}
                           className={`w-2 h-2 rounded-full ${source.status === "active" ? "bg-emerald-500" : "bg-amber-500"}`}
                         />
-                        <span className="text-[10px] text-muted-foreground">{source.status === "active" ? "نشط" : "متوقف"}</span>
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">{source.status === "active" ? "نشط" : "متوقف"}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between flex-wrap text-xs text-muted-foreground">
                       <span>{source.leaksDetected ?? 0} حالة رصد مكتشفة</span>
-                      <span className={`px-2 py-0.5 rounded border text-[10px] ${
+                      <span className={`px-2 py-0.5 rounded border text-xs sm:text-[10px] ${
                         source.riskLevel === "high" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                         source.riskLevel === "medium" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
                         "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
@@ -381,7 +381,7 @@ export default function PasteSites() {
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <FileText className="w-4 h-4 text-amber-400" />
               أحدث اللصقات المرصودة
-              <Badge variant="outline" className="text-[10px] mr-2">
+              <Badge variant="outline" className="text-xs sm:text-[10px] mr-2">
                 {filteredPastes.length} / {pasteEntries.length}
               </Badge>
             </CardTitle>
@@ -447,7 +447,7 @@ export default function PasteSites() {
                       <button
                         key={opt.value}
                         onClick={() => setStatusFilter(opt.value)}
-                        className={`text-[11px] px-3 py-1.5 rounded-lg border transition-colors ${
+                        className={`text-xs sm:text-[11px] px-3 py-1.5 rounded-lg border transition-colors ${
                           statusFilter === opt.value
                             ? "bg-primary/10 border-primary/30 text-primary"
                             : "bg-secondary/20 border-border text-muted-foreground hover:border-primary/20"
@@ -460,10 +460,10 @@ export default function PasteSites() {
 
                   {/* Sort */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground">ترتيب:</span>
+                    <span className="text-xs sm:text-[10px] text-muted-foreground">ترتيب:</span>
                     <button
                       onClick={() => setSortBy("date")}
-                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
+                      className={`text-xs sm:text-[11px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
                         sortBy === "date" ? "bg-primary/10 border-primary/30 text-primary" : "bg-secondary/20 border-border text-muted-foreground"
                       }`}
                     >
@@ -472,7 +472,7 @@ export default function PasteSites() {
                     </button>
                     <button
                       onClick={() => setSortBy("severity")}
-                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
+                      className={`text-xs sm:text-[11px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
                         sortBy === "severity" ? "bg-primary/10 border-primary/30 text-primary" : "bg-secondary/20 border-border text-muted-foreground"
                       }`}
                     >
@@ -535,7 +535,7 @@ export default function PasteSites() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] px-2 py-0.5 rounded border ${
+                        <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${
                           sev.level === "critical" ? "text-red-400 bg-red-500/10 border-red-500/30" :
                           sev.level === "high" ? "text-orange-400 bg-orange-500/10 border-orange-500/30" :
                           sev.level === "medium" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
@@ -543,7 +543,7 @@ export default function PasteSites() {
                         }`}>
                           {sev.label}
                         </span>
-                        <span className={`text-[10px] px-2 py-1 rounded border ${statusStyle(paste.status)}`}>
+                        <span className={`text-xs sm:text-[10px] px-2 py-1 rounded border ${statusStyle(paste.status)}`}>
                           {statusText(paste.status)}
                         </span>
                       </div>
@@ -553,7 +553,7 @@ export default function PasteSites() {
                     {paste.piiTypes && (paste.piiTypes as string[]).length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mb-2 mr-10">
                         {(paste.piiTypes as string[]).map((type) => (
-                          <Badge key={type} variant="outline" className="text-[10px] bg-red-500/5 border-red-500/20 text-red-400">
+                          <Badge key={type} variant="outline" className="text-xs sm:text-[10px] bg-red-500/5 border-red-500/20 text-red-400">
                             {type}
                           </Badge>
                         ))}
@@ -563,7 +563,7 @@ export default function PasteSites() {
                     {/* Preview */}
                     {paste.preview && (
                       <div className="p-2 rounded bg-black/30 border border-border mr-10">
-                        <code className="text-[11px] text-muted-foreground font-mono break-all">{paste.preview}</code>
+                        <code className="text-xs sm:text-[11px] text-muted-foreground font-mono break-all">{paste.preview}</code>
                       </div>
                     )}
                     <p className="text-[9px] text-primary/50 mt-2 opacity-0 group-hover:opacity-100 transition-opacity text-center">اضغط للتفاصيل ←</p>
@@ -605,7 +605,7 @@ export default function PasteSites() {
           icon={stat.icon && <stat.icon className={`w-6 h-6 ${stat.color}`} />}
         >
           <div className="p-4 text-center">
-            <p className={`text-5xl font-bold ${stat.color}`}>{stat.value}</p>
+            <p className={`text-3xl sm:text-5xl font-bold ${stat.color}`}>{stat.value}</p>
             <p className="text-sm text-muted-foreground mt-4">{stat.description}</p>
           </div>
         </DetailModal>
@@ -677,14 +677,14 @@ export default function PasteSites() {
                 }`}>
                   <sev.icon className={`w-5 h-5 ${sev.color}`} />
                   <div>
-                    <p className="text-[10px] text-muted-foreground">مستوى الخطورة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">مستوى الخطورة</p>
                     <p className={`font-bold ${sev.color}`}>{sev.label}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2.5 bg-secondary/30 rounded-lg flex-1 border border-border">
                   <Eye className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="text-[10px] text-muted-foreground">الحالة</p>
+                    <p className="text-xs sm:text-[10px] text-muted-foreground">الحالة</p>
                     <p className={`font-semibold ${statusStyle(paste.status).split(" ")[0]}`}>{statusText(paste.status)}</p>
                   </div>
                 </div>

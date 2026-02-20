@@ -78,7 +78,7 @@ export default function SmartAlerts() {
   const statsData = stats.data;
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="overflow-x-hidden max-w-full p-6 space-y-6" dir="rtl">
       <WatermarkLogo />
       {/* Header */}
       <div>
@@ -219,7 +219,7 @@ export default function SmartAlerts() {
                           <Eye className="w-3 h-3" />
                           التفاصيل
                         </Button>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-xs sm:text-[10px] text-muted-foreground">
                           {alert.createdAt ? new Date(alert.createdAt).toLocaleDateString("ar-SA-u-nu-latn") : ""}
                         </span>
                       </div>
