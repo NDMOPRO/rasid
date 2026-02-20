@@ -1136,28 +1136,27 @@ export default function Dashboard() {
                 {/* Top: trend + icon */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-xs font-bold ${card.trendUp ? "text-emerald-400" : "text-red-400"}`}>{card.trend}</span>
-                    {card.trendUp ? <TrendingUp className="w-3.5 h-3.5 text-emerald-400" /> : <TrendingDown className="w-3.5 h-3.5 text-red-400" />}
-                    <span className="text-[9px] text-muted-foreground">{card.trendLabel}</span>
+                    <span className={`text-sm sm:text-xs font-bold ${card.trendUp ? "text-emerald-400" : "text-red-400"}`}>{card.trend}</span>
+                    {card.trendUp ? <TrendingUp className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-emerald-400" /> : <TrendingDown className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-red-400" />}
+                    <span className="text-xs sm:text-[9px] text-muted-foreground">{card.trendLabel}</span>
                   </div>
                   <motion.div
-                    className={`w-11 h-11 rounded-xl ${card.iconBg} flex items-center justify-center`}
+                    className={`w-14 h-14 sm:w-11 sm:h-11 rounded-xl ${card.iconBg} flex items-center justify-center`}
                     style={{ boxShadow: `0 0 16px ${card.glowColor}` }}
                     whileHover={{ rotate: -8, scale: 1.1 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <Icon className={`w-5 h-5 ${card.iconColor}`} />
+                    <Icon className={`w-7 h-7 sm:w-5 sm:h-5 ${card.iconColor}`} />
                   </motion.div>
                 </div>
 
                 {/* Value */}
-                <div className="text-3xl font-bold text-foreground mb-0.5 tabular-nums premium-stat-enter">
+                <div className="text-4xl sm:text-3xl font-bold text-foreground mb-1 tabular-nums premium-stat-enter">
                   {card.displayValue ? card.displayValue : <AnimatedNumber value={card.value as number} />}
                 </div>
-
                 {/* Label */}
-                <p className="text-xs text-muted-foreground mb-0.5">{card.label}</p>
-                <p className="text-[9px] text-muted-foreground/60">{card.labelEn}</p>
+                <p className="text-base sm:text-xs text-muted-foreground mb-0.5">{card.label}</p>
+                <p className="text-sm sm:text-[9px] text-muted-foreground/60">{card.labelEn}</p>>
 
                 {/* Sparkline */}
                 <div className="mt-3">

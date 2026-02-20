@@ -1230,7 +1230,7 @@ export default function LeadershipDashboard() {
             <div>
               <Card className="glass-card gold-sweep border-red-500/20">
                 <CardContent className="p-4 text-center">
-                  <p className="text-3xl font-bold text-red-500">{alertStats.data.critical}</p>
+                      <p className="text-4xl sm:text-3xl font-bold text-red-500">{alertStats.data.critical}</p>
                   <p className="text-xs text-muted-foreground mt-1">حرج</p>
                 </CardContent>
               </Card>
@@ -1238,7 +1238,7 @@ export default function LeadershipDashboard() {
             <div>
               <Card className="glass-card gold-sweep border-orange-500/20">
                 <CardContent className="p-4 text-center">
-                  <p className="text-3xl font-bold text-orange-500">{alertStats.data.high}</p>
+                      <p className="text-4xl sm:text-3xl font-bold text-orange-500">{alertStats.data.high}</p>
                   <p className="text-xs text-muted-foreground mt-1">عالي</p>
                 </CardContent>
               </Card>
@@ -1246,7 +1246,7 @@ export default function LeadershipDashboard() {
             <div>
               <Card className="glass-card gold-sweep border-amber-500/20">
                 <CardContent className="p-4 text-center">
-                  <p className="text-3xl font-bold text-amber-500">{alertStats.data.medium}</p>
+                      <p className="text-4xl sm:text-3xl font-bold text-amber-500">{alertStats.data.medium}</p>
                   <p className="text-xs text-muted-foreground mt-1">متوسط</p>
                 </CardContent>
               </Card>
@@ -1254,7 +1254,7 @@ export default function LeadershipDashboard() {
             <div>
               <Card className="glass-card gold-sweep border-sky-500/20">
                 <CardContent className="p-4 text-center">
-                  <p className="text-3xl font-bold text-sky-500">{alertStats.data.unacknowledged}</p>
+                      <p className="text-4xl sm:text-3xl font-bold text-sky-500">{alertStats.data.unacknowledged}</p>
                   <p className="text-xs text-muted-foreground mt-1">غير معالج</p>
                 </CardContent>
               </Card>
@@ -1668,10 +1668,10 @@ function MetricCard({ label, value, percentage, icon, color, onClick }: {
             >
               {icon}
             </div>
-            <span className="text-[11px] text-muted-foreground leading-tight font-medium">{label}</span>
+            <span className="text-sm sm:text-[11px] text-muted-foreground leading-tight font-medium">{label}</span>
           </div>
           <div className="flex items-end gap-1.5">
-            <AnimatedNumber value={value} className="text-2xl font-bold leading-none" />
+            <AnimatedNumber value={value} className="text-3xl sm:text-2xl font-bold leading-none" />
             {percentage !== undefined && (
               <span
                 className={`text-xs font-semibold ${c.text} mb-0.5`}

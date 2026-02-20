@@ -526,7 +526,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+    <div className="flex h-screen lg:overflow-hidden overflow-x-hidden bg-background" style={{ maxWidth: '100vw' }}>
       {/* ═══ AURORA BACKGROUND ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0 dark:block hidden">
         <div className="absolute top-0 right-0 w-[60%] h-[50%] opacity-25" style={{ background: `radial-gradient(ellipse at 70% 20%, ${ws.accent}4D, transparent 70%)` }} />
@@ -713,7 +713,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ═══ MAIN CONTENT AREA ═══ */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10" style={{ maxWidth: '100%' }}>
+      <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto lg:overflow-hidden relative z-10" style={{ maxWidth: '100%' }}>
         {/* Top header with WORKSPACE SWITCHER */}
         <header
           className="h-14 flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
@@ -799,7 +799,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Page content */}
-        <main ref={mainContentRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 relative max-w-full">
+        <main ref={mainContentRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 lg:p-6 relative max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
           <ParticleField count={30} className="z-0" />
           <motion.div
             key={location}

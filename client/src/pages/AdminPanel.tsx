@@ -58,8 +58,8 @@ function StatCard({ icon: Icon, label, value, color, delay = 0 }: { icon: any; l
           <Icon className="w-6 h-6" style={{ color }} />
         </div>
         <div className="text-end flex-1">
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold mt-1 gradient-text" style={{ color }}>{typeof value === 'number' ? formatNumber(value) : value}</p>
+          <p className="text-base sm:text-sm text-muted-foreground">{label}</p>
+          <p className="text-3xl sm:text-2xl font-bold mt-1 gradient-text" style={{ color }}>{typeof value === 'number' ? formatNumber(value) : value}</p>
         </div>
       </div>
     </div>
