@@ -2,8 +2,11 @@
  * Seed Data System — بذر البيانات الأولية
  * Seeds all new RASID ULTIMATE tables with initial data
  */
-import { getDb } from "./db";
+import { getDb, bulkInsertPrivacyDomains, clearAllPrivacyDomains } from "./db";
 import { sql } from "drizzle-orm";
+import * as fs from "fs";
+import * as path from "path";
+import * as zlib from "zlib";
 
 // ═══════════════════════════════════════════════════════════════
 // PATRIOTIC PHRASES — 35+ عبارة وطنية تشجيعية
@@ -169,7 +172,39 @@ export async function seedAllNewTables(): Promise<{ results: Record<string, { se
     results.rate_limits = { seeded: 0, status: `error: ${e.message}` };
   }
 
-  // 4. Log the seed operation
+  // 4. Seed Privacy Domains from seed-privacy-data.json.gz
+  try {
+    const [existingPrivacy] = await db.execute(sql`SELECT COUNT(*) as cnt FROM privacy_domains`);
+    const privacyCount = Number((existingPrivacy as any)[0]?.cnt || 0);
+    if (privacyCount < 1000) {
+      console.log('[SeedData] Seeding privacy domains from seed-privacy-data.json.gz...');
+      const gzPath = path.join(process.cwd(), 'server', 'seed-privacy-data.json.gz');
+      const jsonPath = path.join(process.cwd(), 'server', 'seed-privacy-data.json');
+      let privacyData: any[] = [];
+      if (fs.existsSync(gzPath)) {
+        const compressed = fs.readFileSync(gzPath);
+        const decompressed = zlib.gunzipSync(compressed);
+        privacyData = JSON.parse(decompressed.toString());
+      } else if (fs.existsSync(jsonPath)) {
+        privacyData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+      }
+      if (privacyData.length > 0) {
+        if (privacyCount > 0) await clearAllPrivacyDomains();
+        const insertResult = await bulkInsertPrivacyDomains(privacyData);
+        results.privacy_domains = { seeded: insertResult.inserted, status: 'completed' };
+        console.log(`[SeedData] Seeded ${insertResult.inserted} privacy domains`);
+      } else {
+        results.privacy_domains = { seeded: 0, status: 'no_data_file' };
+      }
+    } else {
+      results.privacy_domains = { seeded: 0, status: `already_seeded (${privacyCount} records)` };
+    }
+  } catch (e: any) {
+    console.error('[SeedData] Privacy seed error:', e.message);
+    results.privacy_domains = { seeded: 0, status: `error: ${e.message}` };
+  }
+
+  // 5. Log the seed operation
   try {
     await db.execute(sql`INSERT INTO seed_data_logs (seed_type, records_created, status, details) VALUES ('ultimate_upgrade', ${Object.values(results).reduce((sum, r) => sum + r.seeded, 0)}, 'completed', ${JSON.stringify(results)})`);
   } catch {

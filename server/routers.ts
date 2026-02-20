@@ -8096,6 +8096,30 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       }
       return { domainsInserted: result.inserted, screenshotsInserted };
     }),
+    seedFromFile: protectedProcedure.input(z.object({
+      clearExisting: z.boolean().optional().default(true),
+    })).mutation(async ({ input }) => {
+      const fs = await import('fs');
+      const pathMod = await import('path');
+      const zlibMod = await import('zlib');
+      const { promisify } = await import('util');
+      const gunzip = promisify(zlibMod.gunzip);
+      const gzPath = pathMod.join(process.cwd(), 'server', 'seed-privacy-data.json.gz');
+      const jsonPath = pathMod.join(process.cwd(), 'server', 'seed-privacy-data.json');
+      let privacyData: any[] = [];
+      if (fs.existsSync(gzPath)) {
+        const compressed = fs.readFileSync(gzPath);
+        const decompressed = await gunzip(compressed);
+        privacyData = JSON.parse(decompressed.toString());
+      } else if (fs.existsSync(jsonPath)) {
+        privacyData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+      } else {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Privacy seed data file not found (seed-privacy-data.json.gz)' });
+      }
+      if (input.clearExisting) await db.clearAllPrivacyDomains();
+      const result = await db.bulkInsertPrivacyDomains(privacyData);
+      return { domainsInserted: result.inserted, totalInFile: privacyData.length };
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;
