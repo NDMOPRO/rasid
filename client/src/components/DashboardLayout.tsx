@@ -40,7 +40,8 @@ const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session
 const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
 const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ziWPuMClYqvYmkJG.png";
 
-const ROOT_ADMIN_USER_ID = "mruhaily";
+const ROOT_ADMIN_USER_IDS_LIST = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
+const ROOT_ADMIN_USER_ID = "mruhaily"; // backward compat export
 
 /* ═══ Types ═══ */
 type WorkspaceId = "leaks" | "privacy";
@@ -296,7 +297,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { theme, themeMode, toggleTheme, switchable } = useTheme();
 
   const platformUserId = (user as any)?.userId ?? "";
-  const isRootAdmin = platformUserId === ROOT_ADMIN_USER_ID;
+  const isRootAdmin = ROOT_ADMIN_USER_IDS_LIST.includes(platformUserId.toLowerCase());
 
   /* ═══ WORKSPACE STATE ═══ */
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(() => getWorkspaceForRoute(location));
