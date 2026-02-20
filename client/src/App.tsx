@@ -10,6 +10,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import TopProgressBar from "./components/TopProgressBar";
 import RasidLoadingScreen from "./components/RasidLoadingScreen";
 import { PageSkeleton } from "./components/Skeletons";
+import CommandPalette from "./components/CommandPalette";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -307,6 +308,7 @@ function App() {
           <RasidLoadingScreen show={!appReady} onFinish={handleLoadingFinish} minDuration={2200} />
           <TopProgressBar />
           <Toaster />
+          <CommandPalette />
           <Switch>
             <Route path="/login">
               <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>

@@ -951,6 +951,7 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
 
   members: router({
     list: protectedProcedure.query(async () => {
+      // getMembers() now merges both users and platformUsers tables
       return await db.getMembers();
     }),
     updateRole: protectedProcedure.input(z.object({
@@ -958,10 +959,21 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
       rasidRole: z.string(),
     })).mutation(async ({ input, ctx }) => {
       if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'ليس لديك صلاحية لتعديل الأدوار' });
-      // Protect root admin
-      const targetUser = await db.getUserById?.(input.userId) || await db.getMembers().then(m => (m as any[])?.find((u: any) => u.id === input.userId));
-      if (targetUser) assertNotRootAdmin(targetUser.username || targetUser.name);
-      await db.updateUserRole(input.userId, input.rasidRole);
+      // Check if this is a platformUser (ID >= 100000)
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        const pUser = await getPlatformUserById(realId);
+        if (pUser) assertNotRootAdmin(pUser.userId);
+        // Map rasidRole back to platformRole
+        const roleMap: Record<string, string> = { root: 'root_admin', admin: 'root_admin', director: 'director', monitoring_director: 'vice_president', smart_monitor_manager: 'manager', monitoring_specialist: 'analyst', monitoring_officer: 'viewer' };
+        const platformRole = roleMap[input.rasidRole] || 'viewer';
+        await updatePlatformUser(realId, { platformRole: platformRole as any });
+      } else {
+        // Regular users table
+        const targetUser = await db.getUserById?.(input.userId) || await db.getMembers().then(m => (m as any[])?.find((u: any) => u.id === input.userId));
+        if (targetUser) assertNotRootAdmin(targetUser.username || targetUser.name);
+        await db.updateUserRole(input.userId, input.rasidRole);
+      }
       // Log activity
       await db.insertActivityLog({
         userId: ctx.user.id,
@@ -983,18 +995,22 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
       rasidRole: z.string(),
     })).mutation(async ({ input, ctx }) => {
       if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'ليس لديك صلاحية لإضافة مستخدمين' });
-      // Check if username exists
-      const existing = await db.getUserByUsername(input.username);
-      if (existing) throw new TRPCError({ code: 'CONFLICT', message: 'اسم المستخدم مستخدم بالفعل' });
+      // Check if username exists in both tables
+      const existingUser = await db.getUserByUsername(input.username);
+      const existingPlatform = await getPlatformUserByUserId(input.username);
+      if (existingUser || existingPlatform) throw new TRPCError({ code: 'CONFLICT', message: 'اسم المستخدم مستخدم بالفعل' });
       const hash = await bcrypt.hash(input.password, 10);
-      const newUser = await db.createUser({
-        username: input.username,
+      // Create in platformUsers table (primary user store)
+      const roleMap: Record<string, string> = { root: 'root_admin', admin: 'root_admin', director: 'director', monitoring_director: 'vice_president', smart_monitor_manager: 'manager', monitoring_specialist: 'analyst', monitoring_officer: 'viewer' };
+      const platformRole = roleMap[input.rasidRole] || 'viewer';
+      await createPlatformUser({
+        userId: input.username,
         passwordHash: hash,
         name: input.name,
         displayName: input.displayName,
         email: input.email,
-        mobile: input.mobile,
-        rasidRole: input.rasidRole,
+        mobile: input.mobile || '',
+        platformRole: platformRole as any,
       });
       // Log activity
       await db.insertActivityLog({
@@ -1005,17 +1021,25 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
         ipAddress: ctx.req.ip || ctx.req.headers['x-forwarded-for']?.toString() || '',
         userAgent: ctx.req.headers['user-agent'] || '',
       });
-      return newUser;
+      return { success: true };
     }),
     deleteUser: protectedProcedure.input(z.object({
       userId: z.number(),
     })).mutation(async ({ input, ctx }) => {
       if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'ليس لديك صلاحية لحذف المستخدمين' });
       if (input.userId === ctx.user.id) throw new TRPCError({ code: 'BAD_REQUEST', message: 'لا يمكنك حذف حسابك الخاص' });
-      // Protect root admin
-      const targetUser = await db.getUserById?.(input.userId) || await db.getMembers().then(m => (m as any[])?.find((u: any) => u.id === input.userId));
-      if (targetUser) assertNotRootAdmin(targetUser.username || targetUser.name);
-      await db.deleteUser(input.userId);
+      // Check if this is a platformUser (ID >= 100000)
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        const pUser = await getPlatformUserById(realId);
+        if (pUser) assertNotRootAdmin(pUser.userId);
+        await deletePlatformUser(realId);
+      } else {
+        // Regular users table
+        const targetUser = await db.getUserById?.(input.userId) || await db.getMembers().then(m => (m as any[])?.find((u: any) => u.id === input.userId));
+        if (targetUser) assertNotRootAdmin(targetUser.username || targetUser.name);
+        await db.deleteUser(input.userId);
+      }
       // Log activity
       await db.insertActivityLog({
         userId: ctx.user.id,
@@ -2855,7 +2879,22 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
       mobile: z.string().optional(),
       rasidRole: z.string().optional(),
     })).mutation(async ({ input, ctx }) => {
-      await db.updateUserDetails(input.userId, input);
+      // Check if this is a platformUser (ID >= 100000)
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        const updates: any = {};
+        if (input.name) updates.name = input.name;
+        if (input.displayName) updates.displayName = input.displayName;
+        if (input.email) updates.email = input.email;
+        if (input.mobile) updates.mobile = input.mobile;
+        if (input.rasidRole) {
+          const roleMap: Record<string, string> = { root: 'root_admin', admin: 'root_admin', director: 'director', monitoring_director: 'vice_president', smart_monitor_manager: 'manager', monitoring_specialist: 'analyst', monitoring_officer: 'viewer' };
+          updates.platformRole = roleMap[input.rasidRole] || 'viewer';
+        }
+        await updatePlatformUser(realId, updates);
+      } else {
+        await db.updateUserDetails(input.userId, input);
+      }
       await db.insertActivityLog({
         userId: ctx.user.id,
         username: ctx.user.name || '',
@@ -2869,7 +2908,13 @@ ${scan.summary ? `ملخص التحليل:\n${scan.summary}\n` : ''}
       newPassword: z.string().min(6),
     })).mutation(async ({ input, ctx }) => {
       const passwordHash = await bcrypt.hash(input.newPassword, 10);
-      await db.updatePassword(input.userId, passwordHash);
+      // Check if this is a platformUser (ID >= 100000)
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        await updatePlatformUser(realId, { passwordHash });
+      } else {
+        await db.updatePassword(input.userId, passwordHash);
+      }
       await db.insertActivityLog({
         userId: ctx.user.id,
         username: ctx.user.name || '',
@@ -5787,10 +5832,25 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       userId: z.number(),
       role: z.string(),
     })).mutation(async ({ input, ctx }) => {
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        const pUser = await getPlatformUserById(realId);
+        if (pUser) assertNotRootAdmin(pUser.userId);
+        const roleMap: Record<string, string> = { root: 'root_admin', admin: 'root_admin', director: 'director', monitoring_director: 'vice_president', smart_monitor_manager: 'manager', monitoring_specialist: 'analyst', monitoring_officer: 'viewer' };
+        await updatePlatformUser(realId, { platformRole: (roleMap[input.role] || 'viewer') as any });
+        return [await getPlatformUserById(realId)];
+      }
       return db.adminUpdateUserRole(input.userId, input.role, ctx.user.id);
     }),
     deleteMember: protectedProcedure.input(z.object({ userId: z.number() })).mutation(async ({ input }) => {
-      await db.adminDeleteUser(input.userId);
+      if (input.userId >= 100000) {
+        const realId = input.userId - 100000;
+        const pUser = await getPlatformUserById(realId);
+        if (pUser) assertNotRootAdmin(pUser.userId);
+        await deletePlatformUser(realId);
+      } else {
+        await db.adminDeleteUser(input.userId);
+      }
       return { success: true };
     }),
 
@@ -6400,9 +6460,9 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
     seedUsers: publicProcedure.mutation(async () => {
       const defaultUsers = [
         { userId: "mruhaily", name: "Muhammed ALRuhaily", email: "prog.muhammed@gmail.com", mobile: "+966553445533", displayName: "Admin Rasid System", platformRole: "root_admin" as const },
-        { userId: "aalrebdi", name: "Alrebdi Fahad Alrebdi", email: "aalrebdi@ndmo.gov.sa", mobile: "", displayName: "NDMO's president/director", platformRole: "director" as const },
-        { userId: "msarhan", name: "Mashal Abdullah Alsarhan", email: "msarhan@nic.gov.sa", mobile: "0555113675", displayName: "Vice President of NDMO", platformRole: "vice_president" as const },
-        { userId: "malmoutaz", name: "Manal Mohammed Almoutaz", email: "malmoutaz@ndmo.gov.sa", mobile: "0542087872", displayName: "Manager of Smart Rasid Platform", platformRole: "manager" as const },
+        { userId: "aalrebdi", name: "Alrebdi Fahad Alrebdi", email: "aalrebdi@ndmo.gov.sa", mobile: "", displayName: "NDMO's president/director", platformRole: "root_admin" as const },
+        { userId: "msarhan", name: "Mashal Abdullah Alsarhan", email: "msarhan@nic.gov.sa", mobile: "0555113675", displayName: "Vice President of NDMO", platformRole: "root_admin" as const },
+        { userId: "malmoutaz", name: "Manal Mohammed Almoutaz", email: "malmoutaz@ndmo.gov.sa", mobile: "0542087872", displayName: "Manager of Smart Rasid Platform", platformRole: "root_admin" as const },
       ];
       const passwordHash = await bcrypt.hash("15001500", 12);
       const results: string[] = [];

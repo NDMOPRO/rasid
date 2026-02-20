@@ -539,7 +539,33 @@ export async function createBulkNotifications(userIds: number[], notif: { title:
 export async function getMembers() {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(users).orderBy(desc(users.createdAt));
+  const dbUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+  // Also include platformUsers
+  const pUsers = await db.select().from(platformUsers).orderBy(desc(platformUsers.createdAt));
+  const platformMapped = pUsers.map((pu: any) => ({
+    id: pu.id + 100000,
+    _platformUserId: pu.id,
+    openId: `platform_${pu.userId}`,
+    name: pu.name,
+    displayName: pu.displayName,
+    email: pu.email,
+    mobile: pu.mobile,
+    username: pu.userId,
+    role: pu.platformRole === 'root_admin' ? 'admin' : 'user',
+    rasidRole: pu.platformRole === 'root_admin' ? 'root' :
+               pu.platformRole === 'director' ? 'director' :
+               pu.platformRole === 'vice_president' ? 'monitoring_director' :
+               pu.platformRole === 'manager' ? 'smart_monitor_manager' :
+               pu.platformRole === 'analyst' ? 'monitoring_specialist' : 'monitoring_officer',
+    isActive: pu.status === 'active' ? 1 : 0,
+    lastSignedIn: pu.lastLoginAt || pu.createdAt,
+    createdAt: pu.createdAt,
+    updatedAt: pu.updatedAt,
+    _source: 'platform',
+  }));
+  const platformUsernames = new Set(platformMapped.map((p: any) => p.username?.toLowerCase()));
+  const uniqueDbUsers = dbUsers.filter((u: any) => !platformUsernames.has(u.username?.toLowerCase()));
+  return [...platformMapped, ...uniqueDbUsers];
 }
 
 export async function updateUserRole(userId: number, rasidRole: string) {
@@ -2304,6 +2330,7 @@ export async function getSystemHealthMetrics() {
   const [siteCount] = await db.select({ count: count() }).from(sites);
   const [scanCount] = await db.select({ count: count() }).from(scans);
   const [userCount] = await db.select({ count: count() }).from(users);
+  const [platformUserCount] = await db.select({ count: count() }).from(platformUsers);
   const [caseCount] = await db.select({ count: count() }).from(cases);
   const [letterCount] = await db.select({ count: count() }).from(letters);
   const [notifCount] = await db.select({ count: count() }).from(notifications);
@@ -2340,7 +2367,7 @@ export async function getSystemHealthMetrics() {
     database: {
       totalSites: siteCount.count,
       totalScans: scanCount.count,
-      totalUsers: userCount.count,
+      totalUsers: userCount.count + platformUserCount.count,
       totalCases: caseCount.count,
       totalLetters: letterCount.count,
       totalNotifications: notifCount.count,
@@ -5733,7 +5760,8 @@ export async function adminDeleteUser(userId: number) {
 
 export async function adminGetAllUsers() {
   const db = await getDb();
-  return db!.select({
+  // Get users from both tables
+  const dbUsers = await db!.select({
     id: users.id,
     username: users.username,
     displayName: users.displayName,
@@ -5743,6 +5771,24 @@ export async function adminGetAllUsers() {
     rasidRole: users.rasidRole,
     createdAt: users.createdAt,
   }).from(users).orderBy(desc(users.createdAt));
+  // Also get platformUsers
+  const pUsers = await db!.select().from(platformUsers).orderBy(desc(platformUsers.createdAt));
+  const platformMapped = pUsers.map((pu: any) => ({
+    id: pu.id + 100000,
+    username: pu.userId,
+    displayName: pu.displayName,
+    email: pu.email,
+    mobile: pu.mobile,
+    role: pu.platformRole === 'root_admin' ? 'admin' as const : 'user' as const,
+    rasidRole: pu.platformRole === 'root_admin' ? 'root' as const :
+               pu.platformRole === 'director' ? 'admin' as const :
+               pu.platformRole === 'vice_president' ? 'admin' as const :
+               pu.platformRole === 'manager' ? 'smart_monitor_manager' as const : 'monitoring_officer' as const,
+    createdAt: pu.createdAt,
+  }));
+  const platformUsernames = new Set(platformMapped.map((p: any) => p.username?.toLowerCase()));
+  const uniqueDbUsers = dbUsers.filter((u: any) => !platformUsernames.has(u.username?.toLowerCase()));
+  return [...platformMapped, ...uniqueDbUsers];
 }
 
 // Export data helpers

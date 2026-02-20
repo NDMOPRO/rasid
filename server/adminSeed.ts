@@ -168,18 +168,21 @@ export async function seedAdminData(): Promise<{ success: boolean; message: stri
       }
     }
 
-    // 4. Assign root admin user to super-admin role
-    const rootUser = await db.select().from(platformUsers).where(eq(platformUsers.userId, "mruhaily")).limit(1);
-    if (rootUser.length > 0) {
-      const existing = await db.select().from(adminUserRoles)
-        .where(eq(adminUserRoles.urUserId, rootUser[0].id)).limit(1);
-      if (existing.length === 0) {
-        await db.insert(adminUserRoles).values({
-          id: `ur-${rootUser[0].id}-role-super-admin`,
-          urUserId: rootUser[0].id,
-          urRoleId: "role-super-admin",
-          urAssignedAt: now,
-        });
+    // 4. Assign root admin role to all protected root admins
+    const rootAdminIds = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
+    for (const adminUserId of rootAdminIds) {
+      const rootUser = await db.select().from(platformUsers).where(eq(platformUsers.userId, adminUserId)).limit(1);
+      if (rootUser.length > 0) {
+        const existing = await db.select().from(adminUserRoles)
+          .where(eq(adminUserRoles.urUserId, rootUser[0].id)).limit(1);
+        if (existing.length === 0) {
+          await db.insert(adminUserRoles).values({
+            id: `ur-${rootUser[0].id}-role-super-admin`,
+            urUserId: rootUser[0].id,
+            urRoleId: "role-super-admin",
+            urAssignedAt: now,
+          });
+        }
       }
     }
 

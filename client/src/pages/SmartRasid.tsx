@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useProactiveAssistance } from "@/hooks/useProactiveAssistance";
+import { usePageContext } from "@/hooks/usePageContext";
 import { Streamdown } from "streamdown";
 import LeakDetailDrilldown from "@/components/LeakDetailDrilldown";
 import {
@@ -30,6 +33,7 @@ import {
   Crosshair,
   Link2,
   Mic,
+  MicOff,
   Paperclip,
   ChevronDown,
   ChevronRight,
@@ -641,6 +645,29 @@ export default function SmartRasid() {
 
   const chatMutation = trpc.smartRasid.chat.useMutation();
 
+  // Page Context
+  const pageContext = usePageContext();
+
+  // Voice STT
+  const { isListening, isSupported: sttSupported, toggleListening } = useSpeechRecognition({
+    lang: "ar-SA",
+    onResult: (transcript) => {
+      setInputValue((prev) => (prev ? prev + " " : "") + transcript);
+      if (inputRef.current) {
+        inputRef.current.style.height = "auto";
+        inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + "px";
+      }
+    },
+    onError: (err) => toast.error(err),
+  });
+
+  // Proactive Assistance
+  const { suggestion: proactiveSuggestion, dismiss: dismissProactive } = useProactiveAssistance({
+    idleTimeoutMs: 60000,
+    enabled: messages.length === 0,
+    currentPage: pageContext.path,
+  });
+
   // Pick up message from widget
   useEffect(() => {
     const widgetMsg = sessionStorage.getItem("rasid_widget_message");
@@ -750,6 +777,11 @@ export default function SmartRasid() {
       const result = await chatMutation.mutateAsync({
         message: msg,
         history: history as Array<{ role: "user" | "assistant"; content: string }>,
+        pageContext: {
+          path: pageContext.path,
+          title: pageContext.title,
+          section: pageContext.section,
+        },
       });
 
       setLoadingSteps([]);
@@ -1676,6 +1708,22 @@ export default function SmartRasid() {
                 disabled={isLoading}
               />
             </div>
+            {/* Voice STT Button */}
+            {sttSupported && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleListening}
+                className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+                  isListening
+                    ? "bg-red-500/20 border border-red-500/50 text-red-400 animate-pulse"
+                    : "bg-[#0a1628]/80 border border-cyan-500/15 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30"
+                }`}
+                title={isListening ? "إيقاف التسجيل" : "تحدث بصوتك"}
+              >
+                {isListening ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,200,180,0.3)" }}
               whileTap={{ scale: 0.95 }}
@@ -1691,13 +1739,39 @@ export default function SmartRasid() {
             </motion.button>
           </div>
 
+          {/* Proactive Assistance */}
+          {proactiveSuggestion && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mt-2 p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs text-cyan-300">{proactiveSuggestion.message}</span>
+              </div>
+              <div className="flex gap-2">
+                {proactiveSuggestion.action && (
+                  <button
+                    onClick={() => { sendMessage(proactiveSuggestion.action!); dismissProactive(); }}
+                    className="text-xs bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-md hover:bg-cyan-500/30 transition-colors"
+                  >
+                    {proactiveSuggestion.action}
+                  </button>
+                )}
+                <button onClick={dismissProactive} className="text-xs text-slate-500 hover:text-slate-400">✕</button>
+              </div>
+            </motion.div>
+          )}
+
           <div className="flex items-center justify-between mt-2">
             <p className="text-[10px] text-slate-600 flex items-center gap-1 font-mono">
               <Radar className="w-3 h-3 text-cyan-500/40" />
               SMART_RASID v6.0 // {Object.keys(toolLabels).length} TOOLS · 7 AGENTS
             </p>
             <p className="text-[10px] text-slate-600 font-mono">
-              Enter ↵ · Shift+Enter ⏎
+              Enter ↵ · Shift+Enter ⏎ · Ctrl+K ⌘
             </p>
           </div>
         </div>
