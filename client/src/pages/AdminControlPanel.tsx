@@ -1,6 +1,6 @@
 /**
  * Admin Control Panel — لوحة التحكم الرئيسية
- * 5 Tabs: المستخدمين | المجموعات | الصفحات | سجل التدقيق | مركز التدريب
+ * 7 Tabs: المستخدمين | المجموعات | الصفحات | إدارة القائمة | إعدادات التصميم | سجل التدقيق | مركز التدريب
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -14,15 +14,19 @@ import {
   Users, Layers, FileText, ScrollText, GraduationCap, Loader2,
   Shield, Plus, Trash2, Edit, Search, Check, X, ChevronDown,
   ToggleLeft, ToggleRight, BookOpen, Brain, BarChart3, Settings,
-  RefreshCw, Eye, EyeOff, Lock, Unlock,
+  RefreshCw, Eye, EyeOff, Lock, Unlock, Palette, Menu, GripVertical,
+  ArrowUp, ArrowDown, Sun, Moon, Image, Type, Hash, Save,
 } from "lucide-react";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 
-type TabId = "users" | "groups" | "pages" | "audit" | "training";
+type TabId = "users" | "groups" | "pages" | "sidebar" | "design" | "audit" | "training";
 
 const tabs: { id: TabId; label: string; labelEn: string; icon: any }[] = [
   { id: "users", label: "المستخدمين", labelEn: "Users", icon: Users },
   { id: "groups", label: "المجموعات", labelEn: "Groups", icon: Layers },
   { id: "pages", label: "الصفحات", labelEn: "Pages", icon: FileText },
+  { id: "sidebar", label: "إدارة القائمة", labelEn: "Sidebar", icon: Menu },
+  { id: "design", label: "إعدادات التصميم", labelEn: "Design", icon: Palette },
   { id: "audit", label: "سجل التدقيق", labelEn: "Audit Log", icon: ScrollText },
   { id: "training", label: "مركز التدريب", labelEn: "Training", icon: GraduationCap },
 ];
@@ -30,7 +34,6 @@ const tabs: { id: TabId; label: string; labelEn: string; icon: any }[] = [
 // ═══ Tab 1: Users Management ═══
 function UsersTab() {
   const { data: users, isLoading } = trpc.admin.users.useQuery();
-  const { data: groups } = trpc.admin.groups.list.useQuery();
   const [search, setSearch] = useState("");
 
   const filteredUsers = (users || []).filter((u: any) =>
@@ -190,7 +193,438 @@ function PagesTab() {
   );
 }
 
-// ═══ Tab 4: Audit Log ═══
+// ═══ Tab 4: Sidebar Management ═══
+function SidebarTab() {
+  const workspace = (localStorage.getItem("rasid_workspace") || "leaks") as "leaks" | "privacy";
+  const [activePlatform, setActivePlatform] = useState<"leaks" | "privacy">(workspace);
+  const [editingGroup, setEditingGroup] = useState<string | null>(null);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupNameEn, setNewGroupNameEn] = useState("");
+  const [newGroupColor, setNewGroupColor] = useState("#3DB1AC");
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [newPageLabel, setNewPageLabel] = useState("");
+  const [newPagePath, setNewPagePath] = useState("");
+  const [addingPageToGroup, setAddingPageToGroup] = useState<string | null>(null);
+
+  // Sidebar config stored in localStorage for instant effect
+  const storageKey = `rasid_sidebar_config_${activePlatform}`;
+  const [sidebarConfig, setSidebarConfig] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  const defaultLeaksGroups = [
+    { id: "lk_main", label: "الرئيسية", labelEn: "Main", color: "#3DB1AC", items: ["راصد الذكي", "لوحة القيادة الرئيسية", "حالات الرصد", "التقارير", "التوصيات"] },
+    { id: "lk_dashboards", label: "لوحات المؤشرات", labelEn: "Dashboards", color: "#6459A7", items: ["خريطة التهديدات", "تحليل القطاعات", "تحليل الأثر", "التحليل الجغرافي", "استخبارات المصادر", "تحليل جهات النشر", "أطلس البيانات الشخصية", "رسم المعرفة", "الخط الزمني للحالات", "امتثال PDPL", "مقاييس الدقة", "الملخص التنفيذي", "مقارنة الحالات", "متتبع الحملات"] },
+    { id: "lk_operations", label: "المؤشرات التشغيلية", labelEn: "Operations", color: "#f59e0b", items: ["الرصد المباشر", "رصد تليجرام", "رصد الدارك ويب", "مواقع اللصق", "مهام الرصد", "مختبر أنماط البيانات", "سلسلة الأدلة", "قواعد الرصد", "أدوات OSINT", "ملفات المصادر", "قنوات التنبيه", "سجل الحالات", "استيراد البيانات", "تصدير البيانات"] },
+  ];
+
+  const defaultPrivacyGroups = [
+    { id: "prv_main", label: "الرئيسية", labelEn: "Main", color: "#22c55e", items: ["راصد الذكي", "لوحة القيادة", "التقارير", "التغييرات"] },
+    { id: "prv_dashboards", label: "لوحات المؤشرات", labelEn: "Dashboards", color: "#6459A7", items: ["خريطة الامتثال", "لوحة مؤشرات الأداء", "اللوحة الحية", "التحليلات المتقدمة", "مقارنة الامتثال", "المقارنة الزمنية", "مقارنة القطاعات", "تغطية الاستراتيجية", "التقرير التنفيذي", "التقارير المخصصة", "تقارير PDF", "التقارير المجدولة", "التنبيهات الذكية", "منشئ العروض"] },
+    { id: "prv_operations", label: "المؤشرات التشغيلية", labelEn: "Operations", color: "#f59e0b", items: ["إدارة المواقع", "الفحص المباشر", "الفحص الجماعي", "الفحص العميق", "مكتبة الفحوصات", "جدولة الفحوصات", "سجل الفحوصات", "البنود الثمانية", "الخطابات", "متتبع التحسين", "البحث المتقدم", "استيراد المواقع", "تصدير البيانات"] },
+  ];
+
+  const currentGroups = sidebarConfig.length > 0 ? sidebarConfig : (activePlatform === "leaks" ? defaultLeaksGroups : defaultPrivacyGroups);
+
+  const saveConfig = (groups: any[]) => {
+    setSidebarConfig(groups);
+    localStorage.setItem(storageKey, JSON.stringify(groups));
+    toast.success("تم حفظ إعدادات القائمة الجانبية");
+  };
+
+  const moveGroup = (index: number, direction: "up" | "down") => {
+    const newGroups = [...currentGroups];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newGroups.length) return;
+    [newGroups[index], newGroups[targetIndex]] = [newGroups[targetIndex], newGroups[index]];
+    saveConfig(newGroups);
+  };
+
+  const updateGroupLabel = (index: number, label: string) => {
+    const newGroups = [...currentGroups];
+    newGroups[index] = { ...newGroups[index], label };
+    saveConfig(newGroups);
+    setEditingGroup(null);
+  };
+
+  const updateGroupColor = (index: number, color: string) => {
+    const newGroups = [...currentGroups];
+    newGroups[index] = { ...newGroups[index], color };
+    saveConfig(newGroups);
+  };
+
+  const deleteGroup = (index: number) => {
+    const newGroups = currentGroups.filter((_: any, i: number) => i !== index);
+    saveConfig(newGroups);
+  };
+
+  const addGroup = () => {
+    if (!newGroupName.trim()) return;
+    const newGroups = [...currentGroups, {
+      id: `custom_${Date.now()}`,
+      label: newGroupName.trim(),
+      labelEn: newGroupNameEn.trim() || newGroupName.trim(),
+      color: newGroupColor,
+      items: [],
+    }];
+    saveConfig(newGroups);
+    setNewGroupName("");
+    setNewGroupNameEn("");
+    setShowAddGroup(false);
+  };
+
+  const addPageToGroup = (groupIndex: number) => {
+    if (!newPageLabel.trim()) return;
+    const newGroups = [...currentGroups];
+    newGroups[groupIndex] = {
+      ...newGroups[groupIndex],
+      items: [...newGroups[groupIndex].items, newPageLabel.trim()],
+    };
+    saveConfig(newGroups);
+    setNewPageLabel("");
+    setNewPagePath("");
+    setAddingPageToGroup(null);
+  };
+
+  const removePageFromGroup = (groupIndex: number, pageIndex: number) => {
+    const newGroups = [...currentGroups];
+    newGroups[groupIndex] = {
+      ...newGroups[groupIndex],
+      items: newGroups[groupIndex].items.filter((_: any, i: number) => i !== pageIndex),
+    };
+    saveConfig(newGroups);
+  };
+
+  const movePageInGroup = (groupIndex: number, pageIndex: number, direction: "up" | "down") => {
+    const newGroups = [...currentGroups];
+    const items = [...newGroups[groupIndex].items];
+    const targetIndex = direction === "up" ? pageIndex - 1 : pageIndex + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    [items[pageIndex], items[targetIndex]] = [items[targetIndex], items[pageIndex]];
+    newGroups[groupIndex] = { ...newGroups[groupIndex], items };
+    saveConfig(newGroups);
+  };
+
+  const resetToDefaults = () => {
+    localStorage.removeItem(storageKey);
+    setSidebarConfig([]);
+    toast.success("تم إعادة القائمة للإعدادات الافتراضية");
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">إدارة القائمة الجانبية</h3>
+          <p className="text-gray-400 text-xs mt-1">إضافة وحذف وترتيب المجموعات والصفحات وتخصيص الألوان</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Platform Switcher */}
+          <div className="flex gap-1 p-0.5 bg-gray-800/50 rounded-lg border border-gray-700">
+            <button onClick={() => setActivePlatform("leaks")} className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${activePlatform === "leaks" ? "bg-cyan-600 text-white" : "text-gray-400 hover:text-white"}`}>
+              رصد التسريبات
+            </button>
+            <button onClick={() => setActivePlatform("privacy")} className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${activePlatform === "privacy" ? "bg-green-600 text-white" : "text-gray-400 hover:text-white"}`}>
+              رصد الخصوصية
+            </button>
+          </div>
+          <Button size="sm" variant="outline" className="border-gray-600 text-gray-400 hover:text-white" onClick={resetToDefaults}>
+            <RefreshCw className="h-3 w-3 ml-1" /> افتراضي
+          </Button>
+        </div>
+      </div>
+
+      {/* Groups List */}
+      <div className="space-y-3">
+        {currentGroups.map((group: any, groupIndex: number) => (
+          <Card key={group.id || groupIndex} className="bg-gray-800/50 border-gray-700 overflow-hidden">
+            <div className="flex items-center justify-between flex-wrap p-4">
+              <div className="flex items-center gap-3">
+                <GripVertical className="h-4 w-4 text-gray-500 cursor-grab" />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: group.color || "#3DB1AC" }} />
+                {editingGroup === group.id ? (
+                  <Input
+                    value={group.label}
+                    onChange={(e) => {
+                      const newGroups = [...currentGroups];
+                      newGroups[groupIndex] = { ...newGroups[groupIndex], label: e.target.value };
+                      setSidebarConfig(newGroups);
+                    }}
+                    onBlur={() => updateGroupLabel(groupIndex, currentGroups[groupIndex].label)}
+                    onKeyDown={(e) => e.key === "Enter" && updateGroupLabel(groupIndex, currentGroups[groupIndex].label)}
+                    className="h-7 w-40 bg-gray-700 border-gray-600 text-sm"
+                    autoFocus
+                  />
+                ) : (
+                  <span className="text-white font-medium">{group.label}</span>
+                )}
+                <span className="text-gray-500 text-xs">({group.labelEn})</span>
+                <Badge variant="outline" className="border-gray-600 text-gray-400 text-xs">{group.items?.length || 0} صفحة</Badge>
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="color"
+                  value={group.color || "#3DB1AC"}
+                  onChange={(e) => updateGroupColor(groupIndex, e.target.value)}
+                  className="w-6 h-6 rounded cursor-pointer bg-transparent border-0"
+                  title="لون المجموعة"
+                />
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" onClick={() => setEditingGroup(group.id)}>
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" onClick={() => moveGroup(groupIndex, "up")} disabled={groupIndex === 0}>
+                  <ArrowUp className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" onClick={() => moveGroup(groupIndex, "down")} disabled={groupIndex === currentGroups.length - 1}>
+                  <ArrowDown className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300" onClick={() => deleteGroup(groupIndex)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Pages within group */}
+            <div className="border-t border-gray-700/50 p-3 space-y-1">
+              {(group.items || []).map((page: any, pageIndex: number) => (
+                <div key={pageIndex} className="flex items-center justify-between px-3 py-1.5 rounded hover:bg-gray-700/30 transition-colors group">
+                  <div className="flex items-center gap-2">
+                    <Hash className="h-3 w-3 text-gray-500" />
+                    <span className="text-gray-300 text-sm">{typeof page === 'string' ? page : page.label}</span>
+                  </div>
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-gray-500 hover:text-white" onClick={() => movePageInGroup(groupIndex, pageIndex, "up")} disabled={pageIndex === 0}>
+                      <ArrowUp className="h-2.5 w-2.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-gray-500 hover:text-white" onClick={() => movePageInGroup(groupIndex, pageIndex, "down")} disabled={pageIndex === group.items.length - 1}>
+                      <ArrowDown className="h-2.5 w-2.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-5 w-5 p-0 text-red-400/60 hover:text-red-400" onClick={() => removePageFromGroup(groupIndex, pageIndex)}>
+                      <X className="h-2.5 w-2.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              {addingPageToGroup === group.id ? (
+                <div className="flex items-center gap-2 px-3 py-1.5">
+                  <Input
+                    placeholder="اسم الصفحة..."
+                    value={newPageLabel}
+                    onChange={(e) => setNewPageLabel(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addPageToGroup(groupIndex)}
+                    className="h-7 bg-gray-700 border-gray-600 text-xs flex-1"
+                    autoFocus
+                  />
+                  <Button size="sm" className="h-7 bg-blue-600 hover:bg-blue-700 px-2" onClick={() => addPageToGroup(groupIndex)}>
+                    <Check className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-gray-400" onClick={() => setAddingPageToGroup(null)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setAddingPageToGroup(group.id)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-500 hover:text-cyan-400 transition-colors"
+                >
+                  <Plus className="h-3 w-3" /> إضافة صفحة
+                </button>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Add New Group */}
+      {showAddGroup ? (
+        <Card className="bg-gray-800/50 border-gray-700 border-dashed">
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Input placeholder="اسم المجموعة (عربي)..." value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} className="bg-gray-700 border-gray-600" />
+              <Input placeholder="اسم المجموعة (English)..." value={newGroupNameEn} onChange={(e) => setNewGroupNameEn(e.target.value)} className="bg-gray-700 border-gray-600" />
+              <div className="flex items-center gap-2">
+                <input type="color" value={newGroupColor} onChange={(e) => setNewGroupColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex-1" onClick={addGroup}><Plus className="h-3 w-3 ml-1" /> إضافة</Button>
+                <Button size="sm" variant="ghost" className="text-gray-400" onClick={() => setShowAddGroup(false)}><X className="h-3 w-3" /></Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Button variant="outline" className="w-full border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-cyan-500/50" onClick={() => setShowAddGroup(true)}>
+          <Plus className="h-4 w-4 ml-2" /> إضافة مجموعة جديدة
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// ═══ Tab 5: Design Settings ═══
+function DesignTab() {
+  const workspace = (localStorage.getItem("rasid_workspace") || "leaks") as "leaks" | "privacy";
+  const [activePlatform, setActivePlatform] = useState<"leaks" | "privacy">(workspace);
+  const { refresh } = usePlatformSettings();
+  const upsertMutation = trpc.superAdmin.upsertSetting.useMutation({
+    onSuccess: () => { refresh(); toast.success("تم حفظ الإعداد"); },
+    onError: () => toast.error("فشل حفظ الإعداد"),
+  });
+  const upsertThemeMutation = trpc.superAdmin.upsertTheme.useMutation({
+    onSuccess: () => { refresh(); toast.success("تم حفظ اللون"); },
+    onError: () => toast.error("فشل حفظ اللون"),
+  });
+
+  const prefix = activePlatform === "leaks" ? "leaks" : "privacy";
+
+  // Settings state with localStorage fallbacks
+  const [settings, setSettings] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem(`rasid_design_${prefix}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  const updateSetting = (key: string, value: string) => {
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+    localStorage.setItem(`rasid_design_${prefix}`, JSON.stringify(newSettings));
+  };
+
+  const saveSetting = (key: string, value: string) => {
+    upsertMutation.mutate({ settingKey: `${prefix}_${key}`, settingValue: value, settingType: "string", category: "design", label: key });
+  };
+
+  const saveTheme = (themeKey: string, value: string) => {
+    upsertThemeMutation.mutate({ themeKey, themeValue: value, category: activePlatform });
+  };
+
+  const designSections = [
+    {
+      title: "عناوين المنصة",
+      icon: Type,
+      items: [
+        { key: "platform_title_ar", label: "عنوان المنصة (عربي)", type: "text", placeholder: activePlatform === "leaks" ? "منصة رصد تسريب البيانات" : "منصة رصد سياسة الخصوصية" },
+        { key: "platform_title_en", label: "عنوان المنصة (English)", type: "text", placeholder: activePlatform === "leaks" ? "Data Breach Monitoring" : "Privacy Policy Monitoring" },
+        { key: "platform_subtitle", label: "الوصف الفرعي", type: "text", placeholder: "مكتب إدارة البيانات الوطنية - NDMO" },
+      ],
+    },
+    {
+      title: "الألوان الأساسية",
+      icon: Palette,
+      items: [
+        { key: "primary_color", label: "اللون الرئيسي", type: "color", placeholder: activePlatform === "leaks" ? "#3DB1AC" : "#22c55e" },
+        { key: "secondary_color", label: "اللون الثانوي", type: "color", placeholder: "#6459A7" },
+        { key: "accent_color", label: "لون التمييز", type: "color", placeholder: "#273470" },
+        { key: "header_bg", label: "لون خلفية الرأس", type: "color", placeholder: "#0d1529" },
+        { key: "sidebar_bg", label: "لون خلفية القائمة", type: "color", placeholder: "#0d1529" },
+      ],
+    },
+    {
+      title: "الوضع الفاتح والداكن",
+      icon: Sun,
+      items: [
+        { key: "dark_bg", label: "خلفية الوضع الداكن", type: "color", placeholder: "#0d1529" },
+        { key: "dark_card_bg", label: "خلفية البطاقات (داكن)", type: "color", placeholder: "#1a2744" },
+        { key: "light_bg", label: "خلفية الوضع الفاتح", type: "color", placeholder: "#f8fafc" },
+        { key: "light_card_bg", label: "خلفية البطاقات (فاتح)", type: "color", placeholder: "#ffffff" },
+      ],
+    },
+    {
+      title: "الشعار والعلامة",
+      icon: Image,
+      items: [
+        { key: "logo_dark_url", label: "رابط الشعار (وضع داكن)", type: "text", placeholder: "/branding/logos/Rased_1_transparent.png" },
+        { key: "logo_light_url", label: "رابط الشعار (وضع فاتح)", type: "text", placeholder: "/branding/logos/Rased_1_transparent_1.png" },
+        { key: "favicon_url", label: "رابط الأيقونة (Favicon)", type: "text", placeholder: "/favicon.ico" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">إعدادات التصميم</h3>
+          <p className="text-gray-400 text-xs mt-1">تخصيص العناوين والألوان والشعارات لكل منصة على حدة</p>
+        </div>
+        <div className="flex gap-1 p-0.5 bg-gray-800/50 rounded-lg border border-gray-700">
+          <button onClick={() => setActivePlatform("leaks")} className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${activePlatform === "leaks" ? "bg-cyan-600 text-white" : "text-gray-400 hover:text-white"}`}>
+            رصد التسريبات
+          </button>
+          <button onClick={() => setActivePlatform("privacy")} className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${activePlatform === "privacy" ? "bg-green-600 text-white" : "text-gray-400 hover:text-white"}`}>
+            رصد الخصوصية
+          </button>
+        </div>
+      </div>
+
+      {designSections.map((section) => {
+        const SectionIcon = section.icon;
+        return (
+          <Card key={section.title} className="bg-gray-800/50 border-gray-700">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-white text-sm flex items-center gap-2">
+                <SectionIcon className="h-4 w-4 text-cyan-400" />
+                {section.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {section.items.map((item) => (
+                <div key={item.key} className="flex items-center gap-3 flex-wrap">
+                  <label className="text-gray-300 text-xs w-40 flex-shrink-0">{item.label}</label>
+                  <div className="flex items-center gap-2 flex-1">
+                    {item.type === "color" ? (
+                      <>
+                        <input
+                          type="color"
+                          value={settings[item.key] || item.placeholder}
+                          onChange={(e) => updateSetting(item.key, e.target.value)}
+                          className="w-8 h-8 rounded cursor-pointer bg-transparent border border-gray-600"
+                        />
+                        <Input
+                          value={settings[item.key] || ""}
+                          onChange={(e) => updateSetting(item.key, e.target.value)}
+                          placeholder={item.placeholder}
+                          className="h-8 bg-gray-700 border-gray-600 text-xs font-mono flex-1"
+                        />
+                      </>
+                    ) : (
+                      <Input
+                        value={settings[item.key] || ""}
+                        onChange={(e) => updateSetting(item.key, e.target.value)}
+                        placeholder={item.placeholder}
+                        className="h-8 bg-gray-700 border-gray-600 text-xs flex-1"
+                      />
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2 text-gray-400 hover:text-cyan-400"
+                      onClick={() => {
+                        const val = settings[item.key] || item.placeholder;
+                        if (item.type === "color") {
+                          saveTheme(`${prefix}_${item.key}`, val);
+                        } else {
+                          saveSetting(item.key, val);
+                        }
+                      }}
+                    >
+                      <Save className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══ Tab 6: Audit Log ═══
 function AuditTab() {
   const { data: logs, isLoading } = trpc.audit.list.useQuery({ limit: 50 });
 
@@ -222,7 +656,7 @@ function AuditTab() {
   );
 }
 
-// ═══ Tab 5: AI Training Center ═══
+// ═══ Tab 7: AI Training Center ═══
 function TrainingTab() {
   const { data: aiConfigs, isLoading: configLoading } = trpc.controlPanel.aiConfig.list.useQuery();
   const { data: trainingStats, isLoading: statsLoading } = trpc.controlPanel.trainingStats.useQuery();
@@ -311,7 +745,7 @@ export default function AdminControlPanel() {
       <div className="flex items-center justify-between flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">لوحة التحكم الرئيسية</h1>
-          <p className="text-gray-400 text-sm mt-1">إدارة المستخدمين والمجموعات والصلاحيات ومركز التدريب</p>
+          <p className="text-gray-400 text-sm mt-1">إدارة المستخدمين والمجموعات والصلاحيات والتصميم ومركز التدريب</p>
         </div>
       </div>
       <div className="flex gap-1 p-1 bg-gray-800/50 rounded-xl border border-gray-700 overflow-x-auto">
@@ -329,6 +763,8 @@ export default function AdminControlPanel() {
           {activeTab === "users" && <UsersTab />}
           {activeTab === "groups" && <GroupsTab />}
           {activeTab === "pages" && <PagesTab />}
+          {activeTab === "sidebar" && <SidebarTab />}
+          {activeTab === "design" && <DesignTab />}
           {activeTab === "audit" && <AuditTab />}
           {activeTab === "training" && <TrainingTab />}
         </motion.div>
