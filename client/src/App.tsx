@@ -83,6 +83,16 @@ const SuperAdminPanel = lazy(() => import("./pages/SuperAdminPanel"));
 const StrategyCoverage = lazy(() => import("./pages/StrategyCoverage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Hub Pages — Platform Separation
+const BreachDashboardsHub = lazy(() => import("./pages/BreachDashboardsHub"));
+const PrivacyDashboardsHub = lazy(() => import("./pages/PrivacyDashboardsHub"));
+const BreachOperationsHub = lazy(() => import("./pages/BreachOperationsHub"));
+const PrivacyOperationsHub = lazy(() => import("./pages/PrivacyOperationsHub"));
+
+// Import Pages
+const BreachImport = lazy(() => import("./pages/BreachImport"));
+const PrivacyImport = lazy(() => import("./pages/PrivacyImport"));
+
 // Platform 2 unique pages
 const TelegramMonitor = lazy(() => import("./pages/TelegramMonitor"));
 const DarkWebMonitor = lazy(() => import("./pages/DarkWebMonitor"));
@@ -283,7 +293,14 @@ function Router() {
           <Route path="/app/followups" component={FollowupsList} />
           <Route path="/app/reports" component={ReportsList} />
           <Route path="/recommendations-hub" component={RecommendationsHub} />
-          {/* Rasid Platform Routes */}
+          {/* Hub Pages — Platform Separation */}
+          <Route path="/breach-dashboards" component={BreachDashboardsHub} />
+          <Route path="/privacy-dashboards" component={PrivacyDashboardsHub} />
+          <Route path="/breach-operations" component={BreachOperationsHub} />
+          <Route path="/privacy-operations" component={PrivacyOperationsHub} />
+          {/* Import Pages */}
+          <Route path="/breach-import" component={BreachImport} />
+          <Route path="/privacy-import" component={PrivacyImport} />
           {/* Dynamic Custom Pages */}
           <Route path="/custom/dashboard/:id" component={DynamicDashboard} />
           <Route path="/custom/table/:id" component={DynamicTable} />

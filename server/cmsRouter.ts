@@ -12,7 +12,10 @@ import {
   knowledgeBase, auditLog,
 } from "../drizzle/schema";
 import { processExport, getExportJobs, getExportJobStatus } from "./exportEngine";
-import { getImportJobs, getImportJobStatus } from "./importEngine";
+import { getImportJobs, getImportJobStatus, processImport, processPrivacyImport } from "./importEngine";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
 
 export const cmsRouter = router({
   // ═══════════════════════════════════════════════════════════════
@@ -155,6 +158,44 @@ export const cmsRouter = router({
   // ═══════════════════════════════════════════════════════════════
   // ═══ Import ═══════════════════════════════════════════════════
   // ═══════════════════════════════════════════════════════════════
+  importData: adminProcedure.input(z.object({
+    fileName: z.string(),
+    fileType: z.enum(["json", "csv", "xlsx", "zip"]),
+    content: z.string(),
+    platform: z.enum(["leaks", "privacy"]),
+  })).mutation(async ({ ctx, input }) => {
+    const user = (ctx as any).platformUser;
+    const userId = user?.id || 0;
+    const userName = user?.displayName || "Admin";
+
+    // Write content to temp file
+    const tmpDir = os.tmpdir();
+    const tmpFile = path.join(tmpDir, `import_${Date.now()}_${input.fileName}`);
+
+    if (input.fileType === "json" || input.fileType === "csv") {
+      fs.writeFileSync(tmpFile, input.content, "utf-8");
+    } else {
+      // Base64-encoded binary
+      const buffer = Buffer.from(input.content, "base64");
+      fs.writeFileSync(tmpFile, buffer);
+    }
+
+    try {
+      if (input.platform === "privacy") {
+        return await processPrivacyImport(tmpFile, input.fileType as "json" | "csv" | "xlsx", userId, userName);
+      } else {
+        return await processImport(tmpFile, input.fileType as "json" | "csv" | "xlsx" | "zip", userId, userName);
+      }
+    } catch (err: any) {
+      // Clean up temp file on error
+      try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `فشل الاستيراد: ${err.message}`,
+      });
+    }
+  }),
+
   import: router({
     getJobs: adminProcedure.query(async () => {
       return getImportJobs();
@@ -312,5 +353,158 @@ export const cmsRouter = router({
       lastImport: lastImportArr[0] || null,
       lastExport: lastExportArr[0] || null,
     };
+  }),
+
+  // ═══════════════════════════════════════════════════════════════
+  // ═══ Widget Data API — Real DB Data for Dynamic Dashboards ═══
+  // ═══════════════════════════════════════════════════════════════
+  widgetData: adminProcedure.input(z.object({
+    widgetType: z.string(),
+    workspace: z.enum(["leaks", "privacy"]),
+    config: z.record(z.string(), z.any()).optional(),
+  })).query(async ({ input }) => {
+    const db = await getDb();
+    if (!db) return { type: input.widgetType, data: null };
+
+    const { widgetType, workspace } = input;
+
+    if (workspace === "leaks") {
+      switch (widgetType) {
+        case "stat-card": {
+          const [total] = await db.select({ count: count() }).from(leaks);
+          const [critical] = await db.select({ count: count() }).from(leaks).where(eq(leaks.severity, "critical"));
+          const [newLeaks] = await db.select({ count: count() }).from(leaks).where(eq(leaks.status, "new"));
+          return {
+            type: "stat-card",
+            data: {
+              total: total.count,
+              critical: critical.count,
+              new: newLeaks.count,
+            },
+          };
+        }
+        case "bar-chart":
+        case "pie-chart": {
+          const severityCounts = await db
+            .select({ severity: leaks.severity, count: count() })
+            .from(leaks)
+            .groupBy(leaks.severity);
+          return {
+            type: widgetType,
+            data: {
+              labels: severityCounts.map((s) => s.severity),
+              values: severityCounts.map((s) => s.count),
+            },
+          };
+        }
+        case "line-chart": {
+          const monthly = await db
+            .select({
+              month: sql`DATE_FORMAT(${leaks.detectedAt}, '%Y-%m')`.as("month"),
+              count: count(),
+            })
+            .from(leaks)
+            .groupBy(sql`DATE_FORMAT(${leaks.detectedAt}, '%Y-%m')`)
+            .orderBy(sql`DATE_FORMAT(${leaks.detectedAt}, '%Y-%m')`)
+            .limit(12);
+          return {
+            type: "line-chart",
+            data: {
+              labels: monthly.map((m: any) => m.month),
+              values: monthly.map((m: any) => m.count),
+            },
+          };
+        }
+        case "source-breakdown": {
+          const sources = await db
+            .select({ source: leaks.source, count: count() })
+            .from(leaks)
+            .groupBy(leaks.source);
+          return {
+            type: "source-breakdown",
+            data: {
+              labels: sources.map((s) => s.source),
+              values: sources.map((s) => s.count),
+              total: sources.reduce((a, b) => a + b.count, 0),
+            },
+          };
+        }
+        case "data-table": {
+          const recentLeaks = await db.select({
+            id: leaks.id,
+            leakId: leaks.leakId,
+            title: leaks.title,
+            titleAr: leaks.titleAr,
+            severity: leaks.severity,
+            status: leaks.status,
+            source: leaks.source,
+          }).from(leaks).orderBy(desc(leaks.detectedAt)).limit(10);
+          return {
+            type: "data-table",
+            data: { rows: recentLeaks },
+          };
+        }
+        case "live-feed": {
+          const latest = await db.select({
+            id: leaks.id,
+            leakId: leaks.leakId,
+            titleAr: leaks.titleAr,
+            severity: leaks.severity,
+            detectedAt: leaks.detectedAt,
+          }).from(leaks).orderBy(desc(leaks.detectedAt)).limit(5);
+          return {
+            type: "live-feed",
+            data: { items: latest },
+          };
+        }
+        default:
+          return { type: widgetType, data: null };
+      }
+    } else {
+      // Privacy workspace
+      const sitesTable = (await import("../drizzle/schema")).sites;
+      const scansTable = (await import("../drizzle/schema")).scans;
+      switch (widgetType) {
+        case "stat-card": {
+          const [totalSites] = await db.select({ count: count() }).from(sitesTable);
+          const [totalScans] = await db.select({ count: count() }).from(scansTable);
+          return {
+            type: "stat-card",
+            data: {
+              totalSites: totalSites.count,
+              totalScans: totalScans.count,
+            },
+          };
+        }
+        case "bar-chart":
+        case "pie-chart": {
+          const sectorCounts = await db
+            .select({ sectorType: sitesTable.sectorType, count: count() })
+            .from(sitesTable)
+            .groupBy(sitesTable.sectorType);
+          return {
+            type: widgetType,
+            data: {
+              labels: sectorCounts.map((s: any) => s.sectorType),
+              values: sectorCounts.map((s: any) => s.count),
+            },
+          };
+        }
+        case "data-table": {
+          const recentSites = await db.select({
+            id: sitesTable.id,
+            domain: sitesTable.domain,
+            siteName: sitesTable.siteName,
+            sectorType: sitesTable.sectorType,
+          }).from(sitesTable).limit(10);
+          return {
+            type: "data-table",
+            data: { rows: recentSites },
+          };
+        }
+        default:
+          return { type: widgetType, data: null };
+      }
+    }
   }),
 });

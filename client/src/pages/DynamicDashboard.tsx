@@ -134,6 +134,233 @@ const SIZE_LABELS = {
   large: "كبير (3/4)",
 };
 
+/* ═══ WidgetBody — fetches real data from DB ═══ */
+function WidgetBody({ widgetId, title, catalogItem, isEditMode }: {
+  widgetId: string;
+  title: string;
+  catalogItem: typeof WIDGET_CATALOG[0] | undefined;
+  isEditMode: boolean;
+}) {
+  const workspace = (localStorage.getItem("rasid_workspace") || "leaks") as "leaks" | "privacy";
+  const { data, isLoading } = trpc.cms.widgetData.useQuery(
+    { widgetType: widgetId, workspace },
+    { staleTime: 60000, refetchOnWindowFocus: false }
+  );
+
+  const Icon = catalogItem?.icon || BarChart3;
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-4 flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-slate-700" />
+          <div className="w-20 h-3 rounded bg-slate-700" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.data) {
+    return (
+      <div className="flex-1 p-4 flex items-center justify-center">
+        <div className="text-center">
+          <Icon className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+          <p className="text-slate-500 text-xs">{catalogItem?.description}</p>
+          {isEditMode && (
+            <button className="mt-2 text-cyan-400 text-xs hover:underline">تخصيص البيانات</button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const widgetData = data.data as Record<string, any>;
+
+  // Stat Card
+  if (widgetId === "stat-card") {
+    const entries = Object.entries(widgetData);
+    const mainValue = entries[0]?.[1] ?? 0;
+    const mainLabel = title || entries[0]?.[0] || "";
+    return (
+      <div className="flex-1 p-4 flex flex-col items-center justify-center">
+        <p className="text-3xl font-bold text-white">{Number(mainValue).toLocaleString("ar-SA")}</p>
+        <p className="text-xs text-slate-400 mt-1">{mainLabel}</p>
+        {entries.length > 1 && (
+          <div className="flex items-center gap-3 mt-3">
+            {entries.slice(1, 3).map(([k, v]) => (
+              <div key={k} className="text-center">
+                <p className="text-sm font-semibold text-cyan-400">{Number(v).toLocaleString("ar-SA")}</p>
+                <p className="text-[10px] text-slate-500">{k}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Bar/Pie Chart
+  if (widgetId === "bar-chart" || widgetId === "pie-chart") {
+    const labels = widgetData.labels as string[] || [];
+    const values = widgetData.values as number[] || [];
+    const maxVal = Math.max(...values, 1);
+    const colors = ["bg-cyan-500", "bg-red-500", "bg-amber-500", "bg-emerald-500", "bg-purple-500"];
+    return (
+      <div className="flex-1 p-3 overflow-hidden">
+        {widgetId === "bar-chart" ? (
+          <div className="flex items-end gap-2 h-full pt-2 pb-1">
+            {values.map((v, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                <div
+                  className={`w-full rounded-t ${colors[i % colors.length]} transition-all`}
+                  style={{ height: `${(v / maxVal) * 100}%`, minHeight: "4px" }}
+                />
+                <p className="text-[9px] text-slate-400 mt-1 truncate w-full text-center">{labels[i] || ""}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {labels.map((label, i) => {
+              const total = values.reduce((a, b) => a + b, 0) || 1;
+              const pct = Math.round((values[i] / total) * 100);
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${colors[i % colors.length]}`} />
+                  <span className="text-[10px] text-slate-300 flex-1 truncate">{label}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{pct}%</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Line Chart
+  if (widgetId === "line-chart") {
+    const labels = widgetData.labels as string[] || [];
+    const values = widgetData.values as number[] || [];
+    const maxVal = Math.max(...values, 1);
+    return (
+      <div className="flex-1 p-3 overflow-hidden">
+        <div className="flex items-end gap-1 h-full pt-2 pb-1">
+          {values.map((v, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 mb-1" />
+              <div
+                className="w-0.5 bg-gradient-to-t from-cyan-500/50 to-cyan-500/10 transition-all"
+                style={{ height: `${(v / maxVal) * 80}%`, minHeight: "2px" }}
+              />
+              <p className="text-[8px] text-slate-500 mt-1">{(labels[i] || "").slice(-5)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Source Breakdown
+  if (widgetId === "source-breakdown") {
+    const labels = widgetData.labels as string[] || [];
+    const values = widgetData.values as number[] || [];
+    const total = widgetData.total as number || values.reduce((a: number, b: number) => a + b, 0) || 1;
+    const colors = ["bg-sky-500", "bg-violet-500", "bg-amber-500"];
+    return (
+      <div className="flex-1 p-3 space-y-2 overflow-hidden">
+        {labels.map((label, i) => {
+          const pct = Math.round((values[i] / total) * 100);
+          return (
+            <div key={i}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] text-slate-300">{label}</span>
+                <span className="text-[10px] text-slate-400 font-mono">{values[i]} ({pct}%)</span>
+              </div>
+              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${colors[i % colors.length]} transition-all`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Data Table
+  if (widgetId === "data-table") {
+    const rows = widgetData.rows as Record<string, any>[] || [];
+    if (rows.length === 0) {
+      return (
+        <div className="flex-1 p-4 flex items-center justify-center">
+          <p className="text-slate-500 text-xs">لا توجد بيانات</p>
+        </div>
+      );
+    }
+    const cols = Object.keys(rows[0]).slice(0, 4);
+    return (
+      <div className="flex-1 p-2 overflow-auto">
+        <table className="w-full text-[10px]">
+          <thead>
+            <tr className="border-b border-slate-700/50">
+              {cols.map((col) => (
+                <th key={col} className="px-2 py-1 text-right text-slate-400 font-medium">{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.slice(0, 6).map((row, i) => (
+              <tr key={i} className="border-b border-slate-800/50">
+                {cols.map((col) => (
+                  <td key={col} className="px-2 py-1 text-slate-300 truncate max-w-[100px]">
+                    {String(row[col] ?? "")}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // Live Feed
+  if (widgetId === "live-feed") {
+    const items = widgetData.items as any[] || [];
+    return (
+      <div className="flex-1 p-2 overflow-auto space-y-1.5">
+        {items.map((item: any, i: number) => (
+          <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/30">
+            <div className={`w-2 h-2 rounded-full ${
+              item.severity === "critical" ? "bg-red-500" :
+              item.severity === "high" ? "bg-orange-500" :
+              item.severity === "medium" ? "bg-amber-500" : "bg-green-500"
+            }`} />
+            <span className="text-[11px] text-slate-300 flex-1 truncate">{item.titleAr || item.title}</span>
+            <span className="text-[9px] text-slate-500">{item.leakId}</span>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <p className="text-slate-500 text-xs text-center py-4">لا توجد أحداث حديثة</p>
+        )}
+      </div>
+    );
+  }
+
+  // Default fallback
+  return (
+    <div className="flex-1 p-4 flex items-center justify-center">
+      <div className="text-center">
+        <Icon className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+        <p className="text-slate-500 text-xs">{catalogItem?.description}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function DynamicDashboard() {
   const params = useParams<{ id: string }>();
   const pageId = params?.id ? parseInt(params.id) : null;
@@ -339,18 +566,13 @@ export default function DynamicDashboard() {
                     )}
                   </div>
 
-                  {/* Widget Body - Placeholder */}
-                  <div className="flex-1 p-4 flex items-center justify-center">
-                    <div className="text-center">
-                      <Icon className={`w-10 h-10 mx-auto mb-2 text-slate-600`} />
-                      <p className="text-slate-500 text-xs">{catalogItem?.description}</p>
-                      {isEditMode && (
-                        <button className="mt-2 text-cyan-400 text-xs hover:underline">
-                          تخصيص البيانات
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  {/* Widget Body — Connected to Real Database */}
+                  <WidgetBody
+                    widgetId={widget.widgetId}
+                    title={widget.title}
+                    catalogItem={catalogItem}
+                    isEditMode={isEditMode}
+                  />
                 </motion.div>
               );
             })}
