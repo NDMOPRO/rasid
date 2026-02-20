@@ -1,4 +1,4 @@
-import { eq, sql, desc, asc, like, and, or, count, avg, lte, gte, isNotNull, type SQL, inArray } from "drizzle-orm";
+import { eq, ne, sql, desc, asc, like, and, or, count, avg, lte, gte, isNotNull, type SQL, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   users, sites, scans, letters, notifications, activityLogs, siteWatchers,
@@ -7396,7 +7396,11 @@ export async function analyzeLeakComplianceImpact(leakId: number, entityId?: num
 
 export async function getPrivacyDomains(params: { page?: number; limit?: number; search?: string; complianceStatus?: string; category?: string }) {
   const db = await getDb();
-  if (!db) return { domains: [], total: 0 };
+  if (!db) {
+    const { getPrivacyDomainsFromFile } = await import("./privacyDataProvider");
+    const result = getPrivacyDomainsFromFile(params);
+    return { domains: result.items, total: result.total };
+  }
   const { page = 1, limit = 20, search, complianceStatus, category } = params;
   const offset = (page - 1) * limit;
   const conditions: SQL[] = [];
@@ -7411,7 +7415,11 @@ export async function getPrivacyDomains(params: { page?: number; limit?: number;
 
 export async function getPrivacyDomainById(id: number) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    const { getPrivacyDomainByIdFromFile } = await import("./privacyDataProvider");
+    const domain = getPrivacyDomainByIdFromFile(id);
+    return domain ? { ...domain, screenshots: [] } : null;
+  }
   const [domain] = await db.select().from(privacyDomains).where(eq(privacyDomains.id, id)).limit(1);
   if (!domain) return null;
   const screenshots = await db.select().from(privacyScreenshots).where(eq(privacyScreenshots.domainId, id));
@@ -7420,13 +7428,22 @@ export async function getPrivacyDomainById(id: number) {
 
 export async function getPrivacyDomainStats() {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    const { getPrivacyDomainStatsFromFile } = await import("./privacyDataProvider");
+    return getPrivacyDomainStatsFromFile();
+  }
   const [total] = await db.select({ count: count() }).from(privacyDomains);
   const [compliant] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "compliant"));
   const [partial] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "partially_compliant"));
   const [nonCompliant] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "non_compliant"));
   const [noPolicy] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "no_policy"));
   const [avgScore] = await db.select({ avg: avg(privacyDomains.complianceScore) }).from(privacyDomains);
+  // Additional stats
+  const [working] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.status, "\u064a\u0639\u0645\u0644"));
+  const [hasPolicy] = await db.select({ count: count() }).from(privacyDomains).where(and(isNotNull(privacyDomains.policyUrl), ne(privacyDomains.policyUrl, "\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631")));
+  const [hasSSL] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.sslStatus, "\u0635\u0627\u0644\u062d"));
+  // Category distribution (top 20)
+  const categories = await db.select({ category: privacyDomains.classification, count: count() }).from(privacyDomains).where(isNotNull(privacyDomains.classification)).groupBy(privacyDomains.classification).orderBy(desc(count())).limit(20);
   return {
     total: total.count,
     compliant: compliant.count,
@@ -7434,6 +7451,10 @@ export async function getPrivacyDomainStats() {
     nonCompliant: nonCompliant.count,
     noPolicy: noPolicy.count,
     averageScore: Number(avgScore.avg) || 0,
+    working: working.count,
+    hasPolicy: hasPolicy.count,
+    hasSSL: hasSSL.count,
+    categories: categories.map((c: any) => ({ category: c.category, count: c.count })),
   };
 }
 
