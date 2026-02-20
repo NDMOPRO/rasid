@@ -66,6 +66,7 @@ import {
   recommendationEngine,
   ragEngine,
   conversationMemory,
+  circuitBreaker,
 } from "./rasidEnhancements";
 
 // ═══════════════════════════════════════════════════════════════
@@ -622,7 +623,7 @@ export const RASID_TOOLS = [
     type: "function" as const,
     function: {
       name: "get_system_health",
-      description: "صحة المنصة: حالة النظام، سياسات الاحتفاظ، مفاتيح API.",
+      description: "صحة النظام الشاملة: جاهزية الفهرس RAG، متوسط زمن الاستجابة، حالة Circuit Breaker، آخر تحديث للمعرفة، أخطاء حرجة، سياسات الاحتفاظ، مفاتيح API.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -1919,9 +1920,20 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       const retention = await getRetentionPolicies();
       const stats = await getDashboardStats();
       const apiKeys = await getApiKeys();
+      const cbStatus = circuitBreaker.getStatus();
+      const ragReady = ragEngine.isReady;
       return {
-        status: "operational",
+        status: cbStatus.state === "OPEN" ? "degraded" : "operational",
         database: stats ? "connected" : "disconnected",
+        ragIndex: {
+          ready: ragReady,
+          status: ragReady ? "ready" : "not_initialized",
+        },
+        circuitBreaker: {
+          state: cbStatus.state,
+          failureCount: cbStatus.failureCount,
+          lastFailure: cbStatus.lastFailure ? new Date(cbStatus.lastFailure).toISOString() : null,
+        },
         retentionPolicies: retention,
         apiKeysCount: apiKeys.length,
         stats,

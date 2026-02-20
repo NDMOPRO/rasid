@@ -18,10 +18,53 @@ interface GuideOverlayProps {
   onComplete?: () => void;
 }
 
+const GUIDE_SESSION_KEY = "rasid_guide_session";
+
+interface GuideSession {
+  stepIndex: number;
+  totalSteps: number;
+  timestamp: number;
+}
+
+function saveGuideSession(stepIndex: number, totalSteps: number) {
+  try {
+    const session: GuideSession = { stepIndex, totalSteps, timestamp: Date.now() };
+    localStorage.setItem(GUIDE_SESSION_KEY, JSON.stringify(session));
+  } catch { /* localStorage unavailable */ }
+}
+
+function loadGuideSession(): GuideSession | null {
+  try {
+    const raw = localStorage.getItem(GUIDE_SESSION_KEY);
+    if (!raw) return null;
+    const session: GuideSession = JSON.parse(raw);
+    // Expire after 30 minutes
+    if (Date.now() - session.timestamp > 30 * 60 * 1000) {
+      localStorage.removeItem(GUIDE_SESSION_KEY);
+      return null;
+    }
+    return session;
+  } catch { return null; }
+}
+
+function clearGuideSession() {
+  try { localStorage.removeItem(GUIDE_SESSION_KEY); } catch { /* ignore */ }
+}
+
 export default function GuideOverlay({ steps, open, onClose, onComplete }: GuideOverlayProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = loadGuideSession();
+    return saved && saved.stepIndex < steps.length ? saved.stepIndex : 0;
+  });
   const [spotlightRect, setSpotlightRect] = useState<DOMRect | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Persist current step to localStorage (UI-15)
+  useEffect(() => {
+    if (open) {
+      saveGuideSession(currentStep, steps.length);
+    }
+  }, [currentStep, open, steps.length]);
 
   const updateSpotlight = useCallback(() => {
     if (!open || !steps[currentStep]) return;
@@ -49,6 +92,7 @@ export default function GuideOverlay({ steps, open, onClose, onComplete }: Guide
     if (currentStep < steps.length - 1) {
       setCurrentStep((s) => s + 1);
     } else {
+      clearGuideSession();
       onComplete?.();
       onClose();
       setCurrentStep(0);
@@ -60,7 +104,7 @@ export default function GuideOverlay({ steps, open, onClose, onComplete }: Guide
   };
 
   const handleClose = () => {
-    setCurrentStep(0);
+    // Keep session in localStorage so it can be restored on reload (UI-15)
     onClose();
   };
 
