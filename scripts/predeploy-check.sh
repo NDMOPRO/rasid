@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Prevent merge/deploy while conflicts still exist.
+# Prevent merge/deploy while unresolved conflicts still exist.
 
 unmerged_files="$(git diff --name-only --diff-filter=U || true)"
 if [[ -n "$unmerged_files" ]]; then
@@ -10,9 +10,17 @@ if [[ -n "$unmerged_files" ]]; then
   exit 1
 fi
 
-conflict_markers="$(rg -n "^(<<<<<<<|=======|>>>>>>>)" drizzle server --glob '!**/*.gz' || true)"
+# Search conflict markers in tracked files across the repository,
+# excluding common binary/lock/generated paths.
+conflict_markers="$(
+  git grep -nE '^(<<<<<<<|=======|>>>>>>>)' -- \
+    ':!*.png' ':!*.jpg' ':!*.jpeg' ':!*.gif' ':!*.webp' ':!*.ico' ':!*.pdf' \
+    ':!*.gz' ':!*.zip' ':!pnpm-lock.yaml' ':!package-lock.json' ':!yarn.lock' \
+    ':!dist/**' ':!node_modules/**' || true
+)"
+
 if [[ -n "$conflict_markers" ]]; then
-  echo "❌ Conflict markers found in source files:"
+  echo "❌ Conflict markers found in tracked files:"
   echo "$conflict_markers"
   exit 1
 fi

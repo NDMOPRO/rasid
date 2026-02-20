@@ -3,7 +3,7 @@
 إذا ظهر في GitHub أن الفرع فيه تعارضات (مثل:
 `drizzle/0002_smart_monitor_requirements.sql` و `drizzle/schema.ts` و `server/rasidAI.ts`) اتبع التالي محلياً:
 
-## 1) تحديث الفروع
+## 1) تحديث الفرع من القاعدة
 ```bash
 git fetch origin
 git checkout <your-branch>
@@ -15,20 +15,25 @@ git merge origin/<base-branch>
   - `<<<<<<<`
   - `=======`
   - `>>>>>>>`
-- احتفظ بالمنطق الصحيح من الطرفين عند الحاجة.
+- احتفظ بالنسخة الصحيحة بعد المراجعة (وليس حذف عشوائي).
 
-## 3) فحص سريع قبل الرفع
+## 3) فحص شامل قبل الرفع
 ```bash
-scripts/predeploy-check.sh
+npm run predeploy:check
 ```
+
+> الفحص يتحقق من:
+> - وجود ملفات Unmerged في Git.
+> - وجود علامات تعارض في **جميع الملفات المتتبعة** بالمستودع (مع استثناء الملفات الثنائية والـ lockfiles).
 
 ## 4) إنهاء الدمج
 ```bash
-git add drizzle/0002_smart_monitor_requirements.sql drizzle/schema.ts server/rasidAI.ts
+git add -A
 git commit -m "fix: resolve merge conflicts for deployment"
 git push origin <your-branch>
 ```
 
-## ملاحظات مهمة
-- ملفا Drizzle (`schema.ts` وملفات migration) غالباً تتكرر فيهما التعارضات؛ يفضل توليد migration جديد بعد الدمج إذا لزم.
-- لا تضغط Merge في GitHub قبل نجاح فحص `predeploy-check.sh`.
+## 5) قبل الضغط على Merge في GitHub
+- تأكد أن قسم **Conflicts** اختفى.
+- تأكد أن الـ **Checks** كلها ✅.
+- بعدها اضغط **Merge pull request**.
