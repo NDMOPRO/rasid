@@ -293,11 +293,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cinematicOpen, setCinematicOpen] = useState(false);
-  const { user, isAuthenticated, loading, logout, isAdmin, ndmoRole } = useNdmoAuth();
+  const { user, isAuthenticated, loading, logout, isAdmin, isRootAdmin, ndmoRole } = useNdmoAuth();
   const { theme, themeMode, toggleTheme, switchable } = useTheme();
 
   const platformUserId = (user as any)?.userId ?? "";
-  const isRootAdmin = ROOT_ADMIN_USER_IDS_LIST.includes(platformUserId.toLowerCase());
 
   /* ═══ WORKSPACE STATE ═══ */
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(() => getWorkspaceForRoute(location));

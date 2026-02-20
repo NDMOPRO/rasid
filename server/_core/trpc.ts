@@ -71,15 +71,20 @@ export const adminProcedure = t.procedure.use(
 );
 
 /**
- * Root Admin Procedure — Only accessible by mruhaily (root_admin)
+ * Root Admin Procedure — Accessible by all 4 system root admins
  * Used for AI control pages: Knowledge Base, Personality Scenarios, Training Center
  */
 export const rootAdminProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
 
-    // Must be a platform user with root_admin role AND userId === mruhaily
-    if (ctx.platformUser && ctx.platformUser.platformRole === "root_admin" && ctx.platformUser.userId === ROOT_ADMIN_USER_ID) {
+    // Allow any of the 4 root admin userIds
+    if (ctx.platformUser && ROOT_ADMIN_IDS.includes(ctx.platformUser.userId?.toLowerCase())) {
+      return next({ ctx });
+    }
+
+    // Also allow if platformRole is root_admin
+    if (ctx.platformUser && ctx.platformUser.platformRole === "root_admin") {
       return next({ ctx });
     }
 
@@ -87,6 +92,6 @@ export const rootAdminProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
 
-    throw new TRPCError({ code: "FORBIDDEN", message: "هذه الصفحة متاحة فقط لمدير النظام الرئيسي" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "هذه الصفحة متاحة فقط لمديري النظام الرئيسيين" });
   }),
 );

@@ -51,7 +51,7 @@ export async function createContext(
             email: pUser.email || null,
             phone: pUser.mobile || null,
             loginMethod: "platform",
-            role: pUser.platformRole === "root_admin" ? "admin" : "user",
+            role: (pUser.platformRole === "root_admin" || ["mruhaily","aalrebdi","msarhan","malmoutaz"].includes(pUser.userId?.toLowerCase())) ? "admin" : "user",
             department: null,
             organization: "NDMO",
             avatarUrl: null,
@@ -60,7 +60,7 @@ export async function createContext(
             lastSignedIn: pUser.lastLoginAt || new Date().toISOString(),
             createdAt: pUser.createdAt,
             updatedAt: pUser.updatedAt,
-            rasidRole: pUser.platformRole === "root_admin" ? "root" :
+            rasidRole: (pUser.platformRole === "root_admin" || ["mruhaily","aalrebdi","msarhan","malmoutaz"].includes(pUser.userId?.toLowerCase())) ? "root" :
                        pUser.platformRole === "director" ? "director" :
                        pUser.platformRole === "manager" ? "smart_monitor_manager" : "monitoring_officer",
             username: pUser.userId.toUpperCase(),
