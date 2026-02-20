@@ -1,132 +1,87 @@
-// @ts-nocheck
-import React, { useMemo, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { ChevronsRight, Users, ShieldAlert, BarChart3, CalendarDays, Database } from 'lucide-react';
-import { Link, useLocation } from "wouter";
-import { breachRecords } from "@/lib/breachData";
-import * as analytics from "@/lib/breachAnalytics";
-import { useFilters } from "@/contexts/FilterContext";
-import GlobalFilterBar from "@/components/GlobalFilterBar";
-
-const COLORS = ["#3DB1AC", "#6459A7", "#273470", "#f59e0b", "#ef4444", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
-
-const GlassCard = ({ children, className = '' }) => (
-  <div className={`bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 ${className}`}>
-    {children}
-  </div>
-);
-
-const KpiCard = ({ title, value, icon: Icon }) => (
-  <GlassCard className="flex flex-col justify-between">
-    <div className="flex justify-between items-center">
-      <h3 className="text-lg font-semibold text-slate-300">{title}</h3>
-      <Icon className="text-slate-400" size={24} />
-    </div>
-    <p className="text-2xl sm:text-4xl font-bold text-white mt-2">{value}</p>
-  </GlassCard>
-);
-
-const CampaignBreachDetail = ({ breach }) => (
-    <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 mt-2">
-        <p className="font-semibold text-white">{breach.title_ar}</p>
-        <p className="text-sm text-slate-400">{breach.date} - {breach.exposed_records.toLocaleString('ar-SA')} سجل</p>
-    </div>
-);
-
-const CampaignCard = ({ campaign, onExpand, isExpanded }) => (
-    <GlassCard className="mb-4 transition-all duration-300 hover:border-cyan-400/50">
-        <div className="cursor-pointer" onClick={() => onExpand(campaign.actor)}>
-            <div className="flex justify-between items-start">
-                <div>
-                    <h3 className="text-2xl font-bold text-cyan-300">{campaign.actor}</h3>
-                    <p className="text-slate-400 text-sm">Date Range: {campaign.dateRange}</p>
-                </div>
-                <div className="text-right">
-                    <p className="text-xl font-semibold text-white">{campaign.incidents.toLocaleString('ar-SA')} <span className="text-sm text-slate-300">هجمات</span></p>
-                    <p className="text-xl font-semibold text-white">{campaign.totalRecords.toLocaleString('ar-SA')} <span className="text-sm text-slate-300">سجل</span></p>
-                </div>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-                {campaign.sectors.map(sector => (
-                    <span key={sector} className="bg-slate-700/60 text-cyan-200 text-xs font-medium px-2.5 py-1 rounded-full">{sector}</span>
-                ))}
-            </div>
-        </div>
-        {isExpanded && (
-            <div className="mt-4 pt-4 border-t border-slate-700/50">
-                <h4 className="text-lg font-semibold text-slate-200 mb-2">الهجمات الفردية</h4>
-                {campaign.breaches.map(breach => <CampaignBreachDetail key={breach.id} breach={breach} />)}
-            </div>
-        )}
-    </GlassCard>
-);
+/**
+ * CampaignTracker — متتبع الحملات
+ * مربوط بـ leaks.list API
+ */
+import { useMemo, useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Target, Calendar, Shield, AlertTriangle, TrendingUp } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 export default function CampaignTracker() {
-  const { filteredRecords } = useFilters();
-  const campaignsData = useMemo(() => analytics.getCampaigns(filteredRecords), [filteredRecords]);
-  const [expandedCampaign, setExpandedCampaign] = useState(null);
+  const { data: leaks = [], isLoading } = trpc.leaks.list.useQuery();
+  const [selectedActor, setSelectedActor] = useState<string | null>(null);
 
-  const largestCampaign = useMemo(() => 
-    campaignsData.reduce((max, camp) => camp.totalRecords > max.totalRecords ? camp : max, campaignsData[0] || { actor: 'N/A', totalRecords: 0 })
-  , [campaignsData]);
+  const analysis = useMemo(() => {
+    if (!leaks.length) return { campaigns: [], timeline: [] };
+    const actorMap: Record<string, { leaks: any[]; sectors: Set<string>; firstSeen: string; lastSeen: string }> = {};
+    leaks.forEach((l: any) => {
+      const a = l.threatActorAr || l.threatActor || "غير معروف";
+      if (!actorMap[a]) actorMap[a] = { leaks: [], sectors: new Set(), firstSeen: l.detectedAt || l.createdAt, lastSeen: l.detectedAt || l.createdAt };
+      actorMap[a].leaks.push(l);
+      actorMap[a].sectors.add(l.sectorAr || l.sector || "");
+      const d = l.detectedAt || l.createdAt;
+      if (d < actorMap[a].firstSeen) actorMap[a].firstSeen = d;
+      if (d > actorMap[a].lastSeen) actorMap[a].lastSeen = d;
+    });
+    const campaigns = Object.entries(actorMap).map(([name, d]) => ({
+      name, count: d.leaks.length, sectors: d.sectors.size,
+      records: d.leaks.reduce((s, l) => s + (l.recordCount || 0), 0),
+      critical: d.leaks.filter(l => l.severity === "critical").length,
+      firstSeen: d.firstSeen, lastSeen: d.lastSeen,
+    })).sort((a, b) => b.count - a.count);
+    return { campaigns };
+  }, [leaks]);
 
-  const topCampaignsByIncidents = useMemo(() => 
-    [...campaignsData].sort((a, b) => b.incidents - a.incidents).slice(0, 10)
-  , [campaignsData]);
-
-  const handleExpand = (actor) => {
-    setExpandedCampaign(prev => prev === actor ? null : actor);
-  };
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
 
   return (
-    <div className="overflow-x-hidden max-w-full p-3 sm:p-8 bg-slate-900 text-white min-h-screen font-sans" dir="rtl">
-      <div className="mb-4"><GlobalFilterBar /></div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">تتبع الحملات | Campaign Tracker</h1>
+    <div className="min-h-screen p-6 space-y-6" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-white">متتبع الحملات</h1><p className="text-gray-400 text-sm mt-1">تتبع حملات التهديد ونشاط الجهات الفاعلة</p></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.campaigns.length}</div><div className="text-xs text-gray-400">حملة نشطة</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.campaigns.reduce((s, c) => s + c.critical, 0)}</div><div className="text-xs text-gray-400">هجمات حرجة</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{leaks.length}</div><div className="text-xs text-gray-400">إجمالي الحوادث</div></CardContent></Card>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <KpiCard title="إجمالي الحملات" value={campaignsData.length.toLocaleString('ar-SA')} icon={ShieldAlert} />
-        <KpiCard title="الحملة الأضخم (حسب السجلات)" value={largestCampaign.actor} icon={Users} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8">
-        <div className="lg:col-span-3">
-            <h2 className="text-2xl font-semibold text-slate-200 mb-4">قائمة الحملات</h2>
-            <div className="max-h-[600px] overflow-y-auto pr-2">
-                {campaignsData.map(campaign => (
-                    <CampaignCard 
-                        key={campaign.actor} 
-                        campaign={campaign} 
-                        onExpand={handleExpand}
-                        isExpanded={expandedCampaign === campaign.actor}
-                    />
+      <Card className="bg-gray-800/50 border-gray-700">
+        <CardHeader><CardTitle className="text-white text-base">نشاط الحملات</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={analysis.campaigns.slice(0, 10)}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9ca3af" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
+              <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="الحوادث" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+      <Card className="bg-gray-800/50 border-gray-700">
+        <CardHeader><CardTitle className="text-white text-base">تفاصيل الحملات</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">الجهة</th><th className="text-center text-gray-400 p-2">الحوادث</th><th className="text-center text-gray-400 p-2">السجلات</th><th className="text-center text-gray-400 p-2">القطاعات</th><th className="text-center text-gray-400 p-2">حرج</th><th className="text-center text-gray-400 p-2">أول ظهور</th><th className="text-center text-gray-400 p-2">آخر نشاط</th></tr></thead>
+              <tbody>
+                {analysis.campaigns.map((c, i) => (
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                    <td className="p-2 text-white font-medium">{c.name}</td>
+                    <td className="p-2 text-center text-white">{c.count}</td>
+                    <td className="p-2 text-center text-gray-300">{c.records.toLocaleString("ar-SA")}</td>
+                    <td className="p-2 text-center"><Badge className="bg-purple-500/20 text-purple-400">{c.sectors}</Badge></td>
+                    <td className="p-2 text-center"><Badge className="bg-red-500/20 text-red-400">{c.critical}</Badge></td>
+                    <td className="p-2 text-center text-gray-400 text-xs">{c.firstSeen ? new Date(c.firstSeen).toLocaleDateString("ar-SA") : "---"}</td>
+                    <td className="p-2 text-center text-gray-400 text-xs">{c.lastSeen ? new Date(c.lastSeen).toLocaleDateString("ar-SA") : "---"}</td>
+                  </tr>
                 ))}
-            </div>
-        </div>
-        <div className="lg:col-span-2">
-            <GlassCard>
-                <h2 className="text-2xl font-semibold text-slate-200 mb-4">أبرز الحملات حسب عدد الهجمات</h2>
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={topCampaignsByIncidents} layout="vertical" margin={{ top: 5, right: 20, left: 40, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis type="number" stroke="#9ca3af" />
-                        <YAxis dataKey="actor" type="category" stroke="#9ca3af" width={100} tick={{ fill: '#e2e8f0' }} />
-                        <Tooltip 
-                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', color: '#e5e7eb' }}
-                            labelStyle={{ color: '#f9fafb' }}
-                        />
-                        <Legend formatter={(value) => <span className="text-slate-300">{value}</span>} />
-                        <Bar dataKey="incidents" name="عدد الهجمات" fill="#3DB1AC">
-                            {topCampaignsByIncidents.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-            </GlassCard>
-        </div>
-      </div>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

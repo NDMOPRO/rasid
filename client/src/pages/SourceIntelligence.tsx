@@ -1,141 +1,96 @@
-// @ts-nocheck
-import React, { useMemo } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { breachRecords } from '@/lib/breachData';
-import * as analytics from '@/lib/breachAnalytics';
-import { Link } from 'wouter';
-import { Package, TrendingUp, CircleDollarSign, ExternalLink } from 'lucide-react';
-import { useFilters } from "@/contexts/FilterContext";
-import GlobalFilterBar from "@/components/GlobalFilterBar";
+/**
+ * SourceIntelligence — استخبارات المصادر
+ * مربوط بـ leaks.list API
+ */
+import { useMemo } from "react";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Radio, Globe, Database, Eye } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const COLORS = ["#3DB1AC", "#6459A7", "#273470", "#f59e0b", "#ef4444", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
-
-const GlassCard = ({ children, className = '' }) => (
-  <div className={`bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 ${className}`}>
-    {children}
-  </div>
-);
-
-const KpiCard = ({ title, value, icon: Icon, subtext }) => (
-  <GlassCard>
-    <div className="flex items-center justify-between flex-wrap">
-      <p className="text-lg text-slate-300">{title}</p>
-      <Icon className="h-8 w-8 text-slate-400" />
-    </div>
-    <p className="text-2xl sm:text-4xl font-bold text-white mt-2">{value}</p>
-    {subtext && <p className="text-sm text-slate-400 mt-1">{subtext}</p>}
-  </GlassCard>
-);
+const COLORS = ["#3b82f6", "#ef4444", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
 export default function SourceIntelligence() {
-  const { filteredRecords } = useFilters();
-  const platformDistribution = useMemo(() => analytics.getPlatformDistribution(filteredRecords), [filteredRecords]);
-  const priceAnalysis = useMemo(() => analytics.getPriceAnalysis(filteredRecords), [filteredRecords]);
+  const { data: leaks = [], isLoading } = trpc.leaks.list.useQuery();
+  const analysis = useMemo(() => {
+    if (!leaks.length) return { sources: [], types: [], total: 0 };
+    const srcMap: Record<string, { count: number; records: number }> = {};
+    const typeMap: Record<string, number> = {};
+    leaks.forEach((l: any) => {
+      const s = l.sourceAr || l.source || "غير محدد";
+      const t = l.leakTypeAr || l.leakType || "غير محدد";
+      if (!srcMap[s]) srcMap[s] = { count: 0, records: 0 };
+      srcMap[s].count++; srcMap[s].records += l.recordCount || 0;
+      typeMap[t] = (typeMap[t] || 0) + 1;
+    });
+    return {
+      sources: Object.entries(srcMap).map(([name, d]) => ({ name, ...d })).sort((a, b) => b.count - a.count),
+      types: Object.entries(typeMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+      total: leaks.length,
+    };
+  }, [leaks]);
 
-  const totalPlatforms = useMemo(() => new Set(filteredRecords.map(r => r.leak_source.platform)).size, [filteredRecords]);
-  const dominantPlatform = useMemo(() => platformDistribution.length > 0 ? platformDistribution[0].name : 'N/A', [platformDistribution]);
-  const incidentsWithPricing = useMemo(() => priceAnalysis.filter(p => p.price > 0).length, [priceAnalysis]);
-
-  const pricedLeaksForChart = useMemo(() => 
-    priceAnalysis
-      .filter(p => p.price > 0)
-      .sort((a, b) => b.price - a.price)
-      .slice(0, 10),
-    [priceAnalysis]
-  );
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
 
   return (
-    <div className="overflow-x-hidden max-w-full min-h-screen bg-slate-900 text-white p-3 sm:p-8 font-sans" dir="rtl">
-      <div className="mb-4"><GlobalFilterBar /></div>
-      <header className="mb-8">
-        <h1 className="text-2xl sm:text-4xl font-bold text-cyan-400">استخبارات المصادر | Source Intelligence</h1>
-        <p className="text-slate-400 mt-2">تحليل منصات رصد البيانات وأسعارها.</p>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <KpiCard title="إجمالي المنصات" value={totalPlatforms} icon={Package} subtext="العدد الكلي للمنصات المكتشفة" />
-        <KpiCard title="المنصة المهيمنة" value={dominantPlatform} icon={TrendingUp} subtext="الأكثر ظهوراً في حالات الرصد" />
-        <KpiCard title="حالات رصد مسعّرة" value={incidentsWithPricing} icon={CircleDollarSign} subtext="عدد حالات الرصد التي لها سعر محدد" />
+    <div className="min-h-screen p-6 space-y-6" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-white">استخبارات المصادر</h1><p className="text-gray-400 text-sm mt-1">تحليل مصادر وأنواع التسريبات</p></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Radio className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.sources.length}</div><div className="text-xs text-gray-400">مصدر</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.types.length}</div><div className="text-xs text-gray-400">نوع تسريب</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Eye className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي</div></CardContent></Card>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-8 mb-8">
-        <GlassCard className="lg:col-span-2">
-          <h2 className="text-2xl font-bold mb-4 text-amber-400">توزيع المنصات</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={platformDistribution}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="count"
-                nameKey="name"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {platformDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader><CardTitle className="text-white text-base">المصادر الأكثر نشاطاً</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analysis.sources.slice(0, 10)} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis type="number" stroke="#9ca3af" />
+                <YAxis dataKey="name" type="category" width={130} stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
+                <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader><CardTitle className="text-white text-base">أنواع التسريبات</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={analysis.types.slice(0, 8)} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name.substring(0, 15)} ${(percent * 100).toFixed(0)}%`}>
+                  {analysis.types.slice(0, 8).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      <Card className="bg-gray-800/50 border-gray-700">
+        <CardHeader><CardTitle className="text-white text-base">تفاصيل المصادر</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">المصدر</th><th className="text-center text-gray-400 p-2">الحوادث</th><th className="text-center text-gray-400 p-2">السجلات</th><th className="text-center text-gray-400 p-2">النسبة</th></tr></thead>
+              <tbody>
+                {analysis.sources.map((s, i) => (
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                    <td className="p-2 text-white font-medium">{s.name}</td>
+                    <td className="p-2 text-center text-white">{s.count}</td>
+                    <td className="p-2 text-center text-gray-300">{s.records.toLocaleString("ar-SA")}</td>
+                    <td className="p-2 text-center"><Badge className="bg-purple-500/20 text-purple-400">{analysis.total ? ((s.count / analysis.total) * 100).toFixed(1) : 0}%</Badge></td>
+                  </tr>
                 ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255,255,255,0.2)' }}
-                formatter={(value, name) => [value, name]}
-                labelFormatter={(label) => label}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </GlassCard>
-
-        <GlassCard className="lg:col-span-3">
-          <h2 className="text-2xl font-bold mb-4 text-red-400">أغلى 10 حالات رصد</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={pricedLeaksForChart} layout="vertical" margin={{ right: 20, left: 120 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis type="number" stroke="#94a3b8" />
-              <YAxis dataKey="title" type="category" stroke="#94a3b8" width={120} tick={{ fill: '#e2e8f0' }} />
-              <Tooltip
-                cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
-                contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255,255,255,0.2)' }}
-                labelStyle={{ color: '#f59e0b' }}
-                formatter={(value, name) => [name === 'price' ? `$${Number(value).toLocaleString()}` : value, name === 'price' ? 'السعر' : '']}
-              />
-              <Bar dataKey="price" fill="#ef4444" name="السعر" />
-            </BarChart>
-          </ResponsiveContainer>
-        </GlassCard>
-      </div>
-
-      <GlassCard>
-        <h2 className="text-2xl font-bold mb-4 text-green-400">جدول المصادر</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-right">
-            <thead>
-              <tr className="border-b border-slate-600">
-                <th className="p-4">المنصة</th>
-                <th className="p-4">السعر (USD)</th>
-                <th className="p-4">ادعاء البائع</th>
-                <th className="p-4">الرابط</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record.id} className="border-b border-slate-700 hover:bg-slate-700/50">
-                  <td className="p-4">{record.leak_source.platform}</td>
-                  <td className="p-4">{record.leak_source.price ? `$${record.leak_source.price.toLocaleString()}` : 'غير محدد'}</td>
-                  <td className="p-4">{record.overview.exposed_records.toLocaleString()}</td>
-                  <td className="p-4">
-                    <a href={record.leak_source.url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 flex items-center gap-2">
-                      <span>زيارة المصدر</span>
-                      <ExternalLink size={16} />
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </GlassCard>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

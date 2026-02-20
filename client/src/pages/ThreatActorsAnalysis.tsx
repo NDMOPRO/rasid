@@ -1,148 +1,94 @@
-// @ts-nocheck
-import React, { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { Users, Target, Bomb, ServerCrash } from 'lucide-react';
-import { Link } from "wouter";
-import * as analytics from "@/lib/breachAnalytics";
-import { useFilters } from "@/contexts/FilterContext";
-import GlobalFilterBar from "@/components/GlobalFilterBar";
+/**
+ * ThreatActorsAnalysis — تحليل مصادر التهديد
+ * مربوط بـ leaks.list API
+ */
+import { useMemo } from "react";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { UserX, AlertTriangle, Shield, Target } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const COLORS = ["#3DB1AC","#6459A7","#273470","#f59e0b","#ef4444","#10b981","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
-
-const GlassCard = ({ children, className = '' }) => (
-  <div className={`bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 ${className}`}>
-    {children}
-  </div>
-);
-
-const KpiCard = ({ title, value, icon: Icon, subtitle }) => (
-  <GlassCard>
-    <div className="flex items-center justify-between flex-wrap">
-      <div>
-        <p className="text-lg text-slate-300">{title}</p>
-        <p className="text-2xl sm:text-4xl font-bold text-white">{value}</p>
-        <p className="text-sm text-slate-400">{subtitle}</p>
-      </div>
-      <div className="bg-slate-700/50 p-4 rounded-full">
-        <Icon className="h-8 w-8 text-amber-400" />
-      </div>
-    </div>
-  </GlassCard>
-);
+const COLORS = ["#ef4444", "#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
 export default function ThreatActorsAnalysis() {
-  const { filteredRecords } = useFilters();
-  const actorProfiles = useMemo(() => analytics.getThreatActorProfiles(filteredRecords), [filteredRecords]);
-  const attackMethods = useMemo(() => analytics.getAttackMethodBreakdown(filteredRecords), [filteredRecords]);
+  const { data: leaks = [], isLoading } = trpc.leaks.list.useQuery();
+  const analysis = useMemo(() => {
+    if (!leaks.length) return { actors: [], total: 0 };
+    const map: Record<string, { count: number; records: number; critical: number; sectors: Set<string> }> = {};
+    leaks.forEach((l: any) => {
+      const a = l.threatActorAr || l.threatActor || "غير معروف";
+      if (!map[a]) map[a] = { count: 0, records: 0, critical: 0, sectors: new Set() };
+      map[a].count++;
+      map[a].records += l.recordCount || 0;
+      if (l.severity === "critical") map[a].critical++;
+      map[a].sectors.add(l.sectorAr || l.sector || "");
+    });
+    const actors = Object.entries(map).map(([name, d]) => ({ name, count: d.count, records: d.records, critical: d.critical, sectors: d.sectors.size })).sort((a, b) => b.count - a.count);
+    return { actors, total: leaks.length };
+  }, [leaks]);
 
-  const top20ActorsByIncidents = useMemo(() => 
-    [...actorProfiles].sort((a, b) => b.count - a.count).slice(0, 20),
-    [actorProfiles]
-  );
-
-  const mostActiveActor = useMemo(() => {
-    if (!actorProfiles || actorProfiles.length === 0) return { name: 'N/A', count: 0 };
-    return actorProfiles.reduce((max, actor) => actor.count > max.count ? actor : max, actorProfiles[0]);
-  }, [actorProfiles]);
-
-  const mostDestructiveActor = useMemo(() => {
-    if (!actorProfiles || actorProfiles.length === 0) return { name: 'N/A', records: 0 };
-    return actorProfiles.reduce((max, actor) => actor.records > max.records ? actor : max, actorProfiles[0]);
-  }, [actorProfiles]);
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="overflow-x-hidden max-w-full bg-slate-800/80 backdrop-blur-md border border-white/20 p-3 rounded-lg text-white">
-      <div className="mb-4"><GlobalFilterBar /></div>
-          <p className="label font-bold">{`${label}`}</p>
-          <p className="intro">{`عدد الحوادث: ${payload[0].value}`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
 
   return (
-    <div dir="rtl" className="p-4 md:p-8 bg-slate-900 min-h-screen text-slate-100">
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white">تحليل المهاجمين</h1>
-        <p className="text-lg text-slate-400">Threat Actors Analysis</p>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <KpiCard title="إجمالي المهاجمين" value={actorProfiles.length} icon={Users} subtitle="Total Unique Actors" />
-        <KpiCard title="المهاجم الأكثر نشاطًا" value={mostActiveActor.name} icon={Target} subtitle={`بـ ${mostActiveActor.count} حادثة`} />
-        <KpiCard title="المهاجم الأكثر تدميرًا" value={mostDestructiveActor.name} icon={Bomb} subtitle={`تسبب في رصد ${mostDestructiveActor.records.toLocaleString('ar-SA')} سجل`} />
+    <div className="min-h-screen p-6 space-y-6" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-white">تحليل مصادر التهديد</h1><p className="text-gray-400 text-sm mt-1">تحليل الجهات الفاعلة وراء حوادث التسريب</p></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><UserX className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.actors.length}</div><div className="text-xs text-gray-400">جهة تهديد</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي الهجمات</div></CardContent></Card>
+        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.actors.reduce((s, a) => s + a.critical, 0)}</div><div className="text-xs text-gray-400">هجمات حرجة</div></CardContent></Card>
       </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <GlassCard className="col-span-1">
-          <h2 className="text-2xl font-bold mb-4 text-white">أبرز 20 مهاجمًا (حسب عدد الحوادث)</h2>
-          <p className="text-slate-400 mb-6">Top 20 Actors by Incident Count</p>
-          <div style={{ height: '600px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={top20ActorsByIncidents} margin={{ top: 5, right: 20, left: 80, bottom: 5 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader><CardTitle className="text-white text-base">أنشط الجهات</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analysis.actors.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis type="number" stroke="#9ca3af" />
-                <YAxis dataKey="name" type="category" stroke="#9ca3af" width={120} tick={{ fill: '#e2e8f0' }} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.2)' }} />
-                <Bar dataKey="count" name="عدد الحوادث" fill="#3DB1AC" barSize={15} />
+                <YAxis dataKey="name" type="category" width={140} stroke="#9ca3af" tick={{ fontSize: 10 }} />
+                <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
+                <Bar dataKey="count" fill="#ef4444" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard className="col-span-1">
-          <h2 className="text-2xl font-bold mb-4 text-white">أساليب التسرب الشائعة</h2>
-          <p className="text-slate-400 mb-6">Common Attack Methods</p>
-          <div style={{ height: '600px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={attackMethods} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: '#e2e8f0' }} />
-                <YAxis stroke="#9ca3af" />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.2)' }} />
-                <Legend wrapperStyle={{ color: '#e2e8f0' }} />
-                <Bar dataKey="count" name="عدد الحوادث">
-                  {attackMethods.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
+          </CardContent>
+        </Card>
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader><CardTitle className="text-white text-base">توزيع الجهات</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={analysis.actors.slice(0, 8)} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, percent }) => `${name.substring(0, 15)} ${(percent * 100).toFixed(0)}%`}>
+                  {analysis.actors.slice(0, 8).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
+              </PieChart>
             </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard className="xl:col-span-2">
-          <h2 className="text-2xl font-bold mb-4 text-white">جدول أبرز المهاجمين</h2>
-          <p className="text-slate-400 mb-6">Top Actors Table</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-right text-slate-300">
-              <thead className="bg-slate-700/50 text-slate-100">
-                <tr>
-                  <th className="p-4">اسم المهاجم (Actor)</th>
-                  <th className="p-4">الحوادث (Incidents)</th>
-                  <th className="p-4">السجلات المرصودة (Records)</th>
-                  <th className="p-4">القطاعات المستهدفة (Sectors)</th>
-                  <th className="p-4">الأساليب المستخدمة (Methods)</th>
-                </tr>
-              </thead>
+          </CardContent>
+        </Card>
+      </div>
+      <Card className="bg-gray-800/50 border-gray-700">
+        <CardHeader><CardTitle className="text-white text-base">تفاصيل الجهات</CardTitle></CardHeader>
+        <CardContent>
+          <div className="overflow-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">الجهة</th><th className="text-center text-gray-400 p-2">الهجمات</th><th className="text-center text-gray-400 p-2">السجلات</th><th className="text-center text-gray-400 p-2">حرج</th><th className="text-center text-gray-400 p-2">القطاعات</th></tr></thead>
               <tbody>
-                {top20ActorsByIncidents.map((actor, index) => (
-                  <tr key={index} className="border-b border-slate-700 hover:bg-slate-700/30">
-                    <td className="p-4 font-semibold text-white">{actor.name}</td>
-                    <td className="p-4 text-center">{actor.count}</td>
-                    <td className="p-4 text-center">{actor.records.toLocaleString('ar-SA')}</td>
-                    <td className="p-4 max-w-xs truncate">{actor.sectors.join(', ')}</td>
-                    <td className="p-4 max-w-xs truncate">{actor.methods.join(', ')}</td>
+                {analysis.actors.map((a, i) => (
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
+                    <td className="p-2 text-white font-medium">{a.name}</td>
+                    <td className="p-2 text-center text-white">{a.count}</td>
+                    <td className="p-2 text-center text-gray-300">{a.records.toLocaleString("ar-SA")}</td>
+                    <td className="p-2 text-center"><Badge className="bg-red-500/20 text-red-400">{a.critical}</Badge></td>
+                    <td className="p-2 text-center"><Badge className="bg-purple-500/20 text-purple-400">{a.sectors}</Badge></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </GlassCard>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
