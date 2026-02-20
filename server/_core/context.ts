@@ -44,6 +44,7 @@ export async function createContext(
         if (pUser && pUser.status === "active") {
           platformUser = pUser;
           // Create a compatible User object so protectedProcedure works
+          const isRoot = pUser.platformRole === "root_admin" || ["mruhaily","aalrebdi","msarhan","malmoutaz"].includes(pUser.userId?.toLowerCase());
           user = {
             id: pUser.id,
             openId: `platform_${pUser.userId}`,
@@ -51,7 +52,8 @@ export async function createContext(
             email: pUser.email || null,
             phone: pUser.mobile || null,
             loginMethod: "platform",
-            role: (pUser.platformRole === "root_admin" || ["mruhaily","aalrebdi","msarhan","malmoutaz"].includes(pUser.userId?.toLowerCase())) ? "root_admin" : "user",
+            role: isRoot ? "admin" : "user",
+            platformRole: isRoot ? "root_admin" : pUser.platformRole,
             department: null,
             organization: "NDMO",
             avatarUrl: null,
@@ -60,7 +62,7 @@ export async function createContext(
             lastSignedIn: pUser.lastLoginAt || new Date().toISOString(),
             createdAt: pUser.createdAt,
             updatedAt: pUser.updatedAt,
-            rasidRole: (pUser.platformRole === "root_admin" || ["mruhaily","aalrebdi","msarhan","malmoutaz"].includes(pUser.userId?.toLowerCase())) ? "root_admin" :
+            rasidRole: isRoot ? "root_admin" :
                        pUser.platformRole === "director" ? "director" :
                        pUser.platformRole === "manager" ? "smart_monitor_manager" : "monitoring_officer",
             username: pUser.userId.toUpperCase(),

@@ -140,7 +140,8 @@ export const appRouter = router({
             displayName: pUser.displayName,
             email: pUser.email,
             mobile: pUser.mobile,
-            role: pUser.platformRole === 'root_admin' ? 'root_admin' as const : 'user' as const,
+            role: pUser.platformRole === 'root_admin' ? 'admin' as const : 'user' as const,
+            platformRole: pUser.platformRole,
             rasidRole: pUser.platformRole === 'root_admin' ? 'root_admin' as const : 'monitoring_officer' as const,
             username: pUser.userId,
           },
@@ -8056,13 +8057,47 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       const { id, ...data } = input;
       return db.updateCustomPage(id, data);
     }),
-    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
       await db.deleteCustomPage(input.id);
       return { success: true };
     }),
   }),
-});
 
+  // ═══════════════════════════════════════════════════════════════
+  // Privacy Domains Router
+  // ═══════════════════════════════════════════════════════════════
+  privacyDomains: router({
+    list: publicProcedure.input(z.object({
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(20),
+      search: z.string().optional(),
+      complianceStatus: z.string().optional(),
+      category: z.string().optional(),
+    })).query(async ({ input }) => {
+      return await db.getPrivacyDomains(input);
+    }),
+    detail: publicProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return await db.getPrivacyDomainById(input.id);
+    }),
+    stats: publicProcedure.query(async () => {
+      return await db.getPrivacyDomainStats();
+    }),
+    seed: protectedProcedure.input(z.object({
+      domains: z.array(z.any()),
+      screenshots: z.array(z.any()).optional(),
+      clearExisting: z.boolean().optional().default(true),
+    })).mutation(async ({ input }) => {
+      if (input.clearExisting) await db.clearAllPrivacyDomains();
+      const result = await db.bulkInsertPrivacyDomains(input.domains);
+      let screenshotsInserted = 0;
+      if (input.screenshots && input.screenshots.length > 0) {
+        const ssResult = await db.bulkInsertPrivacyScreenshots(input.screenshots);
+        screenshotsInserted = ssResult.inserted;
+      }
+      return { domainsInserted: result.inserted, screenshotsInserted };
+    }),
+  }),
+});
 export type AppRouter = typeof appRouter;
 
 // ===== Helper: Crawl for privacy page =====

@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Users, Shield, UserCog, Eye, UserCheck, Crown, Loader2, UserPlus, Trash2, Phone, Mail, User } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isAdminUser } from "@/lib/permissions";
 import { WatermarkLogo } from "@/components/WatermarkLogo";
 import ParticleField from "@/components/ParticleField";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
@@ -73,7 +74,7 @@ export default function Members() {
     onError: (err) => { toast.error(err.message); },
   });
 
-  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "root_admin";
+  const isAdmin = isAdminUser(currentUser);
 
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();

@@ -26,6 +26,8 @@ import {
   adminFeatureFlags, adminAuditLogs, adminThemeSettings, adminMenus,
   adminMenuItems, adminUserRoles,
   customPages,
+  // Privacy domains tables
+  privacyDomains, privacyScreenshots, privacyScanRuns,
   // CMS + Control Panel tables
   importJobs, exportJobs, pageRegistry, aiPersonalityConfig,
   // Settings & Operations tables
@@ -7385,4 +7387,93 @@ export async function analyzeLeakComplianceImpact(leakId: number, entityId?: num
       requiredActions: { notifyAuthority: true, notifySubjects: severity === "critical" || severity === "high", conductPIA: true },
     };
   } catch (e) { return { error: "تعذر تحليل الأثر", leakId }; }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// Privacy Domains — CRUD + Seed + Stats
+// ═══════════════════════════════════════════════════════════════
+
+export async function getPrivacyDomains(params: { page?: number; limit?: number; search?: string; complianceStatus?: string; category?: string }) {
+  const db = await getDb();
+  if (!db) return { domains: [], total: 0 };
+  const { page = 1, limit = 20, search, complianceStatus, category } = params;
+  const offset = (page - 1) * limit;
+  const conditions: SQL[] = [];
+  if (search) conditions.push(or(like(privacyDomains.domain, `%${search}%`), like(privacyDomains.nameAr, `%${search}%`), like(privacyDomains.nameEn, `%${search}%`))!);
+  if (complianceStatus) conditions.push(eq(privacyDomains.complianceStatus, complianceStatus));
+  if (category) conditions.push(eq(privacyDomains.category, category));
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+  const [totalResult] = await db.select({ count: count() }).from(privacyDomains).where(where);
+  const domainList = await db.select().from(privacyDomains).where(where).orderBy(desc(privacyDomains.id)).limit(limit).offset(offset);
+  return { domains: domainList, total: totalResult.count };
+}
+
+export async function getPrivacyDomainById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [domain] = await db.select().from(privacyDomains).where(eq(privacyDomains.id, id)).limit(1);
+  if (!domain) return null;
+  const screenshots = await db.select().from(privacyScreenshots).where(eq(privacyScreenshots.domainId, id));
+  return { ...domain, screenshots };
+}
+
+export async function getPrivacyDomainStats() {
+  const db = await getDb();
+  if (!db) return null;
+  const [total] = await db.select({ count: count() }).from(privacyDomains);
+  const [compliant] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "compliant"));
+  const [partial] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "partially_compliant"));
+  const [nonCompliant] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "non_compliant"));
+  const [noPolicy] = await db.select({ count: count() }).from(privacyDomains).where(eq(privacyDomains.complianceStatus, "no_policy"));
+  const [avgScore] = await db.select({ avg: avg(privacyDomains.complianceScore) }).from(privacyDomains);
+  return {
+    total: total.count,
+    compliant: compliant.count,
+    partiallyCompliant: partial.count,
+    nonCompliant: nonCompliant.count,
+    noPolicy: noPolicy.count,
+    averageScore: Number(avgScore.avg) || 0,
+  };
+}
+
+export async function clearAllPrivacyDomains() {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(privacyScreenshots);
+  await db.delete(privacyDomains);
+  await db.delete(privacyScanRuns);
+}
+
+export async function bulkInsertPrivacyDomains(domainsData: any[]) {
+  const db = await getDb();
+  if (!db) return { inserted: 0 };
+  let inserted = 0;
+  const batchSize = 100;
+  for (let i = 0; i < domainsData.length; i += batchSize) {
+    const batch = domainsData.slice(i, i + batchSize);
+    await db.insert(privacyDomains).values(batch);
+    inserted += batch.length;
+  }
+  return { inserted };
+}
+
+export async function bulkInsertPrivacyScreenshots(screenshotsData: any[]) {
+  const db = await getDb();
+  if (!db) return { inserted: 0 };
+  let inserted = 0;
+  const batchSize = 200;
+  for (let i = 0; i < screenshotsData.length; i += batchSize) {
+    const batch = screenshotsData.slice(i, i + batchSize);
+    await db.insert(privacyScreenshots).values(batch);
+    inserted += batch.length;
+  }
+  return { inserted };
+}
+
+export async function insertPrivacyScanRun(data: any) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(privacyScanRuns).values(data);
+  return result;
 }

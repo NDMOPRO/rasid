@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isAdminUser } from "@/lib/permissions";
 import { formatNumber, formatPercent } from "@/lib/formatters";
 import {
   Users, Shield, UserCog, Crown, Loader2, UserPlus, Trash2, Phone, Mail, User,
@@ -104,7 +105,7 @@ export default function AdminPanel() {
     onError: (err) => toast.error(err.message),
   });
 
-  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "root_admin";
+  const isAdmin = isAdminUser(currentUser);
 
   const filteredMembers = useMemo(() => {
     if (!members) return [];

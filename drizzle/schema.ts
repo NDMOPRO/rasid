@@ -2830,3 +2830,93 @@ export const aiAutoLearning = mysqlTable("ai_auto_learning", {
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
+
+
+// ═══════════════════════════════════════════════════════════════
+// جداول الخصوصية — privacy_domains + screenshots + scan_runs
+// ═══════════════════════════════════════════════════════════════
+
+export const privacyDomains = mysqlTable("privacy_domains", {
+	id: int("pd_id").autoincrement().primaryKey(),
+	domain: varchar("pd_domain", { length: 255 }).notNull(),
+	status: varchar("pd_status", { length: 20 }),
+	workingUrl: text("pd_working_url"),
+	finalUrl: text("pd_final_url"),
+	nameAr: varchar("pd_name_ar", { length: 500 }),
+	nameEn: varchar("pd_name_en", { length: 500 }),
+	title: text("pd_title"),
+	description: text("pd_description"),
+	category: varchar("pd_category", { length: 100 }),
+	cms: varchar("pd_cms", { length: 100 }),
+	sslStatus: varchar("pd_ssl_status", { length: 50 }),
+	mxRecords: text("pd_mx_records"),
+	email: text("pd_email"),
+	phone: text("pd_phone"),
+	policyUrl: text("pd_policy_url"),
+	policyTitle: text("pd_policy_title"),
+	policyStatusCode: varchar("pd_policy_status_code", { length: 10 }),
+	policyLanguage: varchar("pd_policy_language", { length: 20 }),
+	policyLastUpdate: varchar("pd_policy_last_update", { length: 100 }),
+	discoveryMethod: varchar("pd_discovery_method", { length: 100 }),
+	policyConfidence: varchar("pd_policy_confidence", { length: 50 }),
+	policyWordCount: int("pd_policy_word_count"),
+	policyCharCount: int("pd_policy_char_count"),
+	robotsStatus: varchar("pd_robots_status", { length: 50 }),
+	entityName: varchar("pd_entity_name", { length: 500 }),
+	entityEmail: text("pd_entity_email"),
+	entityPhone: text("pd_entity_phone"),
+	entityAddress: text("pd_entity_address"),
+	dpo: varchar("pd_dpo", { length: 300 }),
+	contactForm: text("pd_contact_form"),
+	mentionsDataTypes: tinyint("pd_mentions_data_types").default(0),
+	dataTypesList: text("pd_data_types_list"),
+	mentionsPurpose: tinyint("pd_mentions_purpose").default(0),
+	purposeList: text("pd_purpose_list"),
+	mentionsLegalBasis: tinyint("pd_mentions_legal_basis").default(0),
+	mentionsRights: tinyint("pd_mentions_rights").default(0),
+	rightsList: text("pd_rights_list"),
+	mentionsRetention: tinyint("pd_mentions_retention").default(0),
+	mentionsThirdParties: tinyint("pd_mentions_third_parties").default(0),
+	thirdPartiesList: text("pd_third_parties_list"),
+	mentionsCrossBorder: tinyint("pd_mentions_cross_border").default(0),
+	mentionsSecurity: tinyint("pd_mentions_security").default(0),
+	mentionsCookies: tinyint("pd_mentions_cookies").default(0),
+	mentionsChildren: tinyint("pd_mentions_children").default(0),
+	complianceScore: int("pd_compliance_score").default(0),
+	complianceStatus: varchar("pd_compliance_status", { length: 30 }),
+	screenshotUrl: text("pd_screenshot_url"),
+	importedAt: timestamp("pd_imported_at", { mode: 'string' }).defaultNow(),
+	lastScanAt: timestamp("pd_last_scan_at", { mode: 'string' }),
+	scanRunId: int("pd_scan_run_id"),
+});
+
+export const privacyScreenshots = mysqlTable("privacy_screenshots", {
+	id: int("ps_id").autoincrement().primaryKey(),
+	domainId: int("ps_domain_id").notNull(),
+	scanRunId: int("ps_scan_run_id"),
+	captureType: varchar("ps_capture_type", { length: 30 }),
+	filePath: text("ps_file_path"),
+	fileHash: varchar("ps_file_hash", { length: 64 }),
+	fileSize: int("ps_file_size"),
+	isPrimary: tinyint("ps_is_primary").default(0),
+	capturedAt: timestamp("ps_captured_at", { mode: 'string' }).defaultNow(),
+});
+
+export const privacyScanRuns = mysqlTable("privacy_scan_runs", {
+	id: int("psr_id").autoincrement().primaryKey(),
+	sourceType: varchar("psr_source_type", { length: 30 }),
+	sourceFile: varchar("psr_source_file", { length: 255 }),
+	startedAt: timestamp("psr_started_at", { mode: 'string' }).defaultNow(),
+	completedAt: timestamp("psr_completed_at", { mode: 'string' }),
+	totalSites: int("psr_total_sites").default(0),
+	successCount: int("psr_success_count").default(0),
+	failCount: int("psr_fail_count").default(0),
+	notes: text("psr_notes"),
+});
+
+export type PrivacyDomain = typeof privacyDomains.$inferSelect;
+export type InsertPrivacyDomain = typeof privacyDomains.$inferInsert;
+export type PrivacyScreenshot = typeof privacyScreenshots.$inferSelect;
+export type InsertPrivacyScreenshot = typeof privacyScreenshots.$inferInsert;
+export type PrivacyScanRun = typeof privacyScanRuns.$inferSelect;
+export type InsertPrivacyScanRun = typeof privacyScanRuns.$inferInsert;

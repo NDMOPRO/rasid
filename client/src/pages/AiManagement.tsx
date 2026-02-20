@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isAdminUser } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -69,12 +70,13 @@ export default function AiManagement() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Queries
-  const chatStats = trpc.ai.getChatStats.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
-  const searchStats = trpc.ai.getSearchStats.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
-  const knowledgeEntries = trpc.ai.getKnowledgeEntries.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
-  const enhancedScenarios = trpc.ai.getEnhancedScenarios.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
-  const customCommands = trpc.ai.getCustomCommands.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" });
-  const allSessions = trpc.ai.getAllSessions.useQuery(undefined, { enabled: user?.role === "admin" || user?.role === "root_admin" && activeTab === "sessions" });
+  const isAdmin = isAdminUser(user);
+  const chatStats = trpc.ai.getChatStats.useQuery(undefined, { enabled: isAdmin });
+  const searchStats = trpc.ai.getSearchStats.useQuery(undefined, { enabled: isAdmin });
+  const knowledgeEntries = trpc.ai.getKnowledgeEntries.useQuery(undefined, { enabled: isAdmin });
+  const enhancedScenarios = trpc.ai.getEnhancedScenarios.useQuery(undefined, { enabled: isAdmin });
+  const customCommands = trpc.ai.getCustomCommands.useQuery(undefined, { enabled: isAdmin });
+  const allSessions = trpc.ai.getAllSessions.useQuery(undefined, { enabled: isAdmin && activeTab === "sessions" });
 
   // Mutations
   const addKnowledge = trpc.ai.addKnowledge.useMutation({ onSuccess: () => { knowledgeEntries.refetch(); toast.success("تمت الإضافة"); } });
@@ -142,7 +144,7 @@ export default function AiManagement() {
     }
   };
 
-  if (user?.role !== "admin") {
+  if (!isAdmin) {
     return (
       <div className="overflow-x-hidden max-w-full flex items-center justify-center h-[60vh]">
         <Card className="glass-card gold-sweep p-3 sm:p-8 text-center">

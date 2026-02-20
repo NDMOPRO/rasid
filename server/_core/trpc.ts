@@ -52,8 +52,13 @@ export const adminProcedure = t.procedure.use(
       }
     }
 
-    // Check OAuth user admin role
-    if (ctx.user && ctx.user.role === 'admin') {
+    // Check OAuth user admin role (admin, superadmin, root_admin)
+    if (ctx.user && ['admin', 'superadmin', 'root_admin'].includes(ctx.user.role)) {
+      return next({ ctx });
+    }
+
+    // Check rasidRole for root admins
+    if (ctx.user && (ctx.user as any).rasidRole === 'root_admin') {
       return next({ ctx });
     }
 

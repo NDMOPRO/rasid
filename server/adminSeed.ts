@@ -22,9 +22,12 @@ import { eq } from "drizzle-orm";
 
 // ─── Default Roles ───
 const DEFAULT_ROLES = [
-  { id: "role-super-admin", roleName: "مدير النظام الأعلى", roleNameEn: "Super Admin", roleDescription: "صلاحيات كاملة بدون قيود", roleDescriptionEn: "Full unrestricted access", isSystem: 1, rolePriority: 100, roleColor: "#ef4444" },
+  { id: "role-root-admin", roleName: "المدير الجذري", roleNameEn: "Root Admin", roleDescription: "صلاحيات كاملة مطلقة - لا يمكن حذفه أو تعديل صلاحياته", roleDescriptionEn: "Absolute full access - cannot be deleted or modified", isSystem: 1, rolePriority: 100, roleColor: "#dc2626" },
+  { id: "role-super-admin", roleName: "مدير النظام الأعلى", roleNameEn: "Super Admin", roleDescription: "صلاحيات كاملة بدون قيود", roleDescriptionEn: "Full unrestricted access", isSystem: 1, rolePriority: 95, roleColor: "#ef4444" },
   { id: "role-admin", roleName: "مدير النظام", roleNameEn: "Admin", roleDescription: "إدارة كاملة مع بعض القيود", roleDescriptionEn: "Full management with some restrictions", isSystem: 1, rolePriority: 80, roleColor: "#f59e0b" },
-  { id: "role-analyst", roleName: "محلل", roleNameEn: "Analyst", roleDescription: "عرض وتحليل البيانات والتقارير", roleDescriptionEn: "View and analyze data and reports", isSystem: 1, rolePriority: 60, roleColor: "#3b82f6" },
+  { id: "role-supervisor", roleName: "مشرف", roleNameEn: "Supervisor", roleDescription: "إشراف على الفريق واعتماد التقارير والمراجعة", roleDescriptionEn: "Team oversight, report approval, and review", isSystem: 1, rolePriority: 70, roleColor: "#8b5cf6" },
+  { id: "role-analyst", roleName: "محلل", roleNameEn: "Analyst", roleDescription: "عرض وتحليل البيانات والتقارير وإنشاء التوثيقات", roleDescriptionEn: "View, analyze data and reports, create documentation", isSystem: 1, rolePriority: 60, roleColor: "#3b82f6" },
+  { id: "role-auditor", roleName: "مدقق", roleNameEn: "Auditor", roleDescription: "عرض جميع البيانات وسجلات التدقيق بدون تعديل", roleDescriptionEn: "View all data and audit logs without modification", isSystem: 1, rolePriority: 50, roleColor: "#059669" },
   { id: "role-viewer", roleName: "مشاهد", roleNameEn: "Viewer", roleDescription: "عرض البيانات فقط بدون تعديل", roleDescriptionEn: "View-only access", isSystem: 1, rolePriority: 40, roleColor: "#6b7280" },
   { id: "role-guest", roleName: "زائر", roleNameEn: "Guest", roleDescription: "وصول محدود جداً", roleDescriptionEn: "Very limited access", isSystem: 1, rolePriority: 20, roleColor: "#9ca3af" },
 ];

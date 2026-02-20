@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isAdminUser } from "@/lib/permissions";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { DetailModal } from "@/components/DetailModal";
@@ -65,7 +66,7 @@ const roleColor = (r: string) => {
 
 export default function Settings() {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "root_admin";
+  const isAdmin = isAdminUser(user);
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const { data: usersList, isLoading: usersLoading, refetch: refetchUsers } = trpc.users.list.useQuery(

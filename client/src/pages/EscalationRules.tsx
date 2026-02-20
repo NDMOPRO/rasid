@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { isAdminUser } from "@/lib/permissions";
 import {
   AlertTriangle, Plus, Clock, ArrowUpRight, Loader2, Trash2,
   Pencil, Play, Shield, TrendingUp, History, Zap, Timer,
@@ -51,7 +52,7 @@ const priorityColors: Record<string, string> = {
 export default function EscalationRules() {
   const { playClick, playHover } = useSoundEffects();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "root_admin";
+  const isAdmin = isAdminUser(user);
   const [addOpen, setAddOpen] = useState(false);
   const [editRule, setEditRule] = useState<any>(null);
   const [tab, setTab] = useState("rules");
