@@ -2,6 +2,7 @@
  * ExecutiveBrief — الموجز التنفيذي
  * مربوط بـ dashboard.stats + leaks.list APIs
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,22 +34,22 @@ export default function ExecutiveBrief() {
     return { totalLeaks: leaks.length, totalRecords, severity, topSectors, recentLeaks };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div className="flex items-center gap-3"><FileText className="h-8 w-8 text-blue-400" /><div><h1 className="text-2xl font-bold text-white">الموجز التنفيذي</h1><p className="text-gray-400 text-sm">ملخص شامل لحالة أمن البيانات</p></div></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div className="flex items-center gap-3"><FileText className="h-8 w-8 text-blue-400" /><div><h1 className="text-2xl font-bold text-foreground">الموجز التنفيذي</h1><p className="text-muted-foreground text-sm">ملخص شامل لحالة أمن البيانات</p></div></div>
       {brief && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{brief.totalLeaks}</div><div className="text-xs text-gray-400">إجمالي الحوادث</div></CardContent></Card>
-            <Card className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-amber-500/30"><CardContent className="p-4 text-center"><Users className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{brief.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-gray-400">سجلات متأثرة</div></CardContent></Card>
-            <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/30"><CardContent className="p-4 text-center"><Building2 className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{brief.topSectors.length}</div><div className="text-xs text-gray-400">قطاعات متأثرة</div></CardContent></Card>
-            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-500/30"><CardContent className="p-4 text-center"><Shield className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{brief.severity.find(s => s.name === "حرج")?.count || 0}</div><div className="text-xs text-gray-400">حوادث حرجة</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.totalLeaks}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-amber-500/30"><CardContent className="p-4 text-center"><Users className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">سجلات متأثرة</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/30"><CardContent className="p-4 text-center"><Building2 className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.topSectors.length}</div><div className="text-xs text-muted-foreground">قطاعات متأثرة</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-500/30"><CardContent className="p-4 text-center"><Shield className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.severity.find(s => s.name === "حرج")?.count || 0}</div><div className="text-xs text-muted-foreground">حوادث حرجة</div></CardContent></Card>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardHeader><CardTitle className="text-white text-base">توزيع الخطورة</CardTitle></CardHeader>
+            <Card className="glass-card gold-sweep">
+              <CardHeader><CardTitle className="text-foreground text-base">توزيع الخطورة</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
@@ -60,8 +61,8 @@ export default function ExecutiveBrief() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardHeader><CardTitle className="text-white text-base">أكثر القطاعات تأثراً</CardTitle></CardHeader>
+            <Card className="glass-card gold-sweep">
+              <CardHeader><CardTitle className="text-foreground text-base">أكثر القطاعات تأثراً</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={brief.topSectors} layout="vertical">
@@ -75,21 +76,21 @@ export default function ExecutiveBrief() {
               </CardContent>
             </Card>
           </div>
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader><CardTitle className="text-white text-base">آخر الحوادث</CardTitle></CardHeader>
+          <Card className="glass-card gold-sweep">
+            <CardHeader><CardTitle className="text-foreground text-base">آخر الحوادث</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {brief.recentLeaks.map((l: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-lg bg-gray-900/30 border border-gray-700/50">
+                  <div key={i} className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-lg bg-gray-900/30 border border-border/50">
                     <div>
-                      <p className="text-white font-medium text-sm">{l.titleAr || l.title}</p>
-                      <p className="text-gray-500 text-xs mt-1">{l.sectorAr || l.sector} • {l.organizationAr || l.organization}</p>
+                      <p className="text-foreground font-medium text-sm">{l.titleAr || l.title}</p>
+                      <p className="text-muted-foreground text-xs mt-1">{l.sectorAr || l.sector} • {l.organizationAr || l.organization}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className={l.severity === "critical" ? "bg-red-500/20 text-red-400" : l.severity === "high" ? "bg-amber-500/20 text-amber-400" : "bg-blue-500/20 text-blue-400"}>
                         {l.severity === "critical" ? "حرج" : l.severity === "high" ? "عالي" : l.severity === "medium" ? "متوسط" : "منخفض"}
                       </Badge>
-                      <span className="text-gray-500 text-xs">{l.detectedAt ? new Date(l.detectedAt).toLocaleDateString("ar-SA") : ""}</span>
+                      <span className="text-muted-foreground text-xs">{l.detectedAt ? new Date(l.detectedAt).toLocaleDateString("ar-SA") : ""}</span>
                     </div>
                   </div>
                 ))}

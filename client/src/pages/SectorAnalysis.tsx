@@ -2,6 +2,7 @@
  * SectorAnalysis — تحليل القطاعات
  * مربوط بـ leaks.list + dashboard.stats APIs
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,19 +32,19 @@ export default function SectorAnalysis() {
     return { sectors, total: leaks.length };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">تحليل القطاعات</h1><p className="text-gray-400 text-sm mt-1">توزيع حوادث التسريب حسب القطاعات</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">تحليل القطاعات</h1><p className="text-muted-foreground text-sm mt-1">توزيع حوادث التسريب حسب القطاعات</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Building2 className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.sectors.length}</div><div className="text-xs text-gray-400">قطاع متأثر</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي الحوادث</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.sectors.reduce((s, sec) => s + sec.critical, 0)}</div><div className="text-xs text-gray-400">حوادث حرجة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Building2 className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sectors.length}</div><div className="text-xs text-muted-foreground">قطاع متأثر</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sectors.reduce((s, sec) => s + sec.critical, 0)}</div><div className="text-xs text-muted-foreground">حوادث حرجة</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">توزيع الحوادث حسب القطاع</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">توزيع الحوادث حسب القطاع</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analysis.sectors.slice(0, 10)} layout="vertical">
@@ -56,8 +57,8 @@ export default function SectorAnalysis() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">نسبة القطاعات</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">نسبة القطاعات</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -70,25 +71,25 @@ export default function SectorAnalysis() {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل القطاعات</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل القطاعات</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-700">
-                <th className="text-right text-gray-400 p-2">القطاع</th>
-                <th className="text-center text-gray-400 p-2">الحوادث</th>
-                <th className="text-center text-gray-400 p-2">السجلات</th>
-                <th className="text-center text-gray-400 p-2">حرج</th>
-                <th className="text-center text-gray-400 p-2">عالي</th>
-                <th className="text-center text-gray-400 p-2">متوسط</th>
+              <thead><tr className="border-b border-border">
+                <th className="text-right text-muted-foreground p-2">القطاع</th>
+                <th className="text-center text-muted-foreground p-2">الحوادث</th>
+                <th className="text-center text-muted-foreground p-2">السجلات</th>
+                <th className="text-center text-muted-foreground p-2">حرج</th>
+                <th className="text-center text-muted-foreground p-2">عالي</th>
+                <th className="text-center text-muted-foreground p-2">متوسط</th>
               </tr></thead>
               <tbody>
                 {analysis.sectors.map((s, i) => (
-                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                    <td className="p-2 text-white font-medium">{s.name}</td>
-                    <td className="p-2 text-center text-white">{s.count}</td>
-                    <td className="p-2 text-center text-gray-300">{s.records.toLocaleString("ar-SA")}</td>
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">
+                    <td className="p-2 text-foreground font-medium">{s.name}</td>
+                    <td className="p-2 text-center text-foreground">{s.count}</td>
+                    <td className="p-2 text-center text-muted-foreground">{s.records.toLocaleString("ar-SA")}</td>
                     <td className="p-2 text-center"><Badge className="bg-red-500/20 text-red-400">{s.critical}</Badge></td>
                     <td className="p-2 text-center"><Badge className="bg-amber-500/20 text-amber-400">{s.high}</Badge></td>
                     <td className="p-2 text-center"><Badge className="bg-blue-500/20 text-blue-400">{s.medium}</Badge></td>

@@ -2,6 +2,7 @@
  * PdplCompliance — امتثال نظام حماية البيانات الشخصية
  * مربوط بـ dashboard.stats + leaks.list APIs
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +34,7 @@ export default function PdplCompliance() {
     return { complianceScore, pdplArticles, clauses, totalLeaks, criticalLeaks };
   }, [stats, leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   const statusLabels: Record<string, { text: string; color: string; icon: any }> = {
     compliant: { text: "ممتثل", color: "bg-emerald-500/20 text-emerald-400", icon: CheckCircle },
@@ -42,41 +43,41 @@ export default function PdplCompliance() {
   };
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">امتثال نظام حماية البيانات الشخصية (PDPL)</h1><p className="text-gray-400 text-sm mt-1">تقييم مستوى الامتثال لنظام حماية البيانات الشخصية السعودي</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">امتثال نظام حماية البيانات الشخصية (PDPL)</h1><p className="text-muted-foreground text-sm mt-1">تقييم مستوى الامتثال لنظام حماية البيانات الشخصية السعودي</p></div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700 md:col-span-1">
+        <Card className="glass-card gold-sweep md:col-span-1">
           <CardContent className="p-6 text-center">
             <Scale className="h-10 w-10 text-blue-400 mx-auto mb-3" />
             <div className={`text-4xl font-bold ${analysis.complianceScore >= 70 ? "text-emerald-400" : analysis.complianceScore >= 40 ? "text-amber-400" : "text-red-400"}`}>{analysis.complianceScore}%</div>
-            <p className="text-gray-400 text-sm mt-1">مستوى الامتثال العام</p>
+            <p className="text-muted-foreground text-sm mt-1">مستوى الامتثال العام</p>
             <div className="w-full bg-gray-700 rounded-full h-3 mt-3">
               <div className={`h-3 rounded-full transition-all ${analysis.complianceScore >= 70 ? "bg-emerald-500" : analysis.complianceScore >= 40 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${analysis.complianceScore}%` }} />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><CheckCircle className="h-6 w-6 text-emerald-400 mx-auto mb-2" /><div className="text-xl font-bold text-emerald-400">{analysis.pdplArticles.filter(a => a.status === "compliant").length}</div><div className="text-xs text-gray-400">مواد ممتثلة</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-xl font-bold text-amber-400">{analysis.pdplArticles.filter(a => a.status === "partial").length}</div><div className="text-xs text-gray-400">امتثال جزئي</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><XCircle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-xl font-bold text-red-400">{analysis.pdplArticles.filter(a => a.status === "non-compliant").length}</div><div className="text-xs text-gray-400">غير ممتثل</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><CheckCircle className="h-6 w-6 text-emerald-400 mx-auto mb-2" /><div className="text-xl font-bold text-emerald-400">{analysis.pdplArticles.filter(a => a.status === "compliant").length}</div><div className="text-xs text-muted-foreground">مواد ممتثلة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-xl font-bold text-amber-400">{analysis.pdplArticles.filter(a => a.status === "partial").length}</div><div className="text-xs text-muted-foreground">امتثال جزئي</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><XCircle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-xl font-bold text-red-400">{analysis.pdplArticles.filter(a => a.status === "non-compliant").length}</div><div className="text-xs text-muted-foreground">غير ممتثل</div></CardContent></Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل المواد</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل المواد</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-3">
             {analysis.pdplArticles.map((a, i) => {
               const st = statusLabels[a.status];
               const StIcon = st.icon;
               return (
-                <div key={i} className="flex items-center justify-between flex-wrap gap-3 p-3 rounded-lg bg-gray-900/30 border border-gray-700/50">
+                <div key={i} className="flex items-center justify-between flex-wrap gap-3 p-3 rounded-lg bg-gray-900/30 border border-border/50">
                   <div className="flex items-center gap-3">
                     <StIcon className={`h-5 w-5 ${a.status === "compliant" ? "text-emerald-400" : a.status === "partial" ? "text-amber-400" : "text-red-400"}`} />
                     <div>
-                      <p className="text-white font-medium text-sm">{a.article}: {a.title}</p>
+                      <p className="text-foreground font-medium text-sm">{a.article}: {a.title}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-24 bg-gray-700 rounded-full h-2"><div className={`h-2 rounded-full ${a.status === "compliant" ? "bg-emerald-500" : a.status === "partial" ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${a.score}%` }} /></div>
-                    <span className="text-gray-400 text-xs w-10">{a.score}%</span>
+                    <span className="text-muted-foreground text-xs w-10">{a.score}%</span>
                     <Badge className={st.color}>{st.text}</Badge>
                   </div>
                 </div>
@@ -85,8 +86,8 @@ export default function PdplCompliance() {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">ملخص الحوادث المؤثرة على الامتثال</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">ملخص الحوادث المؤثرة على الامتثال</CardTitle></CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={[

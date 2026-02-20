@@ -2,6 +2,7 @@
  * SourceIntelligence — استخبارات المصادر
  * مربوط بـ leaks.list API
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,19 +33,19 @@ export default function SourceIntelligence() {
     };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">استخبارات المصادر</h1><p className="text-gray-400 text-sm mt-1">تحليل مصادر وأنواع التسريبات</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">استخبارات المصادر</h1><p className="text-muted-foreground text-sm mt-1">تحليل مصادر وأنواع التسريبات</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Radio className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.sources.length}</div><div className="text-xs text-gray-400">مصدر</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.types.length}</div><div className="text-xs text-gray-400">نوع تسريب</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Eye className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Radio className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sources.length}</div><div className="text-xs text-muted-foreground">مصدر</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.types.length}</div><div className="text-xs text-muted-foreground">نوع تسريب</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Eye className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">المصادر الأكثر نشاطاً</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">المصادر الأكثر نشاطاً</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analysis.sources.slice(0, 10)} layout="vertical">
@@ -57,8 +58,8 @@ export default function SourceIntelligence() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">أنواع التسريبات</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">أنواع التسريبات</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -71,18 +72,18 @@ export default function SourceIntelligence() {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل المصادر</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل المصادر</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">المصدر</th><th className="text-center text-gray-400 p-2">الحوادث</th><th className="text-center text-gray-400 p-2">السجلات</th><th className="text-center text-gray-400 p-2">النسبة</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">المصدر</th><th className="text-center text-muted-foreground p-2">الحوادث</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">النسبة</th></tr></thead>
               <tbody>
                 {analysis.sources.map((s, i) => (
-                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                    <td className="p-2 text-white font-medium">{s.name}</td>
-                    <td className="p-2 text-center text-white">{s.count}</td>
-                    <td className="p-2 text-center text-gray-300">{s.records.toLocaleString("ar-SA")}</td>
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">
+                    <td className="p-2 text-foreground font-medium">{s.name}</td>
+                    <td className="p-2 text-center text-foreground">{s.count}</td>
+                    <td className="p-2 text-center text-muted-foreground">{s.records.toLocaleString("ar-SA")}</td>
                     <td className="p-2 text-center"><Badge className="bg-purple-500/20 text-purple-400">{analysis.total ? ((s.count / analysis.total) * 100).toFixed(1) : 0}%</Badge></td>
                   </tr>
                 ))}

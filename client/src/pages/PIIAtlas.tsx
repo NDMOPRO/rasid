@@ -2,6 +2,7 @@
  * PIIAtlas — أطلس البيانات الشخصية
  * مربوط بـ leaks.list API
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,19 +32,19 @@ export default function PIIAtlas() {
     return { piiTypes, total: leaks.length, totalRecords: piiTypes.reduce((s, p) => s + p.records, 0) };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">أطلس البيانات الشخصية</h1><p className="text-gray-400 text-sm mt-1">تحليل أنواع البيانات الشخصية المسربة (PII)</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">أطلس البيانات الشخصية</h1><p className="text-muted-foreground text-sm mt-1">تحليل أنواع البيانات الشخصية المسربة (PII)</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Fingerprint className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.piiTypes.length}</div><div className="text-xs text-gray-400">نوع بيانات شخصية</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">حوادث تسريب</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-gray-400">سجلات متأثرة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Fingerprint className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.piiTypes.length}</div><div className="text-xs text-muted-foreground">نوع بيانات شخصية</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">حوادث تسريب</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">سجلات متأثرة</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">أكثر أنواع البيانات تسريباً</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">أكثر أنواع البيانات تسريباً</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={analysis.piiTypes.slice(0, 12)} layout="vertical">
@@ -56,8 +57,8 @@ export default function PIIAtlas() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">توزيع الأنواع</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">توزيع الأنواع</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
@@ -70,20 +71,20 @@ export default function PIIAtlas() {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل أنواع البيانات الشخصية</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل أنواع البيانات الشخصية</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {analysis.piiTypes.map((p, i) => (
-              <div key={i} className="p-3 rounded-lg bg-gray-900/50 border border-gray-700/50">
+              <div key={i} className="p-3 rounded-lg bg-gray-900/50 border border-border/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-white font-medium text-sm">{p.name}</span>
+                  <span className="text-foreground font-medium text-sm">{p.name}</span>
                   <Badge className="bg-purple-500/20 text-purple-400">{p.count}</Badge>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-1.5">
                   <div className="h-1.5 rounded-full bg-purple-500" style={{ width: `${analysis.piiTypes[0]?.count ? (p.count / analysis.piiTypes[0].count) * 100 : 0}%` }} />
                 </div>
-                <p className="text-gray-500 text-xs mt-1">{p.records.toLocaleString("ar-SA")} سجل متأثر</p>
+                <p className="text-muted-foreground text-xs mt-1">{p.records.toLocaleString("ar-SA")} سجل متأثر</p>
               </div>
             ))}
           </div>

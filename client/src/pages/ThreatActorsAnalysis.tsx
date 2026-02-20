@@ -2,6 +2,7 @@
  * ThreatActorsAnalysis — تحليل مصادر التهديد
  * مربوط بـ leaks.list API
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,19 +30,19 @@ export default function ThreatActorsAnalysis() {
     return { actors, total: leaks.length };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">تحليل مصادر التهديد</h1><p className="text-gray-400 text-sm mt-1">تحليل الجهات الفاعلة وراء حوادث التسريب</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">تحليل مصادر التهديد</h1><p className="text-muted-foreground text-sm mt-1">تحليل الجهات الفاعلة وراء حوادث التسريب</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><UserX className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.actors.length}</div><div className="text-xs text-gray-400">جهة تهديد</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي الهجمات</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.actors.reduce((s, a) => s + a.critical, 0)}</div><div className="text-xs text-gray-400">هجمات حرجة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><UserX className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.actors.length}</div><div className="text-xs text-muted-foreground">جهة تهديد</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي الهجمات</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.actors.reduce((s, a) => s + a.critical, 0)}</div><div className="text-xs text-muted-foreground">هجمات حرجة</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">أنشط الجهات</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">أنشط الجهات</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analysis.actors.slice(0, 10)} layout="vertical">
@@ -54,8 +55,8 @@ export default function ThreatActorsAnalysis() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">توزيع الجهات</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">توزيع الجهات</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -68,18 +69,18 @@ export default function ThreatActorsAnalysis() {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل الجهات</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل الجهات</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">الجهة</th><th className="text-center text-gray-400 p-2">الهجمات</th><th className="text-center text-gray-400 p-2">السجلات</th><th className="text-center text-gray-400 p-2">حرج</th><th className="text-center text-gray-400 p-2">القطاعات</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">الجهة</th><th className="text-center text-muted-foreground p-2">الهجمات</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">حرج</th><th className="text-center text-muted-foreground p-2">القطاعات</th></tr></thead>
               <tbody>
                 {analysis.actors.map((a, i) => (
-                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                    <td className="p-2 text-white font-medium">{a.name}</td>
-                    <td className="p-2 text-center text-white">{a.count}</td>
-                    <td className="p-2 text-center text-gray-300">{a.records.toLocaleString("ar-SA")}</td>
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">
+                    <td className="p-2 text-foreground font-medium">{a.name}</td>
+                    <td className="p-2 text-center text-foreground">{a.count}</td>
+                    <td className="p-2 text-center text-muted-foreground">{a.records.toLocaleString("ar-SA")}</td>
                     <td className="p-2 text-center"><Badge className="bg-red-500/20 text-red-400">{a.critical}</Badge></td>
                     <td className="p-2 text-center"><Badge className="bg-purple-500/20 text-purple-400">{a.sectors}</Badge></td>
                   </tr>

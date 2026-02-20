@@ -2,6 +2,7 @@
  * GeoAnalysis — التحليل الجغرافي
  * مربوط بـ leaks.list API
  */
+import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,19 +34,19 @@ export default function GeoAnalysis() {
     };
   }, [leaks]);
 
-  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-gray-800" />)}</div>;
+  if (isLoading) return <div className="p-6 space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32 bg-card" />)}</div>;
 
   return (
-    <div className="min-h-screen p-6 space-y-6" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-white">التحليل الجغرافي</h1><p className="text-gray-400 text-sm mt-1">التوزيع الجغرافي لحوادث التسريب</p></div>
+    <div className="min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
+      <div><h1 className="text-2xl font-bold text-foreground">التحليل الجغرافي</h1><p className="text-muted-foreground text-sm mt-1">التوزيع الجغرافي لحوادث التسريب</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><MapPin className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.regions.length}</div><div className="text-xs text-gray-400">منطقة متأثرة</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><Globe className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.countries.length}</div><div className="text-xs text-gray-400">دولة متأثرة</div></CardContent></Card>
-        <Card className="bg-gray-800/50 border-gray-700"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-white">{analysis.total}</div><div className="text-xs text-gray-400">إجمالي الحوادث</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><MapPin className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.regions.length}</div><div className="text-xs text-muted-foreground">منطقة متأثرة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Globe className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.countries.length}</div><div className="text-xs text-muted-foreground">دولة متأثرة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">الحوادث حسب المنطقة</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">الحوادث حسب المنطقة</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analysis.regions.slice(0, 10)} layout="vertical">
@@ -58,8 +59,8 @@ export default function GeoAnalysis() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader><CardTitle className="text-white text-base">التوزيع حسب الدولة</CardTitle></CardHeader>
+        <Card className="glass-card gold-sweep">
+          <CardHeader><CardTitle className="text-foreground text-base">التوزيع حسب الدولة</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -72,18 +73,18 @@ export default function GeoAnalysis() {
           </CardContent>
         </Card>
       </div>
-      <Card className="bg-gray-800/50 border-gray-700">
-        <CardHeader><CardTitle className="text-white text-base">تفاصيل المناطق</CardTitle></CardHeader>
+      <Card className="glass-card gold-sweep">
+        <CardHeader><CardTitle className="text-foreground text-base">تفاصيل المناطق</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-700"><th className="text-right text-gray-400 p-2">المنطقة</th><th className="text-center text-gray-400 p-2">الحوادث</th><th className="text-center text-gray-400 p-2">السجلات المتأثرة</th><th className="text-center text-gray-400 p-2">النسبة</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">المنطقة</th><th className="text-center text-muted-foreground p-2">الحوادث</th><th className="text-center text-muted-foreground p-2">السجلات المتأثرة</th><th className="text-center text-muted-foreground p-2">النسبة</th></tr></thead>
               <tbody>
                 {analysis.regions.map((r, i) => (
-                  <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                    <td className="p-2 text-white font-medium">{r.name}</td>
-                    <td className="p-2 text-center text-white">{r.count}</td>
-                    <td className="p-2 text-center text-gray-300">{r.records.toLocaleString("ar-SA")}</td>
+                  <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">
+                    <td className="p-2 text-foreground font-medium">{r.name}</td>
+                    <td className="p-2 text-center text-foreground">{r.count}</td>
+                    <td className="p-2 text-center text-muted-foreground">{r.records.toLocaleString("ar-SA")}</td>
                     <td className="p-2 text-center"><Badge className="bg-blue-500/20 text-blue-400">{analysis.total ? ((r.count / analysis.total) * 100).toFixed(1) : 0}%</Badge></td>
                   </tr>
                 ))}
