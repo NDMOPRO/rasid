@@ -75,7 +75,7 @@ export default function Notifications() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 stagger-children">
         <Card className="cursor-pointer hover:border-primary/50 transition-colors glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300" onClick={() => setActiveTab("all")}><CardContent className="p-3 text-center"><div className="text-xl font-bold">{allNotifs.length}</div><div className="text-xs text-muted-foreground">الإجمالي</div></CardContent></Card>
         <Card className="cursor-pointer hover:border-primary/50 transition-colors glass-card gold-sweep hover:shadow-xl hover:shadow-primary/5 transition-all duration-300" onClick={() => setActiveTab("unread")}><CardContent className="p-3 text-center"><div className="text-xl font-bold text-blue-500">{unreadCount}</div><div className="text-xs text-muted-foreground">غير مقروء</div></CardContent></Card>
         {Object.entries(TYPE_CONFIG).map(([type, config]) => (

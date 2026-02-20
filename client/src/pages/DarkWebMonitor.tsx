@@ -313,7 +313,7 @@ export default function DarkWebMonitor() {
       {/* Records Modal */}
       <DetailModal open={activeModal === "records"} onClose={() => setActiveModal(null)} title="تفاصيل العدد المُدّعى للسجلات" icon={<Database className="w-5 h-5 text-cyan-400" />}>
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-center">
               <p className="text-xl font-bold text-cyan-400">{darkWebListings.reduce((s, l) => s + (l.recordCount ?? 0), 0).toLocaleString()}</p>
               <p className="text-[10px] text-muted-foreground">إجمالي السجلات</p>
@@ -365,7 +365,7 @@ export default function DarkWebMonitor() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20 text-center">
                 <p className="text-xl font-bold text-amber-400">{selectedSource.leaksDetected ?? 0}</p>
                 <p className="text-[10px] text-muted-foreground">حالات رصد مكتشفة</p>

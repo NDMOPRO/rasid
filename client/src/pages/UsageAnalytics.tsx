@@ -133,7 +133,7 @@ export default function UsageAnalytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-4">
-        <TabsList className="grid grid-cols-5 w-full max-w-2xl glass-card gold-sweep stagger-children">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full max-w-2xl glass-card gold-sweep stagger-children">
           <TabsTrigger value="trends">الاتجاهات اليومية</TabsTrigger>
           <TabsTrigger value="users">المستخدمون</TabsTrigger>
           <TabsTrigger value="pages">الصفحات</TabsTrigger>

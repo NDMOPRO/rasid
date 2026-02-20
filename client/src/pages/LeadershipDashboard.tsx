@@ -399,7 +399,7 @@ export default function LeadershipDashboard() {
   const allClassifications = data.categories.map(c => c.category);
 
   return (
-    <div ref={dashboardRef} className="space-y-8 pb-8">
+    <div ref={dashboardRef} className="space-y-8 pb-8 overflow-x-hidden max-w-full">
       <WatermarkLogo />
       {/* ===== HEADER ===== */}
       <div
@@ -407,7 +407,7 @@ export default function LeadershipDashboard() {
       >
         <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-x-10 -translate-y-10 blur-2xl btn-glow" />
         <div className="absolute bottom-0 right-0 w-24 h-24 bg-primary/8 rounded-full translate-x-8 translate-y-8 blur-xl btn-glow" />
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           <div
             className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20"
           >
@@ -421,7 +421,7 @@ export default function LeadershipDashboard() {
               تحليل شامل لامتثال المواقع السعودية للمادة 12 من نظام حماية البيانات الشخصية
             </p>
           </div>
-          <div className="me-auto flex items-center gap-2">
+          <div className="me-auto flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <button
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
@@ -1011,7 +1011,7 @@ export default function LeadershipDashboard() {
                     <p className="text-[10px] text-muted-foreground">بناءً على تحليل الانحدار الخطي للبيانات التاريخية</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 stagger-children">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
                   {predictiveData.data.forecast.map((f: any) => (
                     <div key={f.monthsAhead} className="text-center p-4 rounded-xl bg-sky-500/5 border border-sky-500/10">
                       <p className="text-xs text-muted-foreground mb-1">بعد {f.monthsAhead} أشهر</p>
@@ -2018,7 +2018,7 @@ function CategoryInfographicCard({ category, index, onClickCompliance, onClickCl
         </div>
 
         {/* Compliance Mini Stats */}
-        <div className="grid grid-cols-4 gap-1.5 mb-3 stagger-children">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-3 stagger-children">
           {[
             { key: "compliant", label: "ممتثل", value: category.compliant, color: "emerald" },
             { key: "non_compliant", label: "غير ممتثل", value: category.nonCompliant, color: "red" },

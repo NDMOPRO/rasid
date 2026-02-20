@@ -356,7 +356,7 @@ export default function SiteDetail() {
 
       {/* ===== Clause Mini Indicators ===== */}
       {latestScan && (
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 stagger-children">
+        <div className="grid grid-cols-2 sm:grid-cols-4 sm:grid-cols-8 gap-2 stagger-children">
           {clauseNames.map((name, i) => {
             const num = i + 1;
             const compliant = (latestScan as any)[`clause${num}Compliant`];
@@ -382,7 +382,7 @@ export default function SiteDetail() {
       {/* ===== Tabs ===== */}
       {latestScan && (
         <Tabs defaultValue="clauses" dir="rtl">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
             <TabsTrigger value="clauses">البنود الثمانية</TabsTrigger>
             <TabsTrigger value="privacy-analysis">تحليل الخصوصية</TabsTrigger>
             <TabsTrigger value="recommendations">التوصيات</TabsTrigger>

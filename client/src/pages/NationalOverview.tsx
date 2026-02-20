@@ -183,7 +183,7 @@ export default function NationalOverview() {
       </div>
 
       {/* ═══ Mini Stat Cards ═══ */}
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {miniStats.map((stat, i) => {
           const Icon = stat.icon;
           return (

@@ -946,7 +946,7 @@ function LivePreviewTab() {
               {/* Main area */}
               <div className="flex-1 p-6" style={{ background: getTheme("theme_bg_main", "#0f172a") }}>
                 <div className="text-lg font-bold mb-4" style={{ color: getTheme("theme_text_primary", "#f8fafc") }}>الرئيسية</div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {["المواقع", "الفحوصات", "الخطابات"].map((label, i) => (
                     <div key={i} className="rounded-xl p-4 border" style={{
                       background: getTheme("theme_bg_card", "#1e293b"),

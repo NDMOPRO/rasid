@@ -186,7 +186,7 @@ export default function EmailManagement() {
       </div>
 
       <Tabs defaultValue="smtp" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
           <TabsTrigger value="smtp" className="gap-1.5">
             <Settings2 className="h-3.5 w-3.5" />
             إعدادات SMTP

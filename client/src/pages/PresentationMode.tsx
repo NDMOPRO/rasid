@@ -152,7 +152,7 @@ function SlideHeroOverview({ data, mc }: { data: any; mc: any }) {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-7xl stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-7xl stagger-children">
         {kpis.map((kpi, i) => {
           const Icon = kpi.icon;
           return (

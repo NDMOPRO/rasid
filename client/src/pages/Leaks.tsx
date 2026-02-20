@@ -1008,7 +1008,7 @@ export default function Leaks() {
                         {leakDetail.enrichedAt ? (
                           <>
                             {/* AI Confidence & Severity */}
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                               <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-4 border border-purple-500/20 text-center">
                                 <Brain className="w-5 h-5 mx-auto mb-2 text-purple-400" />
                                 <p className="text-2xl font-bold text-purple-400">{leakDetail.aiConfidence}%</p>

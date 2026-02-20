@@ -171,7 +171,7 @@ export default function DynamicTable() {
           {/* Quick templates */}
           <div className="mt-8 w-full max-w-2xl">
             <p className="text-slate-500 text-xs text-center mb-4">أو اختر من النماذج الجاهزة</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { name: "جدول أساسي", desc: "الأعمدة الأساسية", cols: ["id", "title", "status", "severity", "discoveredAt"] },
                 { name: "جدول المصادر", desc: "تفاصيل المصادر", cols: ["id", "title", "source", "platform", "seller", "askingPrice"] },

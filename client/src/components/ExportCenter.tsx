@@ -115,7 +115,7 @@ export default function ExportCenter({ isOpen, onClose, stats, leaks }: ExportCe
             <div className="p-5 space-y-6">
               <div>
                 <h3 className="text-xs font-bold text-foreground mb-3">صيغة التصدير</h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {(Object.entries(formatConfig) as [ExportFormat, typeof formatConfig[ExportFormat]][]).map(([key, config]) => {
                     const Icon = config.icon;
                     const isSelected = selectedFormat === key;

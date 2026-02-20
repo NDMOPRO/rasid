@@ -295,7 +295,7 @@ export default function InteractiveComparison() {
 
       {comparisonData && selectedSiteIds.length >= 2 && (
         <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="overview"><BarChart3 className="w-4 h-4 me-2" />نظرة عامة</TabsTrigger>
             <TabsTrigger value="clauses"><Shield className="w-4 h-4 me-2" />تفاصيل البنود</TabsTrigger>
             <TabsTrigger value="trends"><TrendingUp className="w-4 h-4 me-2" />اتجاهات الأداء</TabsTrigger>

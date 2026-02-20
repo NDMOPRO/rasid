@@ -160,7 +160,7 @@ export default function Cases() {
       </div>
 
       {/* Status Summary */}
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 stagger-children">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-3 stagger-children">
         {Object.entries(statusLabels).map(([key, label], i) => (
           <Card
             key={key}

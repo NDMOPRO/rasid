@@ -140,16 +140,16 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="space-y-6 p-2" dir="rtl">
+    <div className="space-y-6 p-2 overflow-x-hidden max-w-full" dir="rtl">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-l from-blue-400 via-indigo-400 to-blue-800 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-l from-blue-400 via-indigo-400 to-blue-800 bg-clip-text text-transparent">
             لوحة تحكم المشرف
           </h1>
-          <p className="text-muted-foreground mt-1">إدارة المستخدمين والصلاحيات ومراقبة نشاط المنصة</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">إدارة المستخدمين والصلاحيات ومراقبة نشاط المنصة</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)} className="bg-gradient-to-l from-blue-600 to-cyan-600 hover:from-primary/90 hover:to-cyan-700 gap-2">
+        <Button onClick={() => setCreateOpen(true)} className="bg-gradient-to-l from-blue-600 to-cyan-600 hover:from-primary/90 hover:to-cyan-700 gap-2 w-full sm:w-auto">
           <UserPlus className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
           إضافة مستخدم
         </Button>

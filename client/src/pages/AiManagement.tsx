@@ -175,7 +175,7 @@ export default function AiManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
           <TabsTrigger value="knowledge">قاعدة المعرفة</TabsTrigger>
           <TabsTrigger value="scenarios">السيناريوهات</TabsTrigger>
@@ -203,7 +203,7 @@ export default function AiManagement() {
               <CardDescription>أداء البحث في قاعدة المعرفة</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div className="text-center p-4 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-primary">{searchStats.data?.totalSearches || 0}</p>
                   <p className="text-sm text-muted-foreground">إجمالي عمليات البحث</p>

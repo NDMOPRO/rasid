@@ -490,7 +490,7 @@ export default function DeepScan() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-4 text-center stagger-children">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center stagger-children">
                       <div className="p-3 rounded-lg bg-purple-500/10">
                         <div className="text-2xl font-bold text-purple-500">{llmStatusQuery.data.needsAnalysis}</div>
                         <div className="text-xs text-muted-foreground mt-1">بحاجة لتحليل</div>

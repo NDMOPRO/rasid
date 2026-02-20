@@ -702,7 +702,7 @@ export default function PresentationBuilder() {
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <Palette className="w-3 h-3" /> الألوان
               </label>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
                 {COLOR_PRESETS.map((preset, i) => (
                   <button
                     key={i}

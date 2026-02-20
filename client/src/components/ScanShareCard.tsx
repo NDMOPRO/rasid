@@ -110,7 +110,7 @@ export default function ScanShareCard({
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-4 gap-3 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
               <div className="bg-white dark:bg-white/[0.04] rounded-xl p-3 text-center border border-[#C5A55A]/8 dark:border-white/5">
                 <Globe className="h-4 w-4 text-blue-400 mx-auto mb-1" />
                 <div className="text-xl font-bold text-blue-400">{totalSites}</div>

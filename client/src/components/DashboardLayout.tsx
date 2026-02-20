@@ -275,19 +275,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const enableAutoScroll = autoScrollPages.includes(location);
   const { containerRef: mainContentRef } = useAutoScroll<HTMLElement>({ enabled: enableAutoScroll, threshold: 200 });
 
+  // ═══ SCROLL TO TOP on every page navigation ═══
   useEffect(() => {
     if (prevLocationRef.current !== location) {
       prevLocationRef.current = location;
-      const scrollReset = () => {
-        if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
-        window.scrollTo(0, 0);
-      };
-      scrollReset();
-      requestAnimationFrame(scrollReset);
-      const t1 = setTimeout(scrollReset, 50);
-      const t2 = setTimeout(scrollReset, 150);
-      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
+    // Always scroll to top on any location change
+    const scrollReset = () => {
+      if (mainContentRef.current) {
+        mainContentRef.current.scrollTop = 0;
+        mainContentRef.current.scrollLeft = 0;
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    scrollReset();
+    requestAnimationFrame(scrollReset);
+    const t1 = setTimeout(scrollReset, 50);
+    const t2 = setTimeout(scrollReset, 150);
+    const t3 = setTimeout(scrollReset, 300);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [location, mainContentRef]);
 
   const [collapsed, setCollapsed] = useState(false);
@@ -518,7 +526,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-background" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* ═══ AURORA BACKGROUND ═══ */}
       <div className="fixed inset-0 pointer-events-none z-0 dark:block hidden">
         <div className="absolute top-0 right-0 w-[60%] h-[50%] opacity-25" style={{ background: `radial-gradient(ellipse at 70% 20%, ${ws.accent}4D, transparent 70%)` }} />
@@ -705,7 +713,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ═══ MAIN CONTENT AREA ═══ */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10" style={{ maxWidth: '100%' }}>
         {/* Top header with WORKSPACE SWITCHER */}
         <header
           className="h-14 flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
@@ -791,7 +799,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Page content */}
-        <main ref={mainContentRef} className="flex-1 overflow-y-auto p-4 lg:p-6 relative">
+        <main ref={mainContentRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 relative max-w-full">
           <ParticleField count={30} className="z-0" />
           <motion.div
             key={location}

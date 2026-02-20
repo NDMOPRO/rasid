@@ -259,7 +259,7 @@ export default function PasteSites() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
                 { key: "critical", label: "حرج", color: "bg-red-500", textColor: "text-red-400", count: riskDistribution.critical },
                 { key: "high", label: "عالي", color: "bg-orange-500", textColor: "text-orange-400", count: riskDistribution.high },

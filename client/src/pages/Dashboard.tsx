@@ -1027,7 +1027,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div ref={presentationRef} className="space-y-6 p-1 relative light-particles page-transition-enter">
+    <div ref={presentationRef} className="space-y-6 p-1 relative light-particles page-transition-enter overflow-x-hidden max-w-full">
 
       {/* ═══ PRESENTATION MODE OVERLAY ═══ */}
       <AnimatePresence>

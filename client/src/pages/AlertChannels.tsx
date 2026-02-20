@@ -464,7 +464,7 @@ export default function AlertChannels() {
       >
         {selectedEntry && activeModal === "ruleDetail" && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <p className="text-xs text-muted-foreground">الحد الأدنى للتأثير</p>
                 <span className={`text-sm font-bold mt-1 inline-block px-2 py-0.5 rounded border ${severityColors[selectedEntry.severityThreshold]}`}>

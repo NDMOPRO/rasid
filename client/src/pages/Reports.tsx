@@ -485,7 +485,7 @@ export default function Reports() {
       {/* Recommendations Modal */}
       <DetailModal open={activeModal === "recommendations"} onClose={() => setActiveModal(null)} title="التوصيات النشطة" icon={<TrendingUp className="w-5 h-5 text-cyan-400" />}>
         <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 text-center">
               <p className="text-xl font-bold text-emerald-400">{recommendations.filter(r => r.status === "مكتمل").length}</p>
               <p className="text-[10px] text-muted-foreground">مكتملة</p>
@@ -686,7 +686,7 @@ export default function Reports() {
       >
         {selectedReport && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-secondary/50 rounded-xl p-3 border border-border/50 text-center">
                 <p className="text-xs text-muted-foreground">النوع</p>
                 <p className="text-sm font-bold text-foreground mt-1">{typeLabel(selectedReport.type)}</p>

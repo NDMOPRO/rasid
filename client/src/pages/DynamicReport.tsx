@@ -194,7 +194,7 @@ export default function DynamicReport() {
 
       case "stat-summary":
         return (
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/30 text-center">
                 <p className="text-2xl font-bold text-white">0</p>
@@ -366,7 +366,7 @@ export default function DynamicReport() {
           {/* Templates */}
           <div className="mt-8 w-full max-w-2xl">
             <p className="text-slate-500 text-xs text-center mb-4">أو اختر من النماذج الجاهزة</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { name: "تقرير تنفيذي", desc: "ملخص للقيادة", icon: "📋" },
                 { name: "تقرير تحليلي", desc: "تحليل مفصل", icon: "📊" },

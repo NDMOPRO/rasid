@@ -465,7 +465,7 @@ export default function KnowledgeBaseAdmin() {
             {/* Category */}
             <div>
               <label className="text-sm font-medium mb-1.5 block">الفئة</label>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 sm:grid-cols-6 gap-2">
                 {Object.entries(categoryConfig).map(([key, cfg]) => {
                   const Icon = cfg.icon;
                   return (

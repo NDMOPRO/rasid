@@ -350,7 +350,7 @@ export default function SectorComparison() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full grid-cols-3 h-12">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-12">
           <TabsTrigger value="overview" className="gap-2 text-sm">
             <ArrowLeftRight className="h-4 w-4" />
             المقارنة العامة

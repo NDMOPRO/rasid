@@ -385,7 +385,7 @@ export default function AdvancedScan() {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-4 w-full mb-4 stagger-children">
+                <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full mb-4 stagger-children">
                   <TabsTrigger value="manual" className="gap-1.5 text-xs">
                     <Globe className="h-3.5 w-3.5" />
                     يدوي

@@ -377,7 +377,7 @@ export default function KpiDashboard() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 stagger-children">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger-children">
               <div>
                 <Label>القيمة المستهدفة</Label>
                 <Input type="number" value={form.targetValue} onChange={(e) => setForm({ ...form, targetValue: Number(e.target.value) })} />

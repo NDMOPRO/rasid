@@ -251,7 +251,7 @@ export default function DynamicDashboard() {
           {/* Templates */}
           <div className="mt-8 w-full max-w-2xl">
             <p className="text-slate-500 text-xs text-center mb-4">أو اختر من النماذج الجاهزة</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { name: "لوحة قيادية", desc: "مؤشرات عامة للقيادة", icon: "📊" },
                 { name: "لوحة تشغيلية", desc: "مؤشرات الفريق التشغيلي", icon: "⚙️" },
@@ -282,7 +282,7 @@ export default function DynamicDashboard() {
           </div>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-4 gap-4 auto-rows-[200px]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 auto-rows-[200px]">
           <AnimatePresence>
             {widgets.map((widget) => {
               const catalogItem = WIDGET_CATALOG.find(c => c.id === widget.widgetId);

@@ -11,6 +11,7 @@ import TopProgressBar from "./components/TopProgressBar";
 import RasidLoadingScreen from "./components/RasidLoadingScreen";
 import { PageSkeleton } from "./components/Skeletons";
 import CommandPalette from "./components/CommandPalette";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -154,6 +155,7 @@ const DynamicReport = lazy(() => import("./pages/DynamicReport"));
 function Router() {
   return (
     <DashboardLayout>
+      <ScrollToTop />
       <Suspense fallback={<PageSkeleton />}>
         <Switch>
           <Route path="/" component={Home} />

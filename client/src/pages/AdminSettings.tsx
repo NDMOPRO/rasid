@@ -41,7 +41,7 @@ function IdentityTab() {
               <input className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm" defaultValue="Rasid Platform" />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: "اللون الأساسي", value: "#273470" },
               { label: "اللون الثانوي", value: "#6459A7" },

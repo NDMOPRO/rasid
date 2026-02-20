@@ -70,7 +70,7 @@ export default function AdvancedAnalytics() {
       </div>
 
       <Tabs defaultValue="trends" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="trends" className="gap-2"><TrendingUp className="h-4 w-4" /> اتجاهات الامتثال</TabsTrigger>
           <TabsTrigger value="sectors" className="gap-2"><BarChart3 className="h-4 w-4" /> مقارنة القطاعات</TabsTrigger>
           <TabsTrigger value="categories" className="gap-2"><PieChart className="h-4 w-4" /> التصنيفات</TabsTrigger>
