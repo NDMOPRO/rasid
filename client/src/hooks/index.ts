@@ -4,5 +4,6 @@
 
 export { useSpeechRecognition } from "./useSpeechRecognition";
 export { useProactiveAssistance } from "./useProactiveAssistance";
-export { usePageContext } from "./usePageContext";
+export { usePageContext, useAIPageContext } from "./usePageContext";
+export type { PageContextPack } from "./usePageContext";
 export { usePWA } from "./usePWA";
