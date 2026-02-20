@@ -25,7 +25,7 @@ import {
   Type,
 } from "lucide-react";
 
-const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/DnIAzRZfiCrhzgYz.svg";
+const RASID_LOGO = "/branding/logos/Rased_3_transparent.png";
 
 const TIMER_OPTIONS = [
   { label: "5s", value: 5000 },

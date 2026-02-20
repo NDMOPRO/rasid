@@ -6,15 +6,15 @@ import { Eye, EyeOff, Loader2, AlertCircle, Sun, Moon, Monitor, Shield, Lock, Ar
 import { useTheme } from "@/contexts/ThemeContext";
 
 // Full brand logos
-const RASID_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
-const RASID_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
+const RASID_LOGO_LIGHT = "/branding/logos/Rased_3_transparent.png";
+const RASID_LOGO_DARK = "/branding/logos/Rased_3_transparent.png";
 const RASID_CHARACTERS = {
-  armsCrossedShmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/qoUheMlVnqPiZdQe.png",
-  waving: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/trhmUCDmIUgvRfyf.png",
-  sunglasses: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ksSaxPLmSvrLxHAg.png",
-  shmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/qnhkKZjJrOPcqgsf.png",
-  handsOnHips: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/pHcUGrMdEgCexGAn.png",
-  standingShmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/JzZklqOoMNmtrCuP.png",
+  armsCrossedShmagh: "/branding/logos/Rased_3_transparent.png",
+  waving: "/branding/logos/Rased_3_transparent.png",
+  sunglasses: "/branding/logos/Rased_3_transparent.png",
+  shmagh: "/branding/logos/Rased_3_transparent.png",
+  handsOnHips: "/branding/logos/Rased_3_transparent.png",
+  standingShmagh: "/branding/logos/Rased_3_transparent.png",
 };
 const RASID_CHARACTER = RASID_CHARACTERS.armsCrossedShmagh;
 

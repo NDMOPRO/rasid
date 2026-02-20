@@ -9,11 +9,11 @@ import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft, Send, Shield } from 
    ═══════════════════════════════════════════════════════════════ */
 
 const CHARACTERS = {
-  waving: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/LourdpawbeFjzxpF.png",
-  standing: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/XCKlnhEgEcNWsLEB.png",
-  sunglasses: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/glsbsWKPuWnmCuiU.png",
-  shmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/cPbwcXQQKHCHhPDD.png",
-  crossed: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/MNRoXtmiCwlpGuQF.png",
+  waving: "/branding/characters/Character_1_waving_transparent.png",
+  standing: "/branding/characters/Character_6_standing_shmagh_transparent.png",
+  sunglasses: "/branding/characters/Character_4_sunglasses_transparent.png",
+  shmagh: "/branding/characters/Character_2_shmagh_transparent.png",
+  crossed: "/branding/characters/Character_5_arms_crossed_shmagh_transparent.png",
 };
 
 type CharacterState = "standing" | "waving" | "sunglasses" | "shmagh" | "crossed";

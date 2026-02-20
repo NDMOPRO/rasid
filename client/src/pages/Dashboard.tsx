@@ -270,8 +270,8 @@ function SectionHeader({ icon: Icon, title, subtitle, action, onAction }: { icon
 }
 
 /* ═══ PRESENTATION MODE OVERLAY ═══ */
-const RASID_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/DnIAzRZfiCrhzgYz.svg";
-const RASID_CHARACTER_PRES = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/rCKQyRDoubhdjHel.png";
+const RASID_LOGO_LIGHT = "/branding/logos/Rased_3_transparent.png";
+const RASID_CHARACTER_PRES = "/branding/logos/Rased_3_transparent.png";
 
 function PresentationOverlay({
   slides, currentSlide, autoRotate, onExit, onNext, onPrev, onToggleAutoRotate, onGoToSlide,

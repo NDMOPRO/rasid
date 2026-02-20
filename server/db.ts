@@ -7187,6 +7187,25 @@ export async function clearAllScans() {
   await db.delete(scans);
 }
 
+export async function clearAllLeaks() {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(leaks);
+}
+
+export async function bulkInsertLeaks(data: InsertLeak[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const BATCH = 25;
+  let inserted = 0;
+  for (let i = 0; i < data.length; i += BATCH) {
+    const batch = data.slice(i, i + BATCH);
+    await db.insert(leaks).values(batch);
+    inserted += batch.length;
+  }
+  return inserted;
+}
+
 
 // ===== Custom Pages =====
 export async function getCustomPages(userId: number, workspace?: string) {

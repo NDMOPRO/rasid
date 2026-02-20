@@ -1,8 +1,8 @@
 import { Skeleton } from './ui/skeleton';
 
 /* ═══ Rasid Character CDN URL ═══ */
-const RASID_CHARACTER_SMALL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/nceygigNBuUkNsBp.png";
-const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/DnIAzRZfiCrhzgYz.svg";
+const RASID_CHARACTER_SMALL = "/branding/characters/Character_3_dark_bg_transparent.png";
+const RASID_LOGO = "/branding/logos/Rased_3_transparent.png";
 
 export function DashboardLayoutSkeleton() {
   return (

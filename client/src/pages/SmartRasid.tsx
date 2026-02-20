@@ -68,9 +68,9 @@ import { soundManager } from "@/lib/soundManager";
 import { Save, Trash2, FolderOpen, Download, X, MessageCircle, Archive, Timer, Table2, FileDown, Lightbulb } from "lucide-react";
 
 // ═══ CONSTANTS ═══
-const RASID_CHARACTER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/rCKQyRDoubhdjHel.png"; // Transparent background character
-const RASID_FACE_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/nceygigNBuUkNsBp.png"; // Professional 3D character (small)
-const RASID_CHARACTER_ELEGANT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/PFaAwpCdMWpRxWDd.png"; // Elegant composition character
+const RASID_CHARACTER_URL = "/branding/logos/Rased_3_transparent.png"; // Transparent background character
+const RASID_FACE_URL = "/branding/logos/Rased_3_transparent.png"; // Professional 3D character (small)
+const RASID_CHARACTER_ELEGANT = "/branding/logos/Rased_3_transparent.png"; // Elegant composition character
 
 interface ThinkingStep {
   id: string;
@@ -406,7 +406,7 @@ const VIP_LEADERS_CLIENT = [
     keywords: ["الربدي", "المعالي", "معالي القائد", "قائد المبادرة"],
     name: "الربدي",
     title: "معالي قائد مبادرة راصد الوطنية",
-    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/EyXIbPHjtTKGlhZg.png",
+    imageUrl: "/branding/logos/Rased_3_transparent.png",
     type: "leader" as const,
     gradient: "from-amber-500/20 via-yellow-500/10 to-amber-600/20",
     borderColor: "border-amber-500/30",
@@ -418,7 +418,7 @@ const VIP_LEADERS_CLIENT = [
     keywords: ["السرحان", "مشعل السرحان", "مشعل", "نائب المعالي", "سعادة النائب"],
     name: "مشعل السرحان",
     title: "سعادة نائب معالي قائد المبادرة",
-    imageUrl: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/jZnDsXzrTXOCeTwv.jpg",
+    imageUrl: "/branding/logos/Rased_3_transparent.png",
     type: "deputy" as const,
     gradient: "from-cyan-500/20 via-teal-500/10 to-cyan-600/20",
     borderColor: "border-cyan-500/30",

@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
 
 // Full brand logos (with "منصة راصد" + "مكتب إدارة البيانات الوطنية")
-const RASID_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png"; // Cream+Gold for dark bg
-const RASID_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png"; // Navy+Gold for light bg
+const RASID_LOGO_LIGHT = "/branding/logos/Rased_1_transparent_1.png"; // Cream+Gold for dark bg
+const RASID_LOGO_DARK = "/branding/logos/Rased_1_transparent.png"; // Navy+Gold for light bg
 
 interface AnimatedLogoProps {
   size?: "sm" | "md" | "lg" | "xl" | number;

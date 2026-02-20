@@ -1,0 +1,5 @@
+client/public/screenshots/*.png filter=lfs diff=lfs merge=lfs -text
+client/public/evidence/**/*.png filter=lfs diff=lfs merge=lfs -text
+client/public/evidence/**/*.webp filter=lfs diff=lfs merge=lfs -text
+server/seed-data.json.gz filter=lfs diff=lfs merge=lfs -text
+server/seed-scans.json.gz filter=lfs diff=lfs merge=lfs -text

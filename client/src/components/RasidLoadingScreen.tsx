@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
    RasidLoadingScreen — شاشة تحميل فخمة بشخصية راصد المتحركة
    ═══════════════════════════════════════════════════════════════ */
 
-const CHARACTER_WAVING = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/LourdpawbeFjzxpF.png";
-const LOGO_GOLD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/qJkWJtLPpgEYdrpF.png";
+const CHARACTER_WAVING = "/branding/characters/Character_1_waving_transparent.png";
+const LOGO_GOLD = "/branding/logos/Rased_5_transparent.png";
 
 const loadingMessages = [
   "جارٍ تجهيز لوحة التحكم...",

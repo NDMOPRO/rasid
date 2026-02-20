@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Shield, CheckCircle, XCircle, Search } from "lucide-react";
 import { useParams } from "wouter";
 
-const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/eAXbruiTdhpCTGaH.png";
+const LOGO_URL = "/branding/logos/Rased_3_transparent.png";
 
 export default function VerifyPage() {
   const params = useParams<{ code?: string }>();

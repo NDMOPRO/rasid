@@ -30,7 +30,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import jsQR from "jsqr";
 
 const RASID_LOGO_DARK =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
+  "/branding/logos/Rased_3_transparent.png";
 
 // ─── Extract NDMO verification code from text ─────────────────
 function extractVerificationCode(text: string): string | null {

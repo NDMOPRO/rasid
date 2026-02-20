@@ -48,7 +48,7 @@ import { eq, desc, asc, and, count, sql, like, or } from "drizzle-orm";
 
 // Import P1 db functions directly (P1 code uses direct references, not db.* prefix)
 import {
-  getLeaks, getLeakById, createLeak, updateLeakStatus,
+  getLeaks, getLeakById, createLeak, updateLeakStatus, clearAllLeaks, bulkInsertLeaks,
   getChannels, savePiiScan, getPiiScans,
   getDarkWebListings, getPasteEntries, getDashboardStats,
   getAllUsers, updateUserRole, getAuditLogs, exportAuditLogsCsv,
@@ -6121,9 +6121,12 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       const sitesData = seedData.map((s: any) => ({
         domain: s.d,
         url: s.u,
+        workingUrl: s.u || null,
+        finalUrl: s.fu || null,
         siteNameAr: s.na || null,
         siteNameEn: s.ne || null,
         title: s.t || null,
+        description: s.desc || null,
         classification: s.cl || null,
         siteStatus: s.s === 1 ? 'active' as const : 'unreachable' as const,
         complianceStatus: s.s !== 1 ? 'not_working' as const : (s.p ? 'partial' as const : 'non_compliant' as const),
@@ -6132,10 +6135,120 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         cms: s.cm || null,
         sslStatus: s.ssl || null,
         sectorType: (s.cl && s.cl.includes('\u062d\u0643\u0648\u0645')) ? 'public' as const : 'private' as const,
+        emails: s.em || null,
+        phones: s.ph || null,
+        screenshotUrl: s.sc || null,
+        httpsWww: s.hw || null,
+        httpsNoWww: s.hn || null,
+        httpWww: s.hpw || null,
+        httpNoWww: s.hpn || null,
       }));
       
       const result = await db.bulkInsertSites(sitesData);
-      return { success: true, sites: result, totalSeedData: seedData.length };
+      
+      // Also seed scans if available
+      let scansResult = { inserted: 0, skipped: 0 };
+      const scansGzPath = path.join(process.cwd(), 'server', 'seed-scans.json.gz');
+      if (fs.existsSync(scansGzPath)) {
+        const scansCompressed = fs.readFileSync(scansGzPath);
+        const scansDecompressed = await gunzip(scansCompressed);
+        const scansData = JSON.parse(scansDecompressed.toString());
+        scansResult = await db.bulkInsertScans(scansData);
+      }
+      
+      return { success: true, sites: result, scans: scansResult, totalSeedData: seedData.length };
+    }),
+
+    // ===== Seed Incidents from JSON Data (Replace All) =====
+    seedIncidents: rootAdminProcedure.input(z.object({
+      clearExisting: z.boolean().default(true),
+    })).mutation(async ({ input }) => {
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      const jsonPath = path.join(process.cwd(), 'data', 'final_v3_database.json');
+      const mappingPath = path.join(process.cwd(), 'data', 'clean_evidence_mapping.json');
+      
+      if (!fs.existsSync(jsonPath)) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Incident data file not found' });
+      }
+      
+      const rawData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+      const evidenceMapping = fs.existsSync(mappingPath) ? JSON.parse(fs.readFileSync(mappingPath, 'utf-8')) : {};
+      
+      if (input.clearExisting) {
+        await clearAllLeaks();
+      }
+      
+      const mapSeverity = (s: string) => {
+        const sv = (s || '').toLowerCase();
+        if (sv === 'critical' || sv.includes('حرج')) return 'critical' as const;
+        if (sv === 'high' || sv.includes('مرتفع')) return 'high' as const;
+        if (sv === 'medium' || sv.includes('متوسط')) return 'medium' as const;
+        return 'low' as const;
+      };
+      const mapSource = (p: string) => {
+        const pl = (p || '').toLowerCase();
+        if (pl.includes('telegram')) return 'telegram' as const;
+        if (pl.includes('paste')) return 'paste' as const;
+        return 'darkweb' as const;
+      };
+      
+      const transformed = rawData.map((r: any) => {
+        const evidenceFiles = (evidenceMapping[r.id] || []).map((f: string) => '/evidence/' + f.replace('organized_evidence/', ''));
+        const regionParts = (r.leak_source?.region || '').split(' - ');
+        return {
+          leakId: r.id,
+          title: r.title_en || '',
+          titleAr: r.title_ar || '',
+          source: mapSource(r.overview?.source_platform || ''),
+          severity: mapSeverity(r.overview?.severity || 'medium'),
+          sector: r.leak_source?.sector_en || r.sector || '',
+          sectorAr: r.leak_source?.sector || '',
+          piiTypes: r.data_types || [],
+          recordCount: r.overview?.exposed_records || 0,
+          status: 'documented' as const,
+          description: r.description_en || '',
+          descriptionAr: r.description_ar || '',
+          aiSeverity: mapSeverity(r.ai_analysis?.impact_assessment_en || r.overview?.severity || 'medium'),
+          aiSummary: r.ai_analysis?.executive_summary_en || '',
+          aiSummaryAr: r.ai_analysis?.executive_summary || '',
+          aiRecommendations: r.ai_analysis?.recommendations_en || r.ai_analysis?.recommendations || [],
+          aiRecommendationsAr: r.ai_analysis?.recommendations || [],
+          aiConfidence: r.ai_analysis?.confidence_percentage || r.overview?.confidence_level || 0,
+          sampleData: r.data_samples || [],
+          sourceUrl: r.overview?.source_url || r.leak_source?.original_url || '',
+          sourcePlatform: r.overview?.source_platform || r.attacker_info?.platform || '',
+          screenshotUrls: evidenceFiles,
+          threatActor: r.threat_actor || r.attacker_info?.alias || '',
+          leakPrice: r.attacker_info?.price || '',
+          breachMethod: r.overview?.attack_method || '',
+          breachMethodAr: r.overview?.attack_method_ar || '',
+          region: r.leak_source?.region_en || regionParts[0] || '',
+          regionAr: regionParts[0] || '',
+          city: regionParts.length > 1 ? regionParts[1] : '',
+          cityAr: regionParts.length > 1 ? regionParts[1] : '',
+          victim: r.victim || '',
+          category: r.category || '',
+          dataSensitivity: r.data_sensitivity || '',
+          piiTypesAr: r.data_types_ar || [],
+          piiTypesCount: r.data_types_count || 0,
+          sampleFields: r.sample_fields || [],
+          sampleFieldsEn: r.sample_fields_en || [],
+          totalSampleRecords: r.total_sample_records || 0,
+          attackerInfo: r.attacker_info || {},
+          aiAnalysis: r.ai_analysis || {},
+          pdplAnalysis: r.pdpl_analysis || {},
+          sourcesInfo: r.sources || [],
+          evidenceFiles: evidenceFiles,
+          overviewData: r.overview || {},
+          detectedAt: r.date ? new Date(r.date).toISOString().slice(0, 19).replace('T', ' ') : undefined,
+          publishStatus: 'published' as const,
+        };
+      });
+      
+      const inserted = await bulkInsertLeaks(transformed);
+      return { success: true, inserted, total: rawData.length };
     }),
 
   }),

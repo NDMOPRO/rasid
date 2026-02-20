@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 
 /* ═══ Rasid Character CDN URLs ═══ */
-const RASID_CHARACTER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/rCKQyRDoubhdjHel.png";
+const RASID_CHARACTER_URL = "/branding/logos/Rased_3_transparent.png";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();

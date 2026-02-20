@@ -5,3 +5,5 @@ dist/
 .manus-logs/
 *.log
 server/seed-data.json
+screenshots/
+client/public/screenshots/

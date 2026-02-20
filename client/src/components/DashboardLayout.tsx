@@ -36,10 +36,10 @@ import AddPageButton from "@/components/AddPageButton";
 import CustomPagesList from "@/components/CustomPagesList";
 import { useCustomPages } from "@/hooks/useCustomPages";
 
-/* SDAIA Official FULL Logo URLs */
-const FULL_LOGO_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/vyIfeykxwXasuonx.png";
-const FULL_LOGO_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
-const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ziWPuMClYqvYmkJG.png";
+/* SDAIA Official FULL Logo URLs — local branding assets */
+const FULL_LOGO_DARK = "/branding/logos/Rased_1_transparent.png";
+const FULL_LOGO_LIGHT = "/branding/logos/Rased_1_transparent_1.png";
+const RASID_LOGO = "/branding/logos/Rased_3_transparent.png";
 
 const ROOT_ADMIN_USER_IDS_LIST = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
 const ROOT_ADMIN_USER_ID = "mruhaily"; // backward compat export

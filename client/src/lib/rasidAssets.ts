@@ -28,41 +28,41 @@
 // === LOGOS — SVG ===
 
 /** SVG logo for dark backgrounds */
-export const LOGO_SVG_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/NjVCCBUdZUnkmwiS.svg";
+export const LOGO_SVG_DARK = "/branding/logos/Rased_1_transparent.png";
 
 /** SVG logo for light backgrounds */
-export const LOGO_SVG_LIGHT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/sxXyvRpwfGTEClwM.svg";
+export const LOGO_SVG_LIGHT = "/branding/logos/Rased_1_transparent_1.png";
 
 /** SVG full logo with text — light bg */
-export const LOGO_SVG_FULL_TEXT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/oaAnGiwDXnYvbVHf.svg";
+export const LOGO_SVG_FULL_TEXT = "/branding/logos/Rased_3_transparent.png";
 
 /** SVG gold logo with text */
-export const LOGO_SVG_GOLD_TEXT = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/IbyjFjUujCQTyCIY.svg";
+export const LOGO_SVG_GOLD_TEXT = "/branding/logos/Rased_5_transparent.png";
 
 // === LOGOS — PNG ===
 
 /** PNG dark logo — for light backgrounds */
-export const LOGO_PNG_DARK = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/kgYZdPRoTBDxtuXX.png";
+export const LOGO_PNG_DARK = "/branding/logos/Rased_1_transparent.png";
 
 /** PNG gold logo — for light backgrounds */
-export const LOGO_PNG_GOLD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/UUJjdscOPQUPxWTx.png";
+export const LOGO_PNG_GOLD = "/branding/logos/Rased_5_transparent.png";
 
 /** PNG cream logo — for dark backgrounds */
-export const LOGO_PNG_CREAM = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/eiyxFCBkUYrsTpUp.png";
+export const LOGO_PNG_CREAM = "/branding/logos/Rased_1_transparent_1.png";
 
 // === LOGOS — Arabic Calligraphy ===
 
 /** Arabic calligraphy navy+gold */
-export const LOGO_CALLIGRAPHY_NAVY_GOLD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/SUAHVhMpGLQvUpCS.png";
+export const LOGO_CALLIGRAPHY_NAVY_GOLD = "/branding/logos/Rased_4_transparent.png";
 
 /** Arabic calligraphy navy only */
-export const LOGO_CALLIGRAPHY_NAVY = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/NgtxAUDDJMtVcKOd.png";
+export const LOGO_CALLIGRAPHY_NAVY = "/branding/logos/Rased_6_transparent.png";
 
 /** Arabic calligraphy gold only */
-export const LOGO_CALLIGRAPHY_GOLD = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/SVFfFeBHAlYHBdKe.png";
+export const LOGO_CALLIGRAPHY_GOLD = "/branding/logos/Rased_5_transparent.png";
 
 /** Arabic calligraphy cream only */
-export const LOGO_CALLIGRAPHY_CREAM = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/DROHGdWrHoitBRxD.png";
+export const LOGO_CALLIGRAPHY_CREAM = "/branding/logos/Rased_7_transparent.png";
 
 // === LEGACY ALIASES (backward compatibility) ===
 export const LOGO_FULL_DARK = LOGO_PNG_DARK;
@@ -76,28 +76,28 @@ export const LOGO_WATERMARK = LOGO_CALLIGRAPHY_CREAM;
 
 export const CHARACTERS = {
   waving: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/rxDGtGopGKKLvnVh.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/fmtePNIdzHzjIiHK.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   },
   shamagh: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/FKdDnCNejJvQftIp.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/CjOOMrLPzfbRrIue.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   },
   handsOnHips: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/VnfeHdBVqWQsJagZ.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/scTgHKJddKewtQNe.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   },
   glasses: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/RnodkqkYOQwofDYv.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/nWsdZobcNYKIyRyM.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   },
   armsCrossed: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/JOhjELAqWTPmIlUW.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/kHTLHCeIXCZUVtUs.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   },
   standingShamagh: {
-    png: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/VoTrdFOWJyyUZHrU.png",
-    gif: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/zoJeEEsQzVYxefSY.gif"
+    png: "/branding/characters/Character_1_waving_transparent.png",
+    gif: "/branding/characters/Character_1_waving_transparent.png"
   }
 } as const;
 
@@ -113,27 +113,27 @@ export const CHARACTER_STANDING_SHMAGH = CHARACTERS.standingShamagh.png;
 // === NEW LARGE LOGOS (Rased 6 = cream/gold for dark bg, Rased 3 = navy/gold for light bg) ===
 
 /** Large logo - cream/gold calligraphy with text (for dark backgrounds) */
-export const LOGO_LARGE_CREAM_GOLD = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/VZBCzqpzjiRORhth.png';
+export const LOGO_LARGE_CREAM_GOLD = '/branding/logos/Rased_3_transparent.png';
 
 /** Large logo - navy/gold calligraphy with text (for light backgrounds) */
-export const LOGO_LARGE_NAVY_GOLD = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/WhMUdjlXWBbilGnc.png';
+export const LOGO_LARGE_NAVY_GOLD = '/branding/logos/Rased_3_transparent.png';
 
 // === QUANTUM LEAP DESIGN ASSETS ===
 
 /** QuantumLeap logo white (for dark backgrounds / login branding) */
-export const QL_LOGO_WHITE = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/YyXzAHrvYpprtpzG.png';
+export const QL_LOGO_WHITE = '/branding/logos/Rased_3_transparent.png';
 
 /** QuantumLeap logo dark (for light backgrounds / mobile login) */
-export const QL_LOGO_DARK = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/JQTNPhgncFRbmJio.png';
+export const QL_LOGO_DARK = '/branding/logos/Rased_3_transparent.png';
 
 /** QuantumLeap logo main (footer) */
-export const QL_LOGO_MAIN = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/MqXVpxSpMzayTNsa.png';
+export const QL_LOGO_MAIN = '/branding/logos/Rased_3_transparent.png';
 
 /** QuantumLeap NDMO office logo (footer) */
-export const QL_LOGO_OFFICE = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/bltsnPDPVynJFYpl.png';
+export const QL_LOGO_OFFICE = '/branding/logos/Rased_3_transparent.png';
 
 /** QuantumLeap character standing (login branding) */
-export const QL_CHAR_STANDING = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/YGGLRwNmDCIHmIbJ.png';
+export const QL_CHAR_STANDING = '/branding/logos/Rased_3_transparent.png';
 
 // === USAGE MAPPING ===
 export const PAGE_ASSETS = {

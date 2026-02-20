@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import { Bot, Send, Loader2, X, Sparkles, Maximize2 } from "lucide-react";
 import { Streamdown } from "streamdown";
 
-const CHARACTER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/bplMgZcUFrzRMDas.png";
+const CHARACTER_URL = "/branding/characters/Character_3_dark_bg_transparent.png";
 
 export default function SmartRasidFAB() {
   const { user } = useAuth();

@@ -1281,6 +1281,20 @@ export const leaks = mysqlTable("leaks", {
 	regionAr: varchar({ length: 100 }),
 	city: varchar({ length: 100 }),
 	cityAr: varchar({ length: 100 }),
+	victim: varchar({ length: 500 }),
+	category: varchar({ length: 100 }),
+	dataSensitivity: varchar({ length: 100 }),
+	piiTypesAr: json(),
+	piiTypesCount: int(),
+	sampleFields: json(),
+	sampleFieldsEn: json(),
+	totalSampleRecords: int(),
+	attackerInfo: json(),
+	aiAnalysis: json(),
+	pdplAnalysis: json(),
+	sourcesInfo: json(),
+	evidenceFiles: json(),
+	overviewData: json(),
 	latitude: varchar({ length: 20 }),
 	longitude: varchar({ length: 20 }),
 	detectedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
@@ -2413,9 +2427,6 @@ export type AdminMenuItem = typeof adminMenuItems.$inferSelect;
 export type InsertAdminMenuItem = typeof adminMenuItems.$inferInsert;
 export type AdminUserRole = typeof adminUserRoles.$inferSelect;
 export type InsertAdminUserRole = typeof adminUserRoles.$inferInsert;
-
-export type AlertRule = typeof alertRules.$inferSelect;
-export type InsertAlertRule = typeof alertRules.$inferInsert;
 
 /* ═══ Custom Pages — user-created dynamic pages ═══ */
 export const customPages = mysqlTable("custom_pages", {

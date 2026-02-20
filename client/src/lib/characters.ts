@@ -4,17 +4,17 @@
  */
 export const RASID_CHARACTERS = {
   /** Arms crossed with red/white shmagh — confident pose */
-  armsCrossedShmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/qoUheMlVnqPiZdQe.png",
+  armsCrossedShmagh: "/branding/characters/Character_5_arms_crossed_shmagh_transparent.png",
   /** Waving hand — friendly greeting pose */
-  waving: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/trhmUCDmIUgvRfyf.png",
+  waving: "/branding/characters/Character_1_waving_transparent.png",
   /** Sunglasses with arms crossed — cool/professional pose */
-  sunglasses: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/ksSaxPLmSvrLxHAg.png",
+  sunglasses: "/branding/characters/Character_4_sunglasses_transparent.png",
   /** Standing with red/white shmagh — neutral pose */
-  shmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/qnhkKZjJrOPcqgsf.png",
+  shmagh: "/branding/characters/Character_2_shmagh_transparent.png",
   /** Hands on hips — confident/ready pose */
-  handsOnHips: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/pHcUGrMdEgCexGAn.png",
+  handsOnHips: "/branding/characters/Character_3_dark_bg_transparent.png",
   /** Standing with red/white shmagh — full body */
-  standingShmagh: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/JzZklqOoMNmtrCuP.png",
+  standingShmagh: "/branding/characters/Character_6_standing_shmagh_transparent.png",
 } as const;
 
 /** Default character for login page */

@@ -52,8 +52,8 @@ import {
 } from "@/components/ui/collapsible";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/eAXbruiTdhpCTGaH.png";
-const CHARACTER_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663331132774/bplMgZcUFrzRMDas.png";
+const LOGO_URL = "/branding/logos/Rased_3_transparent.png";
+const CHARACTER_URL = "/branding/characters/Character_3_dark_bg_transparent.png";
 
 interface NavGroup {
   label: string;

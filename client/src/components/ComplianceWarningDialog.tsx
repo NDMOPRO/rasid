@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const RASID_LOGO = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663296955420/tSiomIdoNdNFAtOB.png";
+const RASID_LOGO = "/branding/logos/Rased_1_transparent_1.png";
 
 interface ComplianceWarningDialogProps {
   open: boolean;
