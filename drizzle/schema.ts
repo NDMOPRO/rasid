@@ -2930,3 +2930,248 @@ export type PrivacyScreenshot = typeof privacyScreenshots.$inferSelect;
 export type InsertPrivacyScreenshot = typeof privacyScreenshots.$inferInsert;
 export type PrivacyScanRun = typeof privacyScanRuns.$inferSelect;
 export type InsertPrivacyScanRun = typeof privacyScanRuns.$inferInsert;
+
+// ═══════════════════════════════════════════════════════════════
+// SMART MONITOR REQUIREMENTS — Domain Isolation & AI Infrastructure
+// DB-01 to DB-17: Glossary, Page Descriptors, Guides, Task Memory,
+// Training Center, Message Templates, System Events, Feedback
+// ═══════════════════════════════════════════════════════════════
+
+// DB-01, DB-02, GOV-01: Domain-isolated Glossary
+export const aiGlossary = mysqlTable("ai_glossary", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	term: varchar({ length: 200 }).notNull(),
+	termEn: varchar({ length: 200 }),
+	synonyms: json().$type<string[]>(),
+	definition: text().notNull(),
+	definitionEn: text(),
+	relatedPage: varchar({ length: 200 }),
+	relatedEntity: varchar({ length: 200 }),
+	exampleQuestions: json().$type<string[]>(),
+	isActive: tinyint().default(1).notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-04: Page Descriptors per domain
+export const aiPageDescriptors = mysqlTable("ai_page_descriptors", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	pageId: varchar({ length: 100 }).notNull(),
+	route: varchar({ length: 300 }).notNull(),
+	pageName: varchar({ length: 200 }).notNull(),
+	pageNameEn: varchar({ length: 200 }),
+	purpose: text().notNull(),
+	mainElements: json().$type<string[]>(),
+	commonTasks: json().$type<string[]>(),
+	availableActions: json().$type<string[]>(),
+	drillthroughLinks: json().$type<Array<{ label: string; route: string }>>(),
+	suggestedQuestions: json().$type<Array<{ role: string; question: string }>>(),
+	isActive: tinyint().default(1).notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-05: Guide Catalog
+export const aiGuideCatalog = mysqlTable("ai_guide_catalog", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	title: varchar({ length: 300 }).notNull(),
+	titleEn: varchar({ length: 300 }),
+	purpose: text(),
+	visibilityRoles: json().$type<string[]>(),
+	isActive: tinyint().default(1).notNull(),
+	sortOrder: int().default(0).notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-06: Guide Steps
+export const aiGuideSteps = mysqlTable("ai_guide_steps", {
+	id: int().autoincrement().primaryKey().notNull(),
+	guideId: int().notNull(),
+	stepOrder: int().notNull(),
+	route: varchar({ length: 300 }).notNull(),
+	selector: varchar({ length: 500 }),
+	stepText: text().notNull(),
+	stepTextEn: text(),
+	actionType: mysqlEnum(["click", "type", "select", "scroll", "wait", "observe"]).default("observe").notNull(),
+	highlightType: mysqlEnum(["border", "overlay", "pulse", "arrow"]).default("border").notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-07: Guide Sessions
+export const aiGuideSessions = mysqlTable("ai_guide_sessions", {
+	id: int().autoincrement().primaryKey().notNull(),
+	guideId: int().notNull(),
+	userId: int().notNull(),
+	currentStep: int().default(0).notNull(),
+	totalSteps: int().notNull(),
+	status: mysqlEnum(["active", "completed", "abandoned"]).default("active").notNull(),
+	startedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	completedAt: timestamp({ mode: 'string' }),
+});
+
+// DB-08: Task Memory per domain
+export const aiTaskMemory = mysqlTable("ai_task_memory", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	userId: int().notNull(),
+	conversationId: varchar({ length: 100 }),
+	goal: text(),
+	currentEntity: varchar({ length: 200 }),
+	currentEntityId: varchar({ length: 100 }),
+	activeFilters: json(),
+	currentStep: varchar({ length: 200 }),
+	lastActivity: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	expiresAt: timestamp({ mode: 'string' }),
+});
+
+// DB-09, DB-10: Enhanced Conversations with domain isolation
+export const aiConversations = mysqlTable("ai_conversations", {
+	id: int().autoincrement().primaryKey().notNull(),
+	conversationId: varchar({ length: 100 }).notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	userId: int().notNull(),
+	title: varchar({ length: 500 }),
+	tags: json().$type<string[]>(),
+	contextPage: varchar({ length: 200 }),
+	contextEntityId: varchar({ length: 100 }),
+	summary: text(),
+	messageCount: int().default(0).notNull(),
+	isActive: tinyint().default(1).notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-11: Training Center — Documents
+export const aiTrainingDocuments = mysqlTable("ai_training_documents", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	title: varchar({ length: 500 }).notNull(),
+	titleEn: varchar({ length: 500 }),
+	content: text().notNull(),
+	category: varchar({ length: 100 }),
+	isActive: tinyint().default(1).notNull(),
+	createdBy: int(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-11: Training Center — Custom Action Triggers
+export const aiActionTriggers = mysqlTable("ai_action_triggers", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	triggerPhrase: varchar({ length: 300 }).notNull(),
+	actionType: varchar({ length: 100 }).notNull(),
+	actionConfig: json(),
+	priority: int().default(0).notNull(),
+	isActive: tinyint().default(1).notNull(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-12: AI Feedback per domain
+export const aiFeedback = mysqlTable("ai_feedback", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	conversationId: varchar({ length: 100 }),
+	messageIndex: int(),
+	toolName: varchar({ length: 100 }),
+	rating: mysqlEnum(["helpful", "not_helpful"]).notNull(),
+	reason: text(),
+	userId: int(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-13: Official Message Templates
+export const aiMessageTemplates = mysqlTable("ai_message_templates", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	templateType: varchar({ length: 100 }).notNull(),
+	title: varchar({ length: 500 }).notNull(),
+	titleEn: varchar({ length: 500 }),
+	content: text().notNull(),
+	placeholders: json().$type<string[]>(),
+	exampleInput: text(),
+	exampleOutput: text(),
+	version: int().default(1).notNull(),
+	isActive: tinyint().default(1).notNull(),
+	createdBy: int(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-14: System Events for knowledge refresh
+export const aiSystemEvents = mysqlTable("ai_system_events", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	eventType: mysqlEnum(["create", "update", "delete"]).notNull(),
+	resourceType: varchar({ length: 100 }).notNull(),
+	resourceId: varchar({ length: 100 }),
+	resourceName: varchar({ length: 500 }),
+	changes: json(),
+	triggeredBy: int(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// DB-15: Knowledge Refresh Status
+export const aiKnowledgeRefreshStatus = mysqlTable("ai_knowledge_refresh_status", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	sourceName: varchar({ length: 200 }).notNull(),
+	sourceType: varchar({ length: 100 }).notNull(),
+	status: mysqlEnum(["idle", "running", "completed", "error"]).default("idle").notNull(),
+	lastRefreshedAt: timestamp({ mode: 'string' }),
+	lastError: text(),
+	itemCount: int().default(0),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// SEC-01, API-08: Action Runs — audit trail for confirmed actions
+export const aiActionRuns = mysqlTable("ai_action_runs", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	conversationId: varchar({ length: 100 }),
+	userId: int().notNull(),
+	actionType: varchar({ length: 100 }).notNull(),
+	actionDescription: text(),
+	previewData: json(),
+	status: mysqlEnum(["pending", "confirmed", "cancelled", "executed", "rolled_back", "failed"]).default("pending").notNull(),
+	resultData: json(),
+	confirmedAt: timestamp({ mode: 'string' }),
+	executedAt: timestamp({ mode: 'string' }),
+	rolledBackAt: timestamp({ mode: 'string' }),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// Type exports for new tables
+export type AiGlossary = typeof aiGlossary.$inferSelect;
+export type InsertAiGlossary = typeof aiGlossary.$inferInsert;
+export type AiPageDescriptor = typeof aiPageDescriptors.$inferSelect;
+export type InsertAiPageDescriptor = typeof aiPageDescriptors.$inferInsert;
+export type AiGuideCatalog = typeof aiGuideCatalog.$inferSelect;
+export type InsertAiGuideCatalog = typeof aiGuideCatalog.$inferInsert;
+export type AiGuideStep = typeof aiGuideSteps.$inferSelect;
+export type InsertAiGuideStep = typeof aiGuideSteps.$inferInsert;
+export type AiGuideSession = typeof aiGuideSessions.$inferSelect;
+export type InsertAiGuideSession = typeof aiGuideSessions.$inferInsert;
+export type AiTaskMemory = typeof aiTaskMemory.$inferSelect;
+export type InsertAiTaskMemory = typeof aiTaskMemory.$inferInsert;
+export type AiConversation = typeof aiConversations.$inferSelect;
+export type InsertAiConversation = typeof aiConversations.$inferInsert;
+export type AiTrainingDocument = typeof aiTrainingDocuments.$inferSelect;
+export type InsertAiTrainingDocument = typeof aiTrainingDocuments.$inferInsert;
+export type AiActionTrigger = typeof aiActionTriggers.$inferSelect;
+export type InsertAiActionTrigger = typeof aiActionTriggers.$inferInsert;
+export type AiFeedback = typeof aiFeedback.$inferSelect;
+export type InsertAiFeedback = typeof aiFeedback.$inferInsert;
+export type AiMessageTemplate = typeof aiMessageTemplates.$inferSelect;
+export type InsertAiMessageTemplate = typeof aiMessageTemplates.$inferInsert;
+export type AiSystemEvent = typeof aiSystemEvents.$inferSelect;
+export type InsertAiSystemEvent = typeof aiSystemEvents.$inferInsert;
+export type AiKnowledgeRefreshStatus = typeof aiKnowledgeRefreshStatus.$inferSelect;
+export type InsertAiKnowledgeRefreshStatus = typeof aiKnowledgeRefreshStatus.$inferInsert;
+export type AiActionRun = typeof aiActionRuns.$inferSelect;
+export type InsertAiActionRun = typeof aiActionRuns.$inferInsert;
