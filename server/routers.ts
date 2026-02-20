@@ -33,6 +33,7 @@ import { enrichLeak, enrichAllPending } from "./enrichment";
 import { executeRetentionPolicies, previewRetention } from "./retention";
 import { executeScan, quickScan } from "./scanEngine";
 import { rasidAIChat } from "./rasidAI";
+import * as smartDb from "./smartRasidDb";
 import { adminRouter } from "./adminRouter";
 import { cmsRouter } from "./cmsRouter";
 import { controlPanelRouter } from "./controlPanelRouter";
@@ -7463,6 +7464,326 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         recentLeaks: recentLeaks.slice(0, 5),
         totalLeaks: recentLeaks.length,
       };
+    }),
+
+    // ═══ GLOSSARY (DB-03, GOV-01) ═══
+    glossary: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+        search: z.string().optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getGlossaryTerms(input?.domain, input?.search);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        term: z.string().min(1),
+        termEn: z.string().optional(),
+        synonyms: z.array(z.string()).optional(),
+        definition: z.string().min(1),
+        definitionEn: z.string().optional(),
+        relatedPage: z.string().optional(),
+        relatedEntity: z.string().optional(),
+        exampleQuestions: z.array(z.string()).optional(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const id = await smartDb.createGlossaryTerm(input);
+        await smartDb.logSystemEvent({ domain: input.domain, eventType: "create", resourceType: "glossary", resourceId: String(id), resourceName: input.term, triggeredBy: who.id });
+        return { id };
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        term: z.string().optional(),
+        termEn: z.string().optional(),
+        synonyms: z.array(z.string()).optional(),
+        definition: z.string().optional(),
+        definitionEn: z.string().optional(),
+        relatedPage: z.string().optional(),
+        relatedEntity: z.string().optional(),
+        exampleQuestions: z.array(z.string()).optional(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const { id, ...data } = input;
+        await smartDb.updateGlossaryTerm(id, data);
+        await smartDb.logSystemEvent({ domain: "breaches", eventType: "update", resourceType: "glossary", resourceId: String(id), triggeredBy: who.id });
+        return { success: true };
+      }),
+      delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        await smartDb.deleteGlossaryTerm(input.id);
+        await smartDb.logSystemEvent({ domain: "breaches", eventType: "delete", resourceType: "glossary", resourceId: String(input.id), triggeredBy: who.id });
+        return { success: true };
+      }),
+    }),
+
+    // ═══ PAGE DESCRIPTORS (DB-04) ═══
+    pageDescriptors: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getPageDescriptors(input?.domain);
+      }),
+      getByRoute: protectedProcedure.input(z.object({ route: z.string() })).query(async ({ input }) => {
+        return smartDb.getPageDescriptorByRoute(input.route);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        pageId: z.string(),
+        route: z.string(),
+        pageName: z.string(),
+        pageNameEn: z.string().optional(),
+        purpose: z.string(),
+        mainElements: z.array(z.string()).optional(),
+        commonTasks: z.array(z.string()).optional(),
+        availableActions: z.array(z.string()).optional(),
+      })).mutation(async ({ input }) => {
+        const id = await smartDb.createPageDescriptor(input);
+        return { id };
+      }),
+    }),
+
+    // ═══ GUIDES (DB-05, DB-06, DB-07) ═══
+    guides: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getGuides(input?.domain);
+      }),
+      getWithSteps: protectedProcedure.input(z.object({ guideId: z.number() })).query(async ({ input }) => {
+        return smartDb.getGuideWithSteps(input.guideId);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        title: z.string().min(1),
+        titleEn: z.string().optional(),
+        purpose: z.string().optional(),
+        visibilityRoles: z.array(z.string()).optional(),
+      })).mutation(async ({ input }) => {
+        const id = await smartDb.createGuide(input);
+        return { id };
+      }),
+      addStep: protectedProcedure.input(z.object({
+        guideId: z.number(),
+        stepOrder: z.number(),
+        route: z.string(),
+        selector: z.string().optional(),
+        stepText: z.string(),
+        stepTextEn: z.string().optional(),
+        actionType: z.enum(["click", "type", "select", "scroll", "wait", "observe"]).optional(),
+        highlightType: z.enum(["border", "overlay", "pulse", "arrow"]).optional(),
+      })).mutation(async ({ input }) => {
+        const id = await smartDb.createGuideStep(input);
+        return { id };
+      }),
+      getSession: protectedProcedure.input(z.object({ guideId: z.number() })).query(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        return smartDb.getGuideSession(who.id, input.guideId);
+      }),
+      startSession: protectedProcedure.input(z.object({
+        guideId: z.number(),
+        totalSteps: z.number(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const id = await smartDb.createGuideSession({ guideId: input.guideId, userId: who.id, totalSteps: input.totalSteps });
+        return { id };
+      }),
+      updateSession: protectedProcedure.input(z.object({
+        sessionId: z.number(),
+        currentStep: z.number().optional(),
+        status: z.enum(["active", "completed", "abandoned"]).optional(),
+      })).mutation(async ({ input }) => {
+        const { sessionId, ...data } = input;
+        await smartDb.updateGuideSession(sessionId, data);
+        return { success: true };
+      }),
+    }),
+
+    // ═══ AI FEEDBACK (DB-12) ═══
+    feedback: router({
+      submit: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        conversationId: z.string().optional(),
+        messageIndex: z.number().optional(),
+        toolName: z.string().optional(),
+        rating: z.enum(["helpful", "not_helpful"]),
+        reason: z.string().optional(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const id = await smartDb.createAIFeedback({ ...input, userId: who.id });
+        return { id };
+      }),
+      stats: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getAIFeedbackStats(input?.domain);
+      }),
+    }),
+
+    // ═══ MESSAGE TEMPLATES (DB-13) ═══
+    templates: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+        templateType: z.string().optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getMessageTemplates(input?.domain, input?.templateType);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        templateType: z.string(),
+        title: z.string().min(1),
+        titleEn: z.string().optional(),
+        content: z.string().min(1),
+        placeholders: z.array(z.string()).optional(),
+        exampleInput: z.string().optional(),
+        exampleOutput: z.string().optional(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const id = await smartDb.createMessageTemplate({ ...input, createdBy: who.id });
+        return { id };
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        titleEn: z.string().optional(),
+        content: z.string().optional(),
+        placeholders: z.array(z.string()).optional(),
+        exampleInput: z.string().optional(),
+        exampleOutput: z.string().optional(),
+      })).mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await smartDb.updateMessageTemplate(id, data);
+        return { success: true };
+      }),
+    }),
+
+    // ═══ TRAINING DOCUMENTS — Domain-isolated (DB-11) ═══
+    trainingDocs: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+        search: z.string().optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getTrainingDocs(input?.domain, input?.search);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        title: z.string().min(1),
+        titleEn: z.string().optional(),
+        content: z.string().min(1),
+        category: z.string().optional(),
+      })).mutation(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        const id = await smartDb.createTrainingDoc({ ...input, createdBy: who.id });
+        await smartDb.logSystemEvent({ domain: input.domain, eventType: "create", resourceType: "training_doc", resourceId: String(id), resourceName: input.title, triggeredBy: who.id });
+        return { id };
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        titleEn: z.string().optional(),
+        content: z.string().optional(),
+        category: z.string().optional(),
+      })).mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await smartDb.updateTrainingDoc(id, data);
+        return { success: true };
+      }),
+      delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+        await smartDb.deleteTrainingDoc(input.id);
+        return { success: true };
+      }),
+    }),
+
+    // ═══ ACTION TRIGGERS — Domain-isolated (DB-11) ═══
+    actionTriggers: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getActionTriggers(input?.domain);
+      }),
+      create: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]),
+        triggerPhrase: z.string().min(1),
+        actionType: z.string(),
+        actionConfig: z.any().optional(),
+        priority: z.number().optional(),
+      })).mutation(async ({ input }) => {
+        const id = await smartDb.createActionTrigger(input);
+        return { id };
+      }),
+      update: protectedProcedure.input(z.object({
+        id: z.number(),
+        triggerPhrase: z.string().optional(),
+        actionType: z.string().optional(),
+        actionConfig: z.any().optional(),
+        priority: z.number().optional(),
+      })).mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await smartDb.updateActionTrigger(id, data);
+        return { success: true };
+      }),
+      delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+        await smartDb.deleteActionTrigger(input.id);
+        return { success: true };
+      }),
+    }),
+
+    // ═══ SYSTEM EVENTS (DB-14) ═══
+    systemEvents: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+        limit: z.number().optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getSystemEvents(input?.domain, input?.limit);
+      }),
+    }),
+
+    // ═══ KNOWLEDGE REFRESH STATUS (DB-15) ═══
+    knowledgeStatus: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+      }).optional()).query(async ({ input }) => {
+        return smartDb.getKnowledgeRefreshStatus(input?.domain);
+      }),
+    }),
+
+    // ═══ ACTION RUNS (SEC-01, API-08) ═══
+    actionRuns: router({
+      list: protectedProcedure.input(z.object({
+        domain: z.enum(["breaches", "privacy"]).optional(),
+        limit: z.number().optional(),
+      }).optional()).query(async ({ input, ctx }) => {
+        const who = getAuthUser(ctx);
+        return smartDb.getActionRuns(who.id, input?.domain, input?.limit);
+      }),
+      confirm: protectedProcedure.input(z.object({
+        actionRunId: z.number(),
+      })).mutation(async ({ input }) => {
+        await smartDb.updateActionRun(input.actionRunId, { status: "confirmed" });
+        return { success: true };
+      }),
+      cancel: protectedProcedure.input(z.object({
+        actionRunId: z.number(),
+      })).mutation(async ({ input }) => {
+        await smartDb.updateActionRun(input.actionRunId, { status: "cancelled" });
+        return { success: true };
+      }),
+      rollback: protectedProcedure.input(z.object({
+        actionRunId: z.number(),
+      })).mutation(async ({ input }) => {
+        await smartDb.updateActionRun(input.actionRunId, { status: "rolled_back" });
+        return { success: true };
+      }),
+    }),
+
+    // ═══ SYSTEM HEALTH (API-21) ═══
+    systemHealth: protectedProcedure.query(async () => {
+      return smartDb.getSystemHealthData();
+    }),
+
+    // ═══ TRAINING CENTER STATS — Enhanced (API-20) ═══
+    trainingStats: protectedProcedure.input(z.object({
+      domain: z.enum(["breaches", "privacy"]).optional(),
+    }).optional()).query(async ({ input }) => {
+      return smartDb.getTrainingCenterStats(input?.domain);
     }),
   }),
 

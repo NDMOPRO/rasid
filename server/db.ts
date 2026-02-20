@@ -10,7 +10,7 @@ import {
   complianceChangeNotifications, userDashboardWidgets, visualAlerts,
   emailNotificationPrefs, pdfReportHistory, documents, reportAudit, knowledgeBase,
   personalityScenarios, aiUserSessions, chatHistory, customActions, trainingDocuments,
-  aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue,
+  aiFeedbackLegacy as aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue,
   platformAnalytics, platformSettings, pageConfigs, themeSettings, contentBlocks,
   dataTransferLogs, settingsAuditLog, presentationTemplates, presentations,
   alertContacts, alertHistory, alertRules, evidenceChain, feedbackEntries,

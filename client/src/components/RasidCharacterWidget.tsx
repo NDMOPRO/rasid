@@ -48,9 +48,34 @@ const greetings = [
 const tips: Record<string, string> = {
   "/overview": "💡 يمكنك تصفية البيانات حسب الفترة الزمنية",
   "/incidents": "💡 اضغط على أي حالة لعرض التفاصيل الكاملة",
+  "/leaks": "💡 اضغط على أي حالة رصد لعرض التفاصيل والأدلة",
   "/privacy": "💡 تابع مؤشرات الامتثال لنظام حماية البيانات",
+  "/sites": "💡 يمكنك فحص أي موقع لمعرفة حالة الامتثال",
   "/reports": "💡 يمكنك تصدير التقارير بصيغة PDF",
+  "/dark-web": "💡 راقب التهديدات الجديدة في الدارك ويب",
+  "/evidence-chain": "💡 وثّق الأدلة الرقمية لضمان سلسلة الحفظ",
   "/smart-rasid": "💡 اسألني أي سؤال عن بياناتك!",
+};
+
+// Proactive idle suggestions — domain-aware (UI-16, UI-17)
+const IDLE_SUGGESTIONS: Record<string, { text: string; delay: number }[]> = {
+  "/overview": [
+    { text: "🔍 لاحظت أنك في لوحة المعلومات — هل تريد ملخصاً تنفيذياً سريعاً؟", delay: 45000 },
+    { text: "📊 يمكنني تحليل اتجاهات حالات الرصد لك", delay: 90000 },
+  ],
+  "/leaks": [
+    { text: "⚠️ هل تريد مساعدة في تحليل حالات الرصد الحالية؟", delay: 30000 },
+    { text: "🔗 يمكنني ربط حالات الرصد المتشابهة وإيجاد الأنماط", delay: 75000 },
+  ],
+  "/privacy": [
+    { text: "🛡️ هل تريد معرفة أي البنود تحتاج اهتماماً أكبر؟", delay: 40000 },
+  ],
+  "/sites": [
+    { text: "🌐 يمكنني فحص أي موقع جديد لحالة الامتثال", delay: 35000 },
+  ],
+  "/reports": [
+    { text: "📄 هل تريد إنشاء تقرير تنفيذي شامل؟", delay: 30000 },
+  ],
 };
 
 const quickPrompts = [
@@ -80,58 +105,116 @@ export default function RasidCharacterWidget() {
   // Welcome message on first open (CHAT-04)
   const [showWelcome, setShowWelcome] = useState(true);
 
+  /** SSE Streaming chat — token-by-token (API-03, CHAT-01, UI-04) */
   const handleMiniSend = async () => {
     if (!miniMessage.trim()) return;
     const userMsg = miniMessage.trim();
 
     if (chatMode) {
-      // Inline chat: send message and get response
       setChatMessages(prev => [...prev, { role: "user", content: userMsg }]);
       setMiniMessage("");
       setShowWelcome(false);
       setIsAILoading(true);
       setStreamingStatus("understanding");
+      setStreamingContent("");
 
       try {
-        setStreamingStatus("fetching");
-
-        // Use fetch to call tRPC endpoint for AI chat
-        const response = await fetch("/api/trpc/smartRasid.chat", {
+        const response = await fetch("/api/rasid/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            json: {
-              message: userMsg,
-              history: chatMessages.map(m => ({ role: m.role, content: m.content })),
-            }
+            message: userMsg,
+            history: chatMessages.map(m => ({ role: m.role, content: m.content })),
           }),
         });
 
-        setStreamingStatus("preparing");
-        const data = await response.json();
-        const aiResponse = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
+        if (!response.ok || !response.body) {
+          // Fallback to tRPC if SSE endpoint unavailable (API-06)
+          setStreamingStatus("fetching");
+          const fallbackRes = await fetch("/api/trpc/smartRasid.chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ json: { message: userMsg, history: chatMessages.map(m => ({ role: m.role, content: m.content })) } }),
+          });
+          const data = await fallbackRes.json();
+          const aiResp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
+          setChatMessages(prev => [...prev, { role: "assistant", content: aiResp }]);
+          setIsAILoading(false);
+          setStreamingStatus("idle");
+          return;
+        }
 
-        setChatMessages(prev => [...prev, { role: "assistant", content: aiResponse }]);
+        // Stream SSE tokens
+        setStreamingStatus("streaming");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let accumulated = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (line.startsWith("event: ")) {
+              const eventType = line.slice(7).trim();
+              // Next data line
+              const dataIdx = lines.indexOf(line) + 1;
+              if (dataIdx < lines.length && lines[dataIdx].startsWith("data: ")) {
+                try {
+                  const payload = JSON.parse(lines[dataIdx].slice(6));
+                  if (eventType === "token" && payload.text) {
+                    accumulated += payload.text;
+                    setStreamingContent(accumulated);
+                  } else if (eventType === "thinking") {
+                    setStreamingStatus("understanding");
+                  } else if (eventType === "tool") {
+                    setStreamingStatus(payload.status === "running" ? "executing" : "preparing");
+                  } else if (eventType === "done") {
+                    accumulated = payload.response || accumulated;
+                  } else if (eventType === "error") {
+                    accumulated = accumulated || "عذراً، حدث خطأ.";
+                  }
+                } catch {}
+              }
+            } else if (line.startsWith("data: ")) {
+              try {
+                const payload = JSON.parse(line.slice(6));
+                if (payload.text) {
+                  accumulated += payload.text;
+                  setStreamingContent(accumulated);
+                }
+              } catch {}
+            }
+          }
+        }
+
+        setChatMessages(prev => [...prev, { role: "assistant", content: accumulated || "عذراً، لم أتمكن من الرد." }]);
+        setStreamingContent("");
       } catch (err) {
         setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ. حاول مرة أخرى." }]);
       } finally {
         setIsAILoading(false);
         setStreamingStatus("idle");
+        setStreamingContent("");
       }
     } else {
-      // Navigate to SmartRasid with the message
       setIsExpanded(false);
       setLocation(`/app/smart-rasid?q=${encodeURIComponent(userMsg)}`);
       setMiniMessage("");
     }
   };
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat to bottom (including during streaming)
   useEffect(() => {
     if (chatScrollRef.current) {
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
-  }, [chatMessages, isAILoading]);
+  }, [chatMessages, isAILoading, streamingContent]);
 
   const handleQuickAction = (action: string) => {
     if (chatMode) {
@@ -186,6 +269,29 @@ export default function RasidCharacterWidget() {
       return () => clearTimeout(timer);
     }
   }, [location, hasInteracted]);
+
+  // Proactive idle assistance (UI-16, UI-17)
+  useEffect(() => {
+    if (isExpanded || hasInteracted) return;
+    const matchedPage = Object.entries(IDLE_SUGGESTIONS).find(([path]) => location.includes(path));
+    if (!matchedPage) return;
+
+    const timers: NodeJS.Timeout[] = [];
+    matchedPage[1].forEach((suggestion, idx) => {
+      const timer = setTimeout(() => {
+        setBubbleText(suggestion.text);
+        setShowBubble(true);
+        setCurrentChar("waving");
+        bubbleTimer.current = setTimeout(() => {
+          setShowBubble(false);
+          setCurrentChar("standing");
+        }, 8000);
+      }, suggestion.delay);
+      timers.push(timer);
+    });
+
+    return () => timers.forEach(t => clearTimeout(t));
+  }, [location, isExpanded, hasInteracted]);
 
   // Periodic greeting animation
   useEffect(() => {
@@ -387,23 +493,67 @@ export default function RasidCharacterWidget() {
                             whileTap={{ scale: 0.97 }}
                             onClick={() => {
                               setMiniMessage(p.text);
+                              // Use handleMiniSend which now supports SSE
+                              setTimeout(() => {
+                                const input = document.querySelector('[data-mini-chat-input]') as HTMLInputElement;
+                                if (input) {
+                                  input.value = p.text;
+                                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                                  nativeInputValueSetter?.call(input, p.text);
+                                  input.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                              }, 0);
                               setShowWelcome(false);
                               setChatMessages(prev => [...prev, { role: "user", content: p.text }]);
                               setIsAILoading(true);
                               setStreamingStatus("understanding");
-                              // Trigger send
-                              fetch("/api/trpc/smartRasid.chat", {
+                              setStreamingContent("");
+                              // Use SSE streaming
+                              fetch("/api/rasid/stream", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ json: { message: p.text, history: [] } }),
-                              }).then(r => r.json()).then(data => {
-                                const resp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
-                                setChatMessages(prev => [...prev, { role: "assistant", content: resp }]);
+                                body: JSON.stringify({ message: p.text, history: [] }),
+                              }).then(async (res) => {
+                                if (!res.ok || !res.body) {
+                                  // Fallback to tRPC
+                                  const fallback = await fetch("/api/trpc/smartRasid.chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ json: { message: p.text, history: [] } }),
+                                  });
+                                  const data = await fallback.json();
+                                  const resp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً.";
+                                  setChatMessages(prev => [...prev, { role: "assistant", content: resp }]);
+                                  return;
+                                }
+                                const reader = res.body.getReader();
+                                const decoder = new TextDecoder();
+                                let buf = "", acc = "";
+                                setStreamingStatus("streaming");
+                                while (true) {
+                                  const { done, value } = await reader.read();
+                                  if (done) break;
+                                  buf += decoder.decode(value, { stream: true });
+                                  const lines = buf.split("\n");
+                                  buf = lines.pop() || "";
+                                  for (const line of lines) {
+                                    if (line.startsWith("data: ")) {
+                                      try {
+                                        const d = JSON.parse(line.slice(6));
+                                        if (d.text) { acc += d.text; setStreamingContent(acc); }
+                                        if (d.response) acc = d.response;
+                                      } catch {}
+                                    }
+                                  }
+                                }
+                                setChatMessages(prev => [...prev, { role: "assistant", content: acc || "عذراً." }]);
+                                setStreamingContent("");
                               }).catch(() => {
                                 setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ." }]);
                               }).finally(() => {
                                 setIsAILoading(false);
                                 setStreamingStatus("idle");
+                                setStreamingContent("");
                               });
                               setMiniMessage("");
                             }}
@@ -449,8 +599,26 @@ export default function RasidCharacterWidget() {
                     </motion.div>
                   ))}
 
+                  {/* Streaming content — token-by-token (UI-04) */}
+                  {isAILoading && streamingContent && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div
+                        className="max-w-[85%] rounded-xl px-3 py-2 text-[11px] text-[#D4DDEF]/80"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        <div className="prose prose-xs dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-1">
+                          <Streamdown>{streamingContent}</Streamdown>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Loading indicator */}
-                  {isAILoading && (
+                  {isAILoading && !streamingContent && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

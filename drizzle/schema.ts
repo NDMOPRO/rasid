@@ -198,7 +198,7 @@ export const aiChatSessions = mysqlTable("ai_chat_sessions", {
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const aiConversations = mysqlTable("ai_conversations", {
+export const aiConversationsLegacy = mysqlTable("ai_conversations", {
 	id: int().autoincrement().primaryKey().notNull(),
 	userId: int().notNull(),
 	title: varchar({ length: 500 }),
@@ -219,7 +219,7 @@ export const aiCustomCommands = mysqlTable("ai_custom_commands", {
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-export const aiFeedback = mysqlTable("ai_feedback", {
+export const aiFeedbackLegacy = mysqlTable("ai_feedback", {
 	id: int().autoincrement().primaryKey().notNull(),
 	chatHistoryId: int().notNull(),
 	userId: int().notNull(),
@@ -2804,7 +2804,7 @@ export const sseStreamSessions = mysqlTable("sse_stream_sessions", {
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 });
 
-export const aiGuideSteps = mysqlTable("ai_guide_steps", {
+export const aiGuideStepsLegacy = mysqlTable("ai_guide_steps", {
 	id: int().autoincrement().primaryKey().notNull(),
 	stepOrder: int("step_order").notNull(),
 	titleAr: varchar("title_ar", { length: 255 }).notNull(),
