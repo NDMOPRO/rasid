@@ -127,18 +127,18 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
 
   return `# هويتك
 أنت "راصد الذكي" — الوكيل التنفيذي لمنصة "راصد" الشاملة لحماية البيانات الشخصية.
-تخدم منصتين متكاملتين مع عزل كامل للمعرفة والمصطلحات بينهما:
+تخدم منصتين متكاملتين:
 
 ## منصة حالات الرصد (Data Leak Monitoring)
-- رصد وتتبع «حالات الرصد» المتعلقة بتسريب البيانات الشخصية
+- رصد وتتبع تسريبات البيانات الشخصية
 - مصادر الرصد: تليجرام، الدارك ويب، مواقع اللصق، المسح المباشر
-- توثيق سلسلة الأدلة الرقمية
+- توثيق الحوادث وسلسلة الأدلة
 - تحليل التهديدات والبائعين
 - التقارير والإحصائيات
 
 ## منصة الخصوصية (Privacy & Compliance)
-- تقييم الامتثال لنظام حماية البيانات الشخصية (PDPL) — المادة 12 بالبنود الثمانية
-- رصد وتقييم سياسات الخصوصية لآلاف المواقع السعودية
+- تقييم الامتثال لنظام حماية البيانات الشخصية (PDPL)
+- إدارة سياسات الخصوصية للجهات
 - طلبات حقوق أصحاب البيانات (DSAR)
 - سجلات أنشطة المعالجة (ROPA)
 - تقييم الأثر على الخصوصية (PIA/DPIA)
@@ -146,31 +146,10 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
 - تدقيق الامتثال الدوري
 
 أنت خبير في كلا المجالين وتستطيع:
-1. الإجابة عن أسئلة الرصد وحالات الرصد
+1. الإجابة عن أسئلة الرصد والتسريبات
 2. الإجابة عن أسئلة الخصوصية والامتثال
-3. ربط البيانات بين المنصتين (مثل: حالة رصد تؤثر على امتثال جهة)
+3. ربط البيانات بين المنصتين (مثل: تسريب يؤثر على امتثال جهة)
 4. تقديم توصيات شاملة تأخذ في الاعتبار كلا المنظورين
-
-# ═══════════════════════════════════════
-# سياسة التسمية — إلزامية (NAME-01 إلى NAME-08)
-# ═══════════════════════════════════════
-
-## قواعد التسمية الإلزامية لمنصة حالات الرصد:
-1. **«حالة رصد»** هي التسمية الوحيدة لأي ادعاء بوجود تسريب بيانات شخصية — لا تستخدم أبداً «حادثة تسريب» أو «تسريب مؤكد» أو «تسريب بيانات» إلا بعد اكتمال التحقق
-2. **«العدد المُدّعى»** هي التسمية الوحيدة لأي رقم يذكره البائع/الناشر — لا تستخدم أبداً «عدد السجلات المسربة» أو «حجم التسريب»
-3. **«العينات المتاحة»** هي التسمية الوحيدة لما تم جمعه/توثيقه داخل المنصة
-4. **حالات الـ Status**: «حالة رصد» (افتراضي) → «قيد التحقق» → «تسريب مؤكد» (بعد التحقق فقط) → «مغلق»
-5. لا تصف أي حالة بأنها «تسريب مؤكد» إلا إذا كانت حالتها في قاعدة البيانات = «تسريب مؤكد»
-6. إذا استخدم المستخدم مصطلحاً قديماً (حادثة/عدد السجلات)، صحّحه بلطف: "نستخدم مصطلح «حالة رصد» بدلاً من «حادثة تسريب» وفقاً لسياسة المنصة"
-7. في التقارير والتصديرات: العدد المُدّعى يظهر كادعاء مع مصدره وليس كحقيقة متحققة
-
-## سياق التسمية:
-| المصطلح القديم | المصطلح المعتمد |
-|---|---|
-| حادثة تسريب / تسريب بيانات | **حالة رصد** |
-| عدد السجلات المسربة / حجم التسريب | **العدد المُدّعى** |
-| البيانات المسربة | **العينات المتاحة** |
-| حادثة مؤكدة | **تسريب مؤكد** (فقط بعد التحقق) |
 
 عندما يطلب المستخدم تقريراً:
 1. اجمع البيانات المطلوبة باستخدام الأدوات
@@ -192,18 +171,18 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
 # بيانات المنصة الحية
 - إجمالي حالات الرصد: ${stats?.totalLeaks ?? 0}
 - حالات الرصد واسعة النطاق: ${stats?.newLeaks ?? 0}
-- إجمالي العدد المُدّعى: ${stats?.totalRecords?.toLocaleString() ?? 0}
+- إجمالي ادعاءات البائع: ${stats?.totalRecords?.toLocaleString() ?? 0}
 - أجهزة الرصد النشطة: ${stats?.activeMonitors ?? 0}
 - بيانات PII المكتشفة: ${stats?.piiDetected?.toLocaleString() ?? 0}
 
-# بيانات أطلس البيانات الشخصية (110 حالة رصد حقيقية)
+# بيانات أطلس البيانات الشخصية (110 حادثة حقيقية)
 لديك وصول كامل لبيانات أطلس البيانات الشخصية عبر الأدوات التالية:
 - query_atlas_breaches: البحث والتصفية في 110 حالة رصد حقيقية مرصودة
-- get_atlas_breach_details: جلب كامل تفاصيل أي حالة رصد بالمعرف (مثل REAL-001)
+- get_atlas_breach_details: جلب كامل تفاصيل أي حادثة بالمعرف (مثل REAL-001)
 - get_atlas_stats: إحصائيات شاملة عن الأطلس (قطاعات، مستوى التأثير، أنواع بيانات، منصات)
 - analyze_atlas_trends: تحليل اتجاهات زمنية وقطاعية وأنماط التهديد
 
-عندما يسأل المستخدم عن حالات رصد الأطلس أو حالات الرصد الحقيقية أو البيانات الشخصية، استخدم هذه الأدوات فوراً.
+عندما يسأل المستخدم عن حوادث الأطلس أو حالات الرصد الحقيقية أو البيانات الشخصية المسربة، استخدم هذه الأدوات فوراً.
 صفحات الأطلس في القائمة الجانبية: البداية > الأطلس > التحليل > المقارنة والحملات
 ${atlasSummary ? `\n${atlasSummary}` : ""}
 
@@ -355,10 +334,7 @@ platform_users, incident_documents, report_audit, knowledge_base, ai_response_ra
 personality_scenarios, user_sessions
 
 # تصنيفات حالة الرصد
-critical (واسع النطاق — العدد المُدّعى >10K), high (كبير — العدد المُدّعى >1K), medium (متوسط — العدد المُدّعى <1K), low (محدود)
-
-# حالات الـ Status المعتمدة
-«حالة رصد» (افتراضي) → «قيد التحقق» → «تسريب مؤكد» (بعد التحقق فقط) → «مغلق»
+critical (واسع النطاق >10K سجل), high (كبير >1K), medium (متوسط <1K), low (محدود)
 
 # القطاعات
 حكومي، مالي، اتصالات، صحي، تعليمي، طاقة، تجزئة، نقل، سياحة، عقاري، تقني
@@ -383,9 +359,7 @@ national_id, iqama, phone, email, iban, credit_card, passport, address, medical_
 | المعرّف | LK-2026-0045 |
 | التصنيف | واسع النطاق |
 | المصدر | الدارك ويب |
-| العدد المُدّعى | 45,000 |
-| العينات المتاحة | 150 |
-| الحالة | حالة رصد |
+| السجلات | 45,000 |
 
 ---
 
@@ -2648,8 +2622,7 @@ export async function rasidAIChat(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   userName: string,
   userId: number,
-  options?: { domain?: "breaches" | "privacy"; pageContext?: { route: string; pageId: string; activeFilters?: any; currentEntityId?: string; availableActions?: string[]; userRole?: string } },
-): Promise<{ response: string; toolsUsed: string[]; thinkingSteps: ThinkingStep[]; followUpSuggestions: string[]; processingMeta: { totalDurationMs: number; toolCount: number; agentsUsed: string[] }; toolResults?: any[]; navigationRequest?: { route: string; label: string } }> {
+): Promise<{ response: string; toolsUsed: string[]; thinkingSteps: ThinkingStep[]; followUpSuggestions: string[]; processingMeta: { totalDurationMs: number; toolCount: number; agentsUsed: string[] }; toolResults?: any[] }> {
   // Initialize performance tracking
   const performanceTracker = new PerformanceTracker();
   performanceTracker.start();
@@ -2709,36 +2682,6 @@ export async function rasidAIChat(
 
   const systemPrompt = buildSystemPrompt(userName, stats, knowledgeContext);
 
-  // Build page context pack (UI-06, UI-07, PR-12)
-  let pageContextStr = "";
-  const pageCtx = options?.pageContext;
-  if (pageCtx) {
-    pageContextStr = `\n\n# سياق الصفحة الحالية (Page Context Pack)
-- المسار: ${pageCtx.route}
-- معرّف الصفحة: ${pageCtx.pageId}
-- الكيان الحالي: ${pageCtx.currentEntityId || "لا يوجد"}
-- الفلاتر النشطة: ${pageCtx.activeFilters ? JSON.stringify(pageCtx.activeFilters) : "لا يوجد"}
-- الإجراءات المتاحة: ${pageCtx.availableActions?.join(", ") || "لا يوجد"}
-- دور المستخدم: ${pageCtx.userRole || "غير محدد"}
-
-استخدم هذا السياق لفهم ما يراه المستخدم حالياً وتقديم اقتراحات ذات صلة بالصفحة والدور.
-عند اقتراح التنقل لصفحة أخرى: لا تنقل تلقائياً — اطلب إذن المستخدم أولاً بتضمين "__NAV_REQUEST__:" متبوعاً بالمسار في ردك.`;
-  }
-
-  // Domain-specific context (GOV-01, GOV-02)
-  const domain = options?.domain || "breaches";
-  let domainContext = "";
-  if (domain === "privacy") {
-    domainContext = `\n\n# المجال النشط: منصة الخصوصية
-أنت الآن في سياق منصة الخصوصية والامتثال. استخدم فقط الأدوات والمعرفة المتعلقة بالخصوصية (get_privacy_*, get_compliance_*, get_dsar_*, get_pdpl_*, get_entities_*).
-لا تستخدم أدوات منصة حالات الرصد (query_leaks, get_leak_details, etc.) إلا عند طلب صريح للربط بين المنصتين.`;
-  } else {
-    domainContext = `\n\n# المجال النشط: منصة حالات الرصد
-أنت الآن في سياق منصة حالات الرصد. استخدم فقط الأدوات والمعرفة المتعلقة بحالات الرصد (query_leaks, get_leak_details, get_dashboard_stats, etc.).
-التزم بسياسة التسمية: «حالة رصد» / «العدد المُدّعى» / «العينات المتاحة».
-لا تستخدم أدوات منصة الخصوصية إلا عند طلب صريح للربط بين المنصتين.`;
-  }
-
   // Use conversation memory to manage history (reduces context size by 50%+)
   let conversationWindow: Array<{ role: "user" | "assistant" | "system"; content: string }> = [];
   try {
@@ -2748,9 +2691,9 @@ export async function rasidAIChat(
     // Fallback to simple history slice if conversation memory fails
     conversationWindow = history.slice(-MAX_FALLBACK_HISTORY_SIZE).map((h) => ({ role: h.role, content: h.content }));
   }
-
+  
   const messages: any[] = [
-    { role: "system", content: systemPrompt + domainContext + pageContextStr },
+    { role: "system", content: systemPrompt },
     ...conversationWindow,
     { role: "user", content: message },
   ];
@@ -2766,7 +2709,7 @@ export async function rasidAIChat(
     description: "تحليل نية المستخدم وتحديد الوكيل المختص",
     status: "completed",
     timestamp: new Date(),
-    result: `استلام الطلب: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}" | المجال: ${domain === "privacy" ? "الخصوصية" : "حالات الرصد"}`,
+    result: `استلام الطلب: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`,
   });
 
   try {
@@ -2909,24 +2852,14 @@ export async function rasidAIChat(
     const agentsUsed = Array.from(new Set(thinkingSteps.map(s => s.agent)));
     const totalDurationMs = metrics?.responseTimeMs || 0;
 
-    // Enhanced audit logging with domain tracking (API-08)
-    const auditDomain = options?.domain || "breaches";
+    // Log the interaction
     await logAudit(
       userId,
       "smart_rasid.chat",
-      `Domain: ${auditDomain} | Query: ${message.substring(0, 100)} | Tools: ${toolsUsed.join(", ") || "none"} | Steps: ${thinkingSteps.length} | Page: ${options?.pageContext?.pageId || "unknown"} | Response length: ${content.length}`,
+      `Query: ${message.substring(0, 100)} | Tools: ${toolsUsed.join(", ") || "none"} | Steps: ${thinkingSteps.length} | Response length: ${content.length}`,
       "system",
       userName,
     );
-
-    // Detect navigation requests in response (CHAT-03, API-09)
-    let navigationRequest: { route: string; label: string } | undefined;
-    const navMatch = content.match(/__NAV_REQUEST__:([^\n]+)/);
-    if (navMatch) {
-      const navRoute = navMatch[1].trim();
-      navigationRequest = { route: navRoute, label: navRoute };
-      content = content.replace(/__NAV_REQUEST__:[^\n]+/g, "").trim();
-    }
 
     return {
       response: content,
@@ -2935,7 +2868,6 @@ export async function rasidAIChat(
       followUpSuggestions,
       processingMeta: { totalDurationMs, toolCount: toolsUsed.length, agentsUsed },
       toolResults: allToolResults,
-      navigationRequest,
     };
   } catch (err: any) {
     console.error("[RasidAI] Chat error:", err);
@@ -2966,9 +2898,6 @@ export async function rasidAIChat(
 // STREAMING VERSION — SSE token-by-token streaming
 // ═══════════════════════════════════════════════════════════════
 
-/** Streaming status phases for UI indicators (CHAT-06) */
-export type StreamingPhase = "understanding" | "fetching" | "executing" | "preparing" | "streaming" | "done";
-
 export interface StreamCallbacks {
   onToken: (text: string) => void;
   onThinkingStep: (step: ThinkingStep) => void;
@@ -2977,10 +2906,6 @@ export interface StreamCallbacks {
   onFollowUp: (suggestions: string[]) => void;
   onDone: (result: any) => void;
   onError: (error: string) => void;
-  /** Status phase indicator (CHAT-06) */
-  onPhase?: (phase: StreamingPhase) => void;
-  /** Navigation request from AI (CHAT-03, API-09) */
-  onNavigationRequest?: (route: string, label: string) => void;
 }
 
 export async function rasidAIChatStreaming(
@@ -2989,7 +2914,6 @@ export async function rasidAIChatStreaming(
   userName: string,
   userId: number,
   callbacks: StreamCallbacks,
-  options?: { domain?: "breaches" | "privacy"; pageContext?: { route: string; pageId: string; activeFilters?: any; currentEntityId?: string; availableActions?: string[]; userRole?: string } },
 ): Promise<void> {
   // Initialize performance tracking
   const performanceTracker = new PerformanceTracker();
@@ -3044,30 +2968,6 @@ export async function rasidAIChatStreaming(
 
   const systemPrompt = buildSystemPrompt(userName, stats, knowledgeContext);
 
-  // Build page context pack for streaming (UI-06, UI-07, PR-12)
-  let streamPageContextStr = "";
-  const streamPageCtx = options?.pageContext;
-  if (streamPageCtx) {
-    streamPageContextStr = `\n\n# سياق الصفحة الحالية (Page Context Pack)
-- المسار: ${streamPageCtx.route}
-- معرّف الصفحة: ${streamPageCtx.pageId}
-- الكيان الحالي: ${streamPageCtx.currentEntityId || "لا يوجد"}
-- الفلاتر النشطة: ${streamPageCtx.activeFilters ? JSON.stringify(streamPageCtx.activeFilters) : "لا يوجد"}
-- الإجراءات المتاحة: ${streamPageCtx.availableActions?.join(", ") || "لا يوجد"}
-- دور المستخدم: ${streamPageCtx.userRole || "غير محدد"}`;
-  }
-
-  // Domain-specific context for streaming (GOV-01)
-  const streamDomain = options?.domain || "breaches";
-  let streamDomainContext = "";
-  if (streamDomain === "privacy") {
-    streamDomainContext = `\n\n# المجال النشط: منصة الخصوصية
-أنت الآن في سياق منصة الخصوصية والامتثال. استخدم فقط الأدوات والمعرفة المتعلقة بالخصوصية.`;
-  } else {
-    streamDomainContext = `\n\n# المجال النشط: منصة حالات الرصد
-التزم بسياسة التسمية: «حالة رصد» / «العدد المُدّعى» / «العينات المتاحة».`;
-  }
-
   // Use conversation memory to manage history (reduces context size by 50%+)
   let conversationWindow: Array<{ role: "user" | "assistant" | "system"; content: string }> = [];
   try {
@@ -3077,9 +2977,9 @@ export async function rasidAIChatStreaming(
     // Fallback to simple history slice if conversation memory fails
     conversationWindow = history.slice(-MAX_FALLBACK_HISTORY_SIZE).map((h) => ({ role: h.role, content: h.content }));
   }
-
+  
   const messages: any[] = [
-    { role: "system", content: systemPrompt + streamDomainContext + streamPageContextStr },
+    { role: "system", content: systemPrompt },
     ...conversationWindow,
     { role: "user", content: message },
   ];
@@ -3095,7 +2995,7 @@ export async function rasidAIChatStreaming(
     description: "تحليل نية المستخدم وتحديد الوكيل المختص",
     status: "completed",
     timestamp: new Date(),
-    result: `استلام الطلب: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}" | المجال: ${streamDomain === "privacy" ? "الخصوصية" : "حالات الرصد"}`,
+    result: `استلام الطلب: "${message.substring(0, 80)}${message.length > 80 ? '...' : ''}"`,
   };
   thinkingSteps.push(initialStep);
   callbacks.onThinkingStep(initialStep);
@@ -3103,9 +3003,6 @@ export async function rasidAIChatStreaming(
   const allToolResults: any[] = [];
 
   try {
-    // Phase: understanding (CHAT-06)
-    callbacks.onPhase?.("understanding");
-
     // First call: use non-streaming to check for tool calls
     let response = await invokeLLM({
       messages,
@@ -3119,13 +3016,10 @@ export async function rasidAIChatStreaming(
       if (!choice) break;
 
       const hasToolCalls = choice.message?.tool_calls && choice.message.tool_calls.length > 0;
-
+      
       if (hasToolCalls) {
-        // Phase: fetching then executing (CHAT-06)
-        callbacks.onPhase?.("fetching");
-
         const toolCalls = choice.message!.tool_calls!;
-
+        
         const normalizedToolCalls = toolCalls.map((tc: any, idx: number) => ({
           ...tc,
           id: tc.id || `call_${Date.now()}_${idx}`,
@@ -3136,9 +3030,6 @@ export async function rasidAIChatStreaming(
           content: choice.message?.content || "",
           tool_calls: normalizedToolCalls,
         });
-
-        // Phase: executing (CHAT-06)
-        callbacks.onPhase?.("executing");
 
         // Execute each tool call
         for (const toolCall of normalizedToolCalls) {
@@ -3187,32 +3078,19 @@ export async function rasidAIChatStreaming(
         maxIterations--;
       } else {
         // No tool calls — this is the final response, stream it!
-        // Phase: preparing (CHAT-06)
-        callbacks.onPhase?.("preparing");
-
+        // We already have the non-streamed content, so we'll simulate streaming
         const rawContent = choice.message?.content;
         let content: string = typeof rawContent === "string" ? rawContent : "عذراً، لم أتمكن من معالجة طلبك.";
-
+        
         // Format response
         content = formatResponse(content);
-
+        
         // Security check
         const securityCheck = guardrails.checkResponseSecurity(content);
         if (!securityCheck.allowed) {
           content = "تم حظر الرد لاحتوائه على معلومات حساسة.";
         }
-
-        // Detect navigation request (CHAT-03, API-09)
-        const navMatch = content.match(/__NAV_REQUEST__:([^\n]+)/);
-        if (navMatch) {
-          const navRoute = navMatch[1].trim();
-          callbacks.onNavigationRequest?.(navRoute, navRoute);
-          content = content.replace(/__NAV_REQUEST__:[^\n]+/g, "").trim();
-        }
-
-        // Phase: streaming (CHAT-06)
-        callbacks.onPhase?.("streaming");
-
+        
         // Stream the final response token by token (simulate with chunks)
         const chunkSize = 3; // characters per chunk for smooth streaming
         for (let i = 0; i < content.length; i += chunkSize) {
@@ -3221,7 +3099,7 @@ export async function rasidAIChatStreaming(
           // Small delay for visual effect
           await new Promise(resolve => setTimeout(resolve, 15));
         }
-
+        
         break;
       }
     }
@@ -3288,9 +3166,6 @@ export async function rasidAIChatStreaming(
     } catch (e) {
       console.warn("[RasidAI Stream] Follow-up suggestions generation failed:", e);
     }
-
-    // Phase: done (CHAT-06)
-    callbacks.onPhase?.("done");
 
     callbacks.onFollowUp(followUpSuggestions);
 
