@@ -67,10 +67,18 @@ export default function DynamicTable() {
   const [columnFilter, setColumnFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isEditMode, setIsEditMode] = useState(true);
-  const [workspace] = useState<"leaks" | "privacy">("leaks");
+  const [workspace] = useState<"leaks" | "privacy">(
+    (localStorage.getItem("rasid_workspace") || "leaks") as "leaks" | "privacy"
+  );
 
   const pageQuery = pageId ? trpc.customPages.getById.useQuery({ id: pageId }) : null;
   const pageTitle = pageQuery?.data?.title || "جدول بيانات جديد";
+
+  // Fetch real data from DB
+  const tableDataQuery = trpc.cms.widgetData.useQuery(
+    { widgetType: "data-table", workspace },
+    { staleTime: 30000, refetchOnWindowFocus: false, enabled: selectedColumns.length > 0 }
+  );
 
   const availableColumns = AVAILABLE_COLUMNS[workspace];
   const categories = ["all", ...new Set(availableColumns.map(c => c.category))];
@@ -279,16 +287,41 @@ export default function DynamicTable() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Empty rows placeholder */}
-                  <tr>
-                    <td
-                      colSpan={selectedColumns.filter(c => c.visible).length}
-                      className="px-4 py-16 text-center"
-                    >
-                      <p className="text-slate-500 text-sm">لا توجد بيانات بعد</p>
-                      <p className="text-slate-600 text-xs mt-1">سيتم عرض البيانات هنا عند توفرها</p>
-                    </td>
-                  </tr>
+                  {tableDataQuery.isLoading ? (
+                    <tr>
+                      <td colSpan={selectedColumns.filter(c => c.visible).length} className="px-4 py-12 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-slate-400 text-sm">جاري تحميل البيانات...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (() => {
+                    const rows = (tableDataQuery.data?.data as any)?.rows || [];
+                    if (rows.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={selectedColumns.filter(c => c.visible).length} className="px-4 py-16 text-center">
+                            <p className="text-slate-500 text-sm">لا توجد بيانات بعد</p>
+                            <p className="text-slate-600 text-xs mt-1">قم بتغذية المنصة ببيانات عبر صفحة الاستيراد</p>
+                          </td>
+                        </tr>
+                      );
+                    }
+                    return rows.map((row: any, idx: number) => (
+                      <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                        {selectedColumns.filter(c => c.visible).map(col => (
+                          <td key={col.id} className="px-4 py-3 text-sm text-slate-300 truncate max-w-[200px]">
+                            {row[col.id] !== undefined && row[col.id] !== null
+                              ? typeof row[col.id] === "object"
+                                ? JSON.stringify(row[col.id])
+                                : String(row[col.id])
+                              : "—"}
+                          </td>
+                        ))}
+                      </tr>
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>

@@ -11,7 +11,7 @@ import ExcelJS from "exceljs";
 import csvParser from "csv-parser";
 import { Readable } from "stream";
 import { getDb } from "./db";
-import { leaks, importJobs } from "../drizzle/schema";
+import { leaks, importJobs, sites } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -353,6 +353,169 @@ export async function processImport(
     throw err;
   } finally {
     // Clean up temp file
+    try { fs.unlinkSync(filePath); } catch { /* ignore */ }
+  }
+
+  return { jobId, totalRecords, successRecords, failedRecords, errors };
+}
+
+// ─── Privacy Domain Import ──────────────────────────────────────
+interface RawSiteData {
+  domain?: string;
+  name?: string;
+  nameAr?: string;
+  sectorType?: string;
+  category?: string;
+  classification?: string;
+  siteStatus?: string;
+  ownerEntity?: string;
+  ownerEntityAr?: string;
+  [key: string]: any;
+}
+
+const sectorTypeMap: Record<string, string> = {
+  "حكومي": "government",
+  "تجاري": "commercial",
+  "مالي": "financial",
+  "صحي": "healthcare",
+  "تعليمي": "education",
+  "اتصالات": "telecom",
+  "سفر": "travel",
+  "تجزئة": "retail",
+  "أخرى": "other",
+  "government": "government",
+  "commercial": "commercial",
+  "financial": "financial",
+  "healthcare": "healthcare",
+  "education": "education",
+  "telecom": "telecom",
+  "travel": "travel",
+  "retail": "retail",
+  "other": "other",
+};
+
+function normalizeSiteData(raw: RawSiteData): any {
+  let domain = (raw.domain || raw.url || "").toString().trim();
+  // Strip protocol
+  domain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+
+  // The `sites` table uses 'public'|'private' for sectorType
+  const sectorVal = (sectorTypeMap[raw.sectorType || ""] || "private") === "government" ? "public" : "private";
+
+  return {
+    domain: domain || null,
+    url: domain ? `https://${domain}` : "",
+    siteName: raw.name || raw.nameAr || domain || "Untitled",
+    siteNameAr: raw.nameAr || raw.name || null,
+    siteNameEn: raw.name || null,
+    sectorType: sectorVal as "public" | "private",
+    classification: raw.classification || null,
+    entityNameAr: raw.ownerEntityAr || raw.ownerEntity || null,
+    entityNameEn: raw.ownerEntity || null,
+    sector: raw.category || null,
+    siteStatus: (raw.siteStatus === "active" ? "active" : "unreachable") as "active" | "unreachable",
+  };
+}
+
+export async function processPrivacyImport(
+  filePath: string,
+  fileType: "json" | "xlsx" | "csv",
+  userId: number,
+  userName: string
+): Promise<ImportResult> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const jobId = randomUUID();
+  const fileSize = fs.statSync(filePath).size;
+
+  await db.insert(importJobs).values({
+    jobId,
+    fileName: path.basename(filePath),
+    fileType,
+    fileSizeBytes: fileSize,
+    status: "processing",
+    importedBy: userId,
+    importedByName: userName,
+    startedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+  });
+
+  const errors: Array<{ record: number; error: string }> = [];
+  let totalRecords = 0;
+  let successRecords = 0;
+  let failedRecords = 0;
+
+  try {
+    let rawRecords: RawSiteData[] = [];
+
+    switch (fileType) {
+      case "json":
+        rawRecords = await parseJsonFile(filePath);
+        break;
+      case "csv":
+        rawRecords = await parseCsvFile(filePath);
+        break;
+      case "xlsx":
+        rawRecords = await parseXlsxFile(filePath);
+        break;
+    }
+
+    totalRecords = rawRecords.length;
+
+    await db.update(importJobs)
+      .set({ totalRecords })
+      .where(eq(importJobs.jobId, jobId));
+
+    for (let i = 0; i < rawRecords.length; i++) {
+      try {
+        const normalized = normalizeSiteData(rawRecords[i]);
+        if (!normalized.domain) {
+          throw new Error("النطاق مطلوب");
+        }
+
+        await db.insert(sites).values({
+          domain: normalized.domain,
+          url: normalized.url,
+          siteName: normalized.siteName,
+          siteNameAr: normalized.siteNameAr,
+          siteNameEn: normalized.siteNameEn,
+          sectorType: normalized.sectorType,
+          classification: normalized.classification,
+          sector: normalized.sector,
+          siteStatus: normalized.siteStatus,
+          entityNameAr: normalized.entityNameAr,
+          entityNameEn: normalized.entityNameEn,
+        });
+        successRecords++;
+
+        if ((i + 1) % 10 === 0) {
+          await db.update(importJobs)
+            .set({ processedRecords: i + 1, successRecords, failedRecords })
+            .where(eq(importJobs.jobId, jobId));
+        }
+      } catch (err: any) {
+        failedRecords++;
+        errors.push({ record: i + 1, error: err.message || "Unknown error" });
+      }
+    }
+
+    await db.update(importJobs).set({
+      status: failedRecords === totalRecords ? "failed" : "completed",
+      processedRecords: totalRecords,
+      successRecords,
+      failedRecords,
+      errorLog: errors.length > 0 ? errors : null,
+      completedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+    }).where(eq(importJobs.jobId, jobId));
+
+  } catch (err: any) {
+    await db.update(importJobs).set({
+      status: "failed",
+      errorLog: [{ record: 0, error: err.message }],
+      completedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+    }).where(eq(importJobs.jobId, jobId));
+    throw err;
+  } finally {
     try { fs.unlinkSync(filePath); } catch { /* ignore */ }
   }
 
