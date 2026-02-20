@@ -10,6 +10,8 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { processImport } from "../importEngine";
+import { registerSSERoutes } from "../sseChat";
+import { initSeedData } from "../seedData";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -42,6 +44,12 @@ async function startServer() {
   });
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // ─── SSE Streaming for Smart Rasid AI ────────────────────────
+  registerSSERoutes(app);
+
+  // ─── Seed Data — ensure new tables and initial data ──────────
+  initSeedData().catch(err => console.warn("[SeedData] Non-critical init error:", err.message));
 
   // ─── CMS Import Upload Route ────────────────────────────────
   const uploadStorage = multer({

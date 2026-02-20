@@ -2650,3 +2650,145 @@ export type SystemHealthLogEntry = typeof systemHealthLog.$inferSelect;
 export type InsertSystemHealthLogEntry = typeof systemHealthLog.$inferInsert;
 
 /* ═══ Dashboard Layouts — already defined above (line ~750) ═══ */
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RASID ULTIMATE UPGRADE — 12 New Tables
+   ═══════════════════════════════════════════════════════════════ */
+
+export const aiSessionMemory = mysqlTable("ai_session_memory", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	sessionKey: varchar("session_key", { length: 255 }).notNull(),
+	memoryType: varchar("memory_type", { length: 50 }).notNull().default("context"),
+	content: text("content").notNull(),
+	importance: int("importance").notNull().default(5),
+	expiresAt: timestamp("expires_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const aiToolUsage = mysqlTable("ai_tool_usage", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	toolName: varchar("tool_name", { length: 100 }).notNull(),
+	executionTimeMs: int("execution_time_ms"),
+	success: tinyint("success").notNull().default(1),
+	errorMessage: text("error_message"),
+	inputSummary: text("input_summary"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const aiRateLimitsConfig = mysqlTable("ai_rate_limits", {
+	id: int().autoincrement().primaryKey().notNull(),
+	toolName: varchar("tool_name", { length: 100 }).notNull(),
+	maxCallsPerMinute: int("max_calls_per_minute").notNull().default(10),
+	maxCallsPerHour: int("max_calls_per_hour").notNull().default(100),
+	maxCallsPerDay: int("max_calls_per_day").notNull().default(1000),
+	cooldownSeconds: int("cooldown_seconds").notNull().default(2),
+	isEnabled: tinyint("is_enabled").notNull().default(1),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const aiConfirmationRequests = mysqlTable("ai_confirmation_requests", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	toolName: varchar("tool_name", { length: 100 }).notNull(),
+	actionDescription: text("action_description").notNull(),
+	params: text("params"),
+	status: varchar("status", { length: 20 }).notNull().default("pending"),
+	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
+	confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const bulkImports = mysqlTable("bulk_imports", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	fileName: varchar("file_name", { length: 500 }).notNull(),
+	fileType: varchar("file_type", { length: 20 }).notNull(),
+	totalRecords: int("total_records").notNull().default(0),
+	processedRecords: int("processed_records").notNull().default(0),
+	failedRecords: int("failed_records").notNull().default(0),
+	status: varchar("status", { length: 20 }).notNull().default("pending"),
+	errorLog: text("error_log"),
+	targetTable: varchar("target_table", { length: 100 }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+});
+
+export const guideProgressTable = mysqlTable("guide_progress", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	guideId: varchar("guide_id", { length: 100 }).notNull(),
+	stepId: varchar("step_id", { length: 100 }).notNull(),
+	completed: tinyint("completed").notNull().default(0),
+	skipped: tinyint("skipped").notNull().default(0),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const autoLearningEntries = mysqlTable("auto_learning_entries", {
+	id: int().autoincrement().primaryKey().notNull(),
+	sourceType: varchar("source_type", { length: 50 }).notNull(),
+	triggerPattern: text("trigger_pattern").notNull(),
+	learnedResponse: text("learned_response").notNull(),
+	confidence: decimal("confidence", { precision: 5, scale: 2 }).notNull().default("0.50"),
+	usageCount: int("usage_count").notNull().default(0),
+	lastUsedAt: timestamp("last_used_at", { mode: 'string' }),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const seedDataLogs = mysqlTable("seed_data_logs", {
+	id: int().autoincrement().primaryKey().notNull(),
+	seedType: varchar("seed_type", { length: 100 }).notNull(),
+	recordsCreated: int("records_created").notNull().default(0),
+	status: varchar("status", { length: 20 }).notNull().default("completed"),
+	executedBy: int("executed_by"),
+	details: text("details"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const aiNavigationHistory = mysqlTable("ai_navigation_history", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	fromPage: varchar("from_page", { length: 255 }),
+	toPage: varchar("to_page", { length: 255 }).notNull(),
+	reason: text("reason"),
+	triggeredBy: varchar("triggered_by", { length: 50 }).notNull().default("ai"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const patrioticPhrases = mysqlTable("patriotic_phrases", {
+	id: int().autoincrement().primaryKey().notNull(),
+	phrase: text("phrase").notNull(),
+	category: varchar("category", { length: 50 }).notNull().default("general"),
+	isActive: tinyint("is_active").notNull().default(1),
+	displayOrder: int("display_order").notNull().default(0),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const aiKeywordTaskMap = mysqlTable("ai_keyword_task_map", {
+	id: int().autoincrement().primaryKey().notNull(),
+	keyword: varchar("keyword", { length: 255 }).notNull(),
+	taskType: varchar("task_type", { length: 100 }).notNull(),
+	targetAction: text("target_action").notNull(),
+	priority: int("priority").notNull().default(5),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const sseStreamSessions = mysqlTable("sse_stream_sessions", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	sessionToken: varchar("session_token", { length: 255 }).notNull(),
+	status: varchar("status", { length: 20 }).notNull().default("active"),
+	messageCount: int("message_count").notNull().default(0),
+	totalTokens: int("total_tokens").notNull().default(0),
+	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
+	endedAt: timestamp("ended_at", { mode: 'string' }),
+});
