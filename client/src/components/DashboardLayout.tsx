@@ -87,107 +87,144 @@ const wsColors: Record<WorkspaceId, {
   },
 };
 
-/* ═══ LEAKS SIDEBAR GROUPS — Simplified with Hub Pages ═══ */
+/* ═══ LEAKS SIDEBAR GROUPS — Full Navigation ═══ */
 const leaksNavGroups: NavGroup[] = [
   {
-    id: "lk_post_monitoring",
-    label: "ما بعد الرصد",
-    labelEn: "Post-Monitoring",
-    icon: ShieldAlert,
+    id: "lk_main",
+    label: "الرئيسية",
+    labelEn: "Main",
+    icon: Home,
     items: [
+      { label: "راصد الذكي", labelEn: "Smart Rasid", icon: Bot, path: "/smart-rasid" },
+      { label: "لوحة القيادة الرئيسية", labelEn: "Dashboard", icon: Gauge, path: "/national-overview" },
       { label: "حالات الرصد", labelEn: "Leaks", icon: ShieldAlert, path: "/leaks" },
       { label: "التقارير", labelEn: "Reports", icon: BarChart3, path: "/reports" },
       { label: "التوصيات", labelEn: "Recommendations", icon: Brain, path: "/recommendations-hub" },
-      { label: "راصد الذكي", labelEn: "Smart Rasid", icon: Bot, path: "/smart-rasid" },
     ],
   },
   {
-    id: "lk_dashboards_hub",
+    id: "lk_dashboards",
     label: "لوحات المؤشرات",
     labelEn: "Dashboards",
     icon: LayoutDashboard,
     items: [
-      { label: "مركز اللوحات", labelEn: "Dashboards Hub", icon: LayoutDashboard, path: "/breach-dashboards" },
-      { label: "لوحة القيادة", labelEn: "Dashboard", icon: Gauge, path: "/national-overview" },
       { label: "خريطة التهديدات", labelEn: "Threat Map", icon: Map, path: "/threat-map" },
+      { label: "تحليل القطاعات", labelEn: "Sector Analysis", icon: Layers, path: "/sector-analysis" },
+      { label: "تحليل الأثر", labelEn: "Impact Assessment", icon: Crosshair, path: "/impact-assessment" },
+      { label: "التحليل الجغرافي", labelEn: "Geo Analysis", icon: Globe, path: "/geo-analysis" },
+      { label: "استخبارات المصادر", labelEn: "Source Intelligence", icon: Radar, path: "/source-intelligence" },
+      { label: "تحليل جهات النشر", labelEn: "Threat Actors", icon: Users, path: "/threat-actors-analysis" },
+      { label: "أطلس البيانات الشخصية", labelEn: "PII Atlas", icon: Network, path: "/pii-atlas" },
+      { label: "رسم المعرفة", labelEn: "Knowledge Graph", icon: Brain, path: "/knowledge-graph" },
+      { label: "الخط الزمني للحالات", labelEn: "Leak Timeline", icon: Activity, path: "/leak-timeline" },
+      { label: "امتثال PDPL", labelEn: "PDPL Compliance", icon: Shield, path: "/pdpl-compliance" },
+      { label: "مقاييس الدقة", labelEn: "Accuracy Metrics", icon: BarChart3, path: "/feedback-accuracy" },
+      { label: "الملخص التنفيذي", labelEn: "Executive Brief", icon: FileText, path: "/executive-brief" },
+      { label: "مقارنة الحالات", labelEn: "Incident Compare", icon: BarChart3, path: "/incident-compare" },
+      { label: "متتبع الحملات", labelEn: "Campaign Tracker", icon: Sparkles, path: "/campaign-tracker" },
     ],
   },
   {
-    id: "lk_operations_hub",
-    label: "العمليات التشغيلية",
+    id: "lk_operations",
+    label: "المؤشرات التشغيلية",
     labelEn: "Operations",
     icon: Activity,
     items: [
-      { label: "مركز العمليات", labelEn: "Operations Hub", icon: Activity, path: "/breach-operations" },
+      { label: "الرصد المباشر", labelEn: "Live Scan", icon: Radio, path: "/live-scan" },
+      { label: "رصد تليجرام", labelEn: "Telegram", icon: Send, path: "/telegram" },
+      { label: "رصد الدارك ويب", labelEn: "Dark Web", icon: Globe, path: "/darkweb" },
+      { label: "مواقع اللصق", labelEn: "Paste Sites", icon: FileText, path: "/paste-sites" },
+      { label: "مهام الرصد", labelEn: "Monitoring Jobs", icon: CalendarClock, path: "/monitoring-jobs" },
+      { label: "مختبر أنماط البيانات", labelEn: "PII Classifier", icon: ScanSearch, path: "/pii-classifier" },
+      { label: "سلسلة الأدلة", labelEn: "Evidence Chain", icon: Link2, path: "/evidence-chain" },
+      { label: "قواعد الرصد", labelEn: "Threat Rules", icon: Crosshair, path: "/threat-rules" },
+      { label: "أدوات OSINT", labelEn: "OSINT Tools", icon: Radar, path: "/osint-tools" },
+      { label: "ملفات المصادر", labelEn: "Seller Profiles", icon: UserX, path: "/seller-profiles" },
+      { label: "قنوات التنبيه", labelEn: "Alert Channels", icon: Bell, path: "/alert-channels" },
+      { label: "سجل الحالات", labelEn: "Incidents Registry", icon: Archive, path: "/incidents-registry" },
       { label: "استيراد البيانات", labelEn: "Import Data", icon: Import, path: "/breach-import" },
       { label: "تصدير البيانات", labelEn: "Export Data", icon: Download, path: "/export-data" },
     ],
   },
 ];
 
-/* ═══ PRIVACY SIDEBAR GROUPS — Simplified with Hub Pages ═══ */
+/* ═══ PRIVACY SIDEBAR GROUPS — Full Navigation ═══ */
 const privacyNavGroups: NavGroup[] = [
   {
-    id: "prv_core",
-    label: "رصد الخصوصية",
-    labelEn: "Privacy Monitoring",
-    icon: Shield,
+    id: "prv_main",
+    label: "الرئيسية",
+    labelEn: "Main",
+    icon: Home,
     items: [
-      { label: "نظرة عامة", labelEn: "Overview", icon: Shield, path: "/leadership" },
+      { label: "راصد الذكي", labelEn: "Smart Rasid", icon: Bot, path: "/smart-rasid" },
+      { label: "لوحة القيادة", labelEn: "Dashboard", icon: Gauge, path: "/leadership" },
       { label: "التقارير", labelEn: "Reports", icon: BarChart3, path: "/custom-reports" },
       { label: "التغييرات", labelEn: "Changes", icon: Eye, path: "/change-detection" },
-      { label: "راصد الذكي", labelEn: "Smart Rasid", icon: Bot, path: "/smart-rasid" },
     ],
   },
   {
-    id: "prv_dashboards_hub",
+    id: "prv_dashboards",
     label: "لوحات المؤشرات",
     labelEn: "Dashboards",
     icon: LayoutDashboard,
     items: [
-      { label: "مركز اللوحات", labelEn: "Dashboards Hub", icon: LayoutDashboard, path: "/privacy-dashboards" },
       { label: "خريطة الامتثال", labelEn: "Compliance Heatmap", icon: Map, path: "/compliance-heatmap" },
-      { label: "لوحة المؤشرات", labelEn: "KPI Dashboard", icon: Gauge, path: "/kpi-dashboard" },
+      { label: "لوحة مؤشرات الأداء", labelEn: "KPI Dashboard", icon: Gauge, path: "/kpi-dashboard" },
+      { label: "اللوحة الحية", labelEn: "Real-time", icon: Radio, path: "/real-time" },
+      { label: "التحليلات المتقدمة", labelEn: "Advanced Analytics", icon: BarChart3, path: "/advanced-analytics" },
+      { label: "مقارنة الامتثال", labelEn: "Compliance Comparison", icon: BarChart3, path: "/compliance-comparison" },
+      { label: "المقارنة الزمنية", labelEn: "Time Comparison", icon: CalendarClock, path: "/time-comparison" },
+      { label: "مقارنة القطاعات", labelEn: "Sector Comparison", icon: Layers, path: "/sector-comparison" },
+      { label: "تغطية الاستراتيجية", labelEn: "Strategy Coverage", icon: Shield, path: "/strategy-coverage" },
+      { label: "التقرير التنفيذي", labelEn: "Executive Report", icon: FileText, path: "/executive-report" },
+      { label: "التقارير المخصصة", labelEn: "Custom Reports", icon: FileText, path: "/custom-reports" },
+      { label: "تقارير PDF", labelEn: "PDF Reports", icon: FileText, path: "/pdf-reports" },
+      { label: "التقارير المجدولة", labelEn: "Scheduled Reports", icon: CalendarClock, path: "/scheduled-reports" },
+      { label: "التنبيهات الذكية", labelEn: "Smart Alerts", icon: Bell, path: "/smart-alerts" },
+      { label: "منشئ العروض", labelEn: "Presentation Builder", icon: Eye, path: "/presentation-builder" },
     ],
   },
   {
-    id: "prv_operations_hub",
-    label: "العمليات التشغيلية",
+    id: "prv_operations",
+    label: "المؤشرات التشغيلية",
     labelEn: "Operations",
     icon: Activity,
     items: [
-      { label: "مركز العمليات", labelEn: "Operations Hub", icon: Activity, path: "/privacy-operations" },
-      { label: "المواقع", labelEn: "Sites", icon: Globe, path: "/sites" },
+      { label: "إدارة المواقع", labelEn: "Sites", icon: Globe, path: "/sites" },
+      { label: "الفحص المباشر", labelEn: "Live Scan", icon: Radio, path: "/advanced-scan" },
+      { label: "الفحص الجماعي", labelEn: "Batch Scan", icon: Import, path: "/batch-scan" },
+      { label: "الفحص العميق", labelEn: "Deep Scan", icon: Radar, path: "/deep-scan" },
+      { label: "مكتبة الفحوصات", labelEn: "Scan Library", icon: FolderOpen, path: "/scan-library" },
+      { label: "جدولة الفحوصات", labelEn: "Scan Schedules", icon: CalendarClock, path: "/scan-schedules" },
+      { label: "سجل الفحوصات", labelEn: "Scan History", icon: History, path: "/scan-history" },
+      { label: "البنود الثمانية", labelEn: "8 Clauses", icon: FileText, path: "/clauses" },
+      { label: "الخطابات", labelEn: "Letters", icon: Send, path: "/letters" },
+      { label: "متتبع التحسين", labelEn: "Improvement Tracker", icon: CheckCircle2, path: "/improvement-tracker" },
+      { label: "البحث المتقدم", labelEn: "Advanced Search", icon: Search, path: "/advanced-search" },
       { label: "استيراد المواقع", labelEn: "Import Sites", icon: Import, path: "/privacy-import" },
       { label: "تصدير البيانات", labelEn: "Export Data", icon: Download, path: "/export-data" },
     ],
   },
 ];
 
-/* ═══ CONTROL PANEL (لوحة التحكم) — shared admin panel ═══ */
-const controlPanelGroup: NavGroup = {
-  id: "control_panel",
-  label: "لوحة التحكم",
-  labelEn: "Control Panel",
-  icon: Settings,
-  items: [
-    { label: "الإعدادات", labelEn: "Settings", icon: Settings, path: "/settings" },
-    { label: "إدارة المستخدمين", labelEn: "Users", icon: Users, path: "/user-management", requiresAuth: true, minRole: "admin" },
-    { label: "سجل المراجعة", labelEn: "Audit Log", icon: ScrollText, path: "/audit-log", requiresAuth: true, minRole: "admin" },
-    { label: "لوحة التحكم الرئيسية", labelEn: "Control Panel", icon: PanelLeft, path: "/admin/control", requiresAuth: true, rootAdminOnly: true },
-    { label: "إدارة المحتوى", labelEn: "Content Management", icon: Database, path: "/admin/cms", requiresAuth: true, rootAdminOnly: true },
-    { label: "مركز العمليات", labelEn: "Operations Center", icon: Gauge, path: "/admin/operations", requiresAuth: true, rootAdminOnly: true },
-    { label: "المشرف العام", labelEn: "Super Admin", icon: Crown, path: "/super-admin", requiresAuth: true, rootAdminOnly: true },
-    { label: "إعدادات الإدارة", labelEn: "Admin Settings", icon: Wrench, path: "/admin/settings", requiresAuth: true, rootAdminOnly: true },
-  ],
-};
+/* ═══ CONTROL PANEL items — moved to user menu dropdown ═══ */
+const controlPanelItems: NavItem[] = [
+  { label: "الإعدادات", labelEn: "Settings", icon: Settings, path: "/settings" },
+  { label: "إدارة المستخدمين", labelEn: "Users", icon: Users, path: "/user-management", requiresAuth: true, minRole: "admin" },
+  { label: "سجل المراجعة", labelEn: "Audit Log", icon: ScrollText, path: "/audit-log", requiresAuth: true, minRole: "admin" },
+  { label: "لوحة التحكم الرئيسية", labelEn: "Control Panel", icon: PanelLeft, path: "/admin/control", requiresAuth: true, rootAdminOnly: true },
+  { label: "إدارة المحتوى", labelEn: "Content Management", icon: Database, path: "/admin/cms", requiresAuth: true, rootAdminOnly: true },
+  { label: "مركز العمليات", labelEn: "Operations Center", icon: Gauge, path: "/admin/operations", requiresAuth: true, rootAdminOnly: true },
+  { label: "المشرف العام", labelEn: "Super Admin", icon: Crown, path: "/super-admin", requiresAuth: true, rootAdminOnly: true },
+  { label: "إعدادات الإدارة", labelEn: "Admin Settings", icon: Wrench, path: "/admin/settings", requiresAuth: true, rootAdminOnly: true },
+];
 
 /* Build all items for route lookup */
 const allNavItems = [
   { label: "الرئيسية", labelEn: "Home", icon: Home, path: "/" },
   ...leaksNavGroups.flatMap((g) => g.items),
   ...privacyNavGroups.flatMap((g) => g.items),
-  ...controlPanelGroup.items,
+  ...controlPanelItems,
 ];
 
 const roleLabels: Record<string, string> = {
@@ -237,6 +274,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cinematicOpen, setCinematicOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, isAuthenticated, loading, logout, isAdmin, isRootAdmin, ndmoRole } = useNdmoAuth();
   const { theme, themeMode, toggleTheme, switchable } = useTheme();
 
@@ -253,7 +291,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
-  const allCurrentGroups = [...wsNavGroups, controlPanelGroup];
+  const allCurrentGroups = wsNavGroups;
   const activeGroupId = allCurrentGroups.find((g) => g.items.some((item) => item.path === location))?.id;
 
   useEffect(() => {
@@ -275,9 +313,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleNavClick = useCallback(() => {
     setMobileOpen(false);
   }, []);
-  // Auto-close mobile sidebar on any route change
+  // Auto-close mobile sidebar and user menu on any route change
   useEffect(() => {
     setMobileOpen(false);
+    setUserMenuOpen(false);
   }, [location]);
 
   const isItemVisible = (item: NavItem) => {
@@ -530,36 +569,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1">
-          {/* الرئيسية — fixed at top */}
-          {renderNavItem({ label: "الرئيسية", labelEn: "Home", icon: Home, path: "/" })}
-
-          {/* ═══ USER CUSTOM PAGES ═══ */}
-          {isAuthenticated && (
-            <>
-              <CustomPagesList
-                pages={customPages}
-                collapsed={collapsed}
-                accent={accent}
-                accentBg={isDark ? ws.accentBg : ws.accentBgLight}
-                accentBorder={isDark ? ws.accentBorder : ws.accentBorderLight}
-                onDeletePage={handleDeletePage}
-                onRenamePage={handleRenamePage}
-                onNavClick={handleNavClick}
-                isDeleting={isDeletingPage}
-              />
-              <div className="mt-1">
-                <AddPageButton
-                  collapsed={collapsed}
-                  onCreatePage={handleCreatePage}
-                  accent={accent}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Separator */}
-          <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.08)]' : 'bg-[#edf0f7]'} mx-2 my-2`} />
-
           {/* Workspace-specific groups */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -569,62 +578,182 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               exit={{ opacity: 0, x: activeWorkspace === "privacy" ? 8 : -8 }}
               transition={{ duration: 0.2 }}
             >
-              {wsNavGroups.map(renderNavGroup)}
+              {/* Group 1: الرئيسية */}
+              {renderNavGroup(wsNavGroups[0])}
+
+              {/* Group 2: مخصص — user-created pages */}
+              {isAuthenticated && (
+                <div className="mb-1">
+                  {!collapsed ? (
+                    <button
+                      onClick={() => toggleGroup("custom_pages")}
+                      className={`
+                        sidebar-group-header w-full flex items-center justify-between flex-wrap px-3 py-2 rounded-lg
+                        text-xs font-semibold uppercase tracking-wider transition-colors duration-150
+                        ${customPages.length > 0 && customPages.some((p: any) => location === `/custom/${p.pageType}/${p.id}`)
+                          ? isDark ? "text-[#3DB1AC] bg-[rgba(61,177,172,0.08)]" : "text-[#1e3a8a] bg-[rgba(30,58,138,0.06)]"
+                          : isDark ? "text-[#D4DDEF]/60 hover:text-[#D4DDEF]/80" : "text-[#5a6478] hover:text-[#1c2833]"
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        <span>مخصص</span>
+                        <span className="text-[9px] opacity-50 font-normal normal-case">Custom</span>
+                      </div>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedGroups["custom_pages"] ? "" : "-rotate-90"}`} />
+                    </button>
+                  ) : (
+                    <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.08)]' : 'bg-[#edf0f7]'} mx-2 my-2`} />
+                  )}
+                  <AnimatePresence initial={false}>
+                    {(expandedGroups["custom_pages"] || collapsed) && (
+                      <motion.div
+                        initial={collapsed ? false : { height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={collapsed ? undefined : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className={`space-y-0.5 ${collapsed ? "" : "mt-1 mr-2"}`}>
+                          <CustomPagesList
+                            pages={customPages}
+                            collapsed={collapsed}
+                            accent={accent}
+                            accentBg={isDark ? ws.accentBg : ws.accentBgLight}
+                            accentBorder={isDark ? ws.accentBorder : ws.accentBorderLight}
+                            onDeletePage={handleDeletePage}
+                            onRenamePage={handleRenamePage}
+                            onNavClick={handleNavClick}
+                            isDeleting={isDeletingPage}
+                          />
+                          <div className="mt-1 px-1">
+                            <AddPageButton
+                              collapsed={collapsed}
+                              onCreatePage={handleCreatePage}
+                              accent={accent}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
+              {/* Group 3: لوحات المؤشرات */}
+              {renderNavGroup(wsNavGroups[1])}
+
+              {/* Group 4: المؤشرات التشغيلية */}
+              {renderNavGroup(wsNavGroups[2])}
             </motion.div>
           </AnimatePresence>
-
-          {/* Separator */}
-          <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.08)]' : 'bg-[#edf0f7]'} mx-2 my-2`} />
-
-          {/* لوحة التحكم — fixed at bottom */}
-          {renderNavGroup(controlPanelGroup)}
         </nav>
 
-        {/* User profile */}
-        <div className={`p-3 ${isDark ? 'border-t border-[rgba(61,177,172,0.1)]' : 'border-t border-[#edf0f7]'}`}>
+        {/* User profile with dropdown menu */}
+        <div className={`p-3 ${isDark ? 'border-t border-[rgba(61,177,172,0.1)]' : 'border-t border-[#edf0f7]'} relative`}>
           {loading ? (
             <div className="flex items-center justify-center py-2">
               <Loader2 className={`w-4 h-4 animate-spin ${isDark ? 'text-[#3DB1AC]/50' : 'text-[#1e3a8a]/50'}`} />
             </div>
           ) : isAuthenticated && user ? (
-            <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border`}
-                style={{ backgroundColor: `${accent}1A`, borderColor: `${accent}33` }}>
-                <span className="text-xs font-bold" style={{ color: accent }}>{user.name?.charAt(0) || "U"}</span>
-              </div>
-              {!collapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className={`text-xs font-medium ${isDark ? 'text-[#D4DDEF]' : 'text-[#1c2833]'} truncate`}>{user.name || "مستخدم"}</p>
-                  <p className={`text-xs sm:text-[10px] ${isDark ? 'text-[#D4DDEF]/50' : 'text-[#5a6478]'} truncate`}>
-                    {isRootAdmin ? "مدير النظام الرئيسي" : roleLabels[ndmoRole] || ndmoRole}
-                    {isAdmin && !isRootAdmin && " (مشرف)"}
-                    {isRootAdmin && " (Root)"}
-                  </p>
+            <>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className={`w-full flex items-center gap-3 ${collapsed ? "justify-center" : ""} rounded-lg px-2 py-2 transition-colors ${
+                  isDark ? "hover:bg-white/[0.04]" : "hover:bg-black/[0.02]"
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border`}
+                  style={{ backgroundColor: `${accent}1A`, borderColor: `${accent}33` }}>
+                  <span className="text-xs font-bold" style={{ color: accent }}>{user.name?.charAt(0) || "U"}</span>
                 </div>
-              )}
-              {!collapsed && (
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm"
-                    title={activeWorkspace === "leaks" ? "الانتقال إلى الخصوصية" : "الانتقال إلى التسريبات"}
-                    className={`h-7 w-7 p-0 ${isDark ? 'text-[#D4DDEF]/50 hover:text-[#3DB1AC]' : 'text-[#5a6478] hover:text-[#1e3a8a]'}`}
-                    onClick={() => switchWorkspace(activeWorkspace === "leaks" ? "privacy" : "leaks")}>
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm"
-                    title="تسجيل الخروج"
-                    className={`h-7 w-7 p-0 ${isDark ? 'text-[#D4DDEF]/50 hover:text-red-400' : 'text-[#5a6478] hover:text-red-600'}`}
-                    onClick={() => {
-                      logout();
-                      localStorage.removeItem("rasid_workspace");
-                      localStorage.removeItem("rasid_session");
-                      toast("تم تسجيل الخروج");
-                      window.location.href = "/login";
-                    }}>
-                    <LogOut className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              )}
-            </div>
+                {!collapsed && (
+                  <>
+                    <div className="flex-1 min-w-0 text-right">
+                      <p className={`text-xs font-medium ${isDark ? 'text-[#D4DDEF]' : 'text-[#1c2833]'} truncate`}>{user.name || "مستخدم"}</p>
+                      <p className={`text-xs sm:text-[10px] ${isDark ? 'text-[#D4DDEF]/50' : 'text-[#5a6478]'} truncate`}>
+                        {isRootAdmin ? "مدير النظام الرئيسي" : roleLabels[ndmoRole] || ndmoRole}
+                      </p>
+                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${userMenuOpen ? "rotate-180" : ""} ${isDark ? "text-[#D4DDEF]/40" : "text-[#5a6478]"}`} />
+                  </>
+                )}
+              </button>
+
+              {/* User Dropdown Menu */}
+              <AnimatePresence>
+                {userMenuOpen && !collapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute bottom-full right-2 left-2 mb-2 rounded-xl overflow-hidden shadow-2xl z-[60]"
+                    style={{
+                      background: isDark
+                        ? "linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))"
+                        : "rgba(255,255,255,0.98)",
+                      border: isDark
+                        ? "1px solid rgba(61, 177, 172, 0.15)"
+                        : "1px solid rgba(0,0,0,0.08)",
+                      backdropFilter: "blur(20px)",
+                    }}
+                  >
+                    {/* Switch Platform */}
+                    <button
+                      onClick={() => {
+                        switchWorkspace(activeWorkspace === "leaks" ? "privacy" : "leaks");
+                        setUserMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-xs transition-colors ${
+                        isDark ? "text-slate-300 hover:bg-white/[0.06] hover:text-white" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <ArrowRightLeft className="w-4 h-4" style={{ color: accent }} />
+                      <span className="font-medium">
+                        {activeWorkspace === "leaks" ? "التبديل إلى رصد الخصوصية" : "التبديل إلى رصد التسريبات"}
+                      </span>
+                    </button>
+
+                    <div className={`h-px mx-3 ${isDark ? "bg-white/[0.06]" : "bg-gray-100"}`} />
+
+                    {/* Control Panel */}
+                    <button
+                      onClick={() => {
+                        setLocation("/admin/control");
+                        setUserMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-xs transition-colors ${
+                        isDark ? "text-slate-300 hover:bg-white/[0.06] hover:text-white" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <Settings className="w-4 h-4" style={{ color: accent }} />
+                      <span className="font-medium">لوحة التحكم</span>
+                    </button>
+
+                    <div className={`h-px mx-3 ${isDark ? "bg-white/[0.06]" : "bg-gray-100"}`} />
+
+                    {/* Logout */}
+                    <button
+                      onClick={() => {
+                        logout();
+                        localStorage.removeItem("rasid_workspace");
+                        localStorage.removeItem("rasid_session");
+                        toast("تم تسجيل الخروج");
+                        window.location.href = "/login";
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-xs transition-colors ${
+                        isDark ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50"
+                      }`}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="font-medium">تسجيل الخروج</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           ) : (
             <a href="/login">
               <Button variant="outline" size="sm"
@@ -723,20 +852,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <CinematicButton onClick={() => setCinematicOpen(true)} />
           </div>
         </header>
-
-        {/* Workspace title bar */}
-        <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex items-center gap-2 sm:gap-3" style={{
-          backgroundColor: isDark ? `${accent}08` : `${accent}05`,
-          borderBottom: `1px solid ${isDark ? `${accent}14` : `${accent}10`}`,
-        }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${accent}1A` }}>
-            {activeWorkspace === "privacy" ? <Shield className="w-5 h-5" style={{ color: accent }} /> : <LayoutDashboard className="w-5 h-5" style={{ color: accent }} />}
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-foreground">{ws.title}</h2>
-            <p className="text-xs sm:text-[10px] text-muted-foreground">{ws.titleEn}</p>
-          </div>
-        </div>
 
         {/* Page content */}
         <main ref={mainContentRef} data-scroll-container className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 lg:p-6 relative max-w-full" style={{ WebkitOverflowScrolling: 'touch' }}>
