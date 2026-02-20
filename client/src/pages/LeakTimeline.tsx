@@ -47,15 +47,15 @@ export default function LeakTimeline() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">الخط الزمني للتسريبات</h1><p className="text-muted-foreground text-sm mt-1">تتبع الحوادث عبر الزمن</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">الخط الزمني للتسريبات</h1><p className="text-muted-foreground text-sm mt-1">تتبع حالات الرصد عبر الزمن</p></div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Calendar className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{stats.total}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Calendar className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{stats.total}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Clock className="h-6 w-6 text-emerald-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{stats.thisMonth}</div><div className="text-xs text-muted-foreground">هذا الشهر</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{stats.lastMonth}</div><div className="text-xs text-muted-foreground">الشهر الماضي</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><TrendingUp className={`h-6 w-6 mx-auto mb-2 ${stats.trend > 0 ? "text-red-400" : "text-emerald-400"}`} /><div className={`text-xl font-bold ${stats.trend > 0 ? "text-red-400" : "text-emerald-400"}`}>{stats.trend > 0 ? "+" : ""}{stats.trend}</div><div className="text-xs text-muted-foreground">التغيير</div></CardContent></Card>
       </div>
       <Card className="glass-card gold-sweep">
-        <CardHeader><CardTitle className="text-foreground text-base">اتجاه الحوادث الشهري</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-foreground text-base">اتجاه حالات الرصد الشهري</CardTitle></CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={monthly}>

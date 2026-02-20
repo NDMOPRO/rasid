@@ -89,7 +89,7 @@ export class AutoTrainingSystem {
       
       this.knowledgeBase.set(`sector_${sector}`, {
         topic: `القطاع: ${sector}`,
-        description: `هذا القطاع يحتوي على ${sectorIncidents.length} حادثة، بمتوسط ${Math.round(avgRecords)} سجل لكل حادثة. ${criticalCount} منها حرجة.`,
+        description: `هذا القطاع يحتوي على ${sectorIncidents.length} حالة رصد، بمتوسط ${Math.round(avgRecords)} سجل لكل حالة رصد. ${criticalCount} منها حرجة.`,
         examples: sectorIncidents.slice(0, 3).map(i => i.titleAr || i.title || ''),
         relatedTopics: ['sectors', 'incidents', 'statistics'],
         confidence: sectorIncidents.length >= 5 ? 0.9 : 0.6,

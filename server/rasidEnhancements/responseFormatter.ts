@@ -16,7 +16,7 @@ export function convertToArabicNumerals(text: string): string {
  */
 export function addContextualIcons(text: string): string {
   const iconMappings = [
-    { pattern: /(حادثة|حوادث|تسريب|تسريبات)/g, icon: '🚨' },
+    { pattern: /(حالة رصد|حالات رصد|حادثة|حوادث|تسريب|تسريبات)/g, icon: '🚨' },
     { pattern: /(بيانات شخصية|PII)/g, icon: '🔐' },
     { pattern: /(تحذير|تنبيه|خطر)/g, icon: '⚠️' },
     { pattern: /(نجاح|تم|اكتمل)/g, icon: '✅' },
@@ -106,7 +106,7 @@ export function addSmartActionButtons(text: string, context?: { leakIds?: string
   const buttons: string[] = [];
 
   // Check for leak IDs mentioned
-  const leakIdPattern = /leak[_-]?(\d+)|حادثة\s+رقم\s+(\d+)/gi;
+  const leakIdPattern = /leak[_-]?(\d+)|حالة رصد\s+رقم\s+(\d+)|حادثة\s+رقم\s+(\d+)/gi;
   const matches = text.matchAll(leakIdPattern);
   const leakIds = new Set<string>();
   
@@ -120,7 +120,7 @@ export function addSmartActionButtons(text: string, context?: { leakIds?: string
     ids.forEach(id => {
       buttons.push(
         `<button class="action-button" data-action="view-leak" data-leak-id="${id}" style="margin: 4px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
-          🔍 عرض الحادثة ${id}
+          🔍 عرض حالة الرصد ${id}
         </button>`
       );
     });

@@ -3146,6 +3146,36 @@ export const aiActionRuns = mysqlTable("ai_action_runs", {
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
+// SEC-04: Retention Policies — configurable retention for conversations/training/reports
+export const aiRetentionPolicies = mysqlTable("ai_retention_policies", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	resourceType: mysqlEnum(["conversations", "training_documents", "feedback", "action_runs", "task_memory", "reports"]).notNull(),
+	retentionDays: int().notNull().default(365),
+	autoDeleteEnabled: boolean().default(false).notNull(),
+	lastCleanupAt: timestamp({ mode: 'string' }),
+	deletedCount: int().default(0),
+	isActive: boolean().default(true).notNull(),
+	createdBy: int(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
+// API-11/12: RAG Index per domain — tracks domain-specific knowledge indexes
+export const aiRagIndexes = mysqlTable("ai_rag_indexes", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
+	sourceName: varchar({ length: 200 }).notNull(),
+	sourceType: mysqlEnum(["glossary", "page_descriptors", "training_documents", "knowledge_base", "guides"]).notNull(),
+	documentCount: int().default(0),
+	lastIndexedAt: timestamp({ mode: 'string' }),
+	indexStatus: mysqlEnum(["idle", "indexing", "ready", "error"]).default("idle").notNull(),
+	lastError: text(),
+	metadata: json(),
+	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
+});
+
 // Type exports for new tables
 export type AiGlossary = typeof aiGlossary.$inferSelect;
 export type InsertAiGlossary = typeof aiGlossary.$inferInsert;
@@ -3175,3 +3205,7 @@ export type AiKnowledgeRefreshStatus = typeof aiKnowledgeRefreshStatus.$inferSel
 export type InsertAiKnowledgeRefreshStatus = typeof aiKnowledgeRefreshStatus.$inferInsert;
 export type AiActionRun = typeof aiActionRuns.$inferSelect;
 export type InsertAiActionRun = typeof aiActionRuns.$inferInsert;
+export type AiRetentionPolicy = typeof aiRetentionPolicies.$inferSelect;
+export type InsertAiRetentionPolicy = typeof aiRetentionPolicies.$inferInsert;
+export type AiRagIndex = typeof aiRagIndexes.$inferSelect;
+export type InsertAiRagIndex = typeof aiRagIndexes.$inferInsert;

@@ -36,15 +36,15 @@ export default function SectorAnalysis() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">تحليل القطاعات</h1><p className="text-muted-foreground text-sm mt-1">توزيع حوادث التسريب حسب القطاعات</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">تحليل القطاعات</h1><p className="text-muted-foreground text-sm mt-1">توزيع حالات الرصد حسب القطاعات</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Building2 className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sectors.length}</div><div className="text-xs text-muted-foreground">قطاع متأثر</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sectors.reduce((s, sec) => s + sec.critical, 0)}</div><div className="text-xs text-muted-foreground">حوادث حرجة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.sectors.reduce((s, sec) => s + sec.critical, 0)}</div><div className="text-xs text-muted-foreground">حالات رصد حرجة</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="glass-card gold-sweep">
-          <CardHeader><CardTitle className="text-foreground text-base">توزيع الحوادث حسب القطاع</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-foreground text-base">توزيع حالات الرصد حسب القطاع</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={analysis.sectors.slice(0, 10)} layout="vertical">
@@ -78,7 +78,7 @@ export default function SectorAnalysis() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border">
                 <th className="text-right text-muted-foreground p-2">القطاع</th>
-                <th className="text-center text-muted-foreground p-2">الحوادث</th>
+                <th className="text-center text-muted-foreground p-2">حالات الرصد</th>
                 <th className="text-center text-muted-foreground p-2">السجلات</th>
                 <th className="text-center text-muted-foreground p-2">حرج</th>
                 <th className="text-center text-muted-foreground p-2">عالي</th>

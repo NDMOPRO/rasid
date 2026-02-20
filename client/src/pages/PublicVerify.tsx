@@ -749,7 +749,7 @@ export default function PublicVerify() {
                             <p className="text-white">{result.document.generatedByName}</p>
                           </div>
                           <div>
-                            <p className="text-blue-300/50 text-xs mb-1">عنوان الحادثة</p>
+                            <p className="text-blue-300/50 text-xs mb-1">عنوان حالة الرصد</p>
                             <p className="text-white">{result.document.titleAr}</p>
                           </div>
                         </div>

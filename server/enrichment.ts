@@ -189,7 +189,7 @@ function generateFallbackEnrichment(leak: {
       "Review and strengthen access controls for the affected systems",
     ],
     aiRecommendationsAr: [
-      "بدء إجراءات الاستجابة للحوادث وفقاً لإرشادات NDMO",
+      "بدء إجراءات الاستجابة لحالات الرصد وفقاً لإرشادات NDMO",
       "إخطار أصحاب البيانات المتأثرين خلال 72 ساعة وفقاً لنظام حماية البيانات الشخصية",
       "إشراك التحليل الجنائي لتحديد مسار الاختراق ونطاقه",
       "مراجعة وتعزيز ضوابط الوصول للأنظمة المتأثرة",

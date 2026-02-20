@@ -163,7 +163,7 @@ export class PerformanceTracker {
 
     // Incidents analyzed
     if (metrics.incidentsAnalyzed > 0) {
-      lines.push(`📊 عدد الحوادث المحللة: ${metrics.incidentsAnalyzed}`);
+      lines.push(`📊 عدد حالات الرصد المحللة: ${metrics.incidentsAnalyzed}`);
     }
 
     // Confidence score

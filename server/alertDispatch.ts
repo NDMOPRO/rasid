@@ -185,7 +185,7 @@ function buildEmailBody(payload: AlertPayload, recipientName: string): string {
 • معرّف حالة الرصد: ${payload.leakId}
 • العنوان: ${payload.titleAr}
 • المصدر: ${payload.source === "telegram" ? "تليجرام" : payload.source === "darkweb" ? "الدارك ويب" : "موقع لصق"}
-• تصنيف الحادثة: ${severityLabelAr(payload.severity)}
+• تصنيف حالة الرصد: ${severityLabelAr(payload.severity)}
 • القطاع: ${payload.sectorAr}
 • ادعاء البائع: ${payload.recordCount.toLocaleString()}
 • أنواع البيانات الشخصية: ${payload.piiTypes.join("، ")}

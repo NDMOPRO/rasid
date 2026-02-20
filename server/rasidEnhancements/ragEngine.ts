@@ -161,7 +161,7 @@ export class RAGEngine {
     const queryLower = query.toLowerCase();
     
     // Specific incident patterns
-    if (queryLower.match(/حادثة|تفاصيل.*رقم|معرف|real-\d+/i)) {
+    if (queryLower.match(/حالة رصد|تفاصيل.*رقم|معرف|real-\d+/i)) {
       return "specific_incident";
     }
     
@@ -277,7 +277,7 @@ export class RAGEngine {
 
     let context = "\n\n## السياق المسترجع (RAG):\n";
     retrievedIncidents.forEach((inc, idx) => {
-      context += `\n### حادثة ${idx + 1}: ${inc.titleAr || inc.title}\n`;
+      context += `\n### حالة رصد ${idx + 1}: ${inc.titleAr || inc.title}\n`;
       context += `- القطاع: ${inc.sectorAr || inc.sector}\n`;
       context += `- الخطورة: ${inc.severity}\n`;
       context += `- السجلات: ${inc.recordCount?.toLocaleString()}\n`;
@@ -319,10 +319,10 @@ export class RAGEngine {
     
     return `
 ## إحصائيات أطلس البيانات (ملخص)
-- إجمالي الحوادث: ${totalIncidents}
+- إجمالي حالات الرصد: ${totalIncidents}
 - إجمالي السجلات المتأثرة: ${totalRecords.toLocaleString()}
-- الحوادث الحرجة: ${severityCounts.Critical || 0}
-- الحوادث عالية الخطورة: ${severityCounts.High || 0}
+- حالات الرصد الحرجة: ${severityCounts.Critical || 0}
+- حالات الرصد عالية الخطورة: ${severityCounts.High || 0}
 - أكثر القطاعات تأثراً: ${topSectors}
 
 **ملاحظة:** استخدم أدوات الأطلس (query_atlas_breaches، get_atlas_stats) للحصول على التفاصيل الكاملة.

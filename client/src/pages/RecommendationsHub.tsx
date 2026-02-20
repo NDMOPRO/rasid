@@ -32,11 +32,11 @@ export default function RecommendationsHub() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">مركز التوصيات</h1><p className="text-muted-foreground text-sm mt-1">توصيات الذكاء الاصطناعي لمعالجة حوادث التسريب</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">مركز التوصيات</h1><p className="text-muted-foreground text-sm mt-1">توصيات الذكاء الاصطناعي لمعالجة حالات الرصد</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Lightbulb className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{recommendations.length}</div><div className="text-xs text-muted-foreground">توصية متاحة</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{recommendations.filter(r => r.severity === "critical").length}</div><div className="text-xs text-muted-foreground">توصيات حرجة</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
       </div>
       <div className="flex gap-2 flex-wrap">
         {["all", "critical", "high", "medium", "low"].map(f => (

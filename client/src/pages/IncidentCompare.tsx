@@ -1,5 +1,5 @@
 /**
- * IncidentCompare — مقارنة الحوادث
+ * IncidentCompare — مقارنة حالات الرصد
  * مربوط بـ leaks.list API
  */
 import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
@@ -40,7 +40,7 @@ export default function IncidentCompare() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">مقارنة الحوادث</h1><p className="text-muted-foreground text-sm mt-1">اختر حتى 4 حوادث للمقارنة</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">مقارنة حالات الرصد</h1><p className="text-muted-foreground text-sm mt-1">اختر حتى 4 حالات رصد للمقارنة</p></div>
       {compared.length >= 2 && (
         <Card className="glass-card gold-sweep">
           <CardHeader><CardTitle className="text-foreground text-base flex items-center gap-2"><GitCompare className="h-5 w-5 text-blue-400" />جدول المقارنة</CardTitle></CardHeader>
@@ -67,7 +67,7 @@ export default function IncidentCompare() {
         </Card>
       )}
       <div className="space-y-2">
-        <h3 className="text-foreground font-medium">اختر الحوادث ({selected.length}/4)</h3>
+        <h3 className="text-foreground font-medium">اختر حالات الرصد ({selected.length}/4)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] overflow-auto">
           {leaks.slice(0, 50).map((l: any, i: number) => (
             <button key={i} onClick={() => toggle(i)} className={`p-3 rounded-lg border text-right transition-all ${selected.includes(i) ? "border-blue-500 bg-blue-500/10" : "border-border bg-card/30 hover:bg-card/50"}`}>

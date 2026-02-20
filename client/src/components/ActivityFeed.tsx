@@ -76,7 +76,7 @@ export default function ActivityFeed({ leaks, maxItems = 15 }: ActivityFeedProps
         items.push({
           id: `alert-${i}`,
           type: "alert_triggered",
-          title: `تنبيه: ${leak.titleAr || leak.title || "حادثة"}`,
+          title: `تنبيه: ${leak.titleAr || leak.title || "حالة رصد"}`,
           description: `مستوى الخطورة: ${leak.severity === "critical" ? "حرج" : "مرتفع"}`,
           severity: leak.severity,
           timestamp: new Date(leak.detectedAt ? new Date(leak.detectedAt).getTime() + 300000 : Date.now() - i * 3600000 + 300000),

@@ -25,7 +25,7 @@ export class Guardrails {
 
     // Allowed topics (platform-related)
     const platformKeywords = [
-      'راصد', 'رصد', 'حادثة', 'تسريب', 'بيانات', 'شخصية',
+      'راصد', 'رصد', 'حالة رصد', 'تسريب', 'بيانات', 'شخصية',
       'منصة', 'قاعدة', 'معرفة', 'تقرير', 'إحصائيات',
       'مراقبة', 'تنبيه', 'بائع', 'سوق', 'الويب المظلم',
       'leak', 'incident', 'breach', 'monitoring', 'alert',

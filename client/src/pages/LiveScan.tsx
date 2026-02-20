@@ -739,7 +739,7 @@ export default function LiveScan() {
                               ) : (
                                 <Save className="w-3 h-3 ml-1" />
                               )}
-                              {savedResults.has(result.id) ? "تم الحفظ" : "حفظ كحادثة"}
+                              {savedResults.has(result.id) ? "تم الحفظ" : "حفظ كحالة رصد"}
                             </Button>
                           </div>
 

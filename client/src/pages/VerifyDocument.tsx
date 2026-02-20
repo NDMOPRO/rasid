@@ -937,7 +937,7 @@ export default function VerifyDocument() {
                           transition={{ delay: 1.2 }}
                           className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30"
                         >
-                          <p className="text-xs sm:text-[10px] text-slate-400 mb-1.5">عنوان الحادثة</p>
+                          <p className="text-xs sm:text-[10px] text-slate-400 mb-1.5">عنوان حالة الرصد</p>
                           <p className="text-sm font-semibold text-white">{verifyResult.document.titleAr}</p>
                         </motion.div>
 

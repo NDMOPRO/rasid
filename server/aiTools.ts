@@ -207,7 +207,7 @@ export const AI_TOOLS = [
       parameters: {
         type: "object",
         properties: {
-          limit: { type: "number", description: "عدد السجلات" },
+          limit: { type: "number", description: "العدد المُدّعى" },
           action: { type: "string", description: "نوع النشاط (login, scan_site, create_case, إلخ)" },
         },
         required: [],

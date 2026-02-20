@@ -224,6 +224,70 @@ CREATE TABLE IF NOT EXISTS `ai_action_runs` (
   CONSTRAINT `ai_action_runs_id` PRIMARY KEY(`id`)
 );
 
+-- SEC-04: Retention Policies
+CREATE TABLE IF NOT EXISTS `ai_retention_policies` (
+  `id` int AUTO_INCREMENT NOT NULL,
+  `domain` enum('breaches','privacy') NOT NULL,
+  `resource_type` enum('conversations','training_documents','feedback','action_runs','task_memory','reports') NOT NULL,
+  `retention_days` int NOT NULL DEFAULT 365,
+  `auto_delete_enabled` tinyint NOT NULL DEFAULT 0,
+  `last_cleanup_at` timestamp,
+  `deleted_count` int DEFAULT 0,
+  `is_active` tinyint NOT NULL DEFAULT 1,
+  `created_by` int,
+  `created_at` timestamp NOT NULL DEFAULT (now()),
+  `updated_at` timestamp NOT NULL DEFAULT (now()),
+  CONSTRAINT `ai_retention_policies_id` PRIMARY KEY(`id`)
+);
+
+-- API-11/12: RAG Index per domain
+CREATE TABLE IF NOT EXISTS `ai_rag_indexes` (
+  `id` int AUTO_INCREMENT NOT NULL,
+  `domain` enum('breaches','privacy') NOT NULL,
+  `source_name` varchar(200) NOT NULL,
+  `source_type` enum('glossary','page_descriptors','training_documents','knowledge_base','guides') NOT NULL,
+  `document_count` int DEFAULT 0,
+  `last_indexed_at` timestamp,
+  `index_status` enum('idle','indexing','ready','error') NOT NULL DEFAULT 'idle',
+  `last_error` text,
+  `metadata` json,
+  `created_at` timestamp NOT NULL DEFAULT (now()),
+  `updated_at` timestamp NOT NULL DEFAULT (now()),
+  CONSTRAINT `ai_rag_indexes_id` PRIMARY KEY(`id`)
+);
+
+-- SEC-04: Retention Policies
+CREATE TABLE IF NOT EXISTS `ai_retention_policies` (
+  `id` int AUTO_INCREMENT NOT NULL,
+  `domain` enum('breaches','privacy') NOT NULL,
+  `resource_type` enum('conversations','training_documents','feedback','action_runs','task_memory','reports') NOT NULL,
+  `retention_days` int NOT NULL DEFAULT 365,
+  `auto_delete_enabled` tinyint NOT NULL DEFAULT 0,
+  `last_cleanup_at` timestamp,
+  `deleted_count` int DEFAULT 0,
+  `is_active` tinyint NOT NULL DEFAULT 1,
+  `created_by` int,
+  `created_at` timestamp NOT NULL DEFAULT (now()),
+  `updated_at` timestamp NOT NULL DEFAULT (now()),
+  CONSTRAINT `ai_retention_policies_id` PRIMARY KEY(`id`)
+);
+
+-- API-11/12: RAG Index per domain
+CREATE TABLE IF NOT EXISTS `ai_rag_indexes` (
+  `id` int AUTO_INCREMENT NOT NULL,
+  `domain` enum('breaches','privacy') NOT NULL,
+  `source_name` varchar(200) NOT NULL,
+  `source_type` enum('glossary','page_descriptors','training_documents','knowledge_base','guides') NOT NULL,
+  `document_count` int DEFAULT 0,
+  `last_indexed_at` timestamp,
+  `index_status` enum('idle','indexing','ready','error') NOT NULL DEFAULT 'idle',
+  `last_error` text,
+  `metadata` json,
+  `created_at` timestamp NOT NULL DEFAULT (now()),
+  `updated_at` timestamp NOT NULL DEFAULT (now()),
+  CONSTRAINT `ai_rag_indexes_id` PRIMARY KEY(`id`)
+);
+
 -- Indexes for performance
 CREATE INDEX `idx_glossary_domain` ON `ai_glossary` (`domain`);
 CREATE INDEX `idx_glossary_term` ON `ai_glossary` (`term`);
@@ -240,3 +304,5 @@ CREATE INDEX `idx_domain_feedback_domain` ON `ai_domain_feedback` (`domain`);
 CREATE INDEX `idx_message_templates_domain_type` ON `ai_message_templates` (`domain`, `template_type`);
 CREATE INDEX `idx_system_events_domain` ON `ai_system_events` (`domain`);
 CREATE INDEX `idx_action_runs_user_domain` ON `ai_action_runs` (`user_id`, `domain`);
+CREATE INDEX `idx_retention_policies_domain` ON `ai_retention_policies` (`domain`);
+CREATE INDEX `idx_rag_indexes_domain` ON `ai_rag_indexes` (`domain`, `source_type`);

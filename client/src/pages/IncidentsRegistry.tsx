@@ -1,5 +1,5 @@
 /**
- * IncidentsRegistry — سجل الحوادث
+ * IncidentsRegistry — سجل حالات الرصد
  * مربوط بـ leaks.list API
  */
 import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
@@ -37,8 +37,8 @@ export default function IncidentsRegistry() {
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div><h1 className="text-2xl font-bold text-foreground">سجل الحوادث</h1><p className="text-muted-foreground text-sm mt-1">قائمة شاملة بجميع حوادث التسريب</p></div>
-        <Badge className="bg-gray-700 text-muted-foreground text-lg px-4 py-2">{filtered.length} حادثة</Badge>
+        <div><h1 className="text-2xl font-bold text-foreground">سجل حالات الرصد</h1><p className="text-muted-foreground text-sm mt-1">قائمة شاملة بجميع حالات الرصد</p></div>
+        <Badge className="bg-gray-700 text-muted-foreground text-lg px-4 py-2">{filtered.length} حالة رصد</Badge>
       </div>
       <div className="flex items-center gap-3 flex-wrap">
         <Input placeholder="بحث..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="glass-card gold-sweep text-foreground max-w-xs" />
@@ -55,7 +55,7 @@ export default function IncidentsRegistry() {
           <div className="overflow-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-gray-900/50">
-                <th className="text-right text-muted-foreground p-3">الحادثة</th>
+                <th className="text-right text-muted-foreground p-3">حالة الرصد</th>
                 <th className="text-center text-muted-foreground p-3">الخطورة</th>
                 <th className="text-center text-muted-foreground p-3">القطاع</th>
                 <th className="text-center text-muted-foreground p-3">المنظمة</th>

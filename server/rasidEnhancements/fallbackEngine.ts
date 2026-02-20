@@ -20,75 +20,75 @@ const FALLBACK_RULES: FallbackRule[] = [
   // ═══ تحيات وترحيب ═══
   { regex: /^(مرحبا|السلام عليكم|أهلا|هلا|صباح الخير|مساء الخير|hi|hello)/i, response: "أهلاً وسهلاً! أنا راصد الذكي، مساعدك في تحليل حالات الرصد. كيف أقدر أساعدك اليوم؟" },
   { regex: /^(شكرا|ممتاز|رائع|أحسنت|thanks|thank you)/i, response: "شكراً لك! أنا دائماً في خدمتك. هل تحتاج مساعدة في شيء آخر؟" },
-  { regex: /^(من أنت|عرفني عن نفسك|ما هو راصد|what are you)/i, response: "أنا **راصد الذكي** 🛡️ — المساعد الذكي لمنصة رصد حالات رصد البيانات الشخصية. أستطيع تحليل الحوادث، إنشاء التقارير، ومساعدتك في فهم مشهد التهديدات." },
+  { regex: /^(من أنت|عرفني عن نفسك|ما هو راصد|what are you)/i, response: "أنا **راصد الذكي** 🛡️ — المساعد الذكي لمنصة رصد حالات رصد البيانات الشخصية. أستطيع تحليل حالات الرصد، إنشاء التقارير، ومساعدتك في فهم مشهد التهديدات." },
 
   // ═══ إحصائيات لوحة المعلومات ═══
-  { regex: /كم عدد الحوادث|إجمالي الحوادث|total incidents|all leaks/i, context: "dashboardStats", response: "إجمالي عدد الحوادث المسجلة في المنصة هو **{totalLeaks}** حادثة." },
-  { regex: /كم ادعاء البائع|إجمالي ادعاءات البائع|total records|affected records/i, context: "dashboardStats", response: "إجمالي ادعاء البائع المتأثرة في جميع الحوادث هو **{totalRecords}** سجل." },
-  { regex: /الحوادث الخطرة|الحوادث عالية الأهمية|critical incidents|high severity/i, context: "dashboardStats", response: "يوجد **{criticalLeaks}** حادثة مصنفة كـ \"حرجة\" (Critical)." },
+  { regex: /كم عدد الحوادث|كم عدد حالات الرصد|إجمالي الحوادث|إجمالي حالات الرصد|total incidents|all leaks/i, context: "dashboardStats", response: "إجمالي عدد حالات الرصد المسجلة في المنصة هو **{totalLeaks}** حالة رصد." },
+  { regex: /كم ادعاء البائع|إجمالي ادعاءات البائع|total records|affected records/i, context: "dashboardStats", response: "إجمالي ادعاء البائع المتأثرة في جميع حالات الرصد هو **{totalRecords}** سجل." },
+  { regex: /الحوادث الخطرة|حالات الرصد الخطرة|الحوادث عالية الأهمية|حالات الرصد عالية الأهمية|critical incidents|high severity/i, context: "dashboardStats", response: "يوجد **{criticalLeaks}** حالة رصد مصنفة كـ \"حرجة\" (Critical)." },
   { regex: /مستوى التأثير|مؤشر التأثير|risk score|impact level/i, context: "dashboardStats", response: "مؤشر التأثير العام للمنصة حالياً هو **{riskScore}%**." },
   { regex: /مستوى الامتثال|مؤشر الامتثال|compliance score/i, context: "dashboardStats", response: "مؤشر الامتثال العام للمنصة هو **{complianceScore}%**." },
   { regex: /أكثر القطاعات تأثراً|القطاعات المتأثرة|most affected sectors/i, context: "dashboardStats", response: "القطاعات الأكثر تأثراً هي: **{affectedSectors}**." },
 
-  // ═══ أسئلة عن الحوادث - الأساسية ═══
-  { regex: /أكبر حادثة|أضخم حالة رصد|largest breach|biggest leak/i, context: "incidents", response: "أكبر حادثة من حيث ادعاء البائع هي **\"{titleAr}\"** بعدد **{recordCount}** سجل.", find: "max", field: "recordCount" },
-  { regex: /أخطر حادثة|most dangerous|highest severity/i, context: "incidents", response: "أخطر حادثة حالياً هي **\"{titleAr}\"** بمستوى خطورة **{severity}**.", find: "max", field: "severity" },
-  { regex: /أحدث حادثة|آخر حالة رصد|latest breach|most recent/i, context: "incidents", response: "أحدث حادثة تم تسجيلها هي **\"{titleAr}\"** بتاريخ **{detectedAt}**.", find: "max", field: "detectedAt" },
-  { regex: /أقدم حادثة|أول حالة رصد|oldest breach|first incident/i, context: "incidents", response: "أقدم حادثة مسجلة هي **\"{titleAr}\"** بتاريخ **{detectedAt}**.", find: "min", field: "detectedAt" },
+  // ═══ أسئلة عن حالات الرصد - الأساسية ═══
+  { regex: /أكبر حادثة|أكبر حالة رصد|أضخم حالة رصد|largest breach|biggest leak/i, context: "incidents", response: "أكبر حالة رصد من حيث ادعاء البائع هي **\"{titleAr}\"** بعدد **{recordCount}** سجل.", find: "max", field: "recordCount" },
+  { regex: /أخطر حادثة|أخطر حالة رصد|most dangerous|highest severity/i, context: "incidents", response: "أخطر حالة رصد حالياً هي **\"{titleAr}\"** بمستوى خطورة **{severity}**.", find: "max", field: "severity" },
+  { regex: /أحدث حادثة|أحدث حالة رصد|آخر حالة رصد|latest breach|most recent/i, context: "incidents", response: "أحدث حالة رصد تم تسجيلها هي **\"{titleAr}\"** بتاريخ **{detectedAt}**.", find: "max", field: "detectedAt" },
+  { regex: /أقدم حادثة|أقدم حالة رصد|أول حالة رصد|oldest breach|first incident/i, context: "incidents", response: "أقدم حالة رصد مسجلة هي **\"{titleAr}\"** بتاريخ **{detectedAt}**.", find: "min", field: "detectedAt" },
 
   // ═══ أسئلة عن القطاعات ═══
-  { regex: /ما هي القطاعات الموجودة|قائمة القطاعات|list sectors|all sectors/i, context: "incidents", response: "القطاعات التي تم تسجيل حوادث فيها تشمل: **{sectors}**." },
-  { regex: /القطاع الحكومي|government sector/i, context: "incidents", response: "يوجد **{count}** حوادث مسجلة في القطاع الحكومي.", filter: { field: "sector", value: "Government" } },
-  { regex: /القطاع الصحي|health sector|healthcare/i, context: "incidents", response: "يوجد **{count}** حوادث مسجلة في القطاع الصحي.", filter: { field: "sector", value: "Health" } },
-  { regex: /القطاع المالي|financial sector|البنوك|banking/i, context: "incidents", response: "يوجد **{count}** حوادث مسجلة في القطاع المالي.", filter: { field: "sector", value: "Financial" } },
-  { regex: /القطاع التعليمي|education sector|التعليم|schools/i, context: "incidents", response: "يوجد **{count}** حوادث مسجلة في قطاع التعليم.", filter: { field: "sector", value: "Education" } },
-  { regex: /الاتصالات|telecom|telecommunications/i, context: "incidents", response: "يوجد **{count}** حوادث مسجلة في قطاع الاتصالات.", filter: { field: "sector", value: "Telecom" } },
+  { regex: /ما هي القطاعات الموجودة|قائمة القطاعات|list sectors|all sectors/i, context: "incidents", response: "القطاعات التي تم تسجيل حالات رصد فيها تشمل: **{sectors}**." },
+  { regex: /القطاع الحكومي|government sector/i, context: "incidents", response: "يوجد **{count}** حالات رصد مسجلة في القطاع الحكومي.", filter: { field: "sector", value: "Government" } },
+  { regex: /القطاع الصحي|health sector|healthcare/i, context: "incidents", response: "يوجد **{count}** حالات رصد مسجلة في القطاع الصحي.", filter: { field: "sector", value: "Health" } },
+  { regex: /القطاع المالي|financial sector|البنوك|banking/i, context: "incidents", response: "يوجد **{count}** حالات رصد مسجلة في القطاع المالي.", filter: { field: "sector", value: "Financial" } },
+  { regex: /القطاع التعليمي|education sector|التعليم|schools/i, context: "incidents", response: "يوجد **{count}** حالات رصد مسجلة في قطاع التعليم.", filter: { field: "sector", value: "Education" } },
+  { regex: /الاتصالات|telecom|telecommunications/i, context: "incidents", response: "يوجد **{count}** حالات رصد مسجلة في قطاع الاتصالات.", filter: { field: "sector", value: "Telecom" } },
 
   // ═══ أسئلة عن المصادر والمنصات ═══
   { regex: /مصادر حالة الرصد|من أين تأتي حالات الرصد|breach sources|leak sources/i, context: "dashboardStats", response: "أبرز مصادر حالات الرصد هي: **{sourceDistribution}**." },
-  { regex: /الويب المظلم|dark web|darkweb/i, context: "incidents", response: "لدينا **{count}** حادثة مصدرها الويب المظلم.", filter: { field: "source", value: "Dark Web" } },
-  { regex: /تليجرام|telegram/i, context: "incidents", response: "لدينا **{count}** حادثة مصدرها تليجرام.", filter: { field: "source", value: "Telegram" } },
-  { regex: /منتديات|forums|hacker forums/i, context: "incidents", response: "لدينا **{count}** حادثة مصدرها منتديات القرصنة.", filter: { field: "source", value: "Forum" } },
+  { regex: /الويب المظلم|dark web|darkweb/i, context: "incidents", response: "لدينا **{count}** حالة رصد مصدرها الويب المظلم.", filter: { field: "source", value: "Dark Web" } },
+  { regex: /تليجرام|telegram/i, context: "incidents", response: "لدينا **{count}** حالة رصد مصدرها تليجرام.", filter: { field: "source", value: "Telegram" } },
+  { regex: /منتديات|forums|hacker forums/i, context: "incidents", response: "لدينا **{count}** حالة رصد مصدرها منتديات القرصنة.", filter: { field: "source", value: "Forum" } },
 
   // ═══ NEW: أسئلة عن أنواع البيانات ═══
   { regex: /أكثر أنواع البيانات|ما هي أكثر أنواع|most common data types|pii types|أنواع البيانات المسربة/i, context: "incidents", response: "أكثر أنواع البيانات المسربة شيوعاً: **{topPiiTypes}**.", calculate: "count" },
-  { regex: /حوادث تحتوي على بطاقات|credit cards|أرقام بطاقات/i, context: "incidents", response: "لدينا **{count}** حادثة تحتوي على بطاقات ائتمانية.", filter: { field: "piiTypes", value: "Credit Card" } },
-  { regex: /حوادث تحتوي على كلمات مرور|passwords|credentials/i, context: "incidents", response: "لدينا **{count}** حادثة تحتوي على كلمات مرور.", filter: { field: "piiTypes", value: "Password" } },
+  { regex: /حالات رصد تحتوي على بطاقات|حوادث تحتوي على بطاقات|credit cards|أرقام بطاقات/i, context: "incidents", response: "لدينا **{count}** حالة رصد تحتوي على بطاقات ائتمانية.", filter: { field: "piiTypes", value: "Credit Card" } },
+  { regex: /حالات رصد تحتوي على كلمات مرور|حوادث تحتوي على كلمات مرور|passwords|credentials/i, context: "incidents", response: "لدينا **{count}** حالة رصد تحتوي على كلمات مرور.", filter: { field: "piiTypes", value: "Password" } },
 
   // ═══ NEW: أسئلة عن الفترة الزمنية ═══
-  { regex: /حوادث هذا الشهر|this month|current month/i, context: "incidents", response: "تم تسجيل **{count}** حادثة خلال الشهر الحالي.", calculate: "count" },
-  { regex: /حوادث آخر 30 يوم|last 30 days|past month/i, context: "incidents", response: "تم تسجيل **{count}** حادثة خلال آخر 30 يوماً.", calculate: "count" },
-  { regex: /حوادث هذه السنة|this year|current year/i, context: "incidents", response: "تم تسجيل **{count}** حادثة خلال السنة الحالية.", calculate: "count" },
+  { regex: /حالات رصد هذا الشهر|حوادث هذا الشهر|this month|current month/i, context: "incidents", response: "تم تسجيل **{count}** حالة رصد خلال الشهر الحالي.", calculate: "count" },
+  { regex: /حالات رصد آخر 30 يوم|حوادث آخر 30 يوم|last 30 days|past month/i, context: "incidents", response: "تم تسجيل **{count}** حالة رصد خلال آخر 30 يوماً.", calculate: "count" },
+  { regex: /حالات رصد هذه السنة|حوادث هذه السنة|this year|current year/i, context: "incidents", response: "تم تسجيل **{count}** حالة رصد خلال السنة الحالية.", calculate: "count" },
 
   // ═══ NEW: أسئلة عن مستوى الخطورة ═══
-  { regex: /حوادث متوسطة الخطورة|medium severity/i, context: "incidents", response: "لدينا **{count}** حادثة بمستوى خطورة متوسط.", filter: { field: "severity", value: "Medium" } },
-  { regex: /حوادث منخفضة الخطورة|low severity/i, context: "incidents", response: "لدينا **{count}** حادثة بمستوى خطورة منخفض.", filter: { field: "severity", value: "Low" } },
-  { regex: /حوادث عالية الخطورة|high severity/i, context: "incidents", response: "لدينا **{count}** حادثة بمستوى خطورة عالي.", filter: { field: "severity", value: "High" } },
+  { regex: /حالات رصد متوسطة الخطورة|حوادث متوسطة الخطورة|medium severity/i, context: "incidents", response: "لدينا **{count}** حالة رصد بمستوى خطورة متوسط.", filter: { field: "severity", value: "Medium" } },
+  { regex: /حالات رصد منخفضة الخطورة|حوادث منخفضة الخطورة|low severity/i, context: "incidents", response: "لدينا **{count}** حالة رصد بمستوى خطورة منخفض.", filter: { field: "severity", value: "Low" } },
+  { regex: /حالات رصد عالية الخطورة|حوادث عالية الخطورة|high severity/i, context: "incidents", response: "لدينا **{count}** حالة رصد بمستوى خطورة عالي.", filter: { field: "severity", value: "High" } },
 
   // ═══ NEW: أسئلة عن الامتثال و PDPL ═══
   { regex: /PDPL|نظام حماية البيانات الشخصية|personal data protection/i, response: "نظام حماية البيانات الشخصية (PDPL) هو الإطار التنظيمي في المملكة لحماية حقوق الأفراد المتعلقة ببياناتهم. هل لديك سؤال محدد عنه؟" },
-  { regex: /أكبر غرامة|أعلى غرامة|highest fine|maximum penalty/i, context: "incidents", response: "أعلى غرامة مقدرة كانت لحادثة **\"{titleAr}\"** بقيمة **{estimatedFineDisplay}**.", find: "max", field: "estimatedFineSar" },
-  { regex: /إجمالي الغرامات|total fines|all penalties/i, context: "incidents", response: "إجمالي الغرامات المقدرة لجميع الحوادث: **{totalFines}**.", calculate: "sum" },
+  { regex: /أكبر غرامة|أعلى غرامة|highest fine|maximum penalty/i, context: "incidents", response: "أعلى غرامة مقدرة كانت لحالة رصد **\"{titleAr}\"** بقيمة **{estimatedFineDisplay}**.", find: "max", field: "estimatedFineSar" },
+  { regex: /إجمالي الغرامات|total fines|all penalties/i, context: "incidents", response: "إجمالي الغرامات المقدرة لجميع حالات الرصد: **{totalFines}**.", calculate: "sum" },
 
   // ═══ NEW: أسئلة عن الحالة والتحقيق ═══
-  { regex: /حوادث قيد التحقيق|under investigation/i, context: "incidents", response: "لدينا **{count}** حادثة قيد التحقيق حالياً.", filter: { field: "status", value: "investigating" } },
-  { regex: /حوادث مغلقة|closed incidents|resolved/i, context: "incidents", response: "لدينا **{count}** حادثة تم إغلاقها.", filter: { field: "status", value: "closed" } },
-  { regex: /حوادث جديدة|new incidents|pending/i, context: "incidents", response: "لدينا **{count}** حادثة جديدة تحتاج مراجعة.", filter: { field: "status", value: "new" } },
+  { regex: /حالات رصد قيد التحقيق|حوادث قيد التحقيق|under investigation/i, context: "incidents", response: "لدينا **{count}** حالة رصد قيد التحقيق حالياً.", filter: { field: "status", value: "investigating" } },
+  { regex: /حالات رصد مغلقة|حوادث مغلقة|closed incidents|resolved/i, context: "incidents", response: "لدينا **{count}** حالة رصد تم إغلاقها.", filter: { field: "status", value: "closed" } },
+  { regex: /حالات رصد جديدة|حوادث جديدة|new incidents|pending/i, context: "incidents", response: "لدينا **{count}** حالة رصد جديدة تحتاج مراجعة.", filter: { field: "status", value: "new" } },
 
   // ═══ NEW: أسئلة عن الأدلة والتوثيق ═══
-  { regex: /حوادث بدون أدلة|no evidence|missing evidence/i, context: "incidents", response: "لدينا **{count}** حادثة بدون أدلة موثقة.", filter: { field: "evidenceCount", value: "0" } },
-  { regex: /حوادث موثقة|documented|with evidence/i, context: "incidents", response: "لدينا **{count}** حادثة تحتوي على أدلة موثقة.", calculate: "count" },
+  { regex: /حالات رصد بدون أدلة|حوادث بدون أدلة|no evidence|missing evidence/i, context: "incidents", response: "لدينا **{count}** حالة رصد بدون أدلة موثقة.", filter: { field: "evidenceCount", value: "0" } },
+  { regex: /حالات رصد موثقة|حوادث موثقة|documented|with evidence/i, context: "incidents", response: "لدينا **{count}** حالة رصد تحتوي على أدلة موثقة.", calculate: "count" },
 
   // ═══ NEW: مقارنات بين القطاعات ═══
-  { regex: /مقارنة.*القطاع.*الصحي.*المالي|compare health and financial/i, context: "incidents", response: "**القطاع الصحي:** {healthCount} حادثة | **القطاع المالي:** {financialCount} حادثة" },
-  { regex: /أكثر قطاع تضرراً|most affected sector/i, context: "incidents", response: "القطاع الأكثر تضرراً هو **{topSector}** بعدد **{topSectorCount}** حادثة." },
+  { regex: /مقارنة.*القطاع.*الصحي.*المالي|compare health and financial/i, context: "incidents", response: "**القطاع الصحي:** {healthCount} حالة رصد | **القطاع المالي:** {financialCount} حالة رصد" },
+  { regex: /أكثر قطاع تضرراً|most affected sector/i, context: "incidents", response: "القطاع الأكثر تضرراً هو **{topSector}** بعدد **{topSectorCount}** حالة رصد." },
 
   // ═══ NEW: توصيات وإجراءات ═══
-  { regex: /ماذا يجب أن أفعل|what should i do|recommendations/i, response: "يمكنك:\n1. مراجعة الحوادث الحرجة فوراً\n2. تحديث قواعد الكشف\n3. إعداد تقرير دوري\n4. تفعيل التنبيهات الآلية" },
+  { regex: /ماذا يجب أن أفعل|what should i do|recommendations/i, response: "يمكنك:\n1. مراجعة حالات الرصد الحرجة فوراً\n2. تحديث قواعد الكشف\n3. إعداد تقرير دوري\n4. تفعيل التنبيهات الآلية" },
   { regex: /كيف أحسن الأمان|improve security|security recommendations/i, response: "توصيات أمنية:\n• تفعيل المراقبة المستمرة\n• تحديث قواعد الكشف\n• مراجعة سياسات الاحتفاظ\n• تدريب الموظفين" },
 
   // ═══ أسئلة غير مفهومة (آخر قاعدة - catch-all) ═══
-  { regex: /.*/, response: "عذراً، لم أفهم طلبك بشكل كامل. يمكنني مساعدتك في:\n- تحليل الحوادث وحالات الرصد\n- إحصائيات لوحة المعلومات\n- تقارير القطاعات\n- تحليل الامتثال\n\nحاول إعادة صياغة سؤالك أو اختر من الأوامر السريعة." },
+  { regex: /.*/, response: "عذراً، لم أفهم طلبك بشكل كامل. يمكنني مساعدتك في:\n- تحليل حالات الرصد\n- إحصائيات لوحة المعلومات\n- تقارير القطاعات\n- تحليل الامتثال\n\nحاول إعادة صياغة سؤالك أو اختر من الأوامر السريعة." },
 ];
 
 export class FallbackEngine {

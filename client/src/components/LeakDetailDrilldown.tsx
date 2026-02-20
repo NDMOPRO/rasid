@@ -121,7 +121,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
     onSuccess: (data) => {
       setGeneratedDoc(data);
       setIsGeneratingDoc(false);
-      toast.success("تم توثيق الحادثة بنجاح", { description: `رقم التحقق: ${data.verificationCode}` });
+      toast.success("تم توثيق حالة الرصد بنجاح", { description: `رقم التحقق: ${data.verificationCode}` });
     },
     onError: (err) => {
       setIsGeneratingDoc(false);
@@ -189,7 +189,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `توثيق-حادثة-${leakId}-${generatedDoc.verificationCode}.html`;
+      a.download = `توثيق-حالة-رصد-${leakId}-${generatedDoc.verificationCode}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -299,7 +299,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                             className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white text-xs gap-1.5"
                           >
                             {isGeneratingDoc ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
-                            توثيق حادثة التسرب
+                            توثيق حالة الرصد
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1.5">
@@ -462,7 +462,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
                         {/* Description */}
                         <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                           <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5" /> وصف الحادثة
+                            <FileText className="w-3.5 h-3.5" /> وصف حالة الرصد
                           </h4>
                           <p className="text-sm text-foreground leading-relaxed">{detail.descriptionAr || "لا يوجد وصف متاح"}</p>
                           {detail.description && detail.description !== detail.descriptionAr && (
@@ -771,7 +771,7 @@ export default function LeakDetailDrilldown({ leak, open, onClose, onBack, showB
         open={showComplianceWarning}
         onConfirm={handleConfirmGenerate}
         onCancel={() => setShowComplianceWarning(false)}
-        reportType="توثيق الحادثة"
+        reportType="توثيق حالة الرصد"
       />
 
       {/* Screenshot Lightbox */}
