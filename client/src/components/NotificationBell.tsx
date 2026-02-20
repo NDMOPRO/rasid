@@ -356,7 +356,7 @@ export default function NotificationBell({ userId }: { userId?: number }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-12 w-[420px] max-h-[560px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50"
+            className="absolute left-0 sm:left-0 right-0 sm:right-auto top-12 w-[calc(100vw-2rem)] sm:w-[420px] max-h-[70vh] sm:max-h-[560px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50"
             style={{ backdropFilter: "blur(20px)" }}
           >
             {/* Header */}

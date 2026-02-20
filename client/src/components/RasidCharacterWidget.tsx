@@ -154,7 +154,7 @@ export default function RasidCharacterWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-[100]" dir="rtl">
+    <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-[100]" dir="rtl">
       {/* Speech Bubble */}
       <AnimatePresence>
         {showBubble && !isExpanded && (
@@ -197,7 +197,7 @@ export default function RasidCharacterWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute bottom-20 left-0 w-80 rounded-2xl overflow-hidden shadow-2xl"
+            className="absolute bottom-20 left-0 w-[calc(100vw-2rem)] sm:w-80 max-w-80 rounded-2xl overflow-hidden shadow-2xl"
             style={{
               background: "linear-gradient(135deg, rgba(15, 40, 71, 0.98), rgba(11, 29, 53, 0.99))",
               border: "1px solid rgba(197, 165, 90, 0.2)",

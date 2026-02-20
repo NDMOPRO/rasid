@@ -184,10 +184,10 @@
       max-width: 100vw !important;
       width: 100% !important;
     }
-    /* Allow vertical scrolling everywhere */
     body {
       overflow-y: auto !important;
       min-height: 100vh;
+      min-height: 100dvh;
       -webkit-overflow-scrolling: touch;
     }
     /* Make tables scrollable on mobile */
@@ -197,10 +197,21 @@
       -webkit-overflow-scrolling: touch;
       max-width: 100%;
     }
+    thead, tbody, tfoot, tr, th, td {
+      max-width: 100vw;
+    }
     /* Fix text overflow on mobile */
     h1, h2, h3, h4, h5, h6, p, span, a, label {
       word-wrap: break-word;
       overflow-wrap: break-word;
+    }
+    /* Prevent any element from exceeding viewport */
+    * {
+      max-width: 100vw;
+    }
+    /* Fix fixed/absolute elements on mobile */
+    .fixed, [class*="fixed"] {
+      max-width: 100vw;
     }
   }
   @media (max-width: 768px) {
@@ -211,46 +222,50 @@
     .gap-6 { gap: 1rem !important; }
     .gap-8 { gap: 1.25rem !important; }
 
-    /* ═══ Mobile Card & Content Font Size Increase ═══ */
-    /* Only increase font sizes in the main content area, NOT sidebar */
-    [data-scroll-container] .text-xs,
-    main .text-xs { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-    [data-scroll-container] .text-sm,
-    main .text-sm { font-size: 0.9375rem !important; line-height: 1.375rem !important; }
-    [data-scroll-container] .text-\[10px\],
-    main .text-\[10px\] { font-size: 0.8125rem !important; line-height: 1.125rem !important; }
-    [data-scroll-container] .text-\[11px\],
-    main .text-\[11px\] { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-    [data-scroll-container] .text-base,
-    main .text-base { font-size: 1.0625rem !important; line-height: 1.625rem !important; }
-    [data-scroll-container] .text-lg,
-    main .text-lg { font-size: 1.1875rem !important; line-height: 1.75rem !important; }
-    [data-scroll-container] .text-xl,
-    main .text-xl { font-size: 1.375rem !important; line-height: 1.875rem !important; }
-    [data-scroll-container] .text-2xl,
-    main .text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-    [data-scroll-container] .text-3xl,
-    main .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
-    [data-scroll-container] .text-4xl,
-    main .text-4xl { font-size: 2.25rem !important; line-height: 2.75rem !important; }
-    [data-scroll-container] .text-5xl,
-    main .text-5xl { font-size: 2.75rem !important; line-height: 3.25rem !important; }
-
     /* ═══ Mobile Touch Targets ═══ */
-    button, [role="button"], a {
+    button:not(.h-7):not(.h-6):not(.w-7):not(.w-6),
+    [role="button"]:not(.h-7):not(.h-6) {
       min-height: 36px;
-      min-width: 36px;
     }
-    /* Improve card readability */
-    .rounded-xl, .rounded-2xl {
-      padding: 0.5rem;
+
+    /* ═══ TabsList horizontal scroll on mobile ═══ */
+    [role="tablist"] {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap !important;
+      justify-content: flex-start !important;
+      width: 100% !important;
+    }
+    [role="tablist"]::-webkit-scrollbar {
+      display: none;
+    }
+    [role="tab"] {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      font-size: 0.75rem !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    /* ═══ Dialog/Modal mobile full-width ═══ */
+    [data-slot="dialog-content"] {
+      max-width: calc(100vw - 1rem) !important;
+      width: calc(100vw - 1rem) !important;
+      margin: 0.5rem !important;
+      max-height: 90vh !important;
+      max-height: 90dvh !important;
+      overflow-y: auto !important;
+    }
+
+    /* ═══ Card hover: disable translateY on mobile to prevent layout shifts ═══ */
+    [data-slot="card"]:hover {
+      transform: none !important;
+    }
+    .glass-card:hover {
+      transform: none !important;
     }
   }
-  /* ═══ Global Font Size Increase ═══ */
-  .text-xs { font-size: 0.8125rem !important; line-height: 1.25rem !important; }
-  .text-sm { font-size: 0.9375rem !important; line-height: 1.375rem !important; }
-  .text-\[10px\] { font-size: 0.75rem !important; line-height: 1.125rem !important; }
-  .text-\[11px\] { font-size: 0.8125rem !important; line-height: 1.125rem !important; }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),

@@ -720,7 +720,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto relative z-10" style={{ maxWidth: '100%' }}>
         {/* Top header with WORKSPACE SWITCHER */}
         <header
-          className="h-14 flex items-center justify-between flex-wrap px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
+          className="min-h-14 flex items-center justify-between flex-wrap gap-y-1 px-3 sm:px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
           style={{
             backgroundColor: isDark ? 'rgba(13,21,41,0.85)' : 'rgba(255,255,255,0.95)',
             borderBottom: `1px solid ${isDark ? `${accent}14` : '#e2e5ef'}`,
@@ -742,7 +742,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* Live indicator */}
             <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border`}
               style={{ backgroundColor: `${accent}0D`, borderColor: `${accent}26` }}>
@@ -789,7 +789,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Workspace title bar */}
-        <div className="px-4 lg:px-6 py-3 flex items-center gap-3" style={{
+        <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex items-center gap-2 sm:gap-3" style={{
           backgroundColor: isDark ? `${accent}08` : `${accent}05`,
           borderBottom: `1px solid ${isDark ? `${accent}14` : `${accent}10`}`,
         }}>
