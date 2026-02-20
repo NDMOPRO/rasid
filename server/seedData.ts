@@ -2,7 +2,7 @@
  * Seed Data System — بذر البيانات الأولية
  * Seeds all new RASID ULTIMATE tables with initial data
  */
-import { db } from "./db";
+import { getDb } from "./db";
 import { sql } from "drizzle-orm";
 
 // ═══════════════════════════════════════════════════════════════
@@ -119,6 +119,8 @@ const GUIDE_STEPS = [
 // MAIN SEED FUNCTION
 // ═══════════════════════════════════════════════════════════════
 export async function seedAllNewTables(): Promise<{ results: Record<string, { seeded: number; status: string }> }> {
+  const db = await getDb();
+  if (!db) { console.warn('[SeedData] Database not available'); return { results: {} }; }
   const results: Record<string, { seeded: number; status: string }> = {};
 
   // 1. Seed Patriotic Phrases
@@ -181,6 +183,8 @@ export async function seedAllNewTables(): Promise<{ results: Record<string, { se
 // ENSURE TABLES EXIST — Safe table creation
 // ═══════════════════════════════════════════════════════════════
 export async function ensureNewTablesExist(): Promise<void> {
+  const db = await getDb();
+  if (!db) { console.warn('[SeedData] Database not available for table creation'); return; }
   const tables = [
     `CREATE TABLE IF NOT EXISTS ai_session_memory (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -322,6 +326,34 @@ export async function ensureNewTablesExist(): Promise<void> {
       ended_at TIMESTAMP NULL,
       INDEX idx_sss_user (user_id),
       INDEX idx_sss_token (session_token)
+    )`,
+    `CREATE TABLE IF NOT EXISTS ai_guide_steps (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      step_order INT NOT NULL,
+      title_ar VARCHAR(255) NOT NULL,
+      title_en VARCHAR(255) NOT NULL,
+      description_ar TEXT NOT NULL,
+      description_en TEXT,
+      target_selector VARCHAR(255),
+      target_page VARCHAR(255),
+      category VARCHAR(50) NOT NULL DEFAULT 'general',
+      is_active TINYINT NOT NULL DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS ai_auto_learning (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT,
+      pattern_type VARCHAR(100) NOT NULL,
+      input_pattern TEXT NOT NULL,
+      learned_response TEXT NOT NULL,
+      confidence DECIMAL(5,2) NOT NULL DEFAULT 0.50,
+      usage_count INT NOT NULL DEFAULT 0,
+      is_approved TINYINT NOT NULL DEFAULT 0,
+      source VARCHAR(50) NOT NULL DEFAULT 'auto',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_aal_pattern (pattern_type),
+      INDEX idx_aal_user (user_id)
     )`,
   ];
 

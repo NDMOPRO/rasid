@@ -2792,3 +2792,30 @@ export const sseStreamSessions = mysqlTable("sse_stream_sessions", {
 	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 });
+
+export const aiGuideSteps = mysqlTable("ai_guide_steps", {
+	id: int().autoincrement().primaryKey().notNull(),
+	stepOrder: int("step_order").notNull(),
+	titleAr: varchar("title_ar", { length: 255 }).notNull(),
+	titleEn: varchar("title_en", { length: 255 }).notNull(),
+	descriptionAr: text("description_ar").notNull(),
+	descriptionEn: text("description_en"),
+	targetSelector: varchar("target_selector", { length: 255 }),
+	targetPage: varchar("target_page", { length: 255 }),
+	category: varchar("category", { length: 50 }).notNull().default("general"),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+export const aiAutoLearning = mysqlTable("ai_auto_learning", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id"),
+	patternType: varchar("pattern_type", { length: 100 }).notNull(),
+	inputPattern: text("input_pattern").notNull(),
+	learnedResponse: text("learned_response").notNull(),
+	confidence: decimal("confidence", { precision: 5, scale: 2 }).notNull().default("0.50"),
+	usageCount: int("usage_count").notNull().default(0),
+	isApproved: tinyint("is_approved").notNull().default(0),
+	source: varchar("source", { length: 50 }).notNull().default("auto"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
