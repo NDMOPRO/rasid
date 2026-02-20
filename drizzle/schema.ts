@@ -2987,8 +2987,8 @@ export const aiGuideCatalog = mysqlTable("ai_guide_catalog", {
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-// DB-06: Guide Steps
-export const aiGuideSteps = mysqlTable("ai_guide_steps", {
+// DB-06: Guide Steps (domain-isolated)
+export const aiDomainGuideSteps = mysqlTable("ai_domain_guide_steps", {
 	id: int().autoincrement().primaryKey().notNull(),
 	guideId: int().notNull(),
 	stepOrder: int().notNull(),
@@ -3029,7 +3029,7 @@ export const aiTaskMemory = mysqlTable("ai_task_memory", {
 });
 
 // DB-09, DB-10: Enhanced Conversations with domain isolation
-export const aiConversations = mysqlTable("ai_conversations", {
+export const aiDomainConversations = mysqlTable("ai_domain_conversations", {
 	id: int().autoincrement().primaryKey().notNull(),
 	conversationId: varchar({ length: 100 }).notNull(),
 	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
@@ -3071,8 +3071,8 @@ export const aiActionTriggers = mysqlTable("ai_action_triggers", {
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-// DB-12: AI Feedback per domain
-export const aiFeedback = mysqlTable("ai_feedback", {
+// DB-12: AI Feedback per domain (domain-isolated)
+export const aiDomainFeedback = mysqlTable("ai_domain_feedback", {
 	id: int().autoincrement().primaryKey().notNull(),
 	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
 	conversationId: varchar({ length: 100 }),
@@ -3153,20 +3153,20 @@ export type AiPageDescriptor = typeof aiPageDescriptors.$inferSelect;
 export type InsertAiPageDescriptor = typeof aiPageDescriptors.$inferInsert;
 export type AiGuideCatalog = typeof aiGuideCatalog.$inferSelect;
 export type InsertAiGuideCatalog = typeof aiGuideCatalog.$inferInsert;
-export type AiGuideStep = typeof aiGuideSteps.$inferSelect;
-export type InsertAiGuideStep = typeof aiGuideSteps.$inferInsert;
+export type AiGuideStep = typeof aiDomainGuideSteps.$inferSelect;
+export type InsertAiGuideStep = typeof aiDomainGuideSteps.$inferInsert;
 export type AiGuideSession = typeof aiGuideSessions.$inferSelect;
 export type InsertAiGuideSession = typeof aiGuideSessions.$inferInsert;
 export type AiTaskMemory = typeof aiTaskMemory.$inferSelect;
 export type InsertAiTaskMemory = typeof aiTaskMemory.$inferInsert;
-export type AiConversation = typeof aiConversations.$inferSelect;
-export type InsertAiConversation = typeof aiConversations.$inferInsert;
+export type AiDomainConversation = typeof aiDomainConversations.$inferSelect;
+export type InsertAiDomainConversation = typeof aiDomainConversations.$inferInsert;
 export type AiTrainingDocument = typeof aiTrainingDocuments.$inferSelect;
 export type InsertAiTrainingDocument = typeof aiTrainingDocuments.$inferInsert;
 export type AiActionTrigger = typeof aiActionTriggers.$inferSelect;
 export type InsertAiActionTrigger = typeof aiActionTriggers.$inferInsert;
-export type AiFeedback = typeof aiFeedback.$inferSelect;
-export type InsertAiFeedback = typeof aiFeedback.$inferInsert;
+export type AiDomainFeedback = typeof aiDomainFeedback.$inferSelect;
+export type InsertAiDomainFeedback = typeof aiDomainFeedback.$inferInsert;
 export type AiMessageTemplate = typeof aiMessageTemplates.$inferSelect;
 export type InsertAiMessageTemplate = typeof aiMessageTemplates.$inferInsert;
 export type AiSystemEvent = typeof aiSystemEvents.$inferSelect;

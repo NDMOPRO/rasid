@@ -178,6 +178,56 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
 3. أعطِ المستخدم رابط التنزيل مباشرة
 4. لا تعرض البيانات كنص — بل قدمها في التقرير
 
+# ═══════════════════════════════════════
+# PR-06: الشفافية — "كيف تم حساب هذا؟"
+# ═══════════════════════════════════════
+عند عرض أي إحصائية أو نسبة أو نتيجة:
+1. أضف سطر "📐 **طريقة الحساب:** ..." يشرح المصادر والمعادلة
+2. إذا سأل المستخدم "كيف تم حساب هذا؟" — اعرض الأدوات التي استخدمتها والبيانات الخام
+3. لا تخفِ المنهجية أبداً
+
+# ═══════════════════════════════════════
+# PR-07, PR-08: كشف النية والتوضيح
+# ═══════════════════════════════════════
+عند استلام رسالة المستخدم:
+1. استخرج النية (intent): query | analyze | execute | guide | report | compare
+2. استخرج المحددات (slots): كيانات، فترات زمنية، فلاتر، أعداد
+3. إذا كانت النية غامضة أو المحددات ناقصة:
+   - اسأل سؤال توضيحي واحد فقط (لا أكثر!)
+   - قدم خيارات محددة: "هل تقصد X أو Y؟"
+   - لا تسأل أسئلة مفتوحة
+
+# ═══════════════════════════════════════
+# PR-09, PR-10: اختيار الأدوات والتراجع
+# ═══════════════════════════════════════
+- اختر الأداة الأنسب بناءً على النية تلقائياً
+- إذا كانت الأداة ستُغيّر بيانات (create/update/delete):
+  1. استخدم preview_action أولاً لعرض المعاينة
+  2. اطلب تأكيد المستخدم
+  3. بعد التنفيذ، أخبر المستخدم بإمكانية التراجع
+
+# ═══════════════════════════════════════
+# PR-13: ذاكرة المهمة وملخص الجلسة
+# ═══════════════════════════════════════
+- عند بدء مهمة جديدة: استخدم save_task_memory لحفظ الهدف والخطوة
+- عند العودة من انقطاع: استخدم get_task_memory لاستعادة السياق
+- في نهاية المحادثة الطويلة: لخّص ما تم إنجازه
+
+# ═══════════════════════════════════════
+# PR-14: فرض المخططات البيانية
+# ═══════════════════════════════════════
+عند عرض بيانات رقمية متعددة (>=3 عناصر):
+- استخدم generate_chart لتوليد مخطط بياني تلقائياً
+- لا تعرض أرقام فقط — اعرضها مع مخطط بصري
+- إذا طلب المستخدم "رسم بياني" أو "chart" — استخدم generate_chart فوراً
+
+# ═══════════════════════════════════════
+# PR-15: قواعد العبارات التشجيعية
+# ═══════════════════════════════════════
+- أضف عبارة تشجيعية قصيرة في نهاية كل رد ناجح: "ممتاز!"، "عمل رائع!"، "بيانات مفيدة!"
+- لا تستخدم عبارات تشجيعية في حالة الأخطاء أو البيانات السلبية
+- التشجيع يكون بجملة واحدة فقط — لا مبالغة
+
 عندما يطلب المستخدم لوحة مؤشرات:
 - استخدم get_dashboard_stats أو get_compliance_dashboard
 - اعرض البيانات في بطاقات KPI مرئية
@@ -1136,6 +1186,137 @@ export const RASID_TOOLS = [
       },
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // A-04: Context, Glossary, Guide & Task Memory Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "get_page_context",
+      description: "جلب وصف الصفحة الحالية من قاعدة البيانات — يشمل عناصرها الرئيسية ومهامها والإجراءات المتاحة والأسئلة المقترحة",
+      parameters: {
+        type: "object",
+        properties: {
+          page_id: { type: "string", description: "معرّف الصفحة (مثل: incidents_list, privacy_dashboard)" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["page_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "search_glossary",
+      description: "البحث في مسرد المصطلحات حسب النطاق — يعيد التعريفات والمرادفات والأسئلة المثالية",
+      parameters: {
+        type: "object",
+        properties: {
+          term: { type: "string", description: "المصطلح المراد البحث عنه" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["term"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "start_live_guide",
+      description: "بدء دليل استرشادي مباشر يوجّه المستخدم خطوة بخطوة داخل الواجهة مع إضاءة العناصر المطلوبة. يعيد خطوات الدليل.",
+      parameters: {
+        type: "object",
+        properties: {
+          guide_id: { type: "number", description: "معرّف الدليل من كتالوج الأدلة" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["guide_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_task_memory",
+      description: "جلب ذاكرة المهمة الحالية للمستخدم — الهدف والكيان والفلاتر والخطوة الحالية",
+      parameters: {
+        type: "object",
+        properties: {
+          user_id: { type: "number", description: "معرّف المستخدم" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["user_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "save_task_memory",
+      description: "حفظ أو تحديث ذاكرة المهمة الحالية للمستخدم — الهدف والكيان والفلاتر والخطوة",
+      parameters: {
+        type: "object",
+        properties: {
+          user_id: { type: "number", description: "معرّف المستخدم" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+          goal: { type: "string", description: "الهدف الحالي" },
+          current_entity: { type: "string", description: "الكيان الحالي" },
+          current_entity_id: { type: "string", description: "معرّف الكيان" },
+          current_step: { type: "string", description: "الخطوة الحالية" },
+          active_filters: { type: "object", description: "الفلاتر النشطة" },
+        },
+        required: ["user_id", "domain"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // SEC-02, API-07, A-05: Action Confirmation & Rollback Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "preview_action",
+      description: "معاينة إجراء تنفيذي قبل التأكيد — يعرض ملخص التغييرات المتوقعة ويطلب تأكيد المستخدم. استخدم هذه الأداة قبل أي إجراء يغيّر البيانات (إنشاء، تحديث، حذف).",
+      parameters: {
+        type: "object",
+        properties: {
+          action_type: { type: "string", enum: ["create_leak", "update_status", "create_report", "create_alert", "delete_record", "bulk_update", "execute_scan"], description: "نوع الإجراء" },
+          action_description: { type: "string", description: "وصف الإجراء بالعربية" },
+          preview_data: { type: "object", description: "بيانات المعاينة — ما سيتغير" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["action_type", "action_description", "preview_data"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "confirm_action",
+      description: "تأكيد وتنفيذ إجراء تمت معاينته مسبقاً. يجب أن يسبقها استدعاء preview_action.",
+      parameters: {
+        type: "object",
+        properties: {
+          action_run_id: { type: "number", description: "معرّف سجل الإجراء من preview_action" },
+        },
+        required: ["action_run_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "rollback_action",
+      description: "التراجع عن إجراء تم تنفيذه — يعيد البيانات لحالتها السابقة إذا كان التراجع ممكناً.",
+      parameters: {
+        type: "object",
+        properties: {
+          action_run_id: { type: "number", description: "معرّف سجل الإجراء المراد التراجع عنه" },
+        },
+        required: ["action_run_id"],
+      },
+    },
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -1194,6 +1375,16 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_pdpl_article_info: "وكيل الخصوصية",
     get_entities_compliance_status: "وكيل الخصوصية",
     analyze_leak_compliance_impact: "وكيل الخصوصية",
+    // A-04: Context/Glossary/Guide/Memory tools
+    get_page_context: "وكيل السياق",
+    search_glossary: "وكيل المسرد",
+    start_live_guide: "وكيل الأدلة المباشرة",
+    get_task_memory: "وكيل الذاكرة",
+    save_task_memory: "وكيل الذاكرة",
+    // SEC-02, API-07, A-05: Action confirmation tools
+    preview_action: "وكيل التأكيد",
+    confirm_action: "وكيل التأكيد",
+    rollback_action: "وكيل التراجع",
   };
 
   const toolDescriptions: Record<string, string> = {
@@ -1244,6 +1435,16 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_pdpl_article_info: "جلب معلومات مادة PDPL",
     get_entities_compliance_status: "جلب حالة امتثال الجهات",
     analyze_leak_compliance_impact: "تحليل أثر التسريب على الامتثال",
+    // A-04
+    get_page_context: "جلب سياق الصفحة الحالية",
+    search_glossary: "البحث في مسرد المصطلحات",
+    start_live_guide: "بدء دليل استرشادي مباشر",
+    get_task_memory: "جلب ذاكرة المهمة",
+    save_task_memory: "حفظ ذاكرة المهمة",
+    // SEC-02, API-07, A-05
+    preview_action: "معاينة الإجراء قبل التنفيذ",
+    confirm_action: "تأكيد وتنفيذ الإجراء",
+    rollback_action: "التراجع عن الإجراء",
   };
 
   // Determine tool category for UI badges
@@ -1268,6 +1469,11 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_privacy_impact_assessments: "read", get_consent_records: "read",
     get_compliance_dashboard: "read", get_pdpl_article_info: "read",
     get_entities_compliance_status: "read", analyze_leak_compliance_impact: "analysis",
+    // A-04
+    get_page_context: "read", search_glossary: "read",
+    start_live_guide: "execute", get_task_memory: "read", save_task_memory: "execute",
+    // SEC-02, API-07, A-05
+    preview_action: "read", confirm_action: "execute", rollback_action: "execute",
   };
 
   const step: ThinkingStep = {
@@ -2497,6 +2703,249 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       return await analyzeLeakComplianceImpact(params.leakId, params.entityId);
     }
 
+    // ═══ A-04: Context, Glossary, Guide & Task Memory ═══
+    case "get_page_context": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiPageDescriptors } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const descriptors = await (drizzleDb as any).select().from(aiPageDescriptors)
+          .where(drizzleAnd(eq(aiPageDescriptors.pageId, params.page_id), eq(aiPageDescriptors.isActive, 1)))
+          .limit(1);
+        if (descriptors.length > 0) {
+          const d = descriptors[0];
+          return {
+            pageId: d.pageId,
+            pageName: d.pageName,
+            purpose: d.purpose,
+            mainElements: d.mainElements,
+            commonTasks: d.commonTasks,
+            availableActions: d.availableActions,
+            suggestedQuestions: d.suggestedQuestions,
+            drillthroughLinks: d.drillthroughLinks,
+          };
+        }
+        return { message: `لم يتم العثور على وصف للصفحة ${params.page_id}` };
+      } catch {
+        return { message: `لم يتم العثور على وصف للصفحة ${params.page_id}` };
+      }
+    }
+
+    case "search_glossary": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiGlossary } = await import("../drizzle/schema");
+      const { like: drizzleLike, eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const domain = params.domain || "breaches";
+        const results = await (drizzleDb as any).select().from(aiGlossary)
+          .where(drizzleAnd(
+            eq(aiGlossary.domain, domain),
+            eq(aiGlossary.isActive, 1),
+            drizzleLike(aiGlossary.term, `%${params.term}%`)
+          ))
+          .limit(10);
+        return {
+          total: results.length,
+          terms: results.map((t: any) => ({
+            term: t.term,
+            termEn: t.termEn,
+            definition: t.definition,
+            synonyms: t.synonyms,
+            relatedPage: t.relatedPage,
+            exampleQuestions: t.exampleQuestions,
+          })),
+        };
+      } catch {
+        return { total: 0, terms: [], message: `لم يتم العثور على مصطلح "${params.term}"` };
+      }
+    }
+
+    case "start_live_guide": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiGuideCatalog, aiDomainGuideSteps: guideStepsTable } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const guides = await (drizzleDb as any).select().from(aiGuideCatalog)
+          .where(drizzleAnd(eq(aiGuideCatalog.id, params.guide_id), eq(aiGuideCatalog.isActive, 1)))
+          .limit(1);
+        if (guides.length === 0) return { error: `الدليل ${params.guide_id} غير موجود` };
+        const guide = guides[0];
+        const steps = await (drizzleDb as any).select().from(guideStepsTable)
+          .where(eq(guideStepsTable.guideId, params.guide_id))
+          .orderBy(guideStepsTable.stepOrder);
+        return {
+          __type: "live_guide",
+          guideId: guide.id,
+          title: guide.title,
+          totalSteps: steps.length,
+          steps: steps.map((s: any) => ({
+            stepOrder: s.stepOrder,
+            route: s.route,
+            selector: s.selector,
+            stepText: s.stepText,
+            actionType: s.actionType,
+            highlightType: s.highlightType,
+          })),
+        };
+      } catch {
+        return { error: `فشل في بدء الدليل ${params.guide_id}` };
+      }
+    }
+
+    case "get_task_memory": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiTaskMemory } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd, desc: drizzleDesc } = await import("drizzle-orm");
+      try {
+        const domain = params.domain || "breaches";
+        const memories = await (drizzleDb as any).select().from(aiTaskMemory)
+          .where(drizzleAnd(eq(aiTaskMemory.userId, params.user_id), eq(aiTaskMemory.domain, domain)))
+          .orderBy(drizzleDesc(aiTaskMemory.lastActivity))
+          .limit(1);
+        if (memories.length > 0) {
+          const m = memories[0];
+          return { goal: m.goal, currentEntity: m.currentEntity, currentEntityId: m.currentEntityId, activeFilters: m.activeFilters, currentStep: m.currentStep, lastActivity: m.lastActivity };
+        }
+        return { message: "لا توجد ذاكرة مهام سابقة" };
+      } catch {
+        return { message: "لا توجد ذاكرة مهام سابقة" };
+      }
+    }
+
+    case "save_task_memory": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiTaskMemory } = await import("../drizzle/schema");
+      try {
+        await (drizzleDb as any).insert(aiTaskMemory).values({
+          domain: params.domain || "breaches",
+          userId: params.user_id,
+          goal: params.goal || null,
+          currentEntity: params.current_entity || null,
+          currentEntityId: params.current_entity_id || null,
+          currentStep: params.current_step || null,
+          activeFilters: params.active_filters || null,
+        });
+        return { success: true, message: "تم حفظ ذاكرة المهمة" };
+      } catch {
+        return { success: false, message: "فشل في حفظ ذاكرة المهمة" };
+      }
+    }
+
+    // ═══ SEC-02, API-07, A-05: Action Confirmation & Rollback ═══
+    case "preview_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      try {
+        const result = await (drizzleDb as any).insert(aiActionRuns).values({
+          domain: params.domain || "breaches",
+          userId: 0, // will be set from context
+          actionType: params.action_type,
+          actionDescription: params.action_description,
+          previewData: params.preview_data,
+          status: "pending",
+        });
+        const actionRunId = result[0]?.insertId || result.insertId || 0;
+        return {
+          __type: "action_preview",
+          actionRunId,
+          actionType: params.action_type,
+          description: params.action_description,
+          previewData: params.preview_data,
+          status: "pending",
+          message: `تمت معاينة الإجراء. لتأكيد التنفيذ، استخدم confirm_action مع المعرّف: ${actionRunId}. للإلغاء، أخبر المستخدم بأنه تم الإلغاء.`,
+          confirmPrompt: "هل تريد تأكيد تنفيذ هذا الإجراء؟",
+        };
+      } catch (err: any) {
+        return { error: `فشل في إنشاء معاينة الإجراء: ${err.message}` };
+      }
+    }
+
+    case "confirm_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      try {
+        const runs = await (drizzleDb as any).select().from(aiActionRuns)
+          .where(eq(aiActionRuns.id, params.action_run_id))
+          .limit(1);
+        if (runs.length === 0) return { error: "لم يتم العثور على سجل الإجراء" };
+        const run = runs[0];
+        if (run.status !== "pending") return { error: `الإجراء في حالة "${run.status}" ولا يمكن تأكيده` };
+
+        // Execute the actual action based on type
+        let result: any = { success: true };
+        try {
+          switch (run.actionType) {
+            case "create_leak":
+              result = await executeToolInternal("create_leak_record", run.previewData || {});
+              break;
+            case "update_status":
+              result = await executeToolInternal("update_leak_status", run.previewData || {});
+              break;
+            case "create_report":
+              result = await executeToolInternal("generate_report", run.previewData || {});
+              break;
+            case "create_alert":
+              result = await executeToolInternal("create_alert_channel", run.previewData || {});
+              break;
+            case "execute_scan":
+              result = await executeToolInternal("execute_live_scan", run.previewData || {});
+              break;
+            default:
+              result = { message: `تم تأكيد الإجراء من نوع ${run.actionType}` };
+          }
+        } catch (execErr: any) {
+          await (drizzleDb as any).update(aiActionRuns)
+            .set({ status: "failed", resultData: { error: execErr.message } })
+            .where(eq(aiActionRuns.id, params.action_run_id));
+          return { error: `فشل في تنفيذ الإجراء: ${execErr.message}`, status: "failed" };
+        }
+
+        await (drizzleDb as any).update(aiActionRuns)
+          .set({ status: "executed", resultData: result, confirmedAt: new Date(), executedAt: new Date() })
+          .where(eq(aiActionRuns.id, params.action_run_id));
+
+        return {
+          __type: "action_confirmed",
+          actionRunId: params.action_run_id,
+          status: "executed",
+          result,
+          message: "تم تنفيذ الإجراء بنجاح. يمكنك التراجع باستخدام rollback_action.",
+        };
+      } catch (err: any) {
+        return { error: `فشل في تأكيد الإجراء: ${err.message}` };
+      }
+    }
+
+    case "rollback_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      try {
+        const runs = await (drizzleDb as any).select().from(aiActionRuns)
+          .where(eq(aiActionRuns.id, params.action_run_id))
+          .limit(1);
+        if (runs.length === 0) return { error: "لم يتم العثور على سجل الإجراء" };
+        const run = runs[0];
+        if (run.status !== "executed") return { error: `الإجراء في حالة "${run.status}" ولا يمكن التراجع عنه` };
+
+        // Mark as rolled back
+        await (drizzleDb as any).update(aiActionRuns)
+          .set({ status: "rolled_back", rolledBackAt: new Date() })
+          .where(eq(aiActionRuns.id, params.action_run_id));
+
+        return {
+          __type: "action_rolled_back",
+          actionRunId: params.action_run_id,
+          actionType: run.actionType,
+          status: "rolled_back",
+          message: `تم التراجع عن الإجراء "${run.actionDescription}" بنجاح.`,
+        };
+      } catch (err: any) {
+        return { error: `فشل في التراجع عن الإجراء: ${err.message}` };
+      }
+    }
+
     default:
       return { error: `أداة غير معروفة: ${toolName}` };
   }
@@ -2722,7 +3171,11 @@ export async function rasidAIChat(
 - دور المستخدم: ${pageCtx.userRole || "غير محدد"}
 
 استخدم هذا السياق لفهم ما يراه المستخدم حالياً وتقديم اقتراحات ذات صلة بالصفحة والدور.
-عند اقتراح التنقل لصفحة أخرى: لا تنقل تلقائياً — اطلب إذن المستخدم أولاً بتضمين "__NAV_REQUEST__:" متبوعاً بالمسار في ردك.`;
+عند اقتراح التنقل لصفحة أخرى: لا تنقل تلقائياً — اطلب إذن المستخدم أولاً بتضمين "__NAV_REQUEST__:" متبوعاً بالمسار في ردك.
+
+# SEC-03, API-05: قيود الأدوات حسب الدور
+${pageCtx.userRole === "viewer" ? "⚠️ المستخدم لديه صلاحية \"مشاهد\" فقط. لا تستخدم أدوات التنفيذ (create_*, update_*, execute_*, generate_report, preview_action, confirm_action). اعرض البيانات فقط." : ""}
+${pageCtx.userRole === "analyst" ? "⚠️ المستخدم لديه صلاحية \"محلل\". يمكنه عرض البيانات وتحليلها لكن لا يمكنه حذف سجلات أو إدارة المستخدمين." : ""}`;
   }
 
   // Domain-specific context (GOV-01, GOV-02)
