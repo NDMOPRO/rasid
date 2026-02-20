@@ -1,0 +1,25 @@
+:root, [data-platform="rasid"] {
+  --platform-primary: #273470;
+  --platform-primary-light: #3DB1AC;
+  --platform-accent: #6459A7;
+  --platform-focus: #3DB1AC;
+  --platform-focus-ring: rgba(61,177,172,0.35);
+  --platform-nav-active: #3DB1AC;
+  --platform-nav-active-glow: rgba(61,177,172,0.4);
+  --chart-1: #3DB1AC; --chart-2: #6459A7; --chart-3: #273470;
+  --chart-4: #EB3D63; --chart-5: #F59E0B; --chart-6: #10B981;
+}
+
+[data-platform="emerald"] {
+  --platform-primary: #065f46;
+  --platform-primary-light: #34d399;
+  --platform-accent: #059669;
+  --platform-focus: #34d399;
+  --platform-focus-ring: rgba(52,211,153,0.35);
+  --platform-nav-active: #34d399;
+  --platform-nav-active-glow: rgba(52,211,153,0.4);
+  --chart-1: #34d399; --chart-2: #059669; --chart-3: #065f46;
+}
+
+.dark:root, .dark[data-platform="rasid"] { --platform-primary: #3DB1AC; }
+.dark[data-platform="emerald"] { --platform-primary: #34d399; }

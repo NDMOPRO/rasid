@@ -29,9 +29,34 @@ const greetings = [
 const tips: Record<string, string> = {
   "/overview": "💡 يمكنك تصفية البيانات حسب الفترة الزمنية",
   "/incidents": "💡 اضغط على أي حالة لعرض التفاصيل الكاملة",
+  "/leaks": "💡 اضغط على أي حالة رصد لعرض التفاصيل والأدلة",
   "/privacy": "💡 تابع مؤشرات الامتثال لنظام حماية البيانات",
+  "/sites": "💡 يمكنك فحص أي موقع لمعرفة حالة الامتثال",
   "/reports": "💡 يمكنك تصدير التقارير بصيغة PDF",
+  "/dark-web": "💡 راقب التهديدات الجديدة في الدارك ويب",
+  "/evidence-chain": "💡 وثّق الأدلة الرقمية لضمان سلسلة الحفظ",
   "/smart-rasid": "💡 اسألني أي سؤال عن بياناتك!",
+};
+
+// Proactive idle suggestions — domain-aware (UI-16, UI-17)
+const IDLE_SUGGESTIONS: Record<string, { text: string; delay: number }[]> = {
+  "/overview": [
+    { text: "🔍 لاحظت أنك في لوحة المعلومات — هل تريد ملخصاً تنفيذياً سريعاً؟", delay: 45000 },
+    { text: "📊 يمكنني تحليل اتجاهات حالات الرصد لك", delay: 90000 },
+  ],
+  "/leaks": [
+    { text: "⚠️ هل تريد مساعدة في تحليل حالات الرصد الحالية؟", delay: 30000 },
+    { text: "🔗 يمكنني ربط حالات الرصد المتشابهة وإيجاد الأنماط", delay: 75000 },
+  ],
+  "/privacy": [
+    { text: "🛡️ هل تريد معرفة أي البنود تحتاج اهتماماً أكبر؟", delay: 40000 },
+  ],
+  "/sites": [
+    { text: "🌐 يمكنني فحص أي موقع جديد لحالة الامتثال", delay: 35000 },
+  ],
+  "/reports": [
+    { text: "📄 هل تريد إنشاء تقرير تنفيذي شامل؟", delay: 30000 },
+  ],
 };
 
 const quickPrompts = [
@@ -50,13 +75,127 @@ export default function RasidCharacterWidget() {
   const [isHovered, setIsHovered] = useState(false);
   const [miniMessage, setMiniMessage] = useState("");
 
-  const handleMiniSend = () => {
+  // Inline chat state (CHAT-01 to CHAT-07)
+  const [chatMode, setChatMode] = useState(false);
+  const [chatMessages, setChatMessages] = useState<MiniMessage[]>([]);
+  const [isAILoading, setIsAILoading] = useState(false);
+  const [streamingStatus, setStreamingStatus] = useState<StreamingStatus>("idle");
+  const [streamingContent, setStreamingContent] = useState("");
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  // Welcome message on first open (CHAT-04)
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  /** SSE Streaming chat — token-by-token (API-03, CHAT-01, UI-04) */
+  const handleMiniSend = async () => {
     if (!miniMessage.trim()) return;
-    // Navigate to SmartRasid with the message as query param
-    setIsExpanded(false);
-    setLocation(`/app/smart-rasid?q=${encodeURIComponent(miniMessage.trim())}`);
-    setMiniMessage("");
+    const userMsg = miniMessage.trim();
+
+    if (chatMode) {
+      setChatMessages(prev => [...prev, { role: "user", content: userMsg }]);
+      setMiniMessage("");
+      setShowWelcome(false);
+      setIsAILoading(true);
+      setStreamingStatus("understanding");
+      setStreamingContent("");
+
+      try {
+        const response = await fetch("/api/rasid/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userMsg,
+            history: chatMessages.map(m => ({ role: m.role, content: m.content })),
+          }),
+        });
+
+        if (!response.ok || !response.body) {
+          // Fallback to tRPC if SSE endpoint unavailable (API-06)
+          setStreamingStatus("fetching");
+          const fallbackRes = await fetch("/api/trpc/smartRasid.chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ json: { message: userMsg, history: chatMessages.map(m => ({ role: m.role, content: m.content })) } }),
+          });
+          const data = await fallbackRes.json();
+          const aiResp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
+          setChatMessages(prev => [...prev, { role: "assistant", content: aiResp }]);
+          setIsAILoading(false);
+          setStreamingStatus("idle");
+          return;
+        }
+
+        // Stream SSE tokens
+        setStreamingStatus("streaming");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let accumulated = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (line.startsWith("event: ")) {
+              const eventType = line.slice(7).trim();
+              // Next data line
+              const dataIdx = lines.indexOf(line) + 1;
+              if (dataIdx < lines.length && lines[dataIdx].startsWith("data: ")) {
+                try {
+                  const payload = JSON.parse(lines[dataIdx].slice(6));
+                  if (eventType === "token" && payload.text) {
+                    accumulated += payload.text;
+                    setStreamingContent(accumulated);
+                  } else if (eventType === "thinking") {
+                    setStreamingStatus("understanding");
+                  } else if (eventType === "tool") {
+                    setStreamingStatus(payload.status === "running" ? "executing" : "preparing");
+                  } else if (eventType === "done") {
+                    accumulated = payload.response || accumulated;
+                  } else if (eventType === "error") {
+                    accumulated = accumulated || "عذراً، حدث خطأ.";
+                  }
+                } catch {}
+              }
+            } else if (line.startsWith("data: ")) {
+              try {
+                const payload = JSON.parse(line.slice(6));
+                if (payload.text) {
+                  accumulated += payload.text;
+                  setStreamingContent(accumulated);
+                }
+              } catch {}
+            }
+          }
+        }
+
+        setChatMessages(prev => [...prev, { role: "assistant", content: accumulated || "عذراً، لم أتمكن من الرد." }]);
+        setStreamingContent("");
+      } catch (err) {
+        setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ. حاول مرة أخرى." }]);
+      } finally {
+        setIsAILoading(false);
+        setStreamingStatus("idle");
+        setStreamingContent("");
+      }
+    } else {
+      setIsExpanded(false);
+      setLocation(`/app/smart-rasid?q=${encodeURIComponent(userMsg)}`);
+      setMiniMessage("");
+    }
   };
+
+  // Auto-scroll chat to bottom (including during streaming)
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, isAILoading, streamingContent]);
 
   const handleQuickAction = (action: string) => {
     setIsExpanded(false);
@@ -85,6 +224,29 @@ export default function RasidCharacterWidget() {
       return () => clearTimeout(timer);
     }
   }, [location, hasInteracted]);
+
+  // Proactive idle assistance (UI-16, UI-17)
+  useEffect(() => {
+    if (isExpanded || hasInteracted) return;
+    const matchedPage = Object.entries(IDLE_SUGGESTIONS).find(([path]) => location.includes(path));
+    if (!matchedPage) return;
+
+    const timers: NodeJS.Timeout[] = [];
+    matchedPage[1].forEach((suggestion, idx) => {
+      const timer = setTimeout(() => {
+        setBubbleText(suggestion.text);
+        setShowBubble(true);
+        setCurrentChar("waving");
+        bubbleTimer.current = setTimeout(() => {
+          setShowBubble(false);
+          setCurrentChar("standing");
+        }, 8000);
+      }, suggestion.delay);
+      timers.push(timer);
+    });
+
+    return () => timers.forEach(t => clearTimeout(t));
+  }, [location, isExpanded, hasInteracted]);
 
   // Periodic greeting animation
   useEffect(() => {
@@ -263,36 +425,238 @@ export default function RasidCharacterWidget() {
               </div>
             </div>
 
-            {/* Quick Prompts */}
-            <div className="px-3 pt-2 flex flex-wrap gap-1.5">
-              {quickPrompts.map((prompt, i) => (
-                <motion.button
-                  key={i}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => goToSmartRasid(prompt.text)}
-                  className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF] transition-colors"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                >
-                  {prompt.icon} {prompt.text}
-                </motion.button>
-              ))}
-            </div>
+            {chatMode ? (
+              /* ═══ INLINE CHAT MODE (CHAT-01 to CHAT-07) ═══ */
+              <>
+                {/* Chat Messages Area */}
+                <div ref={chatScrollRef} className="h-[280px] overflow-y-auto px-3 pt-3 space-y-2 scrollbar-thin scrollbar-thumb-white/10">
+                  {/* Welcome Message (CHAT-04) */}
+                  {showWelcome && chatMessages.length === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-center py-4"
+                    >
+                      <motion.img
+                        src={CHARACTERS.waving}
+                        alt="راصد"
+                        className="h-16 w-auto mx-auto mb-2"
+                        animate={{ y: [0, -4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      <p className="text-xs font-medium text-[#D4DDEF]">أهلاً! أنا راصد الذكي</p>
+                      <p className="text-[10px] text-[#D4DDEF]/50 mt-1">كيف أقدر أساعدك اليوم؟</p>
+                      {/* Quick prompts as suggestions */}
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                        {quickPrompts.map((p, i) => (
+                          <motion.button
+                            key={i}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => {
+                              setMiniMessage(p.text);
+                              // Use handleMiniSend which now supports SSE
+                              setTimeout(() => {
+                                const input = document.querySelector('[data-mini-chat-input]') as HTMLInputElement;
+                                if (input) {
+                                  input.value = p.text;
+                                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                                  nativeInputValueSetter?.call(input, p.text);
+                                  input.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                              }, 0);
+                              setShowWelcome(false);
+                              setChatMessages(prev => [...prev, { role: "user", content: p.text }]);
+                              setIsAILoading(true);
+                              setStreamingStatus("understanding");
+                              setStreamingContent("");
+                              // Use SSE streaming
+                              fetch("/api/rasid/stream", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ message: p.text, history: [] }),
+                              }).then(async (res) => {
+                                if (!res.ok || !res.body) {
+                                  // Fallback to tRPC
+                                  const fallback = await fetch("/api/trpc/smartRasid.chat", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ json: { message: p.text, history: [] } }),
+                                  });
+                                  const data = await fallback.json();
+                                  const resp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً.";
+                                  setChatMessages(prev => [...prev, { role: "assistant", content: resp }]);
+                                  return;
+                                }
+                                const reader = res.body.getReader();
+                                const decoder = new TextDecoder();
+                                let buf = "", acc = "";
+                                setStreamingStatus("streaming");
+                                while (true) {
+                                  const { done, value } = await reader.read();
+                                  if (done) break;
+                                  buf += decoder.decode(value, { stream: true });
+                                  const lines = buf.split("\n");
+                                  buf = lines.pop() || "";
+                                  for (const line of lines) {
+                                    if (line.startsWith("data: ")) {
+                                      try {
+                                        const d = JSON.parse(line.slice(6));
+                                        if (d.text) { acc += d.text; setStreamingContent(acc); }
+                                        if (d.response) acc = d.response;
+                                      } catch {}
+                                    }
+                                  }
+                                }
+                                setChatMessages(prev => [...prev, { role: "assistant", content: acc || "عذراً." }]);
+                                setStreamingContent("");
+                              }).catch(() => {
+                                setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ." }]);
+                              }).finally(() => {
+                                setIsAILoading(false);
+                                setStreamingStatus("idle");
+                                setStreamingContent("");
+                              });
+                              setMiniMessage("");
+                            }}
+                            className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF]"
+                            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                          >
+                            {p.icon} {p.text}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
-            {/* Quick Actions */}
-            <div className="p-3 space-y-2">
-              <motion.button
-                whileHover={{ x: -4, backgroundColor: "rgba(197, 165, 90, 0.08)" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => goToSmartRasid()}
-                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
-              >
-                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(197, 165, 90, 0.12)" }}>
-                  <MessageCircle className="h-4 w-4 text-[#C5A55A]" />
+                  {/* Chat Messages */}
+                  {chatMessages.map((msg, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-xl px-3 py-2 text-[11px] ${
+                          msg.role === "user"
+                            ? "text-white"
+                            : "text-[#D4DDEF]/80"
+                        }`}
+                        style={{
+                          background: msg.role === "user"
+                            ? "linear-gradient(135deg, #C5A55A, #b8963f)"
+                            : "rgba(255,255,255,0.04)",
+                          border: msg.role === "assistant" ? "1px solid rgba(255,255,255,0.06)" : "none",
+                        }}
+                      >
+                        {msg.role === "assistant" ? (
+                          <div className="prose prose-xs dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-1">
+                            <Streamdown>{msg.content}</Streamdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Streaming content — token-by-token (UI-04) */}
+                  {isAILoading && streamingContent && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start"
+                    >
+                      <div
+                        className="max-w-[85%] rounded-xl px-3 py-2 text-[11px] text-[#D4DDEF]/80"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        <div className="prose prose-xs dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-1">
+                          <Streamdown>{streamingContent}</Streamdown>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Loading indicator */}
+                  {isAILoading && !streamingContent && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-start"
+                    >
+                      <div
+                        className="rounded-xl px-3 py-2 flex items-center gap-2"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        <Loader2 className="h-3 w-3 text-[#C5A55A] animate-spin" />
+                        <span className="text-[10px] text-[#D4DDEF]/50">{STATUS_LABELS[streamingStatus] || "يفكر..."}</span>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
+
+                {/* Chat Input (CHAT-01) */}
+                <div className="p-3 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      data-mini-chat-input
+                      type="text"
+                      value={miniMessage}
+                      onChange={(e) => setMiniMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey && miniMessage.trim()) {
+                          handleMiniSend();
+                        }
+                      }}
+                      placeholder="اكتب رسالتك هنا..."
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#3DB1AC]/50 text-right"
+                      dir="rtl"
+                    />
+                    <button
+                      onClick={handleMiniSend}
+                      disabled={!miniMessage.trim() || isAILoading}
+                      className="p-2 rounded-lg bg-[#3DB1AC] hover:bg-[#3DB1AC]/80 disabled:opacity-30 transition-colors"
+                    >
+                      <Send className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* ═══ NAVIGATION MODE (default) ═══ */
+              <>
+                {/* Quick Prompts */}
+                <div className="px-3 pt-2 flex flex-wrap gap-1.5">
+                  {quickPrompts.map((prompt, i) => (
+                    <motion.button
+                      key={i}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { setChatMode(true); setMiniMessage(prompt.text); }}
+                      className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF] transition-colors"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      {prompt.icon} {prompt.text}
+                    </motion.button>
+                  ))}
+                </div>
+
+                {/* Quick Actions */}
+                <div className="p-3 space-y-2">
+                  <motion.button
+                    whileHover={{ x: -4, backgroundColor: "rgba(197, 165, 90, 0.08)" }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setChatMode(true)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+                  >
+                    <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(197, 165, 90, 0.12)" }}>
+                      <MessageCircle className="h-4 w-4 text-[#C5A55A]" />
+                    </div>
                 <div className="flex-1">
                   <p className="text-xs font-medium text-[#D4DDEF]">محادثة جديدة</p>
                   <p className="text-[10px] text-[#D4DDEF]/40">تحدث مع راصد الذكي</p>
@@ -379,6 +743,8 @@ export default function RasidCharacterWidget() {
                 <button onClick={() => handleQuickAction("أعطني دليل استرشادي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">📖 دليل</button>
               </div>
             </div>
+              </>
+            )}
 
             {/* Footer */}
             <div className="px-4 py-2 border-t border-white/5">
