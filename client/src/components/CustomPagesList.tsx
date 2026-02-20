@@ -218,7 +218,7 @@ export default function CustomPagesList({
                         }}
                         className={`
                           w-5 h-5 rounded flex items-center justify-center flex-shrink-0
-                          opacity-100 transition-opacity
+                          opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity
                           ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}
                         `}
                       >
