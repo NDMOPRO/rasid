@@ -553,3 +553,86 @@ export async function invokeLLMStream(
 
   return result;
 }
+
+// ============================================
+// Vector Embedding Generation
+// ============================================
+
+/**
+ * Generate vector embeddings for text using OpenAI-compatible embeddings API.
+ * Falls back to a simple hash-based embedding if API is unavailable.
+ */
+export async function generateEmbedding(text: string): Promise<number[]> {
+  if (!text || text.trim().length === 0) return [];
+
+  const apiKey = resolveApiKey();
+  if (!apiKey) return fallbackEmbedding(text);
+
+  try {
+    // Determine embeddings endpoint
+    let embeddingsUrl: string;
+    if (ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) {
+      embeddingsUrl = "https://api.openai.com/v1/embeddings";
+    } else if (ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0) {
+      embeddingsUrl = `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/embeddings`;
+    } else {
+      embeddingsUrl = "https://forge.manus.im/v1/embeddings";
+    }
+
+    const response = await fetch(embeddingsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        input: text.slice(0, 8000), // Limit input length
+        model: "text-embedding-3-small",
+        encoding_format: "float",
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`Embedding API returned ${response.status}, using fallback`);
+      return fallbackEmbedding(text);
+    }
+
+    const data = await response.json();
+    const embedding = data?.data?.[0]?.embedding;
+    if (Array.isArray(embedding) && embedding.length > 0) {
+      return embedding;
+    }
+    return fallbackEmbedding(text);
+  } catch (error) {
+    console.warn("Embedding generation failed, using fallback:", error);
+    return fallbackEmbedding(text);
+  }
+}
+
+/**
+ * Fallback: Generate a deterministic pseudo-embedding from text using character-level hashing.
+ * This produces a 256-dimensional vector that preserves some lexical similarity.
+ */
+function fallbackEmbedding(text: string): number[] {
+  const dimensions = 256;
+  const embedding = new Array(dimensions).fill(0);
+  const normalized = text.toLowerCase().trim();
+
+  for (let i = 0; i < normalized.length; i++) {
+    const charCode = normalized.charCodeAt(i);
+    const idx = (charCode * 31 + i * 7) % dimensions;
+    embedding[idx] += 1.0 / (1 + Math.floor(i / 10));
+    // Spread influence to neighboring dimensions
+    embedding[(idx + 1) % dimensions] += 0.5 / (1 + Math.floor(i / 10));
+    embedding[(idx + dimensions - 1) % dimensions] += 0.3 / (1 + Math.floor(i / 10));
+  }
+
+  // Normalize to unit vector
+  const magnitude = Math.sqrt(embedding.reduce((sum: number, v: number) => sum + v * v, 0));
+  if (magnitude > 0) {
+    for (let i = 0; i < dimensions; i++) {
+      embedding[i] /= magnitude;
+    }
+  }
+  return embedding;
+}
