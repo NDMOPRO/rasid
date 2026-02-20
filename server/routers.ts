@@ -7933,10 +7933,23 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       search: z.string().optional(),
       status: z.string().optional(),
       complianceStatus: z.string().optional(),
+      category: z.string().optional(),
     }).optional()).query(async ({ input }) => {
-      return await db.getSites(input || {});
+      // Use privacyDomains table (24,983 real Saudi domains)
+      const result = await db.getPrivacyDomains({
+        page: input?.page || 1,
+        limit: input?.limit || 20,
+        search: input?.search,
+        complianceStatus: input?.complianceStatus || input?.status,
+        category: input?.category,
+      });
+      // Return in compatible format: { sites: [...], total: N }
+      return { sites: result.domains, total: result.total };
     }),
     siteById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      // Try privacyDomains first, fallback to old sites
+      const pd = await db.getPrivacyDomainById(input.id);
+      if (pd) return pd;
       return await db.getSiteById(input.id);
     }),
     siteScans: protectedProcedure.input(z.object({ siteId: z.number() })).query(async ({ input }) => {
@@ -7947,6 +7960,21 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       return scans.length > 0 ? (scans[0] as any).requirements || [] : [];
     }),
     stats: protectedProcedure.query(async () => {
+      // Use privacyDomains table (24,983 real Saudi domains)
+      const pdStats = await db.getPrivacyDomainStats();
+      if (pdStats && pdStats.total > 0) {
+        return {
+          totalSites: pdStats.total,
+          totalScans: pdStats.total,
+          compliant: pdStats.compliant,
+          nonCompliant: pdStats.nonCompliant,
+          partiallyCompliant: pdStats.partiallyCompliant,
+          notWorking: pdStats.noPolicy,
+          noPolicy: pdStats.noPolicy,
+          averageScore: pdStats.averageScore,
+        };
+      }
+      // Fallback to old sites table
       const sites = await db.getSites({ limit: 100000 });
       const siteList = Array.isArray((sites as any).sites) ? (sites as any).sites : Array.isArray(sites) ? sites : [];
       return {

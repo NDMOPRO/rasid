@@ -33,7 +33,8 @@ export default function PrivacyDashboard() {
   const [sectorFilter, setSectorFilter] = useState<SectorFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  const { data: dashStats, isLoading: loadingStats } = trpc.dashboard.stats.useQuery();
+  // Pull from privacyDomains (the new 24,983 domains table)
+  const { data: pdStats, isLoading: loadingStats } = trpc.privacyDomains.stats.useQuery();
   const { data: clauseStats, isLoading: loadingClauses } = trpc.dashboard.clauseStats.useQuery();
   const { data: sectorCompliance, isLoading: loadingSector } = trpc.dashboard.sectorCompliance.useQuery();
   const { data: clauseBySector } = trpc.dashboard.clauseStatsBySectorType.useQuery();
@@ -42,15 +43,15 @@ export default function PrivacyDashboard() {
   const isLoading = loadingStats || loadingClauses || loadingSector;
 
   const filteredStats = useMemo(() => {
-    if (!dashStats) return null;
+    if (!pdStats) return null;
     if (sectorFilter === "all") {
       return {
-        totalSites: dashStats.totalSites || 0,
-        totalScans: dashStats.totalScans || 0,
-        compliant: dashStats.compliant || 0,
-        nonCompliant: dashStats.nonCompliant || 0,
-        partial: (dashStats as any).partiallyCompliant || 0,
-        notWorking: dashStats.noPolicy || 0,
+        totalSites: pdStats.total || 0,
+        totalScans: pdStats.total || 0,
+        compliant: pdStats.compliant || 0,
+        nonCompliant: pdStats.nonCompliant || 0,
+        partial: pdStats.partiallyCompliant || 0,
+        notWorking: pdStats.noPolicy || 0,
       };
     }
     if (sectorCompliance && Array.isArray(sectorCompliance)) {
@@ -67,14 +68,14 @@ export default function PrivacyDashboard() {
       }
     }
     return {
-      totalSites: dashStats.totalSites || 0,
-      totalScans: dashStats.totalScans || 0,
-      compliant: dashStats.compliant || 0,
-      nonCompliant: dashStats.nonCompliant || 0,
-      partial: (dashStats as any).partiallyCompliant || 0,
-      notWorking: dashStats.noPolicy || 0,
+      totalSites: pdStats.total || 0,
+      totalScans: pdStats.total || 0,
+      compliant: pdStats.compliant || 0,
+      nonCompliant: pdStats.nonCompliant || 0,
+      partial: pdStats.partiallyCompliant || 0,
+      notWorking: pdStats.noPolicy || 0,
     };
-  }, [dashStats, sectorCompliance, sectorFilter]);
+  }, [pdStats, sectorCompliance, sectorFilter]);
 
   const filteredClauseStats = useMemo(() => {
     if (sectorFilter === "all") {
@@ -124,7 +125,7 @@ export default function PrivacyDashboard() {
     else if (filter === "non_compliant") params.set("complianceStatus", "non_compliant");
     else if (filter === "not_working") params.set("status", "not_working");
     if (sectorFilter !== "all") params.set("sectorType", sectorFilter);
-    setLocation(`/app/sites?${params.toString()}`);
+    setLocation(`/app/privacy/sites?${params.toString()}`);
   };
 
   const drillDownClause = (clauseNum: number) => {
