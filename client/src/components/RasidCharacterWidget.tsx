@@ -1,31 +1,12 @@
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft, Send, Shield, Loader2, Maximize2, Volume2 } from "lucide-react";
-import { Streamdown } from "streamdown";
+import { Bot, X, Sparkles, MessageCircle, Zap, ChevronLeft, Send, Shield } from "lucide-react";
 
 /* ═══════════════════════════════════════════════════════════════
    RasidCharacterWidget — ويدجت راصد الذكي العائم الإبهاري
    يظهر في كل الصفحات مع تأثيرات حركية متقدمة + حقل إدخال
-   + محادثة مصغرة مع Streaming (CHAT-01 to CHAT-07)
    ═══════════════════════════════════════════════════════════════ */
-
-/** Streaming status indicator types (CHAT-06) */
-type StreamingStatus = "idle" | "understanding" | "fetching" | "executing" | "preparing" | "streaming";
-
-const STATUS_LABELS: Record<StreamingStatus, string> = {
-  idle: "",
-  understanding: "يفهم طلبك...",
-  fetching: "يجلب البيانات...",
-  executing: "ينفذ الأدوات...",
-  preparing: "يُعد الرد...",
-  streaming: "يكتب...",
-};
-
-interface MiniMessage {
-  role: "user" | "assistant";
-  content: string;
-}
 
 const CHARACTERS = {
   waving: "/branding/characters/Character_1_waving_transparent.png",
@@ -69,100 +50,18 @@ export default function RasidCharacterWidget() {
   const [isHovered, setIsHovered] = useState(false);
   const [miniMessage, setMiniMessage] = useState("");
 
-  // Inline chat state (CHAT-01 to CHAT-07)
-  const [chatMode, setChatMode] = useState(false);
-  const [chatMessages, setChatMessages] = useState<MiniMessage[]>([]);
-  const [isAILoading, setIsAILoading] = useState(false);
-  const [streamingStatus, setStreamingStatus] = useState<StreamingStatus>("idle");
-  const [streamingContent, setStreamingContent] = useState("");
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  // Welcome message on first open (CHAT-04)
-  const [showWelcome, setShowWelcome] = useState(true);
-
-  const handleMiniSend = async () => {
+  const handleMiniSend = () => {
     if (!miniMessage.trim()) return;
-    const userMsg = miniMessage.trim();
-
-    if (chatMode) {
-      // Inline chat: send message and get response
-      setChatMessages(prev => [...prev, { role: "user", content: userMsg }]);
-      setMiniMessage("");
-      setShowWelcome(false);
-      setIsAILoading(true);
-      setStreamingStatus("understanding");
-
-      try {
-        setStreamingStatus("fetching");
-
-        // Use fetch to call tRPC endpoint for AI chat
-        const response = await fetch("/api/trpc/smartRasid.chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            json: {
-              message: userMsg,
-              history: chatMessages.map(m => ({ role: m.role, content: m.content })),
-            }
-          }),
-        });
-
-        setStreamingStatus("preparing");
-        const data = await response.json();
-        const aiResponse = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
-
-        setChatMessages(prev => [...prev, { role: "assistant", content: aiResponse }]);
-      } catch (err) {
-        setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ. حاول مرة أخرى." }]);
-      } finally {
-        setIsAILoading(false);
-        setStreamingStatus("idle");
-      }
-    } else {
-      // Navigate to SmartRasid with the message
-      setIsExpanded(false);
-      setLocation(`/app/smart-rasid?q=${encodeURIComponent(userMsg)}`);
-      setMiniMessage("");
-    }
+    // Navigate to SmartRasid with the message as query param
+    setIsExpanded(false);
+    setLocation(`/app/smart-rasid?q=${encodeURIComponent(miniMessage.trim())}`);
+    setMiniMessage("");
   };
-
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [chatMessages, isAILoading]);
 
   const handleQuickAction = (action: string) => {
-    if (chatMode) {
-      setMiniMessage(action);
-      // Auto-send in chat mode
-      setChatMessages(prev => [...prev, { role: "user", content: action }]);
-      setShowWelcome(false);
-      handleMiniSend();
-    } else {
-      setIsExpanded(false);
-      setLocation(`/app/smart-rasid?q=${encodeURIComponent(action)}`);
-    }
+    setIsExpanded(false);
+    setLocation(`/app/smart-rasid?q=${encodeURIComponent(action)}`);
   };
-
-  // Toggle between menu mode and inline chat mode
-  const toggleChatMode = useCallback(() => {
-    setChatMode(prev => !prev);
-    setShowWelcome(true);
-  }, []);
-
-  // TTS: Speak last assistant message (CHAT-07)
-  const speakLastMessage = useCallback(() => {
-    const lastAssistant = [...chatMessages].reverse().find(m => m.role === "assistant");
-    if (lastAssistant && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(lastAssistant.content.replace(/[#*|_`]/g, ""));
-      utterance.lang = "ar-SA";
-      utterance.rate = 0.9;
-      speechSynthesis.speak(utterance);
-    }
-  }, [chatMessages]);
-
   const [pulseCount, setPulseCount] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -312,307 +211,174 @@ export default function RasidCharacterWidget() {
                 src={CHARACTERS.sunglasses}
                 alt="راصد"
                 className="h-12 w-auto"
-                animate={isAILoading ? { rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] } : { rotate: [0, 3, -3, 0] }}
-                transition={{ duration: isAILoading ? 0.8 : 2, repeat: Infinity }}
+                animate={{ rotate: [0, 3, -3, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
               />
               <div className="flex-1">
                 <p className="text-sm font-bold text-[#D4DDEF]">راصد الذكي</p>
                 <div className="flex items-center gap-1.5">
-                  {streamingStatus !== "idle" ? (
-                    <>
-                      <Loader2 className="h-2.5 w-2.5 text-[#C5A55A] animate-spin" />
-                      <p className="text-[10px] text-[#C5A55A]/80">{STATUS_LABELS[streamingStatus]}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <p className="text-[10px] text-emerald-400/80">متصل ومستعد</p>
-                    </>
-                  )}
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <p className="text-[10px] text-emerald-400/80">متصل ومستعد</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                {/* Toggle chat/menu mode */}
-                <button
-                  onClick={toggleChatMode}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
-                  title={chatMode ? "وضع القائمة" : "وضع المحادثة"}
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
+              >
+                <X className="h-3.5 w-3.5 text-[#D4DDEF]/50" />
+              </button>
+            </div>
+
+            {/* Input Field */}
+            <div className="px-3 pt-3">
+              <div
+                className="flex items-center gap-2 rounded-xl px-3 py-2"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(197, 165, 90, 0.15)",
+                }}
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="اكتب سؤالك هنا..."
+                  className="flex-1 bg-transparent text-xs text-[#D4DDEF] placeholder-[#D4DDEF]/30 outline-none"
+                  dir="rtl"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleSend}
+                  disabled={!inputValue.trim()}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30"
+                  style={{
+                    background: inputValue.trim() ? "linear-gradient(135deg, #C5A55A, #b8963f)" : "rgba(255,255,255,0.05)",
+                  }}
                 >
-                  {chatMode ? <Zap className="h-3.5 w-3.5 text-[#3DB1AC]" /> : <MessageCircle className="h-3.5 w-3.5 text-[#C5A55A]" />}
-                </button>
-                {/* Expand to full page */}
-                <button
-                  onClick={() => { setIsExpanded(false); goToSmartRasid(); }}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
-                  title="فتح الصفحة الكاملة"
-                >
-                  <Maximize2 className="h-3.5 w-3.5 text-[#D4DDEF]/50" />
-                </button>
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
-                >
-                  <X className="h-3.5 w-3.5 text-[#D4DDEF]/50" />
-                </button>
+                  <Send className="h-3.5 w-3.5 text-white rotate-180" />
+                </motion.button>
               </div>
             </div>
 
-            {chatMode ? (
-              /* ═══ INLINE CHAT MODE (CHAT-01 to CHAT-07) ═══ */
-              <>
-                {/* Chat Messages Area */}
-                <div ref={chatScrollRef} className="h-[280px] overflow-y-auto px-3 pt-3 space-y-2 scrollbar-thin scrollbar-thumb-white/10">
-                  {/* Welcome Message (CHAT-04) */}
-                  {showWelcome && chatMessages.length === 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-center py-4"
-                    >
-                      <motion.img
-                        src={CHARACTERS.waving}
-                        alt="راصد"
-                        className="h-16 w-auto mx-auto mb-2"
-                        animate={{ y: [0, -4, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                      <p className="text-xs font-medium text-[#D4DDEF]">أهلاً! أنا راصد الذكي</p>
-                      <p className="text-[10px] text-[#D4DDEF]/50 mt-1">كيف أقدر أساعدك اليوم؟</p>
-                      {/* Quick prompts as suggestions */}
-                      <div className="flex flex-wrap justify-center gap-1.5 mt-3">
-                        {quickPrompts.map((p, i) => (
-                          <motion.button
-                            key={i}
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={() => {
-                              setMiniMessage(p.text);
-                              setShowWelcome(false);
-                              setChatMessages(prev => [...prev, { role: "user", content: p.text }]);
-                              setIsAILoading(true);
-                              setStreamingStatus("understanding");
-                              // Trigger send
-                              fetch("/api/trpc/smartRasid.chat", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ json: { message: p.text, history: [] } }),
-                              }).then(r => r.json()).then(data => {
-                                const resp = data?.result?.data?.json?.response || data?.result?.data?.response || "عذراً، لم أتمكن من الرد.";
-                                setChatMessages(prev => [...prev, { role: "assistant", content: resp }]);
-                              }).catch(() => {
-                                setChatMessages(prev => [...prev, { role: "assistant", content: "عذراً، حدث خطأ." }]);
-                              }).finally(() => {
-                                setIsAILoading(false);
-                                setStreamingStatus("idle");
-                              });
-                              setMiniMessage("");
-                            }}
-                            className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF]"
-                            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-                          >
-                            {p.icon} {p.text}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+            {/* Quick Prompts */}
+            <div className="px-3 pt-2 flex flex-wrap gap-1.5">
+              {quickPrompts.map((prompt, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => goToSmartRasid(prompt.text)}
+                  className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF] transition-colors"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  {prompt.icon} {prompt.text}
+                </motion.button>
+              ))}
+            </div>
 
-                  {/* Chat Messages */}
-                  {chatMessages.map((msg, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[85%] rounded-xl px-3 py-2 text-[11px] ${
-                          msg.role === "user"
-                            ? "text-white"
-                            : "text-[#D4DDEF]/80"
-                        }`}
-                        style={{
-                          background: msg.role === "user"
-                            ? "linear-gradient(135deg, #C5A55A, #b8963f)"
-                            : "rgba(255,255,255,0.04)",
-                          border: msg.role === "assistant" ? "1px solid rgba(255,255,255,0.06)" : "none",
-                        }}
-                      >
-                        {msg.role === "assistant" ? (
-                          <div className="prose prose-xs dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-1">
-                            <Streamdown>{msg.content}</Streamdown>
-                          </div>
-                        ) : (
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  {/* Loading indicator */}
-                  {isAILoading && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex justify-start"
-                    >
-                      <div
-                        className="rounded-xl px-3 py-2 flex items-center gap-2"
-                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
-                      >
-                        <Loader2 className="h-3 w-3 text-[#C5A55A] animate-spin" />
-                        <span className="text-[10px] text-[#D4DDEF]/50">{STATUS_LABELS[streamingStatus] || "يفكر..."}</span>
-                      </div>
-                    </motion.div>
-                  )}
+            {/* Quick Actions */}
+            <div className="p-3 space-y-2">
+              <motion.button
+                whileHover={{ x: -4, backgroundColor: "rgba(197, 165, 90, 0.08)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => goToSmartRasid()}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(197, 165, 90, 0.12)" }}>
+                  <MessageCircle className="h-4 w-4 text-[#C5A55A]" />
                 </div>
-
-                {/* Chat Input */}
-                <div className="p-3 border-t border-white/5">
-                  <div className="flex items-center gap-2">
-                    {/* TTS Button (CHAT-07) */}
-                    {chatMessages.some(m => m.role === "assistant") && (
-                      <button
-                        onClick={speakLastMessage}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-white/5 transition-colors flex-shrink-0"
-                        title="استمع للرد"
-                      >
-                        <Volume2 className="h-3.5 w-3.5 text-[#D4DDEF]/40" />
-                      </button>
-                    )}
-                    <input
-                      type="text"
-                      value={miniMessage}
-                      onChange={(e) => setMiniMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey && miniMessage.trim()) {
-                          handleMiniSend();
-                        }
-                      }}
-                      placeholder="اكتب رسالتك هنا..."
-                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#C5A55A]/50 text-right"
-                      dir="rtl"
-                      disabled={isAILoading}
-                    />
-                    <button
-                      onClick={handleMiniSend}
-                      disabled={!miniMessage.trim() || isAILoading}
-                      className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 flex-shrink-0"
-                      style={{ background: miniMessage.trim() ? "linear-gradient(135deg, #C5A55A, #b8963f)" : "rgba(255,255,255,0.05)" }}
-                    >
-                      {isAILoading ? <Loader2 className="h-3.5 w-3.5 text-white animate-spin" /> : <Send className="h-3.5 w-3.5 text-white rotate-180" />}
-                    </button>
-                  </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-[#D4DDEF]">محادثة جديدة</p>
+                  <p className="text-[10px] text-[#D4DDEF]/40">تحدث مع راصد الذكي</p>
                 </div>
-              </>
-            ) : (
-              /* ═══ MENU MODE (Original) ═══ */
-              <>
-                {/* Input Field */}
-                <div className="px-3 pt-3">
-                  <div
-                    className="flex items-center gap-2 rounded-xl px-3 py-2"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(197, 165, 90, 0.15)",
-                    }}
-                  >
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="اكتب سؤالك هنا..."
-                      className="flex-1 bg-transparent text-xs text-[#D4DDEF] placeholder-[#D4DDEF]/30 outline-none"
-                      dir="rtl"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={handleSend}
-                      disabled={!inputValue.trim()}
-                      className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30"
-                      style={{
-                        background: inputValue.trim() ? "linear-gradient(135deg, #C5A55A, #b8963f)" : "rgba(255,255,255,0.05)",
-                      }}
-                    >
-                      <Send className="h-3.5 w-3.5 text-white rotate-180" />
-                    </motion.button>
-                  </div>
+                <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ x: -4, backgroundColor: "rgba(61, 177, 172, 0.08)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setIsExpanded(false); setLocation("/overview"); }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(61, 177, 172, 0.12)" }}>
+                  <Zap className="h-4 w-4 text-[#3DB1AC]" />
                 </div>
-
-                {/* Quick Prompts */}
-                <div className="px-3 pt-2 flex flex-wrap gap-1.5">
-                  {quickPrompts.map((prompt, i) => (
-                    <motion.button
-                      key={i}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => goToSmartRasid(prompt.text)}
-                      className="text-[10px] px-2.5 py-1.5 rounded-lg text-[#D4DDEF]/70 hover:text-[#D4DDEF] transition-colors"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      {prompt.icon} {prompt.text}
-                    </motion.button>
-                  ))}
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-[#D4DDEF]">تحليل سريع</p>
+                  <p className="text-[10px] text-[#D4DDEF]/40">عرض ملخص المؤشرات</p>
                 </div>
+                <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
+              </motion.button>
 
-                {/* Quick Actions */}
-                <div className="p-3 space-y-2">
-                  <motion.button
-                    whileHover={{ x: -4, backgroundColor: "rgba(197, 165, 90, 0.08)" }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={toggleChatMode}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
-                  >
-                    <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(197, 165, 90, 0.12)" }}>
-                      <MessageCircle className="h-4 w-4 text-[#C5A55A]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-medium text-[#D4DDEF]">محادثة مصغرة</p>
-                      <p className="text-[10px] text-[#D4DDEF]/40">تحدث مع راصد مباشرة هنا</p>
-                    </div>
-                    <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ x: -4, backgroundColor: "rgba(61, 177, 172, 0.08)" }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => goToSmartRasid()}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
-                  >
-                    <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(61, 177, 172, 0.12)" }}>
-                      <Zap className="h-4 w-4 text-[#3DB1AC]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-medium text-[#D4DDEF]">الصفحة الكاملة</p>
-                      <p className="text-[10px] text-[#D4DDEF]/40">افتح راصد الذكي بالكامل</p>
-                    </div>
-                    <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ x: -4, backgroundColor: "rgba(139, 92, 246, 0.08)" }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => { setIsExpanded(false); setLocation("/privacy"); }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
-                  >
-                    <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(139, 92, 246, 0.12)" }}>
-                      <Shield className="h-4 w-4 text-violet-400" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-medium text-[#D4DDEF]">الخصوصية والامتثال</p>
-                      <p className="text-[10px] text-[#D4DDEF]/40">لوحة مؤشرات PDPL</p>
-                    </div>
-                    <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
-                  </motion.button>
+              <motion.button
+                whileHover={{ x: -4, backgroundColor: "rgba(139, 92, 246, 0.08)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setIsExpanded(false); setLocation("/privacy"); }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(139, 92, 246, 0.12)" }}>
+                  <Shield className="h-4 w-4 text-violet-400" />
                 </div>
-              </>
-            )}
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-[#D4DDEF]">الخصوصية والامتثال</p>
+                  <p className="text-[10px] text-[#D4DDEF]/40">لوحة مؤشرات PDPL</p>
+                </div>
+                <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ x: -4, backgroundColor: "rgba(100, 89, 167, 0.08)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setIsExpanded(false); setLocation("/reports"); }}
+                className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-colors"
+              >
+                <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(100, 89, 167, 0.12)" }}>
+                  <Sparkles className="h-4 w-4 text-[#6459A7]" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-[#D4DDEF]">التقارير الذكية</p>
+                  <p className="text-[10px] text-[#D4DDEF]/40">إنشاء تقرير تلقائي</p>
+                </div>
+                <ChevronLeft className="h-3.5 w-3.5 text-[#D4DDEF]/30" />
+              </motion.button>
+            </div>
+
+            {/* ═══ حقل الإدخال السريع ═══ */}
+            <div className="p-3 border-t border-white/5">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={miniMessage}
+                  onChange={(e) => setMiniMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && miniMessage.trim()) {
+                      handleMiniSend();
+                    }
+                  }}
+                  placeholder="اكتب رسالتك هنا..."
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#3DB1AC]/50 text-right"
+                  dir="rtl"
+                />
+                <button
+                  onClick={handleMiniSend}
+                  disabled={!miniMessage.trim()}
+                  className="p-2 rounded-lg bg-[#3DB1AC] hover:bg-[#3DB1AC]/80 disabled:opacity-30 transition-colors"
+                >
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div className="flex gap-1 mt-2">
+                <button onClick={() => handleQuickAction("تحليل سريع للوضع الحالي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">⚡ تحليل</button>
+                <button onClick={() => handleQuickAction("أصدر تقرير تنفيذي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">📊 تقرير</button>
+                <button onClick={() => handleQuickAction("أعطني دليل استرشادي")} className="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60">📖 دليل</button>
+              </div>
+            </div>
 
             {/* Footer */}
             <div className="px-4 py-2 border-t border-white/5">
