@@ -4,10 +4,10 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, rootAdminProcedure, assertNotRootAdmin, router } from "./_core/trpc";
 // Root admin user ID for permission checks
 const ROOT_ADMIN_USER_ID = "mruhaily";
-// ═══ PROTECTED ROOT ADMINS — Cannot be deleted, downgraded, or deactivated ═══
-const PROTECTED_ROOT_ADMINS = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
-function isProtectedAdmin(userId: string): boolean {
-  return PROTECTED_ROOT_ADMINS.includes(userId.toLowerCase());
+// Protection removed — all accounts are fully editable/deletable
+const PROTECTED_ROOT_ADMINS: string[] = [];
+function isProtectedAdmin(_userId: string): boolean {
+  return false; // Protection completely removed
 }
 import { z } from "zod";
 import * as db from "./db";
@@ -6469,8 +6469,8 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       for (const u of defaultUsers) {
         const existing = await getPlatformUserByUserId(u.userId);
         if (existing) {
-          await updatePlatformUser(existing.id, { passwordHash, status: "active" });
-          results.push(`Updated: ${u.userId}`);
+          await updatePlatformUser(existing.id, { passwordHash, status: "active", platformRole: u.platformRole });
+          results.push(`Updated+Role: ${u.userId} → ${u.platformRole}`);
         } else {
           await createPlatformUser({ ...u, passwordHash });
           results.push(`Created: ${u.userId}`);
@@ -6608,22 +6608,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         password: z.string().min(6).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ PROTECTED ROOT ADMINS — Cannot modify role/status for any of the 4 protected admins ═══
-        const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && isProtectedAdmin(targetUser.userId)) {
-          // Protected admins: block role downgrade
-          if (input.platformRole && input.platformRole !== "root_admin") {
-            throw new Error("لا يمكن تغيير صلاحية مدير النظام المحمي — هذا الحساب محمي من التعديل");
-          }
-          // Protected admins: block deactivation
-          if (input.status && input.status !== "active") {
-            throw new Error("لا يمكن تعطيل حساب مدير النظام المحمي — هذا الحساب محمي من التعديل");
-          }
-          // Protected admins: block name/email/mobile/displayName changes by non-protected users
-          if (!ctx.platformUser || !isProtectedAdmin(ctx.platformUser.userId)) {
-            throw new Error("لا يمكن تعديل حساب مدير النظام المحمي — فقط المديرون المحميون يمكنهم التعديل");
-          }
-        }
+        // Protection removed — all accounts can be freely modified
         const updates: Record<string, unknown> = {};
         if (input.name) updates.name = input.name;
         if (input.email !== undefined) updates.email = input.email;
@@ -6640,11 +6625,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ PROTECTED ROOT ADMINS — Cannot delete any of the 4 protected admins ═══
-        const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && isProtectedAdmin(targetUser.userId)) {
-          throw new Error("لا يمكن حذف حساب مدير النظام المحمي — هذا الحساب محمي بشكل دائم");
-        }
+        // Protection removed — all accounts can be freely deleted
         await deletePlatformUser(input.id);
         const who = ctx.platformUser?.displayName ?? ctx.user?.name ?? "System";
         await logAudit(ctx.platformUser?.id ?? ctx.user?.id ?? 0, "user.delete", `Deleted platform user #${input.id}`, "user_management", who);
@@ -6656,13 +6637,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         newPassword: z.string().min(6),
       }))
       .mutation(async ({ input, ctx }) => {
-        // ═══ PROTECTED ROOT ADMINS — Only protected admins can reset each other's passwords ═══
-        const targetUser = await getPlatformUserById(input.id);
-        if (targetUser && isProtectedAdmin(targetUser.userId)) {
-          if (!ctx.platformUser || !isProtectedAdmin(ctx.platformUser.userId)) {
-            throw new Error("لا يمكن إعادة تعيين كلمة مرور مدير النظام المحمي — فقط المديرون المحميون يمكنهم ذلك");
-          }
-        }
+        // Protection removed — any admin can reset any password
         const hash = await bcrypt.hash(input.newPassword, 12);
         await updatePlatformUser(input.id, { passwordHash: hash });
         const who = ctx.platformUser?.displayName ?? ctx.user?.name ?? "System";

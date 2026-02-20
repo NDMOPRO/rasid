@@ -3,19 +3,15 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
 
-/** Root Admin userId — protected from any modifications */
+/** Root Admin userId */
 export const ROOT_ADMIN_USER_ID = "mruhaily";
 
-/** All protected root admin userIds */
+/** All root admin userIds */
 const ROOT_ADMIN_IDS = ["mruhaily", "aalrebdi", "msarhan", "malmoutaz"];
 
-/**
- * Assert that a userId is NOT a root admin — prevents modification/deletion of root admins
- */
-export function assertNotRootAdmin(userId: string) {
-  if (ROOT_ADMIN_IDS.includes(userId.toLowerCase())) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "لا يمكن تعديل أو حذف حساب مدير النظام الرئيسي" });
-  }
+/** No-op — protection removed, all users are fully editable/deletable */
+export function assertNotRootAdmin(_userId: string) {
+  // Protection completely removed — all accounts can be modified/deleted freely
 }
 
 const t = initTRPC.context<TrpcContext>().create({

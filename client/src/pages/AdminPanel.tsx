@@ -24,7 +24,7 @@ import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 
 const rasidRoleLabels: Record<string, string> = {
-  root: "روت راصد", admin: "مدير النظام", smart_monitor_manager: "مدير راصد الذكي",
+  root_admin: "مدير النظام الرئيسي", root: "روت راصد", admin: "مدير النظام", smart_monitor_manager: "مدير راصد الذكي",
   monitoring_director: "مدير إدارة الرصد", monitoring_specialist: "أخصائي رصد",
   monitoring_officer: "مسؤول رصد", requester: "مقدم طلب", respondent: "مستجيب",
   ndmo_desk: "مكتب NDMO", legal_advisor: "مستشار قانوني", director: "مدير",
@@ -32,6 +32,7 @@ const rasidRoleLabels: Record<string, string> = {
 };
 
 const rasidRoleColors: Record<string, string> = {
+  root_admin: "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-500/40",
   root: "bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-500/40",
   admin: "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-300 border-red-500/40",
   smart_monitor_manager: "bg-gradient-to-r from-primary/20 to-[oklch(0.48_0.14_290)]/20 text-primary border-primary/40",
@@ -41,7 +42,7 @@ const rasidRoleColors: Record<string, string> = {
 };
 
 const getRoleIcon = (role: string) => {
-  const icons: Record<string, any> = { root: Crown, admin: Shield, smart_monitor_manager: UserCog, monitoring_director: UserCog, monitoring_specialist: Eye, monitoring_officer: User };
+  const icons: Record<string, any> = { root_admin: Crown, root: Crown, admin: Shield, smart_monitor_manager: UserCog, monitoring_director: UserCog, monitoring_specialist: Eye, monitoring_officer: User };
   return icons[role] || User;
 };
 

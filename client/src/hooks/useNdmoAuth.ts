@@ -11,8 +11,9 @@ export function useNdmoAuth() {
   const ndmoRole: NdmoRole = (auth.user as any)?.ndmoRole ?? "viewer";
 
   // Root Admin check — all 4 system admins have root privileges
-  const platformUserId = (auth.user as any)?.userId ?? "";
-  const isRootAdmin = ROOT_ADMIN_USER_IDS.includes(platformUserId.toLowerCase());
+  // context.ts sets username = pUser.userId.toUpperCase(), so we check both username and userId fields
+  const platformUserId = (auth.user as any)?.username ?? (auth.user as any)?.userId ?? "";
+  const isRootAdmin = ROOT_ADMIN_USER_IDS.includes(String(platformUserId).toLowerCase()) || auth.user?.role === "root_admin" || (auth.user as any)?.rasidRole === "root_admin";
 
   // If root admin, grant admin status regardless of DB role
   const isAdmin = isRootAdmin || auth.user?.role === "admin" || auth.user?.role === "root_admin" || auth.user?.role === "superadmin";
