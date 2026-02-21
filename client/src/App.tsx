@@ -131,7 +131,6 @@ const CampaignTracker = lazy(() => import("./pages/CampaignTracker"));
 const RecommendationsHub = lazy(() => import("./pages/RecommendationsHub"));
 const ExecutiveBrief = lazy(() => import("./pages/ExecutiveBrief"));
 const IncidentsRegistry = lazy(() => import("./pages/IncidentsRegistry"));
-const PlatformLogin = lazy(() => import("./pages/PlatformLogin"));
 
 // Admin sub-pages
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
