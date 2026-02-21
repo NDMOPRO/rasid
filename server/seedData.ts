@@ -392,17 +392,17 @@ export async function ensureNewTablesExist(): Promise<void> {
     )`,
     `CREATE TABLE IF NOT EXISTS custom_pages (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      user_id INT NOT NULL,
+      userId INT NOT NULL,
       workspace VARCHAR(20) NOT NULL,
-      page_type VARCHAR(20) NOT NULL,
+      pageType VARCHAR(20) NOT NULL,
       title VARCHAR(255) NOT NULL,
       icon VARCHAR(50) DEFAULT 'LayoutDashboard',
-      sort_order INT NOT NULL DEFAULT 0,
+      sortOrder INT NOT NULL DEFAULT 0,
       config JSON,
-      is_default TINYINT DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX idx_cp_user_workspace (user_id, workspace)
+      isDefault TINYINT DEFAULT 0,
+      createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_cp_user_workspace (userId, workspace)
     )`,
     `CREATE TABLE IF NOT EXISTS import_jobs (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -522,6 +522,29 @@ export async function ensureNewTablesExist(): Promise<void> {
     } catch (e: any) {
       console.warn(`[SeedData] Table creation warning: ${e.message}`);
     }
+  }
+
+  // Fix custom_pages if created with old snake_case columns
+  const columnRenames: Array<{ table: string; old: string; new: string; type: string }> = [
+    { table: "custom_pages", old: "user_id", new: "userId", type: "INT NOT NULL" },
+    { table: "custom_pages", old: "page_type", new: "pageType", type: "VARCHAR(20) NOT NULL" },
+    { table: "custom_pages", old: "sort_order", new: "sortOrder", type: "INT NOT NULL DEFAULT 0" },
+    { table: "custom_pages", old: "is_default", new: "isDefault", type: "TINYINT DEFAULT 0" },
+    { table: "custom_pages", old: "created_at", new: "createdAt", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
+    { table: "custom_pages", old: "updated_at", new: "updatedAt", type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" },
+    { table: "import_jobs", old: "job_id", new: "jobId", type: "VARCHAR(64) NOT NULL" },
+    { table: "import_jobs", old: "file_name", new: "fileName", type: "VARCHAR(500) NOT NULL" },
+    { table: "import_jobs", old: "file_type", new: "fileType", type: "VARCHAR(20) NOT NULL" },
+    { table: "import_jobs", old: "total_records", new: "totalRecords", type: "INT NOT NULL DEFAULT 0" },
+    { table: "import_jobs", old: "success_records", new: "successRecords", type: "INT NOT NULL DEFAULT 0" },
+    { table: "import_jobs", old: "failed_records", new: "failedRecords", type: "INT NOT NULL DEFAULT 0" },
+  ];
+
+  for (const rename of columnRenames) {
+    try {
+      await db.execute(sql.raw(`ALTER TABLE ${rename.table} CHANGE COLUMN \`${rename.old}\` \`${rename.new}\` ${rename.type}`));
+      console.log(`[SeedData] Renamed ${rename.table}.${rename.old} → ${rename.new}`);
+    } catch { /* column already correct or doesn't exist */ }
   }
 }
 
