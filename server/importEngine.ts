@@ -10,7 +10,7 @@ import AdmZip from "adm-zip";
 import ExcelJS from "exceljs";
 import csvParser from "csv-parser";
 import { Readable } from "stream";
-import { getDb } from "./db";
+import { getDb, syncPrivacyDomainsToSitesAndScans } from "./db";
 import { leaks, importJobs, sites, privacyDomains } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
@@ -592,11 +592,20 @@ export async function processPrivacyImport(
       .set({ totalRecords })
       .where(eq(importJobs.jobId, jobId));
 
-    // Batch insert with ALL columns explicit (no DEFAULT keyword)
+    // Get existing domains for UPSERT logic (domain is unique)
+    const existingRows = await db.select({ id: privacyDomains.id, domain: privacyDomains.domain }).from(privacyDomains);
+    const existingDomainMap = new Map<string, number>();
+    for (const row of existingRows) {
+      existingDomainMap.set(row.domain, row.id);
+    }
+    const seenDomainsInBatch = new Set<string>();
+
+    // Batch insert/update with ALL columns explicit (no DEFAULT keyword)
     const BATCH_SIZE = 200;
     for (let i = 0; i < rawRecords.length; i += BATCH_SIZE) {
       const batch = rawRecords.slice(i, i + BATCH_SIZE);
-      const validRows: Array<Record<string, any>> = [];
+      const newRows: Array<Record<string, any>> = [];
+      const updateRows: Array<{ id: number; data: Record<string, any> }> = [];
 
       for (let j = 0; j < batch.length; j++) {
         const recordIndex = i + j + 1;
@@ -605,27 +614,40 @@ export async function processPrivacyImport(
           if (!normalized.domain) {
             throw new Error("النطاق مطلوب — العمود الإلزامي الوحيد");
           }
-          validRows.push({ ...normalized, _idx: recordIndex });
+          // Skip duplicates within the same import batch
+          if (seenDomainsInBatch.has(normalized.domain)) {
+            continue;
+          }
+          seenDomainsInBatch.add(normalized.domain);
+
+          const existingId = existingDomainMap.get(normalized.domain);
+          if (existingId) {
+            updateRows.push({ id: existingId, data: { ...normalized, _idx: recordIndex } });
+          } else {
+            newRows.push({ ...normalized, _idx: recordIndex });
+            existingDomainMap.set(normalized.domain, -1); // mark as seen
+          }
         } catch (err: any) {
           failedRecords++;
           errors.push({ record: recordIndex, error: err.message || "Unknown error" });
         }
       }
 
-      if (validRows.length === 0) continue;
-
       // Build Drizzle values with ALL columns explicit to avoid DEFAULT keyword
       const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-      const drizzleValues = validRows.map((row) => ({
-        domain: row.domain,
-        status: row.status ?? null,
-        workingUrl: row.workingUrl ?? null,
-        finalUrl: row.finalUrl ?? null,
-        nameAr: row.nameAr ?? null,
-        nameEn: row.nameEn ?? null,
-        title: row.title ?? null,
-        description: row.description ?? null,
-        category: row.category ?? null,
+
+      // INSERT new domains
+      if (newRows.length > 0) {
+        const drizzleValues = newRows.map((row) => ({
+          domain: row.domain,
+          status: row.status ?? null,
+          workingUrl: row.workingUrl ?? null,
+          finalUrl: row.finalUrl ?? null,
+          nameAr: row.nameAr ?? null,
+          nameEn: row.nameEn ?? null,
+          title: row.title ?? null,
+          description: row.description ?? null,
+          category: row.category ?? null,
         cms: row.cms ?? null,
         sslStatus: row.sslStatus ?? null,
         mxRecords: row.mxRecords ?? null,
@@ -678,19 +700,35 @@ export async function processPrivacyImport(
         scanRunId: null as number | null,
       }));
 
-      try {
-        await db.insert(privacyDomains).values(drizzleValues);
-        successRecords += validRows.length;
-      } catch (batchErr: any) {
-        // If batch fails, fallback to one-by-one inserts
-        for (let k = 0; k < drizzleValues.length; k++) {
-          try {
-            await db.insert(privacyDomains).values(drizzleValues[k]);
-            successRecords++;
-          } catch (err: any) {
-            failedRecords++;
-            errors.push({ record: validRows[k]._idx, error: err.message || "Unknown error" });
+        try {
+          await db.insert(privacyDomains).values(drizzleValues);
+          successRecords += newRows.length;
+        } catch (batchErr: any) {
+          // If batch fails, fallback to one-by-one inserts
+          for (let k = 0; k < drizzleValues.length; k++) {
+            try {
+              await db.insert(privacyDomains).values(drizzleValues[k]);
+              successRecords++;
+            } catch (err: any) {
+              failedRecords++;
+              errors.push({ record: newRows[k]._idx, error: err.message || "Unknown error" });
+            }
           }
+        }
+      }
+
+      // UPDATE existing domains
+      for (const { id, data } of updateRows) {
+        try {
+          const { domain: _d, _idx, ...updateFields } = data;
+          await db.update(privacyDomains).set({
+            ...updateFields,
+            importedAt: now,
+          } as any).where(eq(privacyDomains.id, id));
+          successRecords++;
+        } catch (err: any) {
+          failedRecords++;
+          errors.push({ record: data._idx, error: err.message || "Unknown error" });
         }
       }
 
@@ -698,6 +736,13 @@ export async function processPrivacyImport(
       await db.update(importJobs)
         .set({ processedRecords: Math.min(i + BATCH_SIZE, totalRecords), successRecords, failedRecords })
         .where(eq(importJobs.jobId, jobId));
+    }
+
+    // Sync imported data to sites/scans tables for dashboard and site detail pages
+    try {
+      await syncPrivacyDomainsToSitesAndScans();
+    } catch (syncErr: any) {
+      console.error("[Import] syncPrivacyDomainsToSitesAndScans error:", syncErr);
     }
 
     await db.update(importJobs).set({
