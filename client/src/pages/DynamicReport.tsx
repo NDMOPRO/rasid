@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -107,7 +107,27 @@ export default function DynamicReport() {
   const [isEditMode, setIsEditMode] = useState(true);
 
   const pageQuery = pageId ? trpc.customPages.getById.useQuery({ id: pageId }) : null;
+  const updatePage = trpc.customPages.update.useMutation();
   const pageTitle = pageQuery?.data?.title || "تقرير جديد";
+
+  // Load saved sections from config when page data arrives
+  useEffect(() => {
+    if (pageQuery?.data?.config) {
+      const config = pageQuery.data.config as Record<string, any>;
+      if (Array.isArray(config.sections) && config.sections.length > 0) {
+        setSections(config.sections);
+        setIsEditMode(false);
+      }
+    }
+  }, [pageQuery?.data]);
+
+  const handleSave = async () => {
+    if (!pageId) return;
+    await updatePage.mutateAsync({
+      id: pageId,
+      config: { sections },
+    });
+  };
 
   const addSection = (type: typeof SECTION_TYPES[0], index?: number) => {
     const newSection: ReportSection = {
@@ -314,7 +334,10 @@ export default function DynamicReport() {
                 <Plus className="w-4 h-4" />
                 إضافة قسم
               </button>
-              <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors">
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors"
+              >
                 <Save className="w-4 h-4" />
                 حفظ
               </button>

@@ -490,12 +490,63 @@ export const cmsRouter = router({
             },
           };
         }
+        case "line-chart": {
+          const monthly = await db
+            .select({
+              month: sql`DATE_FORMAT(${scansTable.scanDate}, '%Y-%m')`.as("month"),
+              count: count(),
+            })
+            .from(scansTable)
+            .groupBy(sql`DATE_FORMAT(${scansTable.scanDate}, '%Y-%m')`)
+            .orderBy(sql`DATE_FORMAT(${scansTable.scanDate}, '%Y-%m')`)
+            .limit(12);
+          return {
+            type: "line-chart",
+            data: {
+              labels: monthly.map((m: any) => m.month),
+              values: monthly.map((m: any) => m.count),
+            },
+          };
+        }
+        case "source-breakdown": {
+          const sectors = await db
+            .select({ sectorType: sitesTable.sectorType, count: count() })
+            .from(sitesTable)
+            .groupBy(sitesTable.sectorType);
+          return {
+            type: "source-breakdown",
+            data: {
+              labels: sectors.map((s: any) => s.sectorType || "غير محدد"),
+              values: sectors.map((s: any) => s.count),
+              total: sectors.reduce((a: number, b: any) => a + b.count, 0),
+            },
+          };
+        }
+        case "live-feed": {
+          const latestScans = await db.select({
+            id: scansTable.id,
+            domain: scansTable.domain,
+            complianceStatus: scansTable.complianceStatus,
+            scanDate: scansTable.scanDate,
+          }).from(scansTable).orderBy(desc(scansTable.scanDate)).limit(5);
+          return {
+            type: "live-feed",
+            data: {
+              items: latestScans.map((s: any) => ({
+                severity: s.complianceStatus === "compliant" ? "low" : s.complianceStatus === "partially_compliant" ? "medium" : "critical",
+                titleAr: s.domain,
+                leakId: `SCAN-${s.id}`,
+              })),
+            },
+          };
+        }
         case "data-table": {
           const recentSites = await db.select({
             id: sitesTable.id,
             domain: sitesTable.domain,
             siteName: sitesTable.siteName,
             sectorType: sitesTable.sectorType,
+            complianceStatus: sitesTable.complianceStatus,
           }).from(sitesTable).limit(10);
           return {
             type: "data-table",
