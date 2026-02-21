@@ -8384,11 +8384,13 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       workspace: z.string().optional(),
     }).optional()).query(async ({ ctx, input }) => {
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-      return db.getCustomPages(ctx.user.id, input?.workspace);
+      const userId = ctx.platformUser?.id || ctx.user.id;
+      return db.getCustomPages(userId, input?.workspace);
     }),
     getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-      return db.getCustomPageById(input.id, ctx.user.id);
+      const userId = ctx.platformUser?.id || ctx.user.id;
+      return db.getCustomPageById(input.id, userId);
     }),
     create: protectedProcedure.input(z.object({
       workspace: z.string(),
@@ -8399,8 +8401,10 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       config: z.any().optional(),
     })).mutation(async ({ ctx, input }) => {
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-      return db.createCustomPage({
-        userId: ctx.user.id,
+      const userId = ctx.platformUser?.id || ctx.user.id;
+      if (!userId) throw new TRPCError({ code: 'BAD_REQUEST', message: 'تعذر تحديد هوية المستخدم' });
+      const result = await db.createCustomPage({
+        userId,
         workspace: input.workspace,
         pageType: input.pageType,
         title: input.title,
@@ -8408,6 +8412,8 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         sortOrder: input.sortOrder || 0,
         config: input.config || {},
       });
+      if (!result) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'تعذر إنشاء الصفحة — قاعدة البيانات غير متاحة' });
+      return result;
     }),
     update: protectedProcedure.input(z.object({
       id: z.number(),
@@ -8417,14 +8423,16 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       config: z.any().optional(),
     })).mutation(async ({ ctx, input }) => {
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+      const userId = ctx.platformUser?.id || ctx.user.id;
       const { id, ...data } = input;
-      const updated = await db.updateCustomPage(id, ctx.user.id, data);
+      const updated = await db.updateCustomPage(id, userId, data);
       if (!updated) throw new TRPCError({ code: 'FORBIDDEN', message: 'لا يمكنك تعديل هذه الصفحة' });
       return updated;
     }),
-     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
       if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-      const success = await db.deleteCustomPage(input.id, ctx.user.id);
+      const userId = ctx.platformUser?.id || ctx.user.id;
+      const success = await db.deleteCustomPage(input.id, userId);
       if (!success) throw new TRPCError({ code: 'FORBIDDEN', message: 'لا يمكنك حذف هذه الصفحة' });
       return { success: true };
     }),
