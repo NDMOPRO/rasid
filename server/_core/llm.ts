@@ -317,9 +317,55 @@ const normalizeResponseFormat = ({
   };
 };
 
-export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+/**
+ * API-15: LLM provider compatibility — timeout, retry with exponential backoff,
+ * thinking+tools conflict detection, json_schema provider validation.
+ */
+const LLM_TIMEOUT_MS = 120_000; // 2 minutes
+const LLM_MAX_RETRIES = 3;
 
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries: number = LLM_MAX_RETRIES, timeoutMs: number = LLM_TIMEOUT_MS): Promise<Response> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, options, timeoutMs);
+      // Retry on 429 (rate limit) and 5xx server errors
+      if (response.status === 429 || (response.status >= 500 && attempt < maxRetries)) {
+        const errorText = await response.text();
+        console.warn(`[LLM] Attempt ${attempt + 1}/${maxRetries + 1} failed: ${response.status} – ${errorText.substring(0, 200)}`);
+        lastError = new Error(`LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`);
+        const backoffMs = Math.min(1000 * Math.pow(2, attempt), 16000);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+      return response;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        lastError = new Error(`LLM request timed out after ${timeoutMs}ms (attempt ${attempt + 1})`);
+      } else {
+        lastError = err;
+      }
+      console.warn(`[LLM] Attempt ${attempt + 1}/${maxRetries + 1} error:`, lastError.message);
+      if (attempt < maxRetries) {
+        const backoffMs = Math.min(1000 * Math.pow(2, attempt), 16000);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+    }
+  }
+  throw lastError || new Error("LLM invocation failed after all retries");
+}
+
+function buildPayload(params: InvokeParams, streaming: boolean = false): { payload: Record<string, unknown>; usingOpenAI: boolean } {
   const {
     messages,
     tools,
@@ -337,6 +383,10 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     messages: messages.map(normalizeMessage),
   };
 
+  if (streaming) {
+    payload.stream = true;
+  }
+
   if (tools && tools.length > 0) {
     payload.tools = tools;
   }
@@ -350,11 +400,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
 
   payload.max_tokens = usingOpenAI ? 16384 : 32768;
-  if (!usingOpenAI) {
-    payload.thinking = {
-      "budget_tokens": 128
-    };
-  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -363,11 +408,38 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
   });
 
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
+  // API-15: Provider compatibility — avoid sending thinking with tools+json_schema on unsupported providers
+  const hasTools = !!(tools && tools.length > 0);
+  const hasJsonSchema = !!(normalizedResponseFormat && normalizedResponseFormat.type === "json_schema");
+
+  if (!usingOpenAI) {
+    // Only add thinking if no json_schema conflict (some providers don't support thinking + json_schema together)
+    if (!hasJsonSchema) {
+      payload.thinking = { "budget_tokens": 128 };
+    }
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  if (normalizedResponseFormat) {
+    // Some providers don't support json_schema — downgrade to json_object for OpenAI-compatible providers
+    if (hasJsonSchema && usingOpenAI) {
+      payload.response_format = normalizedResponseFormat;
+    } else if (normalizedResponseFormat.type !== "json_schema") {
+      payload.response_format = normalizedResponseFormat;
+    } else {
+      // Non-OpenAI provider with json_schema — downgrade to json_object
+      payload.response_format = { type: "json_object" };
+    }
+  }
+
+  return { payload, usingOpenAI };
+}
+
+export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
+  assertApiKey();
+
+  const { payload } = buildPayload(params, false);
+
+  const response = await fetchWithRetry(resolveApiUrl(), {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -396,60 +468,16 @@ export async function invokeLLMStream(
 ): Promise<InvokeResult> {
   assertApiKey();
 
-  const {
-    messages,
-    tools,
-    toolChoice,
-    tool_choice,
-    outputSchema,
-    output_schema,
-    responseFormat,
-    response_format,
-  } = params;
+  const { payload } = buildPayload(params, true);
 
-  const usingOpenAI = !!(ENV.openaiApiKey && ENV.openaiApiKey.trim().length > 0) || (ENV.forgeApiUrl || "").includes("openai.com");
-  const payload: Record<string, unknown> = {
-    model: resolveModel(),
-    messages: messages.map(normalizeMessage),
-    stream: true,
-  };
-
-  if (tools && tools.length > 0) {
-    payload.tools = tools;
-  }
-
-  const normalizedToolChoice = normalizeToolChoice(
-    toolChoice || tool_choice,
-    tools
-  );
-  if (normalizedToolChoice) {
-    payload.tool_choice = normalizedToolChoice;
-  }
-
-  payload.max_tokens = usingOpenAI ? 16384 : 32768;
-  if (!usingOpenAI) {
-    payload.thinking = { "budget_tokens": 128 };
-  }
-
-  const normalizedResponseFormat = normalizeResponseFormat({
-    responseFormat,
-    response_format,
-    outputSchema,
-    output_schema,
-  });
-
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
-  }
-
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetchWithRetry(resolveApiUrl(), {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${resolveApiKey()}`,
     },
     body: JSON.stringify(payload),
-  });
+  }, LLM_MAX_RETRIES, LLM_TIMEOUT_MS);
 
   if (!response.ok) {
     const errorText = await response.text();

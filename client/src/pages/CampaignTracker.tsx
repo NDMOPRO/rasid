@@ -44,7 +44,7 @@ export default function CampaignTracker() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.campaigns.length}</div><div className="text-xs text-muted-foreground">حملة نشطة</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.campaigns.reduce((s, c) => s + c.critical, 0)}</div><div className="text-xs text-muted-foreground">هجمات حرجة</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Shield className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
       </div>
       <Card className="glass-card gold-sweep">
         <CardHeader><CardTitle className="text-foreground text-base">نشاط الحملات</CardTitle></CardHeader>
@@ -55,7 +55,7 @@ export default function CampaignTracker() {
               <XAxis dataKey="name" stroke="#9ca3af" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={80} />
               <YAxis stroke="#9ca3af" />
               <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid #374151", borderRadius: 8 }} />
-              <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="الحوادث" />
+              <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="حالات الرصد" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -65,7 +65,7 @@ export default function CampaignTracker() {
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">الجهة</th><th className="text-center text-muted-foreground p-2">الحوادث</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">القطاعات</th><th className="text-center text-muted-foreground p-2">حرج</th><th className="text-center text-muted-foreground p-2">أول ظهور</th><th className="text-center text-muted-foreground p-2">آخر نشاط</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">الجهة</th><th className="text-center text-muted-foreground p-2">حالات الرصد</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">القطاعات</th><th className="text-center text-muted-foreground p-2">حرج</th><th className="text-center text-muted-foreground p-2">أول ظهور</th><th className="text-center text-muted-foreground p-2">آخر نشاط</th></tr></thead>
               <tbody>
                 {analysis.campaigns.map((c, i) => (
                   <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">

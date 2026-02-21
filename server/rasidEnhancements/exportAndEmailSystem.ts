@@ -73,13 +73,13 @@ export class ExportAndEmailSystem {
         {
           id: 'cover',
           title: 'صفحة الغلاف',
-          content: 'تقرير الحوادث الشهري - {{month}} {{year}}',
+          content: 'تقرير حالات الرصد الشهري - {{month}} {{year}}',
           type: 'text',
         },
         {
           id: 'executive-summary',
           title: 'الملخص التنفيذي',
-          content: 'نظرة عامة على الحوادث المكتشفة خلال الشهر',
+          content: 'نظرة عامة على حالات الرصد المكتشفة خلال الشهر',
           type: 'text',
         },
         {
@@ -90,7 +90,7 @@ export class ExportAndEmailSystem {
         },
         {
           id: 'sector-distribution',
-          title: 'توزيع الحوادث حسب القطاع',
+          title: 'توزيع حالات الرصد حسب القطاع',
           content: '',
           type: 'chart',
         },
@@ -118,12 +118,12 @@ export class ExportAndEmailSystem {
         {
           id: 'alert-header',
           title: 'تنبيه أمني',
-          content: '🚨 تم اكتشاف حادثة حرجة',
+          content: '🚨 تم اكتشاف حالة رصد حرجة',
           type: 'text',
         },
         {
           id: 'incident-details',
-          title: 'تفاصيل الحادثة',
+          title: 'تفاصيل حالة الرصد',
           content: '',
           type: 'table',
         },
@@ -315,13 +315,13 @@ export class ExportAndEmailSystem {
     const templates: Record<string, (data: any) => string> = {
       'incident-alert': (d) => `
         <div style="font-family: 'Cairo', Arial, sans-serif; direction: rtl; text-align: right;">
-          <h2 style="color: #dc2626;">🚨 تنبيه: حادثة جديدة</h2>
-          <p>تم اكتشاف حادثة تسريب بيانات جديدة:</p>
+          <h2 style="color: #dc2626;">🚨 تنبيه: حالة رصد جديدة</h2>
+          <p>تم اكتشاف حالة رصد جديدة:</p>
           <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
             <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>العنوان:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${d.title}</td></tr>
             <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>الخطورة:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${d.severity}</td></tr>
             <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>القطاع:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${d.sector}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>عدد السجلات:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${d.recordCount?.toLocaleString()}</td></tr>
+            <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>العدد المُدّعى:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${d.recordCount?.toLocaleString()}</td></tr>
           </table>
           <p><a href="${d.url}" style="background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">عرض التفاصيل</a></p>
         </div>
@@ -335,7 +335,7 @@ export class ExportAndEmailSystem {
           <ul>
             <li><strong>نوع التقرير:</strong> ${d.reportType}</li>
             <li><strong>الفترة:</strong> ${d.period}</li>
-            <li><strong>عدد الحوادث:</strong> ${d.incidentCount}</li>
+            <li><strong>عدد حالات الرصد:</strong> ${d.incidentCount}</li>
           </ul>
           <p>ستجد التقرير مرفقاً مع هذا البريد.</p>
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
@@ -351,8 +351,8 @@ export class ExportAndEmailSystem {
           <div style="background: #f3f4f6; padding: 20px; border-radius: 10px; margin: 20px 0;">
             <h3>الإحصائيات</h3>
             <ul>
-              <li>إجمالي الحوادث الجديدة: <strong>${d.newIncidents}</strong></li>
-              <li>حوادث حرجة: <strong style="color: #dc2626;">${d.criticalIncidents}</strong></li>
+              <li>إجمالي حالات الرصد الجديدة: <strong>${d.newIncidents}</strong></li>
+              <li>حالات رصد حرجة: <strong style="color: #dc2626;">${d.criticalIncidents}</strong></li>
               <li>القطاع الأكثر تأثراً: <strong>${d.topSector}</strong></li>
             </ul>
           </div>

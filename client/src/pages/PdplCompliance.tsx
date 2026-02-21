@@ -87,7 +87,7 @@ export default function PdplCompliance() {
         </CardContent>
       </Card>
       <Card className="glass-card gold-sweep">
-        <CardHeader><CardTitle className="text-foreground text-base">ملخص الحوادث المؤثرة على الامتثال</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-foreground text-base">ملخص حالات الرصد المؤثرة على الامتثال</CardTitle></CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={[

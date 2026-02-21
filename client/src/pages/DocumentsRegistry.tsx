@@ -38,7 +38,7 @@ type DocumentItem = {
 const PAGE_SIZE = 15;
 
 const docTypeLabels: Record<string, string> = {
-  incident_report: "توثيق حادثة",
+  incident_report: "توثيق حالة رصد",
   custom_report: "تقرير مخصص",
   executive_summary: "ملخص تنفيذي",
 };
@@ -122,7 +122,7 @@ export default function DocumentsRegistry() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { color: "teal", icon: <FileText className="h-5 w-5 text-teal-400" />, value: stats.total, label: "إجمالي التوثيقات" },
-          { color: "blue", icon: <AlertTriangle className="h-5 w-5 text-blue-400" />, value: stats.byType.incident_report, label: "توثيق حوادث" },
+          { color: "blue", icon: <AlertTriangle className="h-5 w-5 text-blue-400" />, value: stats.byType.incident_report, label: "توثيق حالات رصد" },
           { color: "purple", icon: <FileBarChart className="h-5 w-5 text-purple-400" />, value: stats.byType.custom_report + stats.byType.executive_summary, label: "تقارير مخصصة" },
           { color: "amber", icon: <User className="h-5 w-5 text-amber-400" />, value: stats.uniqueEmployees, label: "موظفين مُصدرين" },
         ].map((s, idx) => (
@@ -183,7 +183,7 @@ export default function DocumentsRegistry() {
             <div className="relative">
               <Hash className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="رقم الحادثة (Leak ID)..."
+                placeholder="رقم حالة الرصد (Leak ID)..."
                 value={leakIdFilter}
                 onChange={(e) => { setLeakIdFilter(e.target.value); setPage(0); }}
                 className="pr-9 bg-background/50"
@@ -195,7 +195,7 @@ export default function DocumentsRegistry() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع الأنواع</SelectItem>
-                <SelectItem value="incident_report">توثيق حادثة</SelectItem>
+                <SelectItem value="incident_report">توثيق حالة رصد</SelectItem>
                 <SelectItem value="custom_report">تقرير مخصص</SelectItem>
                 <SelectItem value="executive_summary">ملخص تنفيذي</SelectItem>
               </SelectContent>
@@ -234,7 +234,7 @@ export default function DocumentsRegistry() {
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">العنوان</th>
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">النوع</th>
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">كود التحقق</th>
-                <th className="text-right p-3 text-xs font-medium text-muted-foreground">الحادثة</th>
+                <th className="text-right p-3 text-xs font-medium text-muted-foreground">حالة الرصد</th>
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">المُصدر</th>
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">التاريخ</th>
                 <th className="text-right p-3 text-xs font-medium text-muted-foreground">الحالة</th>
@@ -473,13 +473,13 @@ export default function DocumentsRegistry() {
 
                 {/* Leak Reference */}
                 <div className="bg-muted/20 rounded-lg p-3 border border-border/30">
-                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">الحادثة المرتبطة</p>
+                  <p className="text-xs sm:text-[10px] text-muted-foreground mb-1">حالة الرصد المرتبطة</p>
                   <button
                     onClick={() => { setSelectedDoc(null); setDrillLeakId(selectedDoc.leakId); }}
                     className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
-                    {selectedDoc.leakId} — عرض تفاصيل الحادثة
+                    {selectedDoc.leakId} — عرض تفاصيل حالة الرصد
                   </button>
                 </div>
 
@@ -506,7 +506,7 @@ export default function DocumentsRegistry() {
                     onClick={() => { setSelectedDoc(null); setDrillLeakId(selectedDoc.leakId); }}
                   >
                     <Eye className="h-4 w-4 ml-2" />
-                    عرض الحادثة
+                    عرض حالة الرصد
                   </Button>
                 </div>
               </div>

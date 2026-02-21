@@ -22,7 +22,7 @@ import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { PremiumPageContainer, PremiumCard } from "@/components/UltraPremiumWrapper";
 
 const typeLabels: Record<string, string> = {
-  incident_report: "توثيق حادثة",
+  incident_report: "توثيق حالة رصد",
   custom_report: "تقرير مخصص",
   executive_summary: "ملخص تنفيذي",
   compliance_report: "تقرير امتثال",
@@ -190,7 +190,7 @@ export default function DocumentStats() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children">
         <StatCard icon={<FileText className="h-5 w-5" />} label="إجمالي الوثائق" value={stats.total} color="#3b82f6" delay={0} onClick={() => openDrillDown({ title: "إجمالي الوثائق" })} />
-        <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="توثيق حوادث" value={stats.incidents} color="#ef4444" delay={0.05} onClick={() => openDrillDown({ title: "وثائق حوادث", subtitle: "جميع وثائق الحوادث" })} />
+        <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="توثيق حالات رصد" value={stats.incidents} color="#ef4444" delay={0.05} onClick={() => openDrillDown({ title: "وثائق حالات الرصد", subtitle: "جميع وثائق حالات الرصد" })} />
         <StatCard icon={<FileSpreadsheet className="h-5 w-5" />} label="تقارير مخصصة" value={stats.customReports} color="#3b82f6" delay={0.1} onClick={() => openDrillDown({ title: "تقارير مخصصة", subtitle: "جميع التقارير المخصصة" })} />
         <StatCard icon={<FileBarChart className="h-5 w-5" />} label="ملخصات تنفيذية" value={stats.executiveSummaries} color="#8b5cf6" delay={0.15} onClick={() => openDrillDown({ title: "ملخصات تنفيذية", subtitle: "جميع الملخصات التنفيذية" })} />
         <StatCard icon={<Shield className="h-5 w-5" />} label="تقارير امتثال" value={stats.complianceReports} color="#10b981" delay={0.2} onClick={() => openDrillDown({ title: "تقارير امتثال", subtitle: "جميع تقارير الامتثال" })} />

@@ -1250,7 +1250,7 @@ export default function Dashboard() {
                         <span className="text-xs font-semibold text-foreground truncate">{sec.sector}</span>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
-                      <p className="text-xs sm:text-[10px] text-muted-foreground">{sec.count} حادثة · {(sec.records ?? 0).toLocaleString()} سجل</p>
+                      <p className="text-xs sm:text-[10px] text-muted-foreground">{sec.count} حالة رصد · {(sec.records ?? 0).toLocaleString()} سجل</p>
                       <div className="w-full h-1 bg-muted/40 rounded-full mt-1.5 overflow-hidden">
                         <motion.div
                           className="h-full rounded-full bg-primary/70"
@@ -1543,7 +1543,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between flex-wrap">
                       <h4 className="text-sm font-semibold text-foreground">{getPiiLabel(pii.type)}</h4>
-                      <Badge variant="outline" className="text-xs sm:text-[10px]">{pii.count} حادثة</Badge>
+                      <Badge variant="outline" className="text-xs sm:text-[10px]">{pii.count} حالة رصد</Badge>
                     </div>
                     <div className="w-full h-1.5 bg-muted/30 rounded-full mt-1 overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: colors[i % colors.length] }} />
@@ -1555,7 +1555,7 @@ export default function Dashboard() {
                     {piiLeaks.slice(0, 3).map(l => (
                       <p key={l.leakId} className="text-xs sm:text-[10px] text-muted-foreground truncate">• {l.titleAr} — {l.sectorAr}</p>
                     ))}
-                    {piiLeaks.length > 3 && <p className="text-xs sm:text-[10px] text-primary">+ {piiLeaks.length - 3} حادثة أخرى</p>}
+                    {piiLeaks.length > 3 && <p className="text-xs sm:text-[10px] text-primary">+ {piiLeaks.length - 3} حالة رصد أخرى</p>}
                   </div>
                 )}
               </div>
@@ -1582,7 +1582,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-between flex-wrap">
                       <h4 className="text-sm font-semibold text-foreground">{sec.sector}</h4>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs sm:text-[10px]">{sec.count} حادثة</Badge>
+                        <Badge variant="outline" className="text-xs sm:text-[10px]">{sec.count} حالة رصد</Badge>
                         <span className="text-xs font-bold text-primary">{pct}%</span>
                       </div>
                     </div>

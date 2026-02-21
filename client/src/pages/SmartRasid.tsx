@@ -6,6 +6,7 @@ import { useProactiveAssistance } from "@/hooks/useProactiveAssistance";
 import { usePageContext } from "@/hooks/usePageContext";
 import { Streamdown } from "streamdown";
 import LeakDetailDrilldown from "@/components/LeakDetailDrilldown";
+import NavigationConsentDialog from "@/components/NavigationConsentDialog";
 import {
   Brain,
   Send,
@@ -622,6 +623,9 @@ export default function SmartRasid() {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [newMessageIds, setNewMessageIds] = useState<Set<string>>(new Set());
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; content: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [navConsent, setNavConsent] = useState<{ route: string; label: string } | null>(null);
 
   // Chat history queries/mutations
   const historyQuery = trpc.chatHistory.list.useQuery(undefined, { enabled: showHistory });
@@ -743,15 +747,21 @@ export default function SmartRasid() {
     const msg = text || inputValue.trim();
     if (!msg || isLoading) return;
 
+    // Attach file info to message content if a file is uploaded
+    const fileAttachment = uploadedFile
+      ? `\n\n📎 ملف مرفق: ${uploadedFile.name} (${(uploadedFile.size / 1024).toFixed(1)} KB)`
+      : "";
+
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
-      content: msg,
+      content: msg + fileAttachment,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
+    setUploadedFile(null);
     setShowSuggestions(false);
     setSuggestions([]);
     setIsLoading(true);
@@ -801,6 +811,10 @@ export default function SmartRasid() {
 
       setNewMessageIds(prev => new Set(prev).add(assistantMessage.id));
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Detect navigation request in response (CHAT-03)
+      const navReq = detectNavigationRequest(assistantMessage.content);
+      if (navReq) setNavConsent(navReq);
     } catch (err: any) {
       setLoadingSteps([]);
       soundManager.playError();
@@ -821,7 +835,59 @@ export default function SmartRasid() {
     setMessages([]);
     setInputValue("");
     setExpandedThinking({});
+    setUploadedFile(null);
     inputRef.current?.focus();
+  };
+
+  // Navigation consent handler (CHAT-03, UI-08, API-09/10)
+  const handleNavigationConsent = (allowed: boolean) => {
+    if (allowed && navConsent) {
+      window.location.href = navConsent.route;
+    }
+    setNavConsent(null);
+  };
+
+  // Detect navigation suggestions in AI responses
+  const detectNavigationRequest = useCallback((content: string) => {
+    const navPatterns = [
+      /الانتقال إلى صفحة[:\s]+\[([^\]]+)\]\(([^)]+)\)/,
+      /يمكنك الذهاب إلى[:\s]+\[([^\]]+)\]\(([^)]+)\)/,
+      /navigate_to[:\s]+(\S+)/i,
+    ];
+    for (const pattern of navPatterns) {
+      const match = content.match(pattern);
+      if (match) {
+        return { label: match[1] || match[2], route: match[2] || match[1] };
+      }
+    }
+    return null;
+  }, []);
+
+  // File upload handler (UI-20)
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("حجم الملف يتجاوز الحد الأقصى (5 ميجابايت)");
+      return;
+    }
+    const allowedTypes = [".csv", ".json", ".txt", ".xlsx", ".zip"];
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    if (!allowedTypes.includes(ext)) {
+      toast.error(`نوع الملف غير مدعوم. الأنواع المدعومة: ${allowedTypes.join(", ")}`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(",")[1] || "";
+      setUploadedFile({ name: file.name, size: file.size, content: base64 });
+      toast.success(`تم إرفاق الملف: ${file.name}`);
+    };
+    reader.onerror = () => toast.error("فشل قراءة الملف");
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
   };
 
   // Save current conversation
@@ -1677,6 +1743,20 @@ export default function SmartRasid() {
         </AnimatePresence>
 
         <div className="max-w-[95vw] sm:max-w-4xl mx-auto">
+          {/* Attached file badge */}
+          {uploadedFile && (
+            <div className="mb-2 flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg w-fit">
+              <Paperclip className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs text-emerald-300">{uploadedFile.name}</span>
+              <span className="text-[10px] text-emerald-400/50">({(uploadedFile.size / 1024).toFixed(1)} KB)</span>
+              <button
+                onClick={() => setUploadedFile(null)}
+                className="text-emerald-400/60 hover:text-red-400 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
           <div className="flex items-end gap-2">
             <div className="flex-1 relative">
               {/* Console prompt indicator */}
@@ -1708,6 +1788,28 @@ export default function SmartRasid() {
                 disabled={isLoading}
               />
             </div>
+            {/* File Upload Button (UI-20) */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.json,.txt,.xlsx,.zip"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => fileInputRef.current?.click()}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+                uploadedFile
+                  ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400"
+                  : "bg-[#0a1628]/80 border border-cyan-500/15 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30"
+              }`}
+              title={uploadedFile ? `ملف مرفق: ${uploadedFile.name}` : "إرفاق ملف (CSV, JSON, XLSX, ZIP)"}
+              disabled={isLoading}
+            >
+              <Paperclip className="w-4.5 h-4.5" />
+            </motion.button>
             {/* Voice STT Button */}
             {sttSupported && (
               <motion.button
@@ -1871,6 +1973,14 @@ export default function SmartRasid() {
         leak={drillLeakId ? { leakId: drillLeakId } : null}
         open={!!drillLeakId}
         onClose={() => setDrillLeakId(null)}
+      />
+
+      {/* Navigation Consent Dialog (CHAT-03, UI-08, API-09/10) */}
+      <NavigationConsentDialog
+        isOpen={!!navConsent}
+        route={navConsent?.route || ""}
+        label={navConsent?.label || ""}
+        onConsent={handleNavigationConsent}
       />
     </div>
   );

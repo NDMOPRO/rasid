@@ -449,7 +449,7 @@ export async function generateIncidentDocumentation(
       <div style="margin-bottom:28px;">
         <div class="section-title">
           <div class="section-bar" style="background:linear-gradient(180deg,#0a2540,#0d9488);"></div>
-          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">معلومات الحادثة</h3>
+          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">معلومات حالة الرصد</h3>
         </div>
         <table class="info-table">
           <tr>
@@ -457,11 +457,11 @@ export async function generateIncidentDocumentation(
             <td class="value-cell" style="font-family:'Courier New',monospace;color:#6366f1;font-weight:800;">${leak.leakId}</td>
           </tr>
           <tr>
-            <td class="label-cell">عنوان الحادثة</td>
+            <td class="label-cell">عنوان حالة الرصد</td>
             <td class="value-cell" style="font-size:13px;font-weight:800;color:#0a2540;">${leak.titleAr}</td>
           </tr>
           <tr>
-            <td class="label-cell">تصنيف الحادثة</td>
+            <td class="label-cell">تصنيف حالة الرصد</td>
             <td class="value-cell">
               <span class="badge" style="background:${impact.bg};color:${impact.color};border:1px solid ${impact.color}33;">${impact.ar}</span>
             </td>
@@ -502,7 +502,7 @@ export async function generateIncidentDocumentation(
           ? `<div style="margin-bottom:28px;page-break-inside:avoid;">
         <div class="section-title">
           <div class="section-bar" style="background:linear-gradient(180deg,#0a2540,#0d9488);"></div>
-          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">وصف الحادثة</h3>
+          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">وصف حالة الرصد</h3>
         </div>
         <p style="font-size:12px;color:#334155;line-height:2.2;text-align:right;background:#f8fafc;padding:20px;border-radius:10px;border:1px solid #e2e8f0;">${leak.descriptionAr}</p>
       </div>`

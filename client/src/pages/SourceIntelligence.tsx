@@ -77,7 +77,7 @@ export default function SourceIntelligence() {
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">المصدر</th><th className="text-center text-muted-foreground p-2">الحوادث</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">النسبة</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">المصدر</th><th className="text-center text-muted-foreground p-2">حالات الرصد</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">النسبة</th></tr></thead>
               <tbody>
                 {analysis.sources.map((s, i) => (
                   <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">

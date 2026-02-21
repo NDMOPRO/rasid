@@ -42,10 +42,10 @@ export default function ExecutiveBrief() {
       {brief && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.totalLeaks}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-red-500/20 to-red-600/10 border-red-500/30"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.totalLeaks}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
             <Card className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-amber-500/30"><CardContent className="p-4 text-center"><Users className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">سجلات متأثرة</div></CardContent></Card>
             <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border-blue-500/30"><CardContent className="p-4 text-center"><Building2 className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.topSectors.length}</div><div className="text-xs text-muted-foreground">قطاعات متأثرة</div></CardContent></Card>
-            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-500/30"><CardContent className="p-4 text-center"><Shield className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.severity.find(s => s.name === "حرج")?.count || 0}</div><div className="text-xs text-muted-foreground">حوادث حرجة</div></CardContent></Card>
+            <Card className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border-purple-500/30"><CardContent className="p-4 text-center"><Shield className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{brief.severity.find(s => s.name === "حرج")?.count || 0}</div><div className="text-xs text-muted-foreground">حالات رصد حرجة</div></CardContent></Card>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="glass-card gold-sweep">
@@ -77,7 +77,7 @@ export default function ExecutiveBrief() {
             </Card>
           </div>
           <Card className="glass-card gold-sweep">
-            <CardHeader><CardTitle className="text-foreground text-base">آخر الحوادث</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-foreground text-base">آخر حالات الرصد</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {brief.recentLeaks.map((l: any, i: number) => (

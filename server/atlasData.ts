@@ -150,7 +150,7 @@ export function queryAtlasBreaches(params: {
 export function getAtlasBreachDetails(breachId: string): any {
   const data = loadAtlasData();
   const record = data.find(r => r.id === breachId);
-  if (!record) return { error: `لم يتم العثور على حادثة بمعرّف ${breachId}` };
+  if (!record) return { error: `لم يتم العثور على حالة رصد بمعرّف ${breachId}` };
 
   return {
     id: record.id,

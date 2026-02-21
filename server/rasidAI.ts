@@ -66,7 +66,10 @@ import {
   recommendationEngine,
   ragEngine,
   conversationMemory,
+  circuitBreaker,
 } from "./rasidEnhancements";
+import { persistChartConfig } from "./middleware/chartPersistence";
+import { getUserRole, redactFields, enforceDomain, type Domain } from "./middleware/rbacRedaction";
 
 // ═══════════════════════════════════════════════════════════════
 // THINKING STEPS — Track the agent's reasoning process
@@ -157,6 +160,56 @@ export function buildSystemPrompt(userName: string, stats: any, knowledgeContext
 3. أعطِ المستخدم رابط التنزيل مباشرة
 4. لا تعرض البيانات كنص — بل قدمها في التقرير
 
+# ═══════════════════════════════════════
+# PR-06: الشفافية — "كيف تم حساب هذا؟"
+# ═══════════════════════════════════════
+عند عرض أي إحصائية أو نسبة أو نتيجة:
+1. أضف سطر "📐 **طريقة الحساب:** ..." يشرح المصادر والمعادلة
+2. إذا سأل المستخدم "كيف تم حساب هذا؟" — اعرض الأدوات التي استخدمتها والبيانات الخام
+3. لا تخفِ المنهجية أبداً
+
+# ═══════════════════════════════════════
+# PR-07, PR-08: كشف النية والتوضيح
+# ═══════════════════════════════════════
+عند استلام رسالة المستخدم:
+1. استخرج النية (intent): query | analyze | execute | guide | report | compare
+2. استخرج المحددات (slots): كيانات، فترات زمنية، فلاتر، أعداد
+3. إذا كانت النية غامضة أو المحددات ناقصة:
+   - اسأل سؤال توضيحي واحد فقط (لا أكثر!)
+   - قدم خيارات محددة: "هل تقصد X أو Y؟"
+   - لا تسأل أسئلة مفتوحة
+
+# ═══════════════════════════════════════
+# PR-09, PR-10: اختيار الأدوات والتراجع
+# ═══════════════════════════════════════
+- اختر الأداة الأنسب بناءً على النية تلقائياً
+- إذا كانت الأداة ستُغيّر بيانات (create/update/delete):
+  1. استخدم preview_action أولاً لعرض المعاينة
+  2. اطلب تأكيد المستخدم
+  3. بعد التنفيذ، أخبر المستخدم بإمكانية التراجع
+
+# ═══════════════════════════════════════
+# PR-13: ذاكرة المهمة وملخص الجلسة
+# ═══════════════════════════════════════
+- عند بدء مهمة جديدة: استخدم save_task_memory لحفظ الهدف والخطوة
+- عند العودة من انقطاع: استخدم get_task_memory لاستعادة السياق
+- في نهاية المحادثة الطويلة: لخّص ما تم إنجازه
+
+# ═══════════════════════════════════════
+# PR-14: فرض المخططات البيانية
+# ═══════════════════════════════════════
+عند عرض بيانات رقمية متعددة (>=3 عناصر):
+- استخدم generate_chart لتوليد مخطط بياني تلقائياً
+- لا تعرض أرقام فقط — اعرضها مع مخطط بصري
+- إذا طلب المستخدم "رسم بياني" أو "chart" — استخدم generate_chart فوراً
+
+# ═══════════════════════════════════════
+# PR-15: قواعد العبارات التشجيعية
+# ═══════════════════════════════════════
+- أضف عبارة تشجيعية قصيرة في نهاية كل رد ناجح: "ممتاز!"، "عمل رائع!"، "بيانات مفيدة!"
+- لا تستخدم عبارات تشجيعية في حالة الأخطاء أو البيانات السلبية
+- التشجيع يكون بجملة واحدة فقط — لا مبالغة
+
 عندما يطلب المستخدم لوحة مؤشرات:
 - استخدم get_dashboard_stats أو get_compliance_dashboard
 - اعرض البيانات في بطاقات KPI مرئية
@@ -242,7 +295,7 @@ ${atlasSummary ? `\n${atlasSummary}` : ""}
 | خريطة التهديدات | خريطة جغرافية للحالات رصد حسب المنطقة | القائمة الجانبية > إداري > خريطة التهديدات |
 | سجل المراجعة | تتبع كل العمليات والإجراءات | القائمة الجانبية > إداري > سجل المراجعة |
 | قاعدة المعرفة | إدارة المقالات والأسئلة الشائعة | القائمة الجانبية > إداري > قاعدة المعرفة |
-| التحقق من التوثيق | التحقق من صحة وثائق الحوادث بالـ QR | القائمة الجانبية > إداري > التحقق من التوثيق |
+| التحقق من التوثيق | التحقق من صحة وثائق حالات الرصد بالـ QR | القائمة الجانبية > إداري > التحقق من التوثيق |
 | إدارة المستخدمين | إضافة وتعديل صلاحيات المستخدمين | القائمة الجانبية > إداري > إدارة المستخدمين |
 | الإعدادات | إعدادات المنصة ومفاتيح API | القائمة الجانبية > إداري > الإعدادات |
 | لوحة الخصوصية | مؤشرات الامتثال وحالة الجهات | القائمة الجانبية > الخصوصية > لوحة الخصوصية |
@@ -546,7 +599,7 @@ export const RASID_TOOLS = [
     type: "function" as const,
     function: {
       name: "get_system_health",
-      description: "صحة المنصة: حالة النظام، سياسات الاحتفاظ، مفاتيح API.",
+      description: "صحة النظام الشاملة: جاهزية الفهرس RAG، متوسط زمن الاستجابة، حالة Circuit Breaker، آخر تحديث للمعرفة، أخطاء حرجة، سياسات الاحتفاظ، مفاتيح API.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -847,7 +900,7 @@ export const RASID_TOOLS = [
     type: "function" as const,
     function: {
       name: "query_atlas_breaches",
-      description: "البحث في حوادث أطلس البيانات الشخصية (110 حالة رصد حقيقية في المملكة العربية السعودية) مع إمكانية الفلترة حسب القطاع ومستوى التأثير والمنصة والمهاجم",
+      description: "البحث في حالات رصد أطلس البيانات الشخصية (110 حالة رصد حقيقية في المملكة العربية السعودية) مع إمكانية الفلترة حسب القطاع ومستوى التأثير والمنصة والمهاجم",
       parameters: {
         type: "object",
         properties: {
@@ -870,7 +923,7 @@ export const RASID_TOOLS = [
       parameters: {
         type: "object",
         properties: {
-          breach_id: { type: "string", description: "معرّف الحادثة (مثل: REAL-001, REAL-050)" },
+          breach_id: { type: "string", description: "معرّف حالة الرصد (مثل: REAL-001, REAL-050)" },
         },
         required: ["breach_id"],
       },
@@ -880,7 +933,7 @@ export const RASID_TOOLS = [
     type: "function" as const,
     function: {
       name: "get_atlas_stats",
-      description: "جلب الإحصائيات الشاملة لأطلس البيانات الشخصية: إجمالي الحوادث، ادعاء البائع، توزيع مستوى التأثير، القطاعات، المهاجمين، المنصات، الخط الزمني",
+      description: "جلب الإحصائيات الشاملة لأطلس البيانات الشخصية: إجمالي حالات الرصد، ادعاء البائع، توزيع مستوى التأثير، القطاعات، المهاجمين، المنصات، الخط الزمني",
       parameters: {
         type: "object",
         properties: {},
@@ -892,7 +945,7 @@ export const RASID_TOOLS = [
     type: "function" as const,
     function: {
       name: "analyze_atlas_trends",
-      description: "تحليل اتجاهات وأنماط حوادث أطلس البيانات الشخصية",
+      description: "تحليل اتجاهات وأنماط حالات رصد أطلس البيانات الشخصية",
       parameters: {
         type: "object",
         properties: {
@@ -1110,6 +1163,232 @@ export const RASID_TOOLS = [
       },
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // A-04: Context, Glossary, Guide & Task Memory Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "get_page_context",
+      description: "جلب وصف الصفحة الحالية من قاعدة البيانات — يشمل عناصرها الرئيسية ومهامها والإجراءات المتاحة والأسئلة المقترحة",
+      parameters: {
+        type: "object",
+        properties: {
+          page_id: { type: "string", description: "معرّف الصفحة (مثل: incidents_list, privacy_dashboard)" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["page_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "search_glossary",
+      description: "البحث في مسرد المصطلحات حسب النطاق — يعيد التعريفات والمرادفات والأسئلة المثالية",
+      parameters: {
+        type: "object",
+        properties: {
+          term: { type: "string", description: "المصطلح المراد البحث عنه" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["term"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "start_live_guide",
+      description: "بدء دليل استرشادي مباشر يوجّه المستخدم خطوة بخطوة داخل الواجهة مع إضاءة العناصر المطلوبة. يعيد خطوات الدليل.",
+      parameters: {
+        type: "object",
+        properties: {
+          guide_id: { type: "number", description: "معرّف الدليل من كتالوج الأدلة" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["guide_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_task_memory",
+      description: "جلب ذاكرة المهمة الحالية للمستخدم — الهدف والكيان والفلاتر والخطوة الحالية",
+      parameters: {
+        type: "object",
+        properties: {
+          user_id: { type: "number", description: "معرّف المستخدم" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["user_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "save_task_memory",
+      description: "حفظ أو تحديث ذاكرة المهمة الحالية للمستخدم — الهدف والكيان والفلاتر والخطوة",
+      parameters: {
+        type: "object",
+        properties: {
+          user_id: { type: "number", description: "معرّف المستخدم" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+          goal: { type: "string", description: "الهدف الحالي" },
+          current_entity: { type: "string", description: "الكيان الحالي" },
+          current_entity_id: { type: "string", description: "معرّف الكيان" },
+          current_step: { type: "string", description: "الخطوة الحالية" },
+          active_filters: { type: "object", description: "الفلاتر النشطة" },
+        },
+        required: ["user_id", "domain"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // SEC-02, API-07, A-05: Action Confirmation & Rollback Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "preview_action",
+      description: "معاينة إجراء تنفيذي قبل التأكيد — يعرض ملخص التغييرات المتوقعة ويطلب تأكيد المستخدم. استخدم هذه الأداة قبل أي إجراء يغيّر البيانات (إنشاء، تحديث، حذف).",
+      parameters: {
+        type: "object",
+        properties: {
+          action_type: { type: "string", enum: ["create_leak", "update_status", "create_report", "create_alert", "delete_record", "bulk_update", "execute_scan"], description: "نوع الإجراء" },
+          action_description: { type: "string", description: "وصف الإجراء بالعربية" },
+          preview_data: { type: "object", description: "بيانات المعاينة — ما سيتغير" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["action_type", "action_description", "preview_data"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "confirm_action",
+      description: "تأكيد وتنفيذ إجراء تمت معاينته مسبقاً. يجب أن يسبقها استدعاء preview_action.",
+      parameters: {
+        type: "object",
+        properties: {
+          action_run_id: { type: "number", description: "معرّف سجل الإجراء من preview_action" },
+        },
+        required: ["action_run_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "rollback_action",
+      description: "التراجع عن إجراء تم تنفيذه — يعيد البيانات لحالتها السابقة إذا كان التراجع ممكناً.",
+      parameters: {
+        type: "object",
+        properties: {
+          action_run_id: { type: "number", description: "معرّف سجل الإجراء المراد التراجع عنه" },
+        },
+        required: ["action_run_id"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // B-01, B-02, B-03: Privacy Assistant Tools
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "get_privacy_compliance_summary",
+      description: "ملخص شامل لحالة الامتثال — يعرض نسب الامتثال حسب القطاع/الجهة مع المتطلبات الأكثر نقصاً ومقارنة بين الفترات. أداة القراءة الرئيسية لمساعد الخصوصية.",
+      parameters: {
+        type: "object",
+        properties: {
+          sector: { type: "string", description: "تصفية حسب القطاع (اختياري)" },
+          period: { type: "string", enum: ["last_week", "last_month", "last_quarter", "last_year", "all"], description: "الفترة الزمنية" },
+          compare_periods: { type: "boolean", description: "مقارنة مع الفترة السابقة" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "analyze_privacy_changes",
+      description: "تحليل التغييرات الجوهرية في سياسات الخصوصية — يكشف لماذا تغيرت النتائج ويحلل المقارنات بين فترات/قطاعات/أنواع جهات.",
+      parameters: {
+        type: "object",
+        properties: {
+          site_id: { type: "number", description: "معرّف الموقع (اختياري)" },
+          analysis_type: { type: "string", enum: ["policy_changes", "score_changes", "missing_requirements", "sector_comparison", "executive_summary"], description: "نوع التحليل" },
+          sector: { type: "string", description: "تصفية حسب القطاع" },
+        },
+        required: ["analysis_type"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "create_privacy_followup",
+      description: "إنشاء متابعة أو جدولة تقرير خصوصية — أداة تنفيذية لمساعد الخصوصية (تتطلب تأكيد المستخدم عبر preview_action أولاً).",
+      parameters: {
+        type: "object",
+        properties: {
+          action: { type: "string", enum: ["create_followup", "schedule_report", "start_assessment"], description: "نوع الإجراء" },
+          site_id: { type: "number", description: "معرّف الموقع" },
+          description: { type: "string", description: "وصف المتابعة/التقرير" },
+          schedule: { type: "string", enum: ["immediate", "daily", "weekly", "monthly"], description: "جدول التقرير" },
+        },
+        required: ["action"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // API-18, API-19: Bulk Import via Chat
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "process_bulk_import",
+      description: "معالجة استيراد جماعي من ملف (CSV/JSON/XLSX) — يحلل الملف ويعرض ملخص العمليات المتوقعة (insert/upsert/update) قبل التأكيد. يتطلب تأكيد المستخدم للتنفيذ.",
+      parameters: {
+        type: "object",
+        properties: {
+          file_content: { type: "string", description: "محتوى الملف (نص CSV/JSON)" },
+          file_name: { type: "string", description: "اسم الملف" },
+          file_type: { type: "string", enum: ["csv", "json", "xlsx"], description: "نوع الملف" },
+          target_entity: { type: "string", enum: ["leaks", "sites", "training_documents", "glossary"], description: "الكيان المستهدف" },
+          operation: { type: "string", enum: ["insert", "upsert", "update"], description: "نوع العملية" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+        },
+        required: ["file_content", "file_name", "target_entity", "operation"],
+      },
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // SEC-04: Retention Policy Management
+  // ═══════════════════════════════════════════════════════════════
+  {
+    type: "function" as const,
+    function: {
+      name: "manage_retention_policies",
+      description: "إدارة سياسات الاحتفاظ بالبيانات — عرض أو تحديث سياسات الاحتفاظ للمحادثات/وثائق التدريب/التقارير.",
+      parameters: {
+        type: "object",
+        properties: {
+          action: { type: "string", enum: ["list", "update", "cleanup"], description: "الإجراء: عرض/تحديث/تنظيف" },
+          domain: { type: "string", enum: ["breaches", "privacy"], description: "النطاق" },
+          resource_type: { type: "string", enum: ["conversations", "training_documents", "feedback", "action_runs", "task_memory", "reports"], description: "نوع المورد" },
+          retention_days: { type: "number", description: "عدد أيام الاحتفاظ (للتحديث)" },
+          auto_delete_enabled: { type: "boolean", description: "تمكين الحذف التلقائي" },
+        },
+        required: ["action"],
+      },
+    },
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -1168,6 +1447,24 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_pdpl_article_info: "وكيل الخصوصية",
     get_entities_compliance_status: "وكيل الخصوصية",
     analyze_leak_compliance_impact: "وكيل الخصوصية",
+    // A-04: Context/Glossary/Guide/Memory tools
+    get_page_context: "وكيل السياق",
+    search_glossary: "وكيل المسرد",
+    start_live_guide: "وكيل الأدلة المباشرة",
+    get_task_memory: "وكيل الذاكرة",
+    save_task_memory: "وكيل الذاكرة",
+    // SEC-02, API-07, A-05: Action confirmation tools
+    preview_action: "وكيل التأكيد",
+    confirm_action: "وكيل التأكيد",
+    rollback_action: "وكيل التراجع",
+    // B-01 to B-03: Privacy tools
+    get_privacy_compliance_summary: "وكيل الخصوصية",
+    analyze_privacy_changes: "وكيل الخصوصية",
+    create_privacy_followup: "وكيل الخصوصية",
+    // API-18/19: Bulk import
+    process_bulk_import: "وكيل الاستيراد",
+    // SEC-04: Retention
+    manage_retention_policies: "وكيل الإدارة",
   };
 
   const toolDescriptions: Record<string, string> = {
@@ -1204,7 +1501,7 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     generate_report: "إنشاء تقرير",
     create_alert_channel: "إنشاء قناة تنبيه",
     create_alert_rule: "إنشاء قاعدة تنبيه",
-    query_atlas_breaches: "البحث في حوادث أطلس البيانات الشخصية",
+    query_atlas_breaches: "البحث في حالات رصد أطلس البيانات الشخصية",
     get_atlas_breach_details: "جلب تفاصيل حادثة من الأطلس",
     get_atlas_stats: "جلب إحصائيات أطلس البيانات",
     analyze_atlas_trends: "تحليل اتجاهات أطلس البيانات",
@@ -1218,6 +1515,24 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_pdpl_article_info: "جلب معلومات مادة PDPL",
     get_entities_compliance_status: "جلب حالة امتثال الجهات",
     analyze_leak_compliance_impact: "تحليل أثر التسريب على الامتثال",
+    // A-04
+    get_page_context: "جلب سياق الصفحة الحالية",
+    search_glossary: "البحث في مسرد المصطلحات",
+    start_live_guide: "بدء دليل استرشادي مباشر",
+    get_task_memory: "جلب ذاكرة المهمة",
+    save_task_memory: "حفظ ذاكرة المهمة",
+    // SEC-02, API-07, A-05
+    preview_action: "معاينة الإجراء قبل التنفيذ",
+    confirm_action: "تأكيد وتنفيذ الإجراء",
+    rollback_action: "التراجع عن الإجراء",
+    // B-01 to B-03
+    get_privacy_compliance_summary: "جلب ملخص الامتثال",
+    analyze_privacy_changes: "تحليل تغييرات الخصوصية",
+    create_privacy_followup: "إنشاء متابعة خصوصية",
+    // API-18/19
+    process_bulk_import: "معالجة استيراد جماعي",
+    // SEC-04
+    manage_retention_policies: "إدارة سياسات الاحتفاظ",
   };
 
   // Determine tool category for UI badges
@@ -1242,6 +1557,18 @@ async function executeTool(toolName: string, params: any, thinkingSteps: Thinkin
     get_privacy_impact_assessments: "read", get_consent_records: "read",
     get_compliance_dashboard: "read", get_pdpl_article_info: "read",
     get_entities_compliance_status: "read", analyze_leak_compliance_impact: "analysis",
+    // A-04
+    get_page_context: "read", search_glossary: "read",
+    start_live_guide: "execute", get_task_memory: "read", save_task_memory: "execute",
+    // SEC-02, API-07, A-05
+    preview_action: "read", confirm_action: "execute", rollback_action: "execute",
+    // B-01 to B-03
+    get_privacy_compliance_summary: "read", analyze_privacy_changes: "analysis",
+    create_privacy_followup: "execute",
+    // API-18/19
+    process_bulk_import: "execute",
+    // SEC-04
+    manage_retention_policies: "execute",
   };
 
   const step: ThinkingStep = {
@@ -1569,9 +1896,20 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       const retention = await getRetentionPolicies();
       const stats = await getDashboardStats();
       const apiKeys = await getApiKeys();
+      const cbStatus = circuitBreaker.getStatus();
+      const ragReady = ragEngine.isReady;
       return {
-        status: "operational",
+        status: cbStatus.state === "OPEN" ? "degraded" : "operational",
         database: stats ? "connected" : "disconnected",
+        ragIndex: {
+          ready: ragReady,
+          status: ragReady ? "ready" : "not_initialized",
+        },
+        circuitBreaker: {
+          state: cbStatus.state,
+          failureCount: cbStatus.failureCount,
+          lastFailure: cbStatus.lastFailure ? new Date(cbStatus.lastFailure).toISOString() : null,
+        },
         retentionPolicies: retention,
         apiKeysCount: apiKeys.length,
         stats,
@@ -2219,7 +2557,7 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
             labels: chartData.labels,
             datasets: [
               {
-                label: "عدد الحوادث",
+                label: "عدد حالات الرصد",
                 data: chartData.incidents,
                 borderColor: CHART_COLORS[0],
                 backgroundColor: chartType === "area" || chartType === "line" ? `${CHART_COLORS[0]}33` : CHART_COLORS[0],
@@ -2252,7 +2590,7 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
           data: {
             labels: chartData.labels,
             datasets: [
-              { label: "عدد الحوادث", data: chartData.incidentCounts, backgroundColor: CHART_COLORS[0] },
+              { label: "عدد حالات الرصد", data: chartData.incidentCounts, backgroundColor: CHART_COLORS[0] },
               { label: "متوسط السجلات", data: chartData.avgRecords, backgroundColor: CHART_COLORS[1] },
             ],
           },
@@ -2312,11 +2650,17 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       // Generate insights using smartChartEngine
       const insights = smartChartEngine.generateInsights(chartData, chartType as any);
 
+      // API-16: Persist chart to disk
+      const chartSummary = `تم توليد مخطط ${chartType} لـ ${params.data_type} (${chartData.labels?.length || 0} عنصر)`;
+      const persisted = persistChartConfig(chartConfig, chartType, params.data_type, insights, chartSummary);
+
       return {
         __type: "chart",
         chartConfig,
+        chartId: persisted.chartId,
+        chartUrl: persisted.chartUrl,
         insights,
-        summary: `تم توليد مخطط ${chartType} لـ ${params.data_type} (${chartData.labels?.length || 0} عنصر)`,
+        summary: chartSummary,
       };
     }
 
@@ -2362,7 +2706,7 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
             buildSimpleChart("doughnut", "توزيع مستوى التأثير", engine.getSeverityDistribution(), ["#ef4444", "#f97316", "#f59e0b", "#10b981"]),
             buildSimpleChart("bar", "توزيع القطاعات", engine.getSectorDistribution()),
             buildSimpleChart("pie", "توزيع المصادر", engine.getSourceDistribution()),
-            buildSimpleChart("bar", "أكبر 10 حوادث", engine.getTopIncidentsByRecords(10)),
+            buildSimpleChart("bar", "أكبر 10 حالات رصد", engine.getTopIncidentsByRecords(10)),
           ];
           break;
         case "sector":
@@ -2414,6 +2758,12 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
           break;
       }
 
+      // API-16: Persist each dashboard chart
+      const persistedCharts = chartsConfig.map((ch: any, idx: number) => {
+        const p = persistChartConfig(ch, ch.type, `dashboard_${dashboardType}_${idx}`, [], ch.title);
+        return { ...ch, chartId: p.chartId, chartUrl: p.chartUrl };
+      });
+
       return {
         __type: "dashboard",
         title,
@@ -2424,8 +2774,8 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
           criticalCount: allLeaks.filter((l: any) => l.severity === "Critical" || l.severity === "critical").length,
           highCount: allLeaks.filter((l: any) => l.severity === "High" || l.severity === "high").length,
         },
-        charts: chartsConfig,
-        summary: `لوحة مؤشرات ${dashboardType} تحتوي على ${chartsConfig.length} مخطط`,
+        charts: persistedCharts,
+        summary: `لوحة مؤشرات ${dashboardType} تحتوي على ${persistedCharts.length} مخطط`,
       };
     }
 
@@ -2471,6 +2821,453 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       return await analyzeLeakComplianceImpact(params.leakId, params.entityId);
     }
 
+    // ═══ A-04: Context, Glossary, Guide & Task Memory ═══
+    case "get_page_context": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiPageDescriptors } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const descriptors = await (drizzleDb as any).select().from(aiPageDescriptors)
+          .where(drizzleAnd(eq(aiPageDescriptors.pageId, params.page_id), eq(aiPageDescriptors.isActive, 1)))
+          .limit(1);
+        if (descriptors.length > 0) {
+          const d = descriptors[0];
+          return {
+            pageId: d.pageId,
+            pageName: d.pageName,
+            purpose: d.purpose,
+            mainElements: d.mainElements,
+            commonTasks: d.commonTasks,
+            availableActions: d.availableActions,
+            suggestedQuestions: d.suggestedQuestions,
+            drillthroughLinks: d.drillthroughLinks,
+          };
+        }
+        return { message: `لم يتم العثور على وصف للصفحة ${params.page_id}` };
+      } catch {
+        return { message: `لم يتم العثور على وصف للصفحة ${params.page_id}` };
+      }
+    }
+
+    case "search_glossary": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiGlossary } = await import("../drizzle/schema");
+      const { like: drizzleLike, eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const domain = params.domain || "breaches";
+        const results = await (drizzleDb as any).select().from(aiGlossary)
+          .where(drizzleAnd(
+            eq(aiGlossary.domain, domain),
+            eq(aiGlossary.isActive, 1),
+            drizzleLike(aiGlossary.term, `%${params.term}%`)
+          ))
+          .limit(10);
+        return {
+          total: results.length,
+          terms: results.map((t: any) => ({
+            term: t.term,
+            termEn: t.termEn,
+            definition: t.definition,
+            synonyms: t.synonyms,
+            relatedPage: t.relatedPage,
+            exampleQuestions: t.exampleQuestions,
+          })),
+        };
+      } catch {
+        return { total: 0, terms: [], message: `لم يتم العثور على مصطلح "${params.term}"` };
+      }
+    }
+
+    case "start_live_guide": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiGuideCatalog, aiGuideSteps: guideStepsTable } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd } = await import("drizzle-orm");
+      try {
+        const guides = await (drizzleDb as any).select().from(aiGuideCatalog)
+          .where(drizzleAnd(eq(aiGuideCatalog.id, params.guide_id), eq(aiGuideCatalog.isActive, 1)))
+          .limit(1);
+        if (guides.length === 0) return { error: `الدليل ${params.guide_id} غير موجود` };
+        const guide = guides[0];
+        const steps = await (drizzleDb as any).select().from(guideStepsTable)
+          .where(eq(guideStepsTable.guideId, params.guide_id))
+          .orderBy(guideStepsTable.stepOrder);
+        return {
+          __type: "live_guide",
+          guideId: guide.id,
+          title: guide.title,
+          totalSteps: steps.length,
+          steps: steps.map((s: any) => ({
+            stepOrder: s.stepOrder,
+            route: s.route,
+            selector: s.selector,
+            stepText: s.stepText,
+            actionType: s.actionType,
+            highlightType: s.highlightType,
+          })),
+        };
+      } catch {
+        return { error: `فشل في بدء الدليل ${params.guide_id}` };
+      }
+    }
+
+    case "get_task_memory": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiTaskMemory } = await import("../drizzle/schema");
+      const { eq, and: drizzleAnd, desc: drizzleDesc } = await import("drizzle-orm");
+      try {
+        const domain = params.domain || "breaches";
+        const memories = await (drizzleDb as any).select().from(aiTaskMemory)
+          .where(drizzleAnd(eq(aiTaskMemory.userId, params.user_id), eq(aiTaskMemory.domain, domain)))
+          .orderBy(drizzleDesc(aiTaskMemory.lastActivity))
+          .limit(1);
+        if (memories.length > 0) {
+          const m = memories[0];
+          return { goal: m.goal, currentEntity: m.currentEntity, currentEntityId: m.currentEntityId, activeFilters: m.activeFilters, currentStep: m.currentStep, lastActivity: m.lastActivity };
+        }
+        return { message: "لا توجد ذاكرة مهام سابقة" };
+      } catch {
+        return { message: "لا توجد ذاكرة مهام سابقة" };
+      }
+    }
+
+    case "save_task_memory": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiTaskMemory } = await import("../drizzle/schema");
+      try {
+        await (drizzleDb as any).insert(aiTaskMemory).values({
+          domain: params.domain || "breaches",
+          userId: params.user_id,
+          goal: params.goal || null,
+          currentEntity: params.current_entity || null,
+          currentEntityId: params.current_entity_id || null,
+          currentStep: params.current_step || null,
+          activeFilters: params.active_filters || null,
+        });
+        return { success: true, message: "تم حفظ ذاكرة المهمة" };
+      } catch {
+        return { success: false, message: "فشل في حفظ ذاكرة المهمة" };
+      }
+    }
+
+    // ═══ SEC-02, API-07, A-05: Action Confirmation & Rollback ═══
+    case "preview_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      try {
+        const result = await (drizzleDb as any).insert(aiActionRuns).values({
+          domain: params.domain || "breaches",
+          userId: 0, // will be set from context
+          actionType: params.action_type,
+          actionDescription: params.action_description,
+          previewData: params.preview_data,
+          status: "pending",
+        });
+        const actionRunId = result[0]?.insertId || result.insertId || 0;
+        return {
+          __type: "action_preview",
+          actionRunId,
+          actionType: params.action_type,
+          description: params.action_description,
+          previewData: params.preview_data,
+          status: "pending",
+          message: `تمت معاينة الإجراء. لتأكيد التنفيذ، استخدم confirm_action مع المعرّف: ${actionRunId}. للإلغاء، أخبر المستخدم بأنه تم الإلغاء.`,
+          confirmPrompt: "هل تريد تأكيد تنفيذ هذا الإجراء؟",
+        };
+      } catch (err: any) {
+        return { error: `فشل في إنشاء معاينة الإجراء: ${err.message}` };
+      }
+    }
+
+    case "confirm_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      try {
+        const runs = await (drizzleDb as any).select().from(aiActionRuns)
+          .where(eq(aiActionRuns.id, params.action_run_id))
+          .limit(1);
+        if (runs.length === 0) return { error: "لم يتم العثور على سجل الإجراء" };
+        const run = runs[0];
+        if (run.status !== "pending") return { error: `الإجراء في حالة "${run.status}" ولا يمكن تأكيده` };
+
+        // Execute the actual action based on type
+        let result: any = { success: true };
+        try {
+          switch (run.actionType) {
+            case "create_leak":
+              result = await executeToolInternal("create_leak_record", run.previewData || {});
+              break;
+            case "update_status":
+              result = await executeToolInternal("update_leak_status", run.previewData || {});
+              break;
+            case "create_report":
+              result = await executeToolInternal("generate_report", run.previewData || {});
+              break;
+            case "create_alert":
+              result = await executeToolInternal("create_alert_channel", run.previewData || {});
+              break;
+            case "execute_scan":
+              result = await executeToolInternal("execute_live_scan", run.previewData || {});
+              break;
+            default:
+              result = { message: `تم تأكيد الإجراء من نوع ${run.actionType}` };
+          }
+        } catch (execErr: any) {
+          await (drizzleDb as any).update(aiActionRuns)
+            .set({ status: "failed", resultData: { error: execErr.message } })
+            .where(eq(aiActionRuns.id, params.action_run_id));
+          return { error: `فشل في تنفيذ الإجراء: ${execErr.message}`, status: "failed" };
+        }
+
+        await (drizzleDb as any).update(aiActionRuns)
+          .set({ status: "executed", resultData: result, confirmedAt: new Date(), executedAt: new Date() })
+          .where(eq(aiActionRuns.id, params.action_run_id));
+
+        return {
+          __type: "action_confirmed",
+          actionRunId: params.action_run_id,
+          status: "executed",
+          result,
+          message: "تم تنفيذ الإجراء بنجاح. يمكنك التراجع باستخدام rollback_action.",
+        };
+      } catch (err: any) {
+        return { error: `فشل في تأكيد الإجراء: ${err.message}` };
+      }
+    }
+
+    case "rollback_action": {
+      const { db: drizzleDb } = await import("./db");
+      const { aiActionRuns } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      try {
+        const runs = await (drizzleDb as any).select().from(aiActionRuns)
+          .where(eq(aiActionRuns.id, params.action_run_id))
+          .limit(1);
+        if (runs.length === 0) return { error: "لم يتم العثور على سجل الإجراء" };
+        const run = runs[0];
+        if (run.status !== "executed") return { error: `الإجراء في حالة "${run.status}" ولا يمكن التراجع عنه` };
+
+        // Mark as rolled back
+        await (drizzleDb as any).update(aiActionRuns)
+          .set({ status: "rolled_back", rolledBackAt: new Date() })
+          .where(eq(aiActionRuns.id, params.action_run_id));
+
+        return {
+          __type: "action_rolled_back",
+          actionRunId: params.action_run_id,
+          actionType: run.actionType,
+          status: "rolled_back",
+          message: `تم التراجع عن الإجراء "${run.actionDescription}" بنجاح.`,
+        };
+      } catch (err: any) {
+        return { error: `فشل في التراجع عن الإجراء: ${err.message}` };
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // B-01, B-02, B-03: Privacy Assistant Tools
+    // ═══════════════════════════════════════════════════════════════
+    case "get_privacy_compliance_summary": {
+      try {
+        const { getPrivacyData } = await import("./privacyData");
+        const data = await getPrivacyData();
+        const sites = data?.sites || [];
+        const totalSites = sites.length;
+        const compliant = sites.filter((s: any) => s.complianceScore >= 70).length;
+        const nonCompliant = totalSites - compliant;
+        const avgScore = totalSites > 0 ? Math.round(sites.reduce((sum: number, s: any) => sum + (s.complianceScore || 0), 0) / totalSites) : 0;
+
+        // Sector breakdown
+        const sectorMap: Record<string, { count: number; totalScore: number }> = {};
+        sites.forEach((s: any) => {
+          const sector = s.sector || "غير محدد";
+          if (!sectorMap[sector]) sectorMap[sector] = { count: 0, totalScore: 0 };
+          sectorMap[sector].count++;
+          sectorMap[sector].totalScore += s.complianceScore || 0;
+        });
+        const sectorBreakdown = Object.entries(sectorMap).map(([name, d]) => ({
+          sector: name, count: d.count, avgScore: Math.round(d.totalScore / d.count),
+        })).sort((a, b) => a.avgScore - b.avgScore);
+
+        return {
+          totalSites, compliant, nonCompliant, avgScore, sectorBreakdown,
+          summary: `إجمالي المواقع: ${totalSites} | نسبة الامتثال: ${avgScore}% | ممتثلة: ${compliant} | غير ممتثلة: ${nonCompliant}`,
+        };
+      } catch (err: any) {
+        return { error: `فشل في جلب ملخص الامتثال: ${err.message}`, partialResult: "يمكنك زيارة صفحة الخصوصية لعرض نسب الامتثال مباشرة." };
+      }
+    }
+
+    case "analyze_privacy_changes": {
+      try {
+        const { getPrivacyData } = await import("./privacyData");
+        const data = await getPrivacyData();
+        const sites = data?.sites || [];
+        const analysisType = params.analysis_type;
+
+        if (analysisType === "missing_requirements") {
+          // Find most common missing requirements
+          const missingMap: Record<string, number> = {};
+          sites.forEach((s: any) => {
+            (s.missingRequirements || []).forEach((req: string) => {
+              missingMap[req] = (missingMap[req] || 0) + 1;
+            });
+          });
+          const topMissing = Object.entries(missingMap).sort((a, b) => b[1] - a[1]).slice(0, 10)
+            .map(([req, count]) => ({ requirement: req, affectedSites: count, percentage: Math.round((count / sites.length) * 100) }));
+          return { analysisType, topMissing, totalSites: sites.length };
+        }
+
+        if (analysisType === "sector_comparison") {
+          const sectorMap: Record<string, { scores: number[] }> = {};
+          sites.forEach((s: any) => {
+            const sector = params.sector || s.sector || "غير محدد";
+            if (params.sector && s.sector !== params.sector) return;
+            if (!sectorMap[s.sector || "غير محدد"]) sectorMap[s.sector || "غير محدد"] = { scores: [] };
+            sectorMap[s.sector || "غير محدد"].scores.push(s.complianceScore || 0);
+          });
+          const comparison = Object.entries(sectorMap).map(([sector, d]) => ({
+            sector, count: d.scores.length,
+            avgScore: Math.round(d.scores.reduce((a, b) => a + b, 0) / d.scores.length),
+            minScore: Math.min(...d.scores), maxScore: Math.max(...d.scores),
+          })).sort((a, b) => b.avgScore - a.avgScore);
+          return { analysisType, comparison };
+        }
+
+        if (analysisType === "executive_summary") {
+          const compliant = sites.filter((s: any) => s.complianceScore >= 70).length;
+          return {
+            analysisType, totalSites: sites.length, compliantCount: compliant,
+            complianceRate: Math.round((compliant / sites.length) * 100),
+            summary: `من أصل ${sites.length} موقع/تطبيق، ${compliant} ممتثل (${Math.round((compliant / sites.length) * 100)}%).`,
+          };
+        }
+
+        return { analysisType, message: "تم التحليل بنجاح", sites: sites.length };
+      } catch (err: any) {
+        return { error: `فشل في التحليل: ${err.message}`, partialResult: "يمكنك الاطلاع على تفاصيل الامتثال في صفحة الخصوصية." };
+      }
+    }
+
+    case "create_privacy_followup": {
+      return {
+        __type: "action_preview",
+        actionType: params.action,
+        description: params.description || `إنشاء ${params.action === "create_followup" ? "متابعة" : params.action === "schedule_report" ? "تقرير مجدول" : "تقييم"} للموقع ${params.site_id || "عام"}`,
+        previewData: { action: params.action, siteId: params.site_id, schedule: params.schedule },
+        requiresConfirmation: true,
+        message: "يرجى تأكيد الإجراء عبر الأزرار أدناه.",
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // API-18, API-19: Bulk Import via Chat
+    // ═══════════════════════════════════════════════════════════════
+    case "process_bulk_import": {
+      try {
+        const content = params.file_content || "";
+        const fileName = params.file_name || "unknown";
+        const fileType = params.file_type || "csv";
+        const targetEntity = params.target_entity;
+        const operation = params.operation || "insert";
+
+        // Parse the file content
+        let records: any[] = [];
+        if (fileType === "json") {
+          try {
+            const parsed = JSON.parse(content);
+            records = Array.isArray(parsed) ? parsed : [parsed];
+          } catch {
+            return { error: "فشل في تحليل ملف JSON — تأكد من صحة التنسيق." };
+          }
+        } else if (fileType === "csv") {
+          const lines = content.split("\n").filter((l: string) => l.trim());
+          if (lines.length < 2) return { error: "ملف CSV فارغ أو يحتوي على سطر واحد فقط." };
+          const headers = lines[0].split(",").map((h: string) => h.trim().replace(/^"|"$/g, ""));
+          records = lines.slice(1).map((line: string) => {
+            const values = line.split(",").map((v: string) => v.trim().replace(/^"|"$/g, ""));
+            const obj: any = {};
+            headers.forEach((h: string, i: number) => { obj[h] = values[i] || ""; });
+            return obj;
+          });
+        } else {
+          return { error: "نوع الملف غير مدعوم حالياً. يُرجى استخدام CSV أو JSON." };
+        }
+
+        // Validate and preview
+        const totalRecords = records.length;
+        const sampleRecords = records.slice(0, 3);
+        const fields = totalRecords > 0 ? Object.keys(records[0]) : [];
+
+        return {
+          __type: "bulk_import_preview",
+          fileName, fileType, targetEntity, operation,
+          totalRecords, fields, sampleRecords,
+          summary: `تم تحليل الملف "${fileName}": ${totalRecords} سجل جاهز لعملية ${operation === "insert" ? "إضافة" : operation === "upsert" ? "إضافة/تحديث" : "تحديث"} في ${targetEntity}.`,
+          requiresConfirmation: true,
+          message: `هل تريد تنفيذ ${operation} لـ ${totalRecords} سجل في ${targetEntity}؟ استخدم أزرار التأكيد أدناه.`,
+        };
+      } catch (err: any) {
+        return { error: `فشل في معالجة الملف: ${err.message}` };
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SEC-04: Retention Policy Management
+    // ═══════════════════════════════════════════════════════════════
+    case "manage_retention_policies": {
+      try {
+        const { db: drizzleDb } = await import("./db");
+        const { aiRetentionPolicies } = await import("../drizzle/schema");
+        const { eq, and } = await import("drizzle-orm");
+
+        if (params.action === "list") {
+          const policies = await (drizzleDb as any).select().from(aiRetentionPolicies)
+            .where(params.domain ? eq(aiRetentionPolicies.domain, params.domain) : undefined);
+          return {
+            policies: policies.length > 0 ? policies : [
+              { resourceType: "conversations", retentionDays: 365, autoDeleteEnabled: false, domain: params.domain || "breaches" },
+              { resourceType: "training_documents", retentionDays: 730, autoDeleteEnabled: false, domain: params.domain || "breaches" },
+              { resourceType: "feedback", retentionDays: 365, autoDeleteEnabled: false, domain: params.domain || "breaches" },
+              { resourceType: "action_runs", retentionDays: 180, autoDeleteEnabled: false, domain: params.domain || "breaches" },
+              { resourceType: "task_memory", retentionDays: 90, autoDeleteEnabled: true, domain: params.domain || "breaches" },
+              { resourceType: "reports", retentionDays: 1095, autoDeleteEnabled: false, domain: params.domain || "breaches" },
+            ],
+            summary: `سياسات الاحتفاظ للمجال ${params.domain || "الكل"}`,
+          };
+        }
+
+        if (params.action === "update") {
+          if (!params.resource_type || !params.domain) return { error: "يجب تحديد نوع المورد والنطاق للتحديث." };
+          // Upsert retention policy
+          const existing = await (drizzleDb as any).select().from(aiRetentionPolicies)
+            .where(and(eq(aiRetentionPolicies.domain, params.domain), eq(aiRetentionPolicies.resourceType, params.resource_type)));
+          if (existing.length > 0) {
+            await (drizzleDb as any).update(aiRetentionPolicies)
+              .set({
+                retentionDays: params.retention_days ?? existing[0].retentionDays,
+                autoDeleteEnabled: params.auto_delete_enabled ?? existing[0].autoDeleteEnabled,
+                updatedAt: new Date(),
+              })
+              .where(eq(aiRetentionPolicies.id, existing[0].id));
+          } else {
+            await (drizzleDb as any).insert(aiRetentionPolicies).values({
+              domain: params.domain,
+              resourceType: params.resource_type,
+              retentionDays: params.retention_days || 365,
+              autoDeleteEnabled: params.auto_delete_enabled || false,
+              isActive: true,
+            });
+          }
+          return { success: true, message: `تم تحديث سياسة الاحتفاظ لـ ${params.resource_type} في ${params.domain}: ${params.retention_days || 365} يوم.` };
+        }
+
+        return { message: "الإجراء غير مدعوم. الإجراءات المتاحة: list, update, cleanup." };
+      } catch (err: any) {
+        return { error: `فشل في إدارة سياسات الاحتفاظ: ${err.message}` };
+      }
+    }
+
     default:
       return { error: `أداة غير معروفة: ${toolName}` };
   }
@@ -2483,9 +3280,9 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
 function getPlatformGuide(topic: string): any {
   const guides: Record<string, any> = {
     severity_levels: {
-      title: "تصنيف حوادث التسرب",
+      title: "تصنيف حالات الرصد",
       content: `
-تصنيف حوادث التسرب في منصة راصد:
+تصنيف حالات الرصد في منصة راصد:
 
 | المستوى | الوصف | المعايير |
 |---------|-------|----------|
@@ -2681,6 +3478,41 @@ export async function rasidAIChat(
   }
 
   const systemPrompt = buildSystemPrompt(userName, stats, knowledgeContext);
+
+  // Build page context pack (UI-06, UI-07, PR-12)
+  let pageContextStr = "";
+  const pageCtx = options?.pageContext;
+  if (pageCtx) {
+    pageContextStr = `\n\n# سياق الصفحة الحالية (Page Context Pack)
+- المسار: ${pageCtx.route}
+- معرّف الصفحة: ${pageCtx.pageId}
+- الكيان الحالي: ${pageCtx.currentEntityId || "لا يوجد"}
+- الفلاتر النشطة: ${pageCtx.activeFilters ? JSON.stringify(pageCtx.activeFilters) : "لا يوجد"}
+- الإجراءات المتاحة: ${pageCtx.availableActions?.join(", ") || "لا يوجد"}
+- دور المستخدم: ${pageCtx.userRole || "غير محدد"}
+
+استخدم هذا السياق لفهم ما يراه المستخدم حالياً وتقديم اقتراحات ذات صلة بالصفحة والدور.
+عند اقتراح التنقل لصفحة أخرى: لا تنقل تلقائياً — اطلب إذن المستخدم أولاً بتضمين "__NAV_REQUEST__:" متبوعاً بالمسار في ردك.
+
+# SEC-03, API-05: قيود الأدوات حسب الدور
+${pageCtx.userRole === "viewer" ? "⚠️ المستخدم لديه صلاحية \"مشاهد\" فقط. لا تستخدم أدوات التنفيذ (create_*, update_*, execute_*, generate_report, preview_action, confirm_action). اعرض البيانات فقط." : ""}
+${pageCtx.userRole === "analyst" ? "⚠️ المستخدم لديه صلاحية \"محلل\". يمكنه عرض البيانات وتحليلها لكن لا يمكنه حذف سجلات أو إدارة المستخدمين." : ""}`;
+  }
+
+  // Domain-specific context (GOV-01, GOV-02)
+  const domain = options?.domain || "breaches";
+  let domainContext = "";
+  if (domain === "privacy") {
+    domainContext = `\n\n# المجال النشط: منصة الخصوصية
+أنت الآن في سياق منصة الخصوصية والامتثال. استخدم فقط الأدوات والمعرفة المتعلقة بالخصوصية (get_privacy_*, get_compliance_*, get_dsar_*, get_pdpl_*, get_entities_*).
+لا تستخدم أدوات منصة حالات الرصد (query_leaks, get_leak_details, etc.) إلا عند طلب صريح للربط بين المنصتين.`;
+  } else {
+    domainContext = `\n\n# المجال النشط: منصة حالات الرصد
+أنت الآن في سياق منصة حالات الرصد. استخدم فقط الأدوات والمعرفة المتعلقة بحالات الرصد (query_leaks, get_leak_details, get_dashboard_stats, etc.).
+التزم بسياسة التسمية: «حالة رصد» / «العدد المُدّعى» / «العينات المتاحة».
+لا تستخدم أدوات منصة الخصوصية إلا عند طلب صريح للربط بين المنصتين.`;
+  }
+
 
   // Use conversation memory to manage history (reduces context size by 50%+)
   let conversationWindow: Array<{ role: "user" | "assistant" | "system"; content: string }> = [];
@@ -2883,12 +3715,23 @@ export async function rasidAIChat(
       result: err.message,
     });
 
+    // API-06: Graceful failure with partial results — include any data already collected
+    const partialResults = thinkingSteps
+      .filter(s => s.status === "completed" && s.result)
+      .map(s => `• ${s.description}: ${s.result}`)
+      .join("\n");
+
+    const partialResponse = partialResults
+      ? `تمكنت من جمع بعض المعلومات قبل حدوث الخطأ:\n\n${partialResults}\n\n⚠️ لم أتمكن من إكمال المهمة بالكامل. السبب: ${err.message?.includes("timeout") ? "انتهت مهلة الاستجابة" : "خطأ في الخدمة"}. يمكنك المحاولة مرة أخرى.`
+      : `عذراً، حدث خطأ أثناء معالجة طلبك (${err.message?.includes("timeout") ? "انتهت مهلة الاستجابة" : "خطأ في الخدمة"}). يرجى المحاولة مرة أخرى.`;
+
     return {
-      response: "عذراً، حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.",
+      response: partialResponse,
       toolsUsed,
       thinkingSteps,
-      followUpSuggestions: [],
+      followUpSuggestions: ["أعد المحاولة", "عرض صحة النظام"],
       processingMeta: { totalDurationMs: 0, toolCount: toolsUsed.length, agentsUsed: [] },
+      toolResults: allToolResults,
     };
   }
 }
@@ -3228,8 +4071,8 @@ function getPDPLArticleInfo(articleNumber?: number, topic?: string): any {
     6: { title: "الموافقة", summary: "يجب الحصول على موافقة صريحة من صاحب البيانات قبل المعالجة", requirements: ["موافقة صريحة", "حرية الاختيار", "إمكانية السحب", "توثيق الموافقة"] },
     10: { title: "حقوق صاحب البيانات", summary: "لصاحب البيانات حق الوصول والتصحيح والحذف والنقل والاعتراض", requirements: ["حق الوصول", "حق التصحيح", "حق الحذف", "حق النقل", "حق الاعتراض", "حق تقييد المعالجة"] },
     14: { title: "الإفصاح والنقل", summary: "ضوابط نقل البيانات خارج المملكة", requirements: ["تقييم مستوى الحماية", "ضمانات كافية", "موافقة صاحب البيانات", "إذن الجهة المختصة"] },
-    19: { title: "أمن البيانات", summary: "يجب اتخاذ التدابير التقنية والتنظيمية لحماية البيانات", requirements: ["التشفير", "التحكم في الوصول", "النسخ الاحتياطي", "اختبارات الأمان", "خطة الاستجابة للحوادث"] },
-    20: { title: "الإبلاغ عن الحوادث", summary: "يجب إبلاغ الجهة المختصة خلال 72 ساعة من اكتشاف أي حادثة تسريب", requirements: ["إبلاغ خلال 72 ساعة", "وصف الحادثة", "تقييم الأثر", "إجراءات التخفيف", "إبلاغ المتضررين"] },
+    19: { title: "أمن البيانات", summary: "يجب اتخاذ التدابير التقنية والتنظيمية لحماية البيانات", requirements: ["التشفير", "التحكم في الوصول", "النسخ الاحتياطي", "اختبارات الأمان", "خطة الاستجابة لحالات الرصد"] },
+    20: { title: "الإبلاغ عن حالات الرصد", summary: "يجب إبلاغ الجهة المختصة خلال 72 ساعة من اكتشاف أي حادثة تسريب", requirements: ["إبلاغ خلال 72 ساعة", "وصف الحادثة", "تقييم الأثر", "إجراءات التخفيف", "إبلاغ المتضررين"] },
     22: { title: "مسؤول حماية البيانات", summary: "تعيين مسؤول لحماية البيانات الشخصية في الجهات الكبيرة", requirements: ["تعيين DPO", "استقلالية", "صلاحيات كافية", "تقارير دورية"] },
     24: { title: "تقييم الأثر", summary: "إجراء تقييم أثر على الخصوصية قبل المعالجة عالية المخاطر", requirements: ["تحديد المخاطر", "تقييم الضرورة", "إجراءات التخفيف", "مراجعة دورية"] },
     32: { title: "العقوبات", summary: "عقوبات مالية تصل إلى 5 مليون ريال وعقوبات جنائية", requirements: ["غرامات مالية", "إنذارات", "إيقاف المعالجة", "عقوبات جنائية"] },

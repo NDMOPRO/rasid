@@ -35,12 +35,12 @@ export default function ImpactAssessment() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">تقييم الأثر</h1><p className="text-muted-foreground text-sm mt-1">تحليل حجم وتأثير حوادث التسريب</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">تقييم الأثر</h1><p className="text-muted-foreground text-sm mt-1">تحليل حجم وتأثير حالات الرصد</p></div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Users className="h-6 w-6 text-red-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{analysis.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">إجمالي السجلات المتأثرة</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><BarChart3 className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{analysis.avgRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">متوسط السجلات لكل حادثة</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي الحوادث</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Zap className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{analysis.topImpact[0]?.recordCount?.toLocaleString("ar-SA") || 0}</div><div className="text-xs text-muted-foreground">أكبر حادثة</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><BarChart3 className="h-6 w-6 text-blue-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{analysis.avgRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">متوسط العدد المُدّعى لكل حالة رصد</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-6 w-6 text-amber-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{leaks.length}</div><div className="text-xs text-muted-foreground">إجمالي حالات الرصد</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Zap className="h-6 w-6 text-purple-400 mx-auto mb-2" /><div className="text-xl font-bold text-foreground">{analysis.topImpact[0]?.recordCount?.toLocaleString("ar-SA") || 0}</div><div className="text-xs text-muted-foreground">أكبر حالة رصد</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="glass-card gold-sweep">
@@ -72,11 +72,11 @@ export default function ImpactAssessment() {
         </Card>
       </div>
       <Card className="glass-card gold-sweep">
-        <CardHeader><CardTitle className="text-foreground text-base">أكبر 10 حوادث تأثيراً</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-foreground text-base">أكبر 10 حالات رصد تأثيراً</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">#</th><th className="text-right text-muted-foreground p-2">الحادثة</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">القطاع</th><th className="text-center text-muted-foreground p-2">الخطورة</th></tr></thead>
+              <thead><tr className="border-b border-border"><th className="text-right text-muted-foreground p-2">#</th><th className="text-right text-muted-foreground p-2">حالة الرصد</th><th className="text-center text-muted-foreground p-2">السجلات</th><th className="text-center text-muted-foreground p-2">القطاع</th><th className="text-center text-muted-foreground p-2">الخطورة</th></tr></thead>
               <tbody>
                 {analysis.topImpact.map((l: any, i: number) => (
                   <tr key={i} className="border-b border-gray-800/50 hover:bg-card/30">

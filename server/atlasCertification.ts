@@ -305,7 +305,7 @@ export async function generateAtlasCertification(
             <img src="${RASID_LOGO_DARK_BG}" alt="منصة راصد" style="height:56px;object-fit:contain;" />
             <div style="width:1px;height:40px;background:rgba(255,255,255,0.15);"></div>
             <div>
-              <p style="font-size:14px;color:white;font-weight:800;margin:0;">منصة راصد الوطنية — أطلس الحوادث</p>
+              <p style="font-size:14px;color:white;font-weight:800;margin:0;">منصة راصد الوطنية — أطلس حالات الرصد</p>
               <p style="font-size:10px;color:rgba(255,255,255,0.5);margin:3px 0 0 0;">NDMO Rasid Platform — Atlas Incident Certification</p>
             </div>
           </div>
@@ -355,15 +355,15 @@ export async function generateAtlasCertification(
       <div style="margin-bottom:28px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
           <div style="width:4px;height:26px;background:linear-gradient(180deg,#0a2540,#0d9488);border-radius:2px;"></div>
-          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">معلومات الحادثة</h3>
+          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">معلومات حالة الرصد</h3>
         </div>
         <table class="info-table">
           <tr>
-            <td class="label-cell">رقم الحادثة</td>
+            <td class="label-cell">رقم حالة الرصد</td>
             <td class="value-cell" style="font-family:'Courier New',monospace;color:#6366f1;font-weight:800;">${incident.id}</td>
           </tr>
           <tr>
-            <td class="label-cell">عنوان الحادثة</td>
+            <td class="label-cell">عنوان حالة الرصد</td>
             <td class="value-cell" style="font-size:13px;font-weight:800;color:#0a2540;">${incident.title_ar}</td>
           </tr>
           <tr>
@@ -416,7 +416,7 @@ export async function generateAtlasCertification(
       <div style="margin-bottom:28px;page-break-inside:avoid;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
           <div style="width:4px;height:26px;background:linear-gradient(180deg,#0a2540,#0d9488);border-radius:2px;"></div>
-          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">وصف الحادثة</h3>
+          <h3 style="color:#0a2540;font-size:16px;margin:0;font-weight:900;">وصف حالة الرصد</h3>
         </div>
         <p style="font-size:12px;color:#334155;line-height:2.2;text-align:right;background:#f8fafc;padding:20px;border-radius:10px;border:1px solid #e2e8f0;">${incident.description_ar}</p>
       </div>` : ""}

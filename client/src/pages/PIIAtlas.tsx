@@ -39,7 +39,7 @@ export default function PIIAtlas() {
       <div><h1 className="text-2xl font-bold text-foreground">أطلس البيانات الشخصية</h1><p className="text-muted-foreground text-sm mt-1">تحليل أنواع البيانات الشخصية المسربة (PII)</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Fingerprint className="h-8 w-8 text-purple-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.piiTypes.length}</div><div className="text-xs text-muted-foreground">نوع بيانات شخصية</div></CardContent></Card>
-        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">حوادث تسريب</div></CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">حالات الرصد</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Database className="h-8 w-8 text-blue-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.totalRecords.toLocaleString("ar-SA")}</div><div className="text-xs text-muted-foreground">سجلات متأثرة</div></CardContent></Card>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

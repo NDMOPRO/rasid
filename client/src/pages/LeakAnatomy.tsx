@@ -1,6 +1,6 @@
 /**
  * LeakAnatomy — تشريح التسريب
- * مربوط بـ leaks.list API - عرض تفصيلي لحادثة واحدة
+ * مربوط بـ leaks.list API - عرض تفصيلي لحالة رصد واحدة
  */
 import { PremiumPageContainer, PremiumSectionHeader } from "@/components/UltraPremiumWrapper";
 import { useState, useMemo } from "react";
@@ -31,10 +31,10 @@ export default function LeakAnatomy() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">تشريح التسريب</h1><p className="text-muted-foreground text-sm mt-1">عرض تفصيلي لكل حادثة تسريب</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">تشريح التسريب</h1><p className="text-muted-foreground text-sm mt-1">عرض تفصيلي لكل حالة رصد</p></div>
       <div className="flex items-center gap-3 flex-wrap">
-        <Input placeholder="بحث عن حادثة..." value={search} onChange={(e) => { setSearch(e.target.value); setSelectedIndex(0); }} className="glass-card gold-sweep text-foreground max-w-xs" />
-        <Badge className="bg-gray-700 text-muted-foreground">{filtered.length} حادثة</Badge>
+        <Input placeholder="بحث عن حالة رصد..." value={search} onChange={(e) => { setSearch(e.target.value); setSelectedIndex(0); }} className="glass-card gold-sweep text-foreground max-w-xs" />
+        <Badge className="bg-gray-700 text-muted-foreground">{filtered.length} حالة رصد</Badge>
         <div className="flex items-center gap-1 mr-auto">
           <Button variant="outline" size="sm" disabled={selectedIndex <= 0} onClick={() => setSelectedIndex(i => i - 1)} className="border-border text-muted-foreground"><ChevronRight className="h-4 w-4" /></Button>
           <span className="text-muted-foreground text-sm px-2">{selectedIndex + 1} / {filtered.length}</span>
@@ -99,7 +99,7 @@ export default function LeakAnatomy() {
           )}
         </div>
       ) : (
-        <Card className="glass-card gold-sweep"><CardContent className="p-12 text-center text-muted-foreground">لا توجد حوادث مطابقة</CardContent></Card>
+        <Card className="glass-card gold-sweep"><CardContent className="p-12 text-center text-muted-foreground">لا توجد حالات رصد مطابقة</CardContent></Card>
       )}
     </div>
   );

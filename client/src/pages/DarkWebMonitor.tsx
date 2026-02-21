@@ -327,7 +327,7 @@ export default function DarkWebMonitor() {
               <p className="text-xs sm:text-[10px] text-muted-foreground">أكبر عرض</p>
             </div>
           </div>
-          <h4 className="text-sm font-semibold text-foreground">العروض مرتبة حسب عدد السجلات</h4>
+          <h4 className="text-sm font-semibold text-foreground">العروض مرتبة حسب العدد المُدّعى</h4>
           {[...darkWebListings].sort((a, b) => (b.recordCount ?? 0) - (a.recordCount ?? 0)).map(listing => (
             <div key={listing.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border/50">
               <span className={`text-xs sm:text-[10px] px-2 py-0.5 rounded border ${severityColor(listing.severity)}`}>{severityLabel(listing.severity)}</span>
@@ -435,7 +435,7 @@ export default function DarkWebMonitor() {
             <div className="bg-red-500/5 rounded-xl p-4 border border-red-500/20">
               <h4 className="text-xs font-semibold text-red-400 mb-2">تحذير أمني</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                هذا العرض تم رصده على الدارك ويب ويحتوي على بيانات شخصية مسربة. يجب التحقق من صحة البيانات وتوثيق الحادثة وتحليلها.
+                هذا العرض تم رصده على الدارك ويب ويحتوي على بيانات شخصية مسربة. يجب التحقق من صحة البيانات وتوثيق حالة الرصد وتحليلها.
               </p>
             </div>
           </div>

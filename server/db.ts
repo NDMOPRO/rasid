@@ -7390,13 +7390,13 @@ export async function analyzeLeakComplianceImpact(leakId: number, entityId?: num
       leakId, severity, impactScore,
       pdplViolations: [
         severity === "critical" || severity === "high" ? "المادة 19 — أمن البيانات" : null,
-        "المادة 20 — الإبلاغ عن الحوادث",
+        "المادة 20 — الإبلاغ عن حالات الرصد",
         (leak as any).recordCount > 1000 ? "المادة 24 — تقييم الأثر مطلوب" : null,
       ].filter(Boolean),
       recommendations: [
         "إبلاغ الجهة المختصة خلال 72 ساعة",
         "تقييم نطاق التسريب وعدد المتضررين",
-        "تفعيل خطة الاستجابة للحوادث",
+        "تفعيل خطة الاستجابة لحالات الرصد",
         severity === "critical" ? "إبلاغ أصحاب البيانات المتضررين فوراً" : null,
       ].filter(Boolean),
       requiredActions: { notifyAuthority: true, notifySubjects: severity === "critical" || severity === "high", conductPIA: true },

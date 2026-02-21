@@ -32,7 +32,7 @@ const templateConfig: Record<ExportTemplate, { icon: any; label: string; descrip
 };
 
 function generateCSV(leaks: any[]): string {
-  const headers = ["العنوان", "القطاع", "المصدر", "الخطورة", "عدد السجلات", "تاريخ الاكتشاف", "الحالة"];
+  const headers = ["العنوان", "القطاع", "المصدر", "الخطورة", "العدد المُدّعى", "تاريخ الاكتشاف", "الحالة"];
   const rows = leaks.map(l => [
     l.titleAr || l.title || "",
     l.sectorAr || l.sector || "",
@@ -76,7 +76,7 @@ export default function ExportCenter({ isOpen, onClose, stats, leaks }: ExportCe
     if (selectedFormat === "csv") {
       downloadBlob(generateCSV(leaks), `rasid-${selectedTemplate}-${timestamp}.csv`, "text/csv;charset=utf-8");
     } else if (selectedFormat === "excel") {
-      const headers = ["العنوان", "القطاع", "المصدر", "الخطورة", "عدد السجلات", "تاريخ الاكتشاف"];
+      const headers = ["العنوان", "القطاع", "المصدر", "الخطورة", "العدد المُدّعى", "تاريخ الاكتشاف"];
       const rows = leaks.map(l => [l.titleAr || l.title || "", l.sectorAr || l.sector || "", l.source || "", l.severity || "", l.recordCount || 0, l.detectedAt || ""]);
       const html = `<html dir="rtl"><head><meta charset="utf-8"></head><body><h2>منصة راصد - ${templateLabel}</h2><p>تاريخ التصدير: ${timestamp}</p><table border="1" style="border-collapse:collapse;direction:rtl"><tr>${headers.map(h => `<th style="background:#1e3a8a;color:white;padding:8px">${h}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td style="padding:6px">${c}</td>`).join("")}</tr>`).join("")}</table></body></html>`;
       downloadBlob(html, `rasid-${selectedTemplate}-${timestamp}.xls`, "application/vnd.ms-excel");

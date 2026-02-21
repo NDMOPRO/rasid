@@ -34,7 +34,7 @@ export default function ThreatActorsAnalysis() {
 
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen p-6 space-y-6 stagger-children" dir="rtl">
-      <div><h1 className="text-2xl font-bold text-foreground">تحليل مصادر التهديد</h1><p className="text-muted-foreground text-sm mt-1">تحليل الجهات الفاعلة وراء حوادث التسريب</p></div>
+      <div><h1 className="text-2xl font-bold text-foreground">تحليل مصادر التهديد</h1><p className="text-muted-foreground text-sm mt-1">تحليل الجهات الفاعلة وراء حالات الرصد</p></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><UserX className="h-8 w-8 text-red-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.actors.length}</div><div className="text-xs text-muted-foreground">جهة تهديد</div></CardContent></Card>
         <Card className="glass-card gold-sweep"><CardContent className="p-4 text-center"><Target className="h-8 w-8 text-amber-400 mx-auto mb-2" /><div className="text-2xl font-bold text-foreground">{analysis.total}</div><div className="text-xs text-muted-foreground">إجمالي الهجمات</div></CardContent></Card>

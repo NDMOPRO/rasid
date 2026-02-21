@@ -67,7 +67,7 @@ const REPORT_SECTIONS = [
   { id: "threats", label: "تحليل التهديدات", description: "الجهات الفاعلة وأساليب الاختراق" },
   { id: "pii", label: "البيانات الشخصية المكشوفة", description: "أنواع البيانات الشخصية المسربة" },
   { id: "recommendations", label: "التوصيات", description: "توصيات لتعزيز حماية البيانات" },
-  { id: "timeline", label: "الجدول الزمني", description: "تسلسل زمني للحوادث المرصودة" },
+  { id: "timeline", label: "الجدول الزمني", description: "تسلسل زمني لحالات الرصد" },
 ];
 
 interface ReportCustomizerProps {

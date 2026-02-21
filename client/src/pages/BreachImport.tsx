@@ -320,7 +320,7 @@ export default function BreachImport() {
                   { field: "severity / مستوى التأثير", required: true },
                   { field: "sector / القطاع", required: false },
                   { field: "piiTypes / أنواع البيانات", required: false },
-                  { field: "recordCount / عدد السجلات", required: false },
+                  { field: "recordCount / العدد المُدّعى", required: false },
                   { field: "description / الوصف", required: false },
                   { field: "threatActor / جهة التهديد", required: false },
                 ].map((item) => (

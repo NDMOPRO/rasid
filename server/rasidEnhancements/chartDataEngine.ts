@@ -170,7 +170,7 @@ export class ChartDataEngine {
     const highRatio = sectorIncidents.length > 0 ? (highCount / sectorIncidents.length) * 100 : 0;
 
     return {
-      labels: ["نسبة الحوادث", "نسبة السجلات", "نسبة عالي الأهمية", "نسبة العالي"],
+      labels: ["نسبة حالات الرصد", "نسبة السجلات", "نسبة عالي الأهمية", "نسبة العالي"],
       data: [incidentsRatio, recordsRatio, criticalRatio, highRatio].map((v) => Math.min(100, Math.round(v))),
     };
   }

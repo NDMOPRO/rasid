@@ -698,7 +698,7 @@ export default function Leaks() {
                         <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                           <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
                             <FileText className="w-3.5 h-3.5" />
-                            وصف الحادثة
+                            وصف حالة الرصد
                           </h4>
                           <p className="text-sm text-foreground leading-relaxed">{leakDetail.descriptionAr || "لا يوجد وصف متاح"}</p>
                           {leakDetail.description && leakDetail.description !== leakDetail.descriptionAr && (
@@ -731,12 +731,12 @@ export default function Leaks() {
                         <div className="bg-secondary/30 rounded-xl p-4 border border-border/30">
                           <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            الجدول الزمني للحادثة
+                            الجدول الزمني لحالة الرصد
                           </h4>
                           <div className="space-y-3 relative before:absolute before:right-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                             {[
                               { date: leakDetail.detectedAt, label: "تم اكتشاف حالة الرصد", color: "bg-red-400" },
-                              { date: leakDetail.createdAt, label: "تم تسجيل الحادثة في النظام", color: "bg-cyan-400" },
+                              { date: leakDetail.createdAt, label: "تم تسجيل حالة الرصد في النظام", color: "bg-cyan-400" },
                               ...(leakDetail.enrichedAt ? [{ date: leakDetail.enrichedAt, label: "تم تحليل حالة الرصد بالذكاء الاصطناعي", color: "bg-purple-400" }] : []),
                               { date: leakDetail.updatedAt, label: `الحالة الحالية: ${statusLabel(leakDetail.status)}`, color: leakDetail.status === "reported" ? "bg-emerald-400" : "bg-amber-400" },
                             ].filter(e => e.date).map((event, idx) => (
