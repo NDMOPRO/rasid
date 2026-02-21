@@ -441,7 +441,46 @@ const arabicToFieldMap: Record<string, string> = {
   "url": "workingUrl",
   "sectorType": "category",
   "sector_type": "category",
-  "classification": "category",
+  "classification": "classification",
+  // Additional columns from full Excel exports
+  "finalUrl": "finalUrl",
+  "final_url": "finalUrl",
+  "الرابط النهائي": "finalUrl",
+  "httpsWww": "httpsWww",
+  "https_www": "httpsWww",
+  "httpsNoWww": "httpsNoWww",
+  "https_no_www": "httpsNoWww",
+  "httpWww": "httpWww",
+  "http_www": "httpWww",
+  "httpNoWww": "httpNoWww",
+  "http_no_www": "httpNoWww",
+  "policyFinalUrl": "policyFinalUrl",
+  "policy_final_url": "policyFinalUrl",
+  "crawlStatus": "crawlStatus",
+  "crawl_status": "crawlStatus",
+  "internalLinks": "internalLinks",
+  "internal_links": "internalLinks",
+  "policyLastUpdate": "policyLastUpdate",
+  "policy_last_update": "policyLastUpdate",
+  "policyConfidence": "policyConfidence",
+  "policy_confidence": "policyConfidence",
+  "policyWordCount": "policyWordCount",
+  "policy_word_count": "policyWordCount",
+  "policyCharCount": "policyCharCount",
+  "policy_char_count": "policyCharCount",
+  "robotsStatus": "robotsStatus",
+  "robots_status": "robotsStatus",
+  "entityAddress": "entityAddress",
+  "entity_address": "entityAddress",
+  "complianceScore": "complianceScore",
+  "compliance_score": "complianceScore",
+  "complianceStatus": "complianceStatus",
+  "compliance_status": "complianceStatus",
+  "التصنيف": "classification",
+  "حالة الزحف": "crawlStatus",
+  "درجة الامتثال": "complianceScore",
+  "حالة الامتثال": "complianceStatus",
+  "عنوان الجهة": "entityAddress",
 };
 
 function normalizePrivacyData(raw: RawPrivacyData): Record<string, any> {
@@ -462,6 +501,7 @@ function normalizePrivacyData(raw: RawPrivacyData): Record<string, any> {
     domain: domain || null,
     status: mapped.status || null,
     workingUrl: mapped.workingUrl || (domain ? `https://${domain}` : null),
+    finalUrl: mapped.finalUrl || null,
     nameAr: mapped.nameAr || null,
     nameEn: mapped.nameEn || null,
     title: mapped.title || null,
@@ -476,13 +516,29 @@ function normalizePrivacyData(raw: RawPrivacyData): Record<string, any> {
     policyTitle: mapped.policyTitle || null,
     policyStatusCode: mapped.policyStatusCode || null,
     policyLanguage: mapped.policyLanguage || null,
+    policyLastUpdate: mapped.policyLastUpdate || null,
+    discoveryMethod: mapped.discoveryMethod || null,
+    policyConfidence: mapped.policyConfidence || null,
+    policyWordCount: mapped.policyWordCount ? parseInt(mapped.policyWordCount, 10) || null : null,
+    policyCharCount: mapped.policyCharCount ? parseInt(mapped.policyCharCount, 10) || null : null,
+    robotsStatus: mapped.robotsStatus || null,
     entityName: mapped.entityName || null,
     entityEmail: mapped.entityEmail || null,
     entityPhone: mapped.entityPhone || null,
+    entityAddress: mapped.entityAddress || null,
     dpo: mapped.dpo || null,
     contactForm: mapped.contactForm || null,
-    discoveryMethod: mapped.discoveryMethod || null,
+    complianceScore: mapped.complianceScore ? parseInt(mapped.complianceScore, 10) || 0 : 0,
+    complianceStatus: mapped.complianceStatus || null,
     screenshotUrl: mapped.screenshotUrl || null,
+    classification: mapped.classification || null,
+    httpsWww: mapped.httpsWww || null,
+    httpsNoWww: mapped.httpsNoWww || null,
+    httpWww: mapped.httpWww || null,
+    httpNoWww: mapped.httpNoWww || null,
+    policyFinalUrl: mapped.policyFinalUrl || null,
+    internalLinks: mapped.internalLinks || null,
+    crawlStatus: mapped.crawlStatus || null,
     fullTextPath: mapped.fullTextPath || null,
   };
 }
@@ -536,76 +592,112 @@ export async function processPrivacyImport(
       .set({ totalRecords })
       .where(eq(importJobs.jobId, jobId));
 
-    for (let i = 0; i < rawRecords.length; i++) {
-      try {
-        const normalized = normalizePrivacyData(rawRecords[i]);
-        if (!normalized.domain) {
-          throw new Error("النطاق مطلوب — العمود الإلزامي الوحيد");
-        }
+    // Batch insert with ALL columns explicit (no DEFAULT keyword)
+    const BATCH_SIZE = 200;
+    for (let i = 0; i < rawRecords.length; i += BATCH_SIZE) {
+      const batch = rawRecords.slice(i, i + BATCH_SIZE);
+      const validRows: Array<Record<string, any>> = [];
 
-        // Insert into privacyDomains table
-        // Must explicitly set null for ALL columns without Drizzle .default()
-        // because MySQL TEXT columns cannot use DEFAULT keyword
-        await db.insert(privacyDomains).values({
-          domain: normalized.domain,
-          status: normalized.status,
-          workingUrl: normalized.workingUrl,
-          finalUrl: null,
-          nameAr: normalized.nameAr,
-          nameEn: normalized.nameEn,
-          title: normalized.title,
-          description: normalized.description,
-          category: normalized.category,
-          cms: normalized.cms,
-          sslStatus: normalized.sslStatus,
-          mxRecords: normalized.mxRecords,
-          email: normalized.email,
-          phone: normalized.phone,
-          policyUrl: normalized.policyUrl,
-          policyTitle: normalized.policyTitle,
-          policyStatusCode: normalized.policyStatusCode,
-          policyLanguage: normalized.policyLanguage,
-          policyLastUpdate: null,
-          discoveryMethod: normalized.discoveryMethod,
-          policyConfidence: null,
-          policyWordCount: null,
-          policyCharCount: null,
-          robotsStatus: null,
-          entityName: normalized.entityName,
-          entityEmail: normalized.entityEmail,
-          entityPhone: normalized.entityPhone,
-          entityAddress: null,
-          dpo: normalized.dpo,
-          contactForm: normalized.contactForm,
-          dataTypesList: null,
-          purposeList: null,
-          rightsList: null,
-          thirdPartiesList: null,
-          complianceStatus: null,
-          screenshotUrl: normalized.screenshotUrl,
-          httpsWww: null,
-          httpsNoWww: null,
-          httpWww: null,
-          httpNoWww: null,
-          classification: null,
-          policyFinalUrl: null,
-          internalLinks: null,
-          crawlStatus: null,
-          fullTextPath: normalized.fullTextPath,
-          lastScanAt: null,
-          scanRunId: null,
-        });
-        successRecords++;
-
-        if ((i + 1) % 10 === 0) {
-          await db.update(importJobs)
-            .set({ processedRecords: i + 1, successRecords, failedRecords })
-            .where(eq(importJobs.jobId, jobId));
+      for (let j = 0; j < batch.length; j++) {
+        const recordIndex = i + j + 1;
+        try {
+          const normalized = normalizePrivacyData(batch[j]);
+          if (!normalized.domain) {
+            throw new Error("النطاق مطلوب — العمود الإلزامي الوحيد");
+          }
+          validRows.push({ ...normalized, _idx: recordIndex });
+        } catch (err: any) {
+          failedRecords++;
+          errors.push({ record: recordIndex, error: err.message || "Unknown error" });
         }
-      } catch (err: any) {
-        failedRecords++;
-        errors.push({ record: i + 1, error: err.message || "Unknown error" });
       }
+
+      if (validRows.length === 0) continue;
+
+      // Build Drizzle values with ALL columns explicit to avoid DEFAULT keyword
+      const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+      const drizzleValues = validRows.map((row) => ({
+        domain: row.domain,
+        status: row.status ?? null,
+        workingUrl: row.workingUrl ?? null,
+        finalUrl: row.finalUrl ?? null,
+        nameAr: row.nameAr ?? null,
+        nameEn: row.nameEn ?? null,
+        title: row.title ?? null,
+        description: row.description ?? null,
+        category: row.category ?? null,
+        cms: row.cms ?? null,
+        sslStatus: row.sslStatus ?? null,
+        mxRecords: row.mxRecords ?? null,
+        email: row.email ?? null,
+        phone: row.phone ?? null,
+        policyUrl: row.policyUrl ?? null,
+        policyTitle: row.policyTitle ?? null,
+        policyStatusCode: row.policyStatusCode ?? null,
+        policyLanguage: row.policyLanguage ?? null,
+        policyLastUpdate: row.policyLastUpdate ?? null,
+        discoveryMethod: row.discoveryMethod ?? null,
+        policyConfidence: row.policyConfidence ?? null,
+        policyWordCount: row.policyWordCount ?? null,
+        policyCharCount: row.policyCharCount ?? null,
+        robotsStatus: row.robotsStatus ?? null,
+        entityName: row.entityName ?? null,
+        entityEmail: row.entityEmail ?? null,
+        entityPhone: row.entityPhone ?? null,
+        entityAddress: row.entityAddress ?? null,
+        dpo: row.dpo ?? null,
+        contactForm: row.contactForm ?? null,
+        mentionsDataTypes: 0,
+        dataTypesList: null as string | null,
+        mentionsPurpose: 0,
+        purposeList: null as string | null,
+        mentionsLegalBasis: 0,
+        mentionsRights: 0,
+        rightsList: null as string | null,
+        mentionsRetention: 0,
+        mentionsThirdParties: 0,
+        thirdPartiesList: null as string | null,
+        mentionsCrossBorder: 0,
+        mentionsSecurity: 0,
+        mentionsCookies: 0,
+        mentionsChildren: 0,
+        complianceScore: row.complianceScore ?? 0,
+        complianceStatus: row.complianceStatus ?? null,
+        screenshotUrl: row.screenshotUrl ?? null,
+        httpsWww: row.httpsWww ?? null,
+        httpsNoWww: row.httpsNoWww ?? null,
+        httpWww: row.httpWww ?? null,
+        httpNoWww: row.httpNoWww ?? null,
+        classification: row.classification ?? null,
+        policyFinalUrl: row.policyFinalUrl ?? null,
+        internalLinks: row.internalLinks ?? null,
+        crawlStatus: row.crawlStatus ?? null,
+        fullTextPath: row.fullTextPath ?? null,
+        importedAt: now,
+        lastScanAt: null as string | null,
+        scanRunId: null as number | null,
+      }));
+
+      try {
+        await db.insert(privacyDomains).values(drizzleValues);
+        successRecords += validRows.length;
+      } catch (batchErr: any) {
+        // If batch fails, fallback to one-by-one inserts
+        for (let k = 0; k < drizzleValues.length; k++) {
+          try {
+            await db.insert(privacyDomains).values(drizzleValues[k]);
+            successRecords++;
+          } catch (err: any) {
+            failedRecords++;
+            errors.push({ record: validRows[k]._idx, error: err.message || "Unknown error" });
+          }
+        }
+      }
+
+      // Update progress every batch
+      await db.update(importJobs)
+        .set({ processedRecords: Math.min(i + BATCH_SIZE, totalRecords), successRecords, failedRecords })
+        .where(eq(importJobs.jobId, jobId));
     }
 
     await db.update(importJobs).set({
