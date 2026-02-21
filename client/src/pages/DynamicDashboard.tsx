@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "wouter";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
@@ -376,6 +376,17 @@ export default function DynamicDashboard() {
   const updatePage = trpc.customPages.update.useMutation();
 
   const pageTitle = pageQuery?.data?.title || "لوحة مؤشرات جديدة";
+
+  // Load saved widgets from config when page data arrives
+  useEffect(() => {
+    if (pageQuery?.data?.config) {
+      const config = pageQuery.data.config as Record<string, any>;
+      if (Array.isArray(config.widgets) && config.widgets.length > 0) {
+        setWidgets(config.widgets);
+        setIsEditMode(false);
+      }
+    }
+  }, [pageQuery?.data]);
 
   const addWidget = useCallback((catalogItem: typeof WIDGET_CATALOG[0]) => {
     const newWidget: PlacedWidget = {

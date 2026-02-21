@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -72,7 +72,19 @@ export default function DynamicTable() {
   );
 
   const pageQuery = pageId ? trpc.customPages.getById.useQuery({ id: pageId }) : null;
+  const updatePage = trpc.customPages.update.useMutation();
   const pageTitle = pageQuery?.data?.title || "جدول بيانات جديد";
+
+  // Load saved columns from config when page data arrives
+  useEffect(() => {
+    if (pageQuery?.data?.config) {
+      const config = pageQuery.data.config as Record<string, any>;
+      if (Array.isArray(config.columns) && config.columns.length > 0) {
+        setSelectedColumns(config.columns);
+        setIsEditMode(false);
+      }
+    }
+  }, [pageQuery?.data]);
 
   // Fetch real data from DB
   const tableDataQuery = trpc.cms.widgetData.useQuery(
@@ -114,6 +126,14 @@ export default function DynamicTable() {
     ));
   };
 
+  const handleSave = async () => {
+    if (!pageId) return;
+    await updatePage.mutateAsync({
+      id: pageId,
+      config: { columns: selectedColumns },
+    });
+  };
+
   return (
     <div className="overflow-x-hidden max-w-full min-h-screen" dir="rtl">
       {/* Header */}
@@ -126,13 +146,22 @@ export default function DynamicTable() {
         </div>
         <div className="flex items-center gap-3">
           {isEditMode && (
-            <button
-              onClick={() => setShowColumnPicker(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-lg hover:shadow-emerald-500/25 transition-all hover:scale-105"
-            >
-              <Columns className="w-4 h-4" />
-              إضافة أعمدة
-            </button>
+            <>
+              <button
+                onClick={() => setShowColumnPicker(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-lg hover:shadow-emerald-500/25 transition-all hover:scale-105"
+              >
+                <Columns className="w-4 h-4" />
+                إضافة أعمدة
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                حفظ
+              </button>
+            </>
           )}
           <button
             onClick={() => {}}
