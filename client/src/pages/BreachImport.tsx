@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
-import { trpc } from "@/lib/trpc";
 
 type ImportStatus = "idle" | "uploading" | "processing" | "completed" | "error";
 
@@ -46,18 +45,6 @@ export default function BreachImport() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
-  const importMutation = trpc.cms.importData.useMutation({
-    onSuccess: (data: any) => {
-      setStatus("completed");
-      setResult(data);
-      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} سجل بنجاح`);
-    },
-    onError: (err: any) => {
-      setStatus("error");
-      toast.error(`فشل الاستيراد: ${err.message}`);
-    },
-  });
-
   const handleFileSelect = (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!["json", "csv", "xlsx", "zip"].includes(ext || "")) {
@@ -80,28 +67,30 @@ export default function BreachImport() {
     if (!selectedFile) return;
 
     setStatus("uploading");
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        setStatus("processing");
-        const content = e.target?.result as string;
-        const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "json";
+    try {
+      // Use REST endpoint with FormData for reliable file upload
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-        await importMutation.mutateAsync({
-          fileName: selectedFile.name,
-          fileType: ext as "json" | "csv" | "xlsx" | "zip",
-          content: content.includes("base64,") ? content.split("base64,")[1] : content,
-          platform: "leaks",
-        });
-      } catch {
-        setStatus("error");
+      setStatus("processing");
+      const response = await fetch("/api/cms/import/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(errorData.error || `فشل الاستيراد: ${response.statusText}`);
       }
-    };
 
-    if (selectedFile.name.endsWith(".json") || selectedFile.name.endsWith(".csv")) {
-      reader.readAsText(selectedFile);
-    } else {
-      reader.readAsDataURL(selectedFile);
+      const data = await response.json();
+      setStatus("completed");
+      setResult(data);
+      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} سجل بنجاح`);
+    } catch (err: any) {
+      setStatus("error");
+      toast.error(`فشل الاستيراد: ${err.message}`);
     }
   };
 

@@ -390,6 +390,38 @@ export async function ensureNewTablesExist(): Promise<void> {
       INDEX idx_aal_pattern (pattern_type),
       INDEX idx_aal_user (user_id)
     )`,
+    `CREATE TABLE IF NOT EXISTS custom_pages (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      workspace VARCHAR(20) NOT NULL,
+      page_type VARCHAR(20) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      icon VARCHAR(50) DEFAULT 'LayoutDashboard',
+      sort_order INT NOT NULL DEFAULT 0,
+      config JSON,
+      is_default TINYINT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_cp_user_workspace (user_id, workspace)
+    )`,
+    `CREATE TABLE IF NOT EXISTS import_jobs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      job_id VARCHAR(100) NOT NULL,
+      user_id INT NOT NULL,
+      user_name VARCHAR(255),
+      file_name VARCHAR(500),
+      file_type VARCHAR(20),
+      total_records INT NOT NULL DEFAULT 0,
+      success_records INT NOT NULL DEFAULT 0,
+      failed_records INT NOT NULL DEFAULT 0,
+      status VARCHAR(20) NOT NULL DEFAULT 'pending',
+      errors JSON,
+      platform VARCHAR(20) DEFAULT 'leaks',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      completed_at TIMESTAMP NULL,
+      INDEX idx_ij_user (user_id),
+      INDEX idx_ij_job (job_id)
+    )`,
   ];
 
   for (const ddl of tables) {

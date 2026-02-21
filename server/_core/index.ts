@@ -59,42 +59,37 @@ async function startServer() {
 
   app.post("/api/cms/import/upload", uploadStorage.single("file"), async (req, res) => {
     try {
-      // Basic auth check via session cookie
-      if (!(req as any).session?.userId && !(req as any).user) {
-        // Try to get user from cookie-based auth
-        const ctx = await createContext({ req, res } as any);
-        if (!ctx.user || (ctx.user as any).platformRole === "viewer") {
-          res.status(403).json({ error: "Admin access required" });
-          return;
-        }
-        const file = req.file;
-        if (!file) {
-          res.status(400).json({ error: "No file uploaded" });
-          return;
-        }
-        const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
-        const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
-        const result = await processImport(
-          file.path,
-          fileType,
-          (ctx.user as any).id || 0,
-          (ctx.user as any).displayName || "Admin"
-        );
-        res.json(result);
+      // Authenticate via cookie-based auth
+      const ctx = await createContext({ req, res } as any);
+      if (!ctx.user) {
+        res.status(401).json({ error: "يرجى تسجيل الدخول أولاً" });
         return;
       }
+
+      // Check admin access
+      const role = ctx.platformUser?.platformRole || (ctx.user as any)?.role;
+      const adminRoles = ["root_admin", "director", "vice_president", "manager", "admin", "superadmin"];
+      if (!adminRoles.includes(role)) {
+        res.status(403).json({ error: "صلاحية المسؤول مطلوبة للاستيراد" });
+        return;
+      }
+
       const file = req.file;
       if (!file) {
-        res.status(400).json({ error: "No file uploaded" });
+        res.status(400).json({ error: "لم يتم رفع أي ملف" });
         return;
       }
+
       const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
       const fileType = (["zip", "json", "xlsx", "csv"].includes(ext) ? ext : "json") as "zip" | "json" | "xlsx" | "csv";
-      const result = await processImport(file.path, fileType, 0, "Admin");
+      const userId = ctx.platformUser?.id || (ctx.user as any)?.id || 0;
+      const userName = ctx.platformUser?.displayName || (ctx.user as any)?.name || "Admin";
+
+      const result = await processImport(file.path, fileType, userId, userName);
       res.json(result);
     } catch (err: any) {
-      console.error("Import error:", err);
-      res.status(500).json({ error: err.message || "Import failed" });
+      console.error("[Import] Error:", err);
+      res.status(500).json({ error: err.message || "فشل الاستيراد" });
     }
   });
 

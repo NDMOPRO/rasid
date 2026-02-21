@@ -7434,6 +7434,11 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
           role: z.enum(["user", "assistant"]),
           content: z.string(),
         })).optional(),
+        pageContext: z.object({
+          path: z.string().optional(),
+          title: z.string().optional(),
+          section: z.string().optional(),
+        }).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const who = getAuthUser(ctx);
@@ -7442,6 +7447,13 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
           input.history ?? [],
           who.name,
           who.id,
+          input.pageContext ? {
+            pageContext: {
+              route: input.pageContext.path,
+              pageId: input.pageContext.section || input.pageContext.path,
+              userRole: (ctx.platformUser as any)?.platformRole,
+            },
+          } : undefined,
         );
         return {
           response: result.response,
