@@ -173,10 +173,11 @@ export async function seedAllNewTables(): Promise<{ results: Record<string, { se
   }
 
   // 4. Seed Privacy Domains from seed-privacy-data.json.gz
+  // Only seed if table is completely empty (0 records) to avoid overwriting imported data
   try {
     const [existingPrivacy] = await db.execute(sql`SELECT COUNT(*) as cnt FROM privacy_domains`);
     const privacyCount = Number((existingPrivacy as any)[0]?.cnt || 0);
-    if (privacyCount < 1000) {
+    if (privacyCount === 0) {
       console.log('[SeedData] Seeding privacy domains from seed-privacy-data.json.gz...');
       const gzPath = path.join(process.cwd(), 'server', 'seed-privacy-data.json.gz');
       const jsonPath = path.join(process.cwd(), 'server', 'seed-privacy-data.json');
@@ -189,7 +190,6 @@ export async function seedAllNewTables(): Promise<{ results: Record<string, { se
         privacyData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
       }
       if (privacyData.length > 0) {
-        if (privacyCount > 0) await clearAllPrivacyDomains();
         const insertResult = await bulkInsertPrivacyDomains(privacyData);
         results.privacy_domains = { seeded: insertResult.inserted, status: 'completed' };
         console.log(`[SeedData] Seeded ${insertResult.inserted} privacy domains`);
@@ -197,7 +197,7 @@ export async function seedAllNewTables(): Promise<{ results: Record<string, { se
         results.privacy_domains = { seeded: 0, status: 'no_data_file' };
       }
     } else {
-      results.privacy_domains = { seeded: 0, status: `already_seeded (${privacyCount} records)` };
+      results.privacy_domains = { seeded: 0, status: `already_has_data (${privacyCount} records)` };
     }
   } catch (e: any) {
     console.error('[SeedData] Privacy seed error:', e.message);

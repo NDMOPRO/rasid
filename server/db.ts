@@ -7232,10 +7232,21 @@ export async function getCustomPageById(id: number, userId?: number) {
 export async function createCustomPage(data: InsertCustomPage) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.insert(customPages).values(data);
-  const insertId = Number((result as any)?.[0]?.insertId ?? (result as any)?.insertId ?? 0);
-  if (insertId > 0) return getCustomPageById(insertId, data.userId as number);
 
+  // Ensure config is properly serialized for JSON column
+  const insertData = {
+    ...data,
+    config: data.config != null ? data.config : {},
+  };
+
+  const result = await db.insert(customPages).values(insertData);
+
+  // Extract insertId — MySQL2 returns [ResultSetHeader, FieldPacket[]]
+  const header = Array.isArray(result) ? result[0] : result;
+  const insertId = Number((header as any)?.insertId ?? 0);
+  if (insertId > 0) return getCustomPageById(insertId);
+
+  // Fallback: find by userId + workspace + title (without userId filter on getById to avoid mismatch)
   const fallback = await db
     .select()
     .from(customPages)
@@ -7249,7 +7260,8 @@ export async function updateCustomPage(id: number, userId: number, data: Partial
   const db = await getDb();
   if (!db) return null;
   const result = await db.update(customPages).set(data).where(and(eq(customPages.id, id), eq(customPages.userId, userId)));
-  const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+  const header = Array.isArray(result) ? result[0] : result;
+  const affectedRows = Number((header as any)?.affectedRows ?? 0);
   if (affectedRows === 0) return null;
   return getCustomPageById(id, userId);
 }
@@ -7258,7 +7270,8 @@ export async function deleteCustomPage(id: number, userId: number) {
   const db = await getDb();
   if (!db) return false;
   const result = await db.delete(customPages).where(and(eq(customPages.id, id), eq(customPages.userId, userId)));
-  const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+  const header = Array.isArray(result) ? result[0] : result;
+  const affectedRows = Number((header as any)?.affectedRows ?? 0);
   return affectedRows > 0;
 }
 

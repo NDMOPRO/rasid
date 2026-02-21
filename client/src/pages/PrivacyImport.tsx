@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { trpc } from "@/lib/trpc";
 
 type ImportStatus = "idle" | "uploading" | "processing" | "completed" | "error";
 
@@ -68,6 +69,7 @@ export default function PrivacyImport() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const utils = trpc.useUtils();
 
   const [status, setStatus] = useState<ImportStatus>("idle");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -115,6 +117,11 @@ export default function PrivacyImport() {
       const data = await response.json();
       setStatus("completed");
       setResult(data);
+
+      // Invalidate tRPC cache so privacy pages show the new data immediately
+      utils.privacyDomains.list.invalidate();
+      utils.privacyDomains.stats.invalidate();
+
       toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} موقع بنجاح`);
     } catch (err: any) {
       setStatus("error");
@@ -283,6 +290,17 @@ export default function PrivacyImport() {
                       <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>إجمالي</p>
                     </div>
                   </div>
+
+                  {/* Navigate to privacy sites */}
+                  {result.successRecords > 0 && (
+                    <Button
+                      className="w-full mt-4"
+                      onClick={() => setLocation("/app/privacy/sites")}
+                    >
+                      <Globe className="w-4 h-4 ml-2" />
+                      عرض المواقع المستوردة ({result.successRecords.toLocaleString("ar-SA")} موقع)
+                    </Button>
+                  )}
 
                   {result.errors.length > 0 && (
                     <div className={`p-4 rounded-xl ${isDark ? "bg-red-500/5 border border-red-500/20" : "bg-red-50 border border-red-200"}`}>
