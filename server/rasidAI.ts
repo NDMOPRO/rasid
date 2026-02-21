@@ -68,6 +68,8 @@ import {
   conversationMemory,
   circuitBreaker,
 } from "./rasidEnhancements";
+import { persistChartConfig } from "./middleware/chartPersistence";
+import { getUserRole, redactFields, enforceDomain, type Domain } from "./middleware/rbacRedaction";
 
 // ═══════════════════════════════════════════════════════════════
 // THINKING STEPS — Track the agent's reasoning process
@@ -2674,11 +2676,17 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
       // Generate insights using smartChartEngine
       const insights = smartChartEngine.generateInsights(chartData, chartType as any);
 
+      // API-16: Persist chart to disk
+      const chartSummary = `تم توليد مخطط ${chartType} لـ ${params.data_type} (${chartData.labels?.length || 0} عنصر)`;
+      const persisted = persistChartConfig(chartConfig, chartType, params.data_type, insights, chartSummary);
+
       return {
         __type: "chart",
         chartConfig,
+        chartId: persisted.chartId,
+        chartUrl: persisted.chartUrl,
         insights,
-        summary: `تم توليد مخطط ${chartType} لـ ${params.data_type} (${chartData.labels?.length || 0} عنصر)`,
+        summary: chartSummary,
       };
     }
 
@@ -2776,6 +2784,12 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
           break;
       }
 
+      // API-16: Persist each dashboard chart
+      const persistedCharts = chartsConfig.map((ch: any, idx: number) => {
+        const p = persistChartConfig(ch, ch.type, `dashboard_${dashboardType}_${idx}`, [], ch.title);
+        return { ...ch, chartId: p.chartId, chartUrl: p.chartUrl };
+      });
+
       return {
         __type: "dashboard",
         title,
@@ -2786,8 +2800,8 @@ async function executeToolInternal(toolName: string, params: any): Promise<any> 
           criticalCount: allLeaks.filter((l: any) => l.severity === "Critical" || l.severity === "critical").length,
           highCount: allLeaks.filter((l: any) => l.severity === "High" || l.severity === "high").length,
         },
-        charts: chartsConfig,
-        summary: `لوحة مؤشرات ${dashboardType} تحتوي على ${chartsConfig.length} مخطط`,
+        charts: persistedCharts,
+        summary: `لوحة مؤشرات ${dashboardType} تحتوي على ${persistedCharts.length} مخطط`,
       };
     }
 
