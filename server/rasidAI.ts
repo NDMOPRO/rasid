@@ -3419,6 +3419,7 @@ export async function rasidAIChat(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   userName: string,
   userId: number,
+  options?: { pageContext?: { route?: string; pageId?: string; currentEntityId?: string; activeFilters?: any; availableActions?: string[]; userRole?: string }; domain?: string },
 ): Promise<{ response: string; toolsUsed: string[]; thinkingSteps: ThinkingStep[]; followUpSuggestions: string[]; processingMeta: { totalDurationMs: number; toolCount: number; agentsUsed: string[] }; toolResults?: any[] }> {
   // Initialize performance tracking
   const performanceTracker = new PerformanceTracker();
