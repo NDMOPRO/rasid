@@ -9,7 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { processImport } from "../importEngine";
+import { processImport, processPrivacyImport } from "../importEngine";
 import { registerSSERoutes } from "../sseChat";
 import { initSeedData } from "../seedData";
 
@@ -89,6 +89,41 @@ async function startServer() {
       res.json(result);
     } catch (err: any) {
       console.error("[Import] Error:", err);
+      res.status(500).json({ error: err.message || "فشل الاستيراد" });
+    }
+  });
+
+  // ─── Privacy Import Upload Route ────────────────────────────
+  app.post("/api/cms/import/privacy", uploadStorage.single("file"), async (req, res) => {
+    try {
+      const ctx = await createContext({ req, res } as any);
+      if (!ctx.user) {
+        res.status(401).json({ error: "يرجى تسجيل الدخول أولاً" });
+        return;
+      }
+
+      const role = ctx.platformUser?.platformRole || (ctx.user as any)?.role;
+      const adminRoles = ["root_admin", "director", "vice_president", "manager", "admin", "superadmin"];
+      if (!adminRoles.includes(role)) {
+        res.status(403).json({ error: "صلاحية المسؤول مطلوبة للاستيراد" });
+        return;
+      }
+
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: "لم يتم رفع أي ملف" });
+        return;
+      }
+
+      const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+      const fileType = (["json", "xlsx", "csv"].includes(ext) ? ext : "json") as "json" | "xlsx" | "csv";
+      const userId = ctx.platformUser?.id || (ctx.user as any)?.id || 0;
+      const userName = ctx.platformUser?.displayName || (ctx.user as any)?.name || "Admin";
+
+      const result = await processPrivacyImport(file.path, fileType, userId, userName);
+      res.json(result);
+    } catch (err: any) {
+      console.error("[PrivacyImport] Error:", err);
       res.status(500).json({ error: err.message || "فشل الاستيراد" });
     }
   });
