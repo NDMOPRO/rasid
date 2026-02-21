@@ -8460,7 +8460,7 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
     seed: protectedProcedure.input(z.object({
       domains: z.array(z.any()),
       screenshots: z.array(z.any()).optional(),
-      clearExisting: z.boolean().optional().default(true),
+      clearExisting: z.boolean().optional().default(false),
     })).mutation(async ({ input }) => {
       if (input.clearExisting) await db.clearAllPrivacyDomains();
       const result = await db.bulkInsertPrivacyDomains(input.domains);
@@ -8469,10 +8469,17 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
         const ssResult = await db.bulkInsertPrivacyScreenshots(input.screenshots);
         screenshotsInserted = ssResult.inserted;
       }
-      return { domainsInserted: result.inserted, screenshotsInserted };
+      // Sync to sites/scans tables for dashboard and site detail pages
+      const syncResult = await db.syncPrivacyDomainsToSitesAndScans();
+      return {
+        domainsInserted: result.inserted,
+        domainsUpdated: result.updated,
+        screenshotsInserted,
+        ...syncResult,
+      };
     }),
     seedFromFile: protectedProcedure.input(z.object({
-      clearExisting: z.boolean().optional().default(true),
+      clearExisting: z.boolean().optional().default(false),
     })).mutation(async ({ input }) => {
       const fs = await import('fs');
       const pathMod = await import('path');
@@ -8493,7 +8500,14 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       }
       if (input.clearExisting) await db.clearAllPrivacyDomains();
       const result = await db.bulkInsertPrivacyDomains(privacyData);
-      return { domainsInserted: result.inserted, totalInFile: privacyData.length };
+      // Sync to sites/scans tables for dashboard and site detail pages
+      const syncResult = await db.syncPrivacyDomainsToSitesAndScans();
+      return {
+        domainsInserted: result.inserted,
+        domainsUpdated: result.updated,
+        totalInFile: privacyData.length,
+        ...syncResult,
+      };
     }),
   }),
 });

@@ -7804,6 +7804,10 @@ export async function getPrivacyDomainStats() {
 export async function clearAllPrivacyDomains() {
   const db = await getDb();
   if (!db) return;
+  // Clear synced sites/scans first (foreign key on scans.siteId)
+  await db.delete(scans);
+  await db.delete(sites);
+  // Clear privacy tables
   await db.delete(privacyScreenshots);
   await db.delete(privacyDomains);
   await db.delete(privacyScanRuns);
@@ -7811,15 +7815,153 @@ export async function clearAllPrivacyDomains() {
 
 export async function bulkInsertPrivacyDomains(domainsData: any[]) {
   const db = await getDb();
-  if (!db) return { inserted: 0 };
+  if (!db) return { inserted: 0, updated: 0, skipped: 0 };
+
+  // Get all existing domains to determine insert vs update
+  const existingRows = await db.select({ id: privacyDomains.id, domain: privacyDomains.domain }).from(privacyDomains);
+  const existingMap = new Map<string, number>();
+  for (const row of existingRows) {
+    existingMap.set(row.domain, row.id);
+  }
+
   let inserted = 0;
+  let updated = 0;
+  let skipped = 0;
   const batchSize = 100;
-  for (let i = 0; i < domainsData.length; i += batchSize) {
-    const batch = domainsData.slice(i, i + batchSize);
+  const newDomains: any[] = [];
+  const updateDomains: { id: number; data: any }[] = [];
+
+  // Split into new and existing
+  const seenDomains = new Set<string>();
+  for (const d of domainsData) {
+    if (!d.domain) { skipped++; continue; }
+    // Skip duplicates within the same import batch
+    if (seenDomains.has(d.domain)) { skipped++; continue; }
+    seenDomains.add(d.domain);
+
+    const existingId = existingMap.get(d.domain);
+    if (existingId) {
+      updateDomains.push({ id: existingId, data: d });
+    } else {
+      newDomains.push(d);
+    }
+  }
+
+  // Batch INSERT new domains
+  for (let i = 0; i < newDomains.length; i += batchSize) {
+    const batch = newDomains.slice(i, i + batchSize);
     await db.insert(privacyDomains).values(batch);
     inserted += batch.length;
   }
-  return { inserted };
+
+  // Batch UPDATE existing domains
+  for (const { id, data } of updateDomains) {
+    const { domain: _domain, ...updateFields } = data;
+    await db.update(privacyDomains).set(updateFields).where(eq(privacyDomains.id, id));
+    updated++;
+  }
+
+  return { inserted, updated, skipped };
+}
+
+// Sync privacyDomains data to sites and scans tables for dashboard/detail compatibility
+export async function syncPrivacyDomainsToSitesAndScans() {
+  const db = await getDb();
+  if (!db) return { sitesCreated: 0, sitesUpdated: 0, scansCreated: 0 };
+
+  // Get all privacy domains
+  const allPD = await db.select().from(privacyDomains);
+  if (allPD.length === 0) return { sitesCreated: 0, sitesUpdated: 0, scansCreated: 0 };
+
+  // Get existing sites by domain
+  const existingSites = await db.select({ id: sites.id, domain: sites.domain }).from(sites);
+  const siteDomainMap = new Map<string, number>();
+  for (const s of existingSites) {
+    if (s.domain) siteDomainMap.set(s.domain, s.id);
+  }
+
+  let sitesCreated = 0;
+  let sitesUpdated = 0;
+  let scansCreated = 0;
+  const batchSize = 50;
+
+  // Map compliance status from privacyDomains to sites enum
+  function mapSiteStatus(pdStatus: string | null): 'compliant' | 'partial' | 'non_compliant' | 'not_working' {
+    switch (pdStatus) {
+      case 'compliant': return 'compliant';
+      case 'partially_compliant': return 'partial';
+      case 'non_compliant': return 'non_compliant';
+      default: return 'not_working';
+    }
+  }
+
+  for (let i = 0; i < allPD.length; i += batchSize) {
+    const batch = allPD.slice(i, i + batchSize);
+
+    for (const pd of batch) {
+      const existingSiteId = siteDomainMap.get(pd.domain);
+
+      const siteData = {
+        domain: pd.domain,
+        url: pd.workingUrl || pd.finalUrl || `https://${pd.domain}`,
+        siteName: pd.nameAr || pd.nameEn || pd.domain,
+        siteNameAr: pd.nameAr,
+        siteNameEn: pd.nameEn,
+        siteTitle: pd.title,
+        siteDescription: pd.description,
+        classification: pd.classification || pd.category || null,
+        privacyUrl: pd.policyUrl,
+        siteStatus: (pd.status === '\u064a\u0639\u0645\u0644' ? 'active' : 'unreachable') as 'active' | 'unreachable',
+        complianceStatus: mapSiteStatus(pd.complianceStatus),
+        hasPrivacyPolicy: pd.policyUrl && pd.policyUrl !== '\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631' ? 1 : 0,
+        sslStatus: pd.sslStatus,
+        cms: pd.cms,
+        screenshotUrl: pd.screenshotUrl,
+      };
+
+      let siteId: number;
+
+      if (existingSiteId) {
+        // Update existing site
+        await db.update(sites).set(siteData).where(eq(sites.id, existingSiteId));
+        siteId = existingSiteId;
+        sitesUpdated++;
+      } else {
+        // Insert new site
+        const result = await db.insert(sites).values(siteData as any);
+        siteId = (result as any)[0]?.insertId || (result as any).insertId;
+        siteDomainMap.set(pd.domain, siteId);
+        sitesCreated++;
+      }
+
+      // Create a new scan record (scan history) for this import
+      const scanData = {
+        siteId,
+        domain: pd.domain,
+        overallScore: pd.complianceScore || 0,
+        complianceStatus: (pd.complianceStatus || 'no_policy') as 'compliant' | 'partially_compliant' | 'non_compliant' | 'no_policy',
+        summary: pd.description || null,
+        // Map mentions* fields to clause compliance
+        clause1Compliant: pd.mentionsPurpose || 0,
+        clause2Compliant: pd.mentionsDataTypes || 0,
+        clause3Compliant: pd.mentionsCookies || 0,
+        clause4Compliant: pd.mentionsSecurity || 0,
+        clause5Compliant: pd.mentionsLegalBasis || 0,
+        clause6Compliant: pd.mentionsRetention || 0,
+        clause7Compliant: pd.mentionsRights || 0,
+        clause8Compliant: pd.mentionsThirdParties || 0,
+        rating: pd.complianceScore && pd.complianceScore >= 80 ? '\u0645\u0645\u062a\u0627\u0632' :
+                pd.complianceScore && pd.complianceScore >= 60 ? '\u062c\u064a\u062f' :
+                pd.complianceScore && pd.complianceScore >= 40 ? '\u0645\u0642\u0628\u0648\u0644' : '\u0636\u0639\u064a\u0641',
+        screenshotUrl: pd.screenshotUrl,
+      };
+
+      await db.insert(scans).values(scanData as any);
+      scansCreated++;
+    }
+  }
+
+  return { sitesCreated, sitesUpdated, scansCreated };
 }
 
 export async function bulkInsertPrivacyScreenshots(screenshotsData: any[]) {
