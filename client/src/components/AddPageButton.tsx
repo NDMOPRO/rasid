@@ -143,12 +143,12 @@ export default function AddPageButton({ collapsed, onCreatePage, accent }: AddPa
       <AnimatePresence>
         {showDropdown && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={`
-              absolute z-[60] mt-1 rounded-xl overflow-hidden shadow-2xl
+              absolute z-[60] bottom-full mb-1 rounded-xl overflow-hidden shadow-2xl
               ${collapsed ? "right-0 w-64" : "right-0 left-0"}
             `}
             style={{

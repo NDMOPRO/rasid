@@ -1,7 +1,8 @@
 /**
  * PrivacyImport — صفحة استيراد مواقع لمنصة رصد سياسة الخصوصية
  * تدعم: JSON, CSV, XLSX
- * مربوطة بـ API الاستيراد الفعلي
+ * مربوطة بـ REST API للاستيراد الفعلي
+ * الأعمدة المدعومة: 25 عمود — الإلزامي فقط: النطاق
  */
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
@@ -16,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
-import { trpc } from "@/lib/trpc";
 
 type ImportStatus = "idle" | "uploading" | "processing" | "completed" | "error";
 
@@ -34,6 +34,35 @@ const SUPPORTED_FORMATS = [
   { ext: "xlsx", label: "Excel", icon: FileSpreadsheet, color: "text-blue-400", description: "ملف Excel مع بيانات المواقع" },
 ];
 
+/** الأعمدة المدعومة في الاستيراد */
+const IMPORT_COLUMNS = [
+  { field: "النطاق", fieldEn: "domain", required: true },
+  { field: "الحالة", fieldEn: "status", required: false },
+  { field: "الرابط الفعال", fieldEn: "workingUrl", required: false },
+  { field: "اسم الموقع بالعربية", fieldEn: "nameAr", required: false },
+  { field: "اسم الموقع بالإنجليزية", fieldEn: "nameEn", required: false },
+  { field: "العنوان", fieldEn: "title", required: false },
+  { field: "الوصف", fieldEn: "description", required: false },
+  { field: "الفئة", fieldEn: "category", required: false },
+  { field: "البريد الإلكتروني", fieldEn: "email", required: false },
+  { field: "أرقام الهاتف", fieldEn: "phone", required: false },
+  { field: "سجلات MX", fieldEn: "mxRecords", required: false },
+  { field: "نظام إدارة المحتوى", fieldEn: "cms", required: false },
+  { field: "حالة SSL", fieldEn: "sslStatus", required: false },
+  { field: "رابط السياسة", fieldEn: "policyUrl", required: false },
+  { field: "عنوان السياسة", fieldEn: "policyTitle", required: false },
+  { field: "كود الحالة", fieldEn: "policyStatusCode", required: false },
+  { field: "لغة السياسة", fieldEn: "policyLanguage", required: false },
+  { field: "اسم الجهة", fieldEn: "entityName", required: false },
+  { field: "البريد", fieldEn: "entityEmail", required: false },
+  { field: "الهاتف", fieldEn: "entityPhone", required: false },
+  { field: "مسؤول حماية البيانات", fieldEn: "dpo", required: false },
+  { field: "نموذج الاتصال", fieldEn: "contactForm", required: false },
+  { field: "طريقة الاكتشاف", fieldEn: "discoveryMethod", required: false },
+  { field: "مسار لقطة الشاشة", fieldEn: "screenshotUrl", required: false },
+  { field: "مسار النص الكامل", fieldEn: "fullTextPath", required: false },
+];
+
 export default function PrivacyImport() {
   const [, setLocation] = useLocation();
   const { theme } = useTheme();
@@ -44,18 +73,6 @@ export default function PrivacyImport() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
-
-  const importMutation = trpc.cms.importData.useMutation({
-    onSuccess: (data: any) => {
-      setStatus("completed");
-      setResult(data);
-      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} موقع بنجاح`);
-    },
-    onError: (err: any) => {
-      setStatus("error");
-      toast.error(`فشل الاستيراد: ${err.message}`);
-    },
-  });
 
   const handleFileSelect = (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
@@ -79,28 +96,29 @@ export default function PrivacyImport() {
     if (!selectedFile) return;
 
     setStatus("uploading");
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        setStatus("processing");
-        const content = e.target?.result as string;
-        const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "json";
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
 
-        await importMutation.mutateAsync({
-          fileName: selectedFile.name,
-          fileType: ext as "json" | "csv" | "xlsx" | "zip",
-          content: content.includes("base64,") ? content.split("base64,")[1] : content,
-          platform: "privacy",
-        });
-      } catch {
-        setStatus("error");
+      setStatus("processing");
+      const response = await fetch("/api/cms/import/privacy", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(errorData.error || `فشل الاستيراد: ${response.statusText}`);
       }
-    };
 
-    if (selectedFile.name.endsWith(".json") || selectedFile.name.endsWith(".csv")) {
-      reader.readAsText(selectedFile);
-    } else {
-      reader.readAsDataURL(selectedFile);
+      const data = await response.json();
+      setStatus("completed");
+      setResult(data);
+      toast.success(`تم استيراد ${data.successRecords} من ${data.totalRecords} موقع بنجاح`);
+    } catch (err: any) {
+      setStatus("error");
+      toast.error(`فشل الاستيراد: ${err.message}`);
     }
   };
 
@@ -109,6 +127,19 @@ export default function PrivacyImport() {
     setStatus("idle");
     setResult(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = IMPORT_COLUMNS.map((c) => c.field);
+    const csvContent = "\uFEFF" + headers.join(",") + "\n";
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "privacy_import_template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("تم تحميل قالب الاستيراد");
   };
 
   return (
@@ -216,6 +247,10 @@ export default function PrivacyImport() {
                     </>
                   )}
                 </Button>
+                <Button variant="outline" onClick={handleDownloadTemplate}>
+                  <Download className="w-4 h-4 ml-2" />
+                  تحميل القالب
+                </Button>
                 {result && (
                   <Button variant="outline" onClick={handleReset}>
                     <RefreshCw className="w-4 h-4 ml-2" />
@@ -270,7 +305,7 @@ export default function PrivacyImport() {
           </Card>
         </div>
 
-        {/* Supported Formats */}
+        {/* Sidebar: Formats + Fields */}
         <div>
           <Card className={`${isDark ? "bg-gray-900/50 border-gray-700/50" : "bg-white border-gray-200"}`}>
             <CardHeader>
@@ -306,24 +341,22 @@ export default function PrivacyImport() {
           <Card className={`mt-4 ${isDark ? "bg-gray-900/50 border-gray-700/50" : "bg-white border-gray-200"}`}>
             <CardHeader>
               <CardTitle className={`text-lg ${isDark ? "text-white" : "text-gray-900"}`}>
-                الحقول المطلوبة
+                الأعمدة المدعومة
               </CardTitle>
+              <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                العمود الإلزامي الوحيد هو <span className="text-red-400 font-bold">النطاق</span>
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {[
-                  { field: "domain / النطاق", required: true },
-                  { field: "name / اسم الموقع", required: true },
-                  { field: "sectorType / نوع القطاع", required: false },
-                  { field: "category / الفئة", required: false },
-                  { field: "classification / التصنيف", required: false },
-                  { field: "siteStatus / حالة الموقع", required: false },
-                  { field: "ownerEntity / الجهة المالكة", required: false },
-                ].map((item) => (
-                  <div key={item.field} className="flex items-center justify-between">
-                    <span className={`text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>{item.field}</span>
-                    <Badge variant="outline" className={`text-[9px] ${item.required ? "border-red-500/30 text-red-400" : "border-gray-500/30 text-gray-400"}`}>
-                      {item.required ? "مطلوب" : "اختياري"}
+              <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                {IMPORT_COLUMNS.map((item) => (
+                  <div key={item.fieldEn} className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>{item.field}</span>
+                      <span className={`text-[10px] mr-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>({item.fieldEn})</span>
+                    </div>
+                    <Badge variant="outline" className={`text-[9px] flex-shrink-0 ${item.required ? "border-red-500/30 text-red-400" : "border-gray-500/30 text-gray-400"}`}>
+                      {item.required ? "إلزامي" : "اختياري"}
                     </Badge>
                   </div>
                 ))}

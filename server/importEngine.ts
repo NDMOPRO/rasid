@@ -11,7 +11,7 @@ import ExcelJS from "exceljs";
 import csvParser from "csv-parser";
 import { Readable } from "stream";
 import { getDb } from "./db";
-import { leaks, importJobs, sites } from "../drizzle/schema";
+import { leaks, importJobs, sites, privacyDomains } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -360,60 +360,130 @@ export async function processImport(
 }
 
 // ─── Privacy Domain Import ──────────────────────────────────────
-interface RawSiteData {
-  domain?: string;
-  name?: string;
-  nameAr?: string;
-  sectorType?: string;
-  category?: string;
-  classification?: string;
-  siteStatus?: string;
-  ownerEntity?: string;
-  ownerEntityAr?: string;
+interface RawPrivacyData {
   [key: string]: any;
 }
 
-const sectorTypeMap: Record<string, string> = {
-  "حكومي": "government",
-  "تجاري": "commercial",
-  "مالي": "financial",
-  "صحي": "healthcare",
-  "تعليمي": "education",
-  "اتصالات": "telecom",
-  "سفر": "travel",
-  "تجزئة": "retail",
-  "أخرى": "other",
-  "government": "government",
-  "commercial": "commercial",
-  "financial": "financial",
-  "healthcare": "healthcare",
-  "education": "education",
-  "telecom": "telecom",
-  "travel": "travel",
-  "retail": "retail",
-  "other": "other",
+/**
+ * Arabic column header → privacyDomains field mapping
+ * Supports both Arabic headers (from Excel/CSV) and English field names
+ */
+const arabicToFieldMap: Record<string, string> = {
+  // Arabic headers
+  "النطاق": "domain",
+  "الحالة": "status",
+  "الرابط الفعال": "workingUrl",
+  "اسم الموقع بالعربية": "nameAr",
+  "اسم الموقع بالإنجليزية": "nameEn",
+  "العنوان": "title",
+  "الوصف": "description",
+  "الفئة": "category",
+  "البريد الإلكتروني": "email",
+  "أرقام الهاتف": "phone",
+  "سجلات MX": "mxRecords",
+  "نظام إدارة المحتوى": "cms",
+  "حالة SSL": "sslStatus",
+  "رابط السياسة": "policyUrl",
+  "عنوان السياسة": "policyTitle",
+  "كود الحالة": "policyStatusCode",
+  "لغة السياسة": "policyLanguage",
+  "اسم الجهة": "entityName",
+  "البريد": "entityEmail",
+  "الهاتف": "entityPhone",
+  "مسؤول حماية البيانات": "dpo",
+  "نموذج الاتصال": "contactForm",
+  "طريقة الاكتشاف": "discoveryMethod",
+  "مسار لقطة الشاشة": "screenshotUrl",
+  "مسار النص الكامل": "fullTextPath",
+  // English aliases
+  "domain": "domain",
+  "status": "status",
+  "workingUrl": "workingUrl",
+  "working_url": "workingUrl",
+  "nameAr": "nameAr",
+  "name_ar": "nameAr",
+  "nameEn": "nameEn",
+  "name_en": "nameEn",
+  "name": "nameAr",
+  "title": "title",
+  "description": "description",
+  "category": "category",
+  "email": "email",
+  "phone": "phone",
+  "mxRecords": "mxRecords",
+  "mx_records": "mxRecords",
+  "cms": "cms",
+  "sslStatus": "sslStatus",
+  "ssl_status": "sslStatus",
+  "policyUrl": "policyUrl",
+  "policy_url": "policyUrl",
+  "policyTitle": "policyTitle",
+  "policy_title": "policyTitle",
+  "policyStatusCode": "policyStatusCode",
+  "policy_status_code": "policyStatusCode",
+  "policyLanguage": "policyLanguage",
+  "policy_language": "policyLanguage",
+  "entityName": "entityName",
+  "entity_name": "entityName",
+  "entityEmail": "entityEmail",
+  "entity_email": "entityEmail",
+  "entityPhone": "entityPhone",
+  "entity_phone": "entityPhone",
+  "dpo": "dpo",
+  "contactForm": "contactForm",
+  "contact_form": "contactForm",
+  "discoveryMethod": "discoveryMethod",
+  "discovery_method": "discoveryMethod",
+  "screenshotUrl": "screenshotUrl",
+  "screenshot_url": "screenshotUrl",
+  "fullTextPath": "fullTextPath",
+  "full_text_path": "fullTextPath",
+  "url": "workingUrl",
+  "sectorType": "category",
+  "sector_type": "category",
+  "classification": "category",
 };
 
-function normalizeSiteData(raw: RawSiteData): any {
-  let domain = (raw.domain || raw.url || "").toString().trim();
-  // Strip protocol
-  domain = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+function normalizePrivacyData(raw: RawPrivacyData): Record<string, any> {
+  // Map raw keys (Arabic or English) to normalized field names
+  const mapped: Record<string, any> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const trimmedKey = String(key).trim();
+    const field = arabicToFieldMap[trimmedKey];
+    if (field && value !== null && value !== undefined && String(value).trim() !== "") {
+      mapped[field] = String(value).trim();
+    }
+  }
 
-  // The `sites` table uses 'public'|'private' for sectorType
-  const sectorVal = (sectorTypeMap[raw.sectorType || ""] || "private") === "government" ? "public" : "private";
+  // Clean domain
+  let domain = (mapped.domain || "").replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "").trim();
 
   return {
     domain: domain || null,
-    url: domain ? `https://${domain}` : "",
-    siteName: raw.name || raw.nameAr || domain || "Untitled",
-    siteNameAr: raw.nameAr || raw.name || null,
-    siteNameEn: raw.name || null,
-    sectorType: sectorVal as "public" | "private",
-    classification: raw.classification || null,
-    entityNameAr: raw.ownerEntityAr || raw.ownerEntity || null,
-    entityNameEn: raw.ownerEntity || null,
-    sector: raw.category || null,
-    siteStatus: (raw.siteStatus === "active" ? "active" : "unreachable") as "active" | "unreachable",
+    status: mapped.status || null,
+    workingUrl: mapped.workingUrl || (domain ? `https://${domain}` : null),
+    nameAr: mapped.nameAr || null,
+    nameEn: mapped.nameEn || null,
+    title: mapped.title || null,
+    description: mapped.description || null,
+    category: mapped.category || null,
+    email: mapped.email || null,
+    phone: mapped.phone || null,
+    mxRecords: mapped.mxRecords || null,
+    cms: mapped.cms || null,
+    sslStatus: mapped.sslStatus || null,
+    policyUrl: mapped.policyUrl || null,
+    policyTitle: mapped.policyTitle || null,
+    policyStatusCode: mapped.policyStatusCode || null,
+    policyLanguage: mapped.policyLanguage || null,
+    entityName: mapped.entityName || null,
+    entityEmail: mapped.entityEmail || null,
+    entityPhone: mapped.entityPhone || null,
+    dpo: mapped.dpo || null,
+    contactForm: mapped.contactForm || null,
+    discoveryMethod: mapped.discoveryMethod || null,
+    screenshotUrl: mapped.screenshotUrl || null,
+    fullTextPath: mapped.fullTextPath || null,
   };
 }
 
@@ -446,7 +516,7 @@ export async function processPrivacyImport(
   let failedRecords = 0;
 
   try {
-    let rawRecords: RawSiteData[] = [];
+    let rawRecords: RawPrivacyData[] = [];
 
     switch (fileType) {
       case "json":
@@ -468,23 +538,38 @@ export async function processPrivacyImport(
 
     for (let i = 0; i < rawRecords.length; i++) {
       try {
-        const normalized = normalizeSiteData(rawRecords[i]);
+        const normalized = normalizePrivacyData(rawRecords[i]);
         if (!normalized.domain) {
-          throw new Error("النطاق مطلوب");
+          throw new Error("النطاق مطلوب — العمود الإلزامي الوحيد");
         }
 
-        await db.insert(sites).values({
+        // Insert into privacyDomains table
+        await db.insert(privacyDomains).values({
           domain: normalized.domain,
-          url: normalized.url,
-          siteName: normalized.siteName,
-          siteNameAr: normalized.siteNameAr,
-          siteNameEn: normalized.siteNameEn,
-          sectorType: normalized.sectorType,
-          classification: normalized.classification,
-          sector: normalized.sector,
-          siteStatus: normalized.siteStatus,
-          entityNameAr: normalized.entityNameAr,
-          entityNameEn: normalized.entityNameEn,
+          status: normalized.status,
+          workingUrl: normalized.workingUrl,
+          nameAr: normalized.nameAr,
+          nameEn: normalized.nameEn,
+          title: normalized.title,
+          description: normalized.description,
+          category: normalized.category,
+          email: normalized.email,
+          phone: normalized.phone,
+          mxRecords: normalized.mxRecords,
+          cms: normalized.cms,
+          sslStatus: normalized.sslStatus,
+          policyUrl: normalized.policyUrl,
+          policyTitle: normalized.policyTitle,
+          policyStatusCode: normalized.policyStatusCode,
+          policyLanguage: normalized.policyLanguage,
+          entityName: normalized.entityName,
+          entityEmail: normalized.entityEmail,
+          entityPhone: normalized.entityPhone,
+          dpo: normalized.dpo,
+          contactForm: normalized.contactForm,
+          discoveryMethod: normalized.discoveryMethod,
+          screenshotUrl: normalized.screenshotUrl,
+          fullTextPath: normalized.fullTextPath,
         });
         successRecords++;
 
