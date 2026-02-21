@@ -5,7 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Table2, FileText, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import { LayoutDashboard, Table2, FileText, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { CustomPage } from "@/hooks/useCustomPages";
 
@@ -207,23 +207,41 @@ export default function CustomPagesList({
                       </span>
                     )}
 
-                    {/* More button (on hover) */}
+                    {/* Action buttons (rename & delete) */}
                     {!collapsed && (
-                      <button
-                        aria-label="خيارات الصفحة"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleContextMenu(e, page.id);
-                        }}
-                        className={`
-                          w-5 h-5 rounded flex items-center justify-center flex-shrink-0
-                          opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity
-                          ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}
-                        `}
-                      >
-                        <MoreHorizontal className="w-3 h-3" />
-                      </button>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button
+                          aria-label="إعادة تسمية"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            startRename(page);
+                          }}
+                          className={`
+                            w-5 h-5 rounded flex items-center justify-center
+                            opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity
+                            ${isDark ? "hover:bg-white/10 text-slate-400 hover:text-[#3DB1AC]" : "hover:bg-black/5 text-gray-400 hover:text-blue-600"}
+                          `}
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button
+                          aria-label="حذف"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDeletePage(page.id);
+                          }}
+                          disabled={isDeleting}
+                          className={`
+                            w-5 h-5 rounded flex items-center justify-center
+                            opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity
+                            ${isDark ? "hover:bg-red-500/10 text-slate-400 hover:text-red-400" : "hover:bg-red-50 text-gray-400 hover:text-red-500"}
+                          `}
+                        >
+                          {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                        </button>
+                      </div>
                     )}
 
                     {/* Collapsed tooltip */}
