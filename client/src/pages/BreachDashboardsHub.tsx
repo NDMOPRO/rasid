@@ -206,11 +206,13 @@ export default function BreachDashboardsHub() {
     (p: any) => p.pageType === "dashboard"
   );
 
-  const handleCreatePage = async (pageType: "dashboard" | "table" | "report", title: string) => {
+  const handleCreatePage = async (pageType: "dashboard" | "table" | "report", title: string): Promise<boolean> => {
     const result = await createPage(pageType, title);
     if (result) {
       setLocation(`/custom/${pageType}/${(result as any).id}`);
+      return true;
     }
+    return false;
   };
 
   return (

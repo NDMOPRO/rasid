@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import './styles/design-tokens.css';
+@import './styles/platform-theme.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -1673,4 +1675,19 @@ select {
 .sidebar-nav-item:hover .sidebar-tooltip {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* Responsive & Accessibility — Design System */
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px); z-index: 40;
+  }
+}
+
+button, a, [role="button"], select { min-height: 44px; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.375rem; }
+  h2 { font-size: 1.125rem; }
 }

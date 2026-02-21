@@ -15,6 +15,7 @@ interface CustomPagesListProps {
   accent: string;
   accentBg: string;
   accentBorder: string;
+  searchQuery?: string;
   onDeletePage: (id: number) => void;
   onRenamePage: (id: number, newTitle: string) => void;
   onNavClick: () => void;
@@ -39,6 +40,7 @@ export default function CustomPagesList({
   accent,
   accentBg,
   accentBorder,
+  searchQuery = "",
   onDeletePage,
   onRenamePage,
   onNavClick,
@@ -98,10 +100,32 @@ export default function CustomPagesList({
 
   if (pages.length === 0) return null;
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const visiblePages = normalizedQuery
+    ? pages.filter((page) =>
+        page.title.toLowerCase().includes(normalizedQuery) ||
+        page.pageType.toLowerCase().includes(normalizedQuery)
+      )
+    : pages;
+
+  if (visiblePages.length === 0) {
+    return (
+      <div
+        className={`px-3 py-2.5 text-[11px] rounded-lg border ${
+          isDark
+            ? "text-slate-300/70 border-white/10 bg-white/[0.02]"
+            : "text-[#5a6478] border-[#e6ebf5] bg-[#f8faff]"
+        }`}
+      >
+        لا توجد صفحات مطابقة للبحث.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-0.5">
       <AnimatePresence>
-        {pages.map((page, index) => {
+        {visiblePages.map((page, index) => {
           const Icon = PAGE_TYPE_ICONS[page.pageType] || LayoutDashboard;
           const typeColor = PAGE_TYPE_COLORS[page.pageType] || accent;
           const pagePath = getPagePath(page);
@@ -186,6 +210,7 @@ export default function CustomPagesList({
                     {/* More button (on hover) */}
                     {!collapsed && (
                       <button
+                        aria-label="خيارات الصفحة"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -193,7 +218,7 @@ export default function CustomPagesList({
                         }}
                         className={`
                           w-5 h-5 rounded flex items-center justify-center flex-shrink-0
-                          opacity-0 group-hover:opacity-100 transition-opacity
+                          opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity
                           ${isDark ? "hover:bg-white/10" : "hover:bg-black/5"}
                         `}
                       >

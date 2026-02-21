@@ -198,7 +198,7 @@ export const aiChatSessions = mysqlTable("ai_chat_sessions", {
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
-export const aiConversations = mysqlTable("ai_conversations", {
+export const aiConversationsLegacy = mysqlTable("ai_conversations", {
 	id: int().autoincrement().primaryKey().notNull(),
 	userId: int().notNull(),
 	title: varchar({ length: 500 }),
@@ -219,7 +219,7 @@ export const aiCustomCommands = mysqlTable("ai_custom_commands", {
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-export const aiFeedback = mysqlTable("ai_feedback", {
+export const aiFeedbackLegacy = mysqlTable("ai_feedback", {
 	id: int().autoincrement().primaryKey().notNull(),
 	chatHistoryId: int().notNull(),
 	userId: int().notNull(),
@@ -2229,8 +2229,8 @@ export type AiChatSession = typeof aiChatSessions.$inferSelect;
 export type InsertAiChatSession = typeof aiChatSessions.$inferInsert;
 export type AiCustomCommand = typeof aiCustomCommands.$inferSelect;
 export type InsertAiCustomCommand = typeof aiCustomCommands.$inferInsert;
-export type AiFeedback = typeof aiFeedback.$inferSelect;
-export type InsertAiFeedback = typeof aiFeedback.$inferInsert;
+export type AiFeedbackLegacy = typeof aiFeedbackLegacy.$inferSelect;
+export type InsertAiFeedbackLegacy = typeof aiFeedbackLegacy.$inferInsert;
 export type AiRating = typeof aiRatings.$inferSelect;
 export type InsertAiRating = typeof aiRatings.$inferInsert;
 export type AiScenario = typeof aiScenarios.$inferSelect;
@@ -2804,7 +2804,7 @@ export const sseStreamSessions = mysqlTable("sse_stream_sessions", {
 	endedAt: timestamp("ended_at", { mode: 'string' }),
 });
 
-export const aiGuideSteps = mysqlTable("ai_guide_steps", {
+export const aiGuideStepsLegacy = mysqlTable("ai_guide_steps", {
 	id: int().autoincrement().primaryKey().notNull(),
 	stepOrder: int("step_order").notNull(),
 	titleAr: varchar("title_ar", { length: 255 }).notNull(),
@@ -2987,8 +2987,8 @@ export const aiGuideCatalog = mysqlTable("ai_guide_catalog", {
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-// DB-06: Guide Steps (domain-isolated)
-export const aiDomainGuideSteps = mysqlTable("ai_domain_guide_steps", {
+// DB-06: Guide Steps (new version with guideId and actionType)
+export const aiGuideSteps = mysqlTable("ai_guide_steps_v2", {
 	id: int().autoincrement().primaryKey().notNull(),
 	guideId: int().notNull(),
 	stepOrder: int().notNull(),
@@ -3029,7 +3029,7 @@ export const aiTaskMemory = mysqlTable("ai_task_memory", {
 });
 
 // DB-09, DB-10: Enhanced Conversations with domain isolation
-export const aiDomainConversations = mysqlTable("ai_domain_conversations", {
+export const aiConversations = mysqlTable("ai_conversations_v2", {
 	id: int().autoincrement().primaryKey().notNull(),
 	conversationId: varchar({ length: 100 }).notNull(),
 	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
@@ -3071,8 +3071,8 @@ export const aiActionTriggers = mysqlTable("ai_action_triggers", {
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-// DB-12: AI Feedback per domain (domain-isolated)
-export const aiDomainFeedback = mysqlTable("ai_domain_feedback", {
+// DB-12: AI Feedback per domain (new version with domain isolation)
+export const aiFeedback = mysqlTable("ai_feedback_v2", {
 	id: int().autoincrement().primaryKey().notNull(),
 	domain: mysqlEnum(["breaches", "privacy"]).notNull(),
 	conversationId: varchar({ length: 100 }),
@@ -3176,27 +3176,27 @@ export const aiRagIndexes = mysqlTable("ai_rag_indexes", {
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
-// Type exports for new tables
+// Type exports for new AI infrastructure tables
 export type AiGlossary = typeof aiGlossary.$inferSelect;
 export type InsertAiGlossary = typeof aiGlossary.$inferInsert;
 export type AiPageDescriptor = typeof aiPageDescriptors.$inferSelect;
 export type InsertAiPageDescriptor = typeof aiPageDescriptors.$inferInsert;
 export type AiGuideCatalog = typeof aiGuideCatalog.$inferSelect;
 export type InsertAiGuideCatalog = typeof aiGuideCatalog.$inferInsert;
-export type AiGuideStep = typeof aiDomainGuideSteps.$inferSelect;
-export type InsertAiGuideStep = typeof aiDomainGuideSteps.$inferInsert;
+export type AiGuideStep = typeof aiGuideSteps.$inferSelect;
+export type InsertAiGuideStep = typeof aiGuideSteps.$inferInsert;
 export type AiGuideSession = typeof aiGuideSessions.$inferSelect;
 export type InsertAiGuideSession = typeof aiGuideSessions.$inferInsert;
 export type AiTaskMemory = typeof aiTaskMemory.$inferSelect;
 export type InsertAiTaskMemory = typeof aiTaskMemory.$inferInsert;
-export type AiDomainConversation = typeof aiDomainConversations.$inferSelect;
-export type InsertAiDomainConversation = typeof aiDomainConversations.$inferInsert;
+export type AiConversation = typeof aiConversations.$inferSelect;
+export type InsertAiConversation = typeof aiConversations.$inferInsert;
 export type AiTrainingDocument = typeof aiTrainingDocuments.$inferSelect;
 export type InsertAiTrainingDocument = typeof aiTrainingDocuments.$inferInsert;
 export type AiActionTrigger = typeof aiActionTriggers.$inferSelect;
 export type InsertAiActionTrigger = typeof aiActionTriggers.$inferInsert;
-export type AiDomainFeedback = typeof aiDomainFeedback.$inferSelect;
-export type InsertAiDomainFeedback = typeof aiDomainFeedback.$inferInsert;
+export type AiFeedback = typeof aiFeedback.$inferSelect;
+export type InsertAiFeedback = typeof aiFeedback.$inferInsert;
 export type AiMessageTemplate = typeof aiMessageTemplates.$inferSelect;
 export type InsertAiMessageTemplate = typeof aiMessageTemplates.$inferInsert;
 export type AiSystemEvent = typeof aiSystemEvents.$inferSelect;

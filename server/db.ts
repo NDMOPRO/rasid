@@ -10,7 +10,7 @@ import {
   complianceChangeNotifications, userDashboardWidgets, visualAlerts,
   emailNotificationPrefs, pdfReportHistory, documents, reportAudit, knowledgeBase,
   personalityScenarios, aiUserSessions, chatHistory, customActions, trainingDocuments,
-  aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue,
+  aiFeedbackLegacy as aiFeedback, aiTrainingLogs, bulkAnalysisJobs, bulkAnalysisResults, deepScanQueue,
   platformAnalytics, platformSettings, pageConfigs, themeSettings, contentBlocks,
   dataTransferLogs, settingsAuditLog, presentationTemplates, presentations,
   alertContacts, alertHistory, alertRules, evidenceChain, feedbackEntries,
@@ -47,8 +47,10 @@ import type {
   InsertComplianceChangeNotification, InsertUserDashboardWidget, InsertVisualAlert,
   InsertEmailNotificationPref, InsertPdfReportHistory, InsertDocument,
   InsertReportAudit, InsertKnowledgeBaseEntry as InsertKnowledgeEntry, InsertPersonalityScenario,
-  InsertChatHistoryEntry, InsertCustomAction, InsertTrainingDocument, InsertAiFeedback,
-  InsertAiTrainingLog, CustomAction, TrainingDocument, AiFeedback, AiTrainingLog,
+  InsertChatHistoryEntry, InsertCustomAction, InsertTrainingDocument,
+  InsertAiFeedbackLegacy as InsertAiFeedback,
+  InsertAiTrainingLog, CustomAction, TrainingDocument,
+  AiFeedbackLegacy as AiFeedback, AiTrainingLog,
   InsertBulkAnalysisJob, InsertBulkAnalysisResult, BulkAnalysisJob, BulkAnalysisResult,
   InsertDeepScanQueueItem, DeepScanQueueItem, InsertPlatformSetting, InsertPageConfig,
   InsertThemeSetting, InsertContentBlock, InsertDataTransferLog,
@@ -7218,10 +7220,12 @@ export async function getCustomPages(userId: number, workspace?: string) {
   return db.select().from(customPages).where(and(...conditions)).orderBy(asc(customPages.sortOrder));
 }
 
-export async function getCustomPageById(id: number) {
+export async function getCustomPageById(id: number, userId?: number) {
   const db = await getDb();
   if (!db) return null;
-  const [page] = await db.select().from(customPages).where(eq(customPages.id, id)).limit(1);
+  const conditions = [eq(customPages.id, id)];
+  if (userId) conditions.push(eq(customPages.userId, userId));
+  const [page] = await db.select().from(customPages).where(and(...conditions)).limit(1);
   return page || null;
 }
 
@@ -7229,22 +7233,33 @@ export async function createCustomPage(data: InsertCustomPage) {
   const db = await getDb();
   if (!db) return null;
   const result = await db.insert(customPages).values(data);
-  const insertId = (result as any)[0]?.insertId;
-  if (insertId) return getCustomPageById(insertId);
-  return null;
+  const insertId = Number((result as any)?.[0]?.insertId ?? (result as any)?.insertId ?? 0);
+  if (insertId > 0) return getCustomPageById(insertId, data.userId as number);
+
+  const fallback = await db
+    .select()
+    .from(customPages)
+    .where(and(eq(customPages.userId, data.userId as number), eq(customPages.workspace, data.workspace), eq(customPages.title, data.title)))
+    .orderBy(desc(customPages.id))
+    .limit(1);
+  return fallback[0] || null;
 }
 
-export async function updateCustomPage(id: number, data: Partial<InsertCustomPage>) {
+export async function updateCustomPage(id: number, userId: number, data: Partial<InsertCustomPage>) {
   const db = await getDb();
   if (!db) return null;
-  await db.update(customPages).set(data).where(eq(customPages.id, id));
-  return getCustomPageById(id);
+  const result = await db.update(customPages).set(data).where(and(eq(customPages.id, id), eq(customPages.userId, userId)));
+  const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+  if (affectedRows === 0) return null;
+  return getCustomPageById(id, userId);
 }
 
-export async function deleteCustomPage(id: number) {
+export async function deleteCustomPage(id: number, userId: number) {
   const db = await getDb();
-  if (!db) return;
-  await db.delete(customPages).where(eq(customPages.id, id));
+  if (!db) return false;
+  const result = await db.delete(customPages).where(and(eq(customPages.id, id), eq(customPages.userId, userId)));
+  const affectedRows = Number((result as any)?.[0]?.affectedRows ?? (result as any)?.affectedRows ?? 0);
+  return affectedRows > 0;
 }
 
 

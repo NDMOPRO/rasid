@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS `ai_guide_catalog` (
   CONSTRAINT `ai_guide_catalog_id` PRIMARY KEY(`id`)
 );
 
--- DB-06: Guide Steps (domain-isolated)
-CREATE TABLE IF NOT EXISTS `ai_domain_guide_steps` (
+-- DB-06: Guide Steps (v2 — new version with guideId and actionType)
+CREATE TABLE IF NOT EXISTS `ai_guide_steps_v2` (
   `id` int AUTO_INCREMENT NOT NULL,
   `guide_id` int NOT NULL,
   `step_order` int NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `ai_domain_guide_steps` (
   `action_type` enum('click','type','select','scroll','wait','observe') NOT NULL DEFAULT 'observe',
   `highlight_type` enum('border','overlay','pulse','arrow') NOT NULL DEFAULT 'border',
   `created_at` timestamp NOT NULL DEFAULT (now()),
-  CONSTRAINT `ai_domain_guide_steps_id` PRIMARY KEY(`id`)
+  CONSTRAINT `ai_guide_steps_v2_id` PRIMARY KEY(`id`)
 );
 
 -- DB-07: Guide Sessions
@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS `ai_task_memory` (
   CONSTRAINT `ai_task_memory_id` PRIMARY KEY(`id`)
 );
 
--- DB-09, DB-10: Enhanced Conversations with domain isolation
-CREATE TABLE IF NOT EXISTS `ai_domain_conversations` (
+-- DB-09, DB-10: Enhanced Conversations with domain isolation (v2)
+CREATE TABLE IF NOT EXISTS `ai_conversations_v2` (
   `id` int AUTO_INCREMENT NOT NULL,
   `conversation_id` varchar(100) NOT NULL,
   `domain` enum('breaches','privacy') NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `ai_domain_conversations` (
   `is_active` tinyint NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT (now()),
   `updated_at` timestamp NOT NULL DEFAULT (now()),
-  CONSTRAINT `ai_domain_conversations_id` PRIMARY KEY(`id`)
+  CONSTRAINT `ai_conversations_v2_id` PRIMARY KEY(`id`)
 );
 
 -- DB-11: Training Center — Documents
@@ -144,8 +144,8 @@ CREATE TABLE IF NOT EXISTS `ai_action_triggers` (
   CONSTRAINT `ai_action_triggers_id` PRIMARY KEY(`id`)
 );
 
--- DB-12: AI Feedback per domain (domain-isolated)
-CREATE TABLE IF NOT EXISTS `ai_domain_feedback` (
+-- DB-12: AI Feedback per domain (v2 — new version with domain isolation)
+CREATE TABLE IF NOT EXISTS `ai_feedback_v2` (
   `id` int AUTO_INCREMENT NOT NULL,
   `domain` enum('breaches','privacy') NOT NULL,
   `conversation_id` varchar(100),
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `ai_domain_feedback` (
   `reason` text,
   `user_id` int,
   `created_at` timestamp NOT NULL DEFAULT (now()),
-  CONSTRAINT `ai_domain_feedback_id` PRIMARY KEY(`id`)
+  CONSTRAINT `ai_feedback_v2_id` PRIMARY KEY(`id`)
 );
 
 -- DB-13: Official Message Templates
@@ -261,14 +261,14 @@ CREATE INDEX `idx_glossary_domain` ON `ai_glossary` (`domain`);
 CREATE INDEX `idx_glossary_term` ON `ai_glossary` (`term`);
 CREATE INDEX `idx_page_descriptors_domain_route` ON `ai_page_descriptors` (`domain`, `route`);
 CREATE INDEX `idx_guide_catalog_domain` ON `ai_guide_catalog` (`domain`);
-CREATE INDEX `idx_domain_guide_steps_guide_id` ON `ai_domain_guide_steps` (`guide_id`);
+CREATE INDEX `idx_guide_steps_v2_guide_id` ON `ai_guide_steps_v2` (`guide_id`);
 CREATE INDEX `idx_guide_sessions_user_id` ON `ai_guide_sessions` (`user_id`);
 CREATE INDEX `idx_task_memory_user_domain` ON `ai_task_memory` (`user_id`, `domain`);
-CREATE INDEX `idx_domain_conversations_user_domain` ON `ai_domain_conversations` (`user_id`, `domain`);
-CREATE INDEX `idx_domain_conversations_conversation_id` ON `ai_domain_conversations` (`conversation_id`);
+CREATE INDEX `idx_conversations_v2_user_domain` ON `ai_conversations_v2` (`user_id`, `domain`);
+CREATE INDEX `idx_conversations_v2_conversation_id` ON `ai_conversations_v2` (`conversation_id`);
 CREATE INDEX `idx_training_documents_domain` ON `ai_training_documents` (`domain`);
 CREATE INDEX `idx_action_triggers_domain` ON `ai_action_triggers` (`domain`);
-CREATE INDEX `idx_domain_feedback_domain` ON `ai_domain_feedback` (`domain`);
+CREATE INDEX `idx_feedback_v2_domain` ON `ai_feedback_v2` (`domain`);
 CREATE INDEX `idx_message_templates_domain_type` ON `ai_message_templates` (`domain`, `template_type`);
 CREATE INDEX `idx_system_events_domain` ON `ai_system_events` (`domain`);
 CREATE INDEX `idx_action_runs_user_domain` ON `ai_action_runs` (`user_id`, `domain`);
