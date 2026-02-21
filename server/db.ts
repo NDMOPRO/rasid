@@ -127,8 +127,26 @@ export async function getDashboardStats() {
     if (!db) return null;
 
     const [totalSites] = await db.select({ count: count() }).from(sites);
-    const [activeSites] = await db.select({ count: count() }).from(sites).where(eq(sites.siteStatus, 'active'));
     const [totalScans] = await db.select({ count: count() }).from(scans);
+
+    // Fall back to privacyDomains when sites/scans tables are empty
+    if (totalSites.count === 0 && totalScans.count === 0) {
+      const pdStats = await getPrivacyDomainStats() as any;
+      if (pdStats && pdStats.total > 0) {
+        return {
+          totalSites: pdStats.total,
+          activeSites: pdStats.working || 0,
+          totalScans: pdStats.total,
+          compliant: pdStats.compliant || 0,
+          partiallyCompliant: pdStats.partiallyCompliant ?? pdStats.partial ?? 0,
+          nonCompliant: pdStats.nonCompliant || 0,
+          noPolicy: pdStats.noPolicy ?? pdStats.unknown ?? 0,
+          averageScore: pdStats.averageScore ?? pdStats.avgScore ?? 0,
+        };
+      }
+    }
+
+    const [activeSites] = await db.select({ count: count() }).from(sites).where(eq(sites.siteStatus, 'active'));
     const [compliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'compliant'));
     const [partialScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'partially_compliant'));
     const [nonCompliantScans] = await db.select({ count: count() }).from(scans).where(eq(scans.complianceStatus, 'non_compliant'));
@@ -156,7 +174,6 @@ export async function getClauseStats() {
   const db = await getDb();
   if (!db) return [];
   const [total] = await db.select({ count: count() }).from(scans);
-  const totalCount = total.count || 1;
 
   const clauseNames = [
     'تحديد الغرض من جمع البيانات',
@@ -169,6 +186,38 @@ export async function getClauseStats() {
     'كيفية ممارسة الحقوق',
   ];
 
+  // Fall back to privacyDomains when scans table is empty
+  if (total.count === 0) {
+    const [pdTotal] = await db.select({ count: count() }).from(privacyDomains);
+    if (pdTotal.count > 0) {
+      // Map privacyDomains mentions* fields to Article 12 clauses
+      const clauseColumns = [
+        privacyDomains.mentionsPurpose,      // Clause 1: Purpose
+        privacyDomains.mentionsDataTypes,     // Clause 2: Data types
+        privacyDomains.mentionsCookies,       // Clause 3: Collection method
+        privacyDomains.mentionsSecurity,      // Clause 4: Storage
+        privacyDomains.mentionsLegalBasis,    // Clause 5: Processing
+        privacyDomains.mentionsRetention,     // Clause 6: Destruction
+        privacyDomains.mentionsRights,        // Clause 7: Rights
+        privacyDomains.mentionsThirdParties,  // Clause 8: Exercising rights
+      ];
+      const pdTotalCount = pdTotal.count || 1;
+      const results = [];
+      for (let i = 0; i < 8; i++) {
+        const [compliant] = await db.select({ count: count() }).from(privacyDomains).where(eq(clauseColumns[i], 1));
+        results.push({
+          clause: i + 1,
+          name: clauseNames[i],
+          compliant: compliant.count,
+          total: pdTotalCount,
+          percentage: Math.round((compliant.count / pdTotalCount) * 100),
+        });
+      }
+      return results;
+    }
+  }
+
+  const totalCount = total.count || 1;
   const results = [];
   for (let i = 1; i <= 8; i++) {
     const col = `clause${i}Compliant` as keyof typeof scans.$inferSelect;
@@ -368,6 +417,20 @@ export async function updateSite(siteId: number, data: Partial<InsertSite>) {
 export async function getClassificationStats() {
   const db = await getDb();
   if (!db) return [];
+
+  const [siteCount] = await db.select({ count: count() }).from(sites);
+
+  // Fall back to privacyDomains when sites table is empty
+  if (siteCount.count === 0) {
+    const result = await db.select({
+      classification: privacyDomains.classification,
+      count: count(),
+    }).from(privacyDomains)
+      .where(and(isNotNull(privacyDomains.classification), ne(privacyDomains.classification, '')))
+      .groupBy(privacyDomains.classification);
+    return result;
+  }
+
   const result = await db.select({
     classification: sites.classification,
     count: count(),
@@ -589,8 +652,29 @@ export async function getRecentScans(limit: number = 10) {
 export async function getSectorCompliance() {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans table is empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT pd_classification as classification,
+             COUNT(*) as total,
+             SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+             SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partial,
+             SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as non_compliant,
+             SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as no_policy,
+             ROUND(AVG(pd_compliance_score), 1) as avg_score
+      FROM privacy_domains
+      WHERE pd_classification IS NOT NULL AND pd_classification != ''
+      GROUP BY pd_classification
+      ORDER BY total DESC
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   const result = await db.execute(sql`
-    SELECT s.classification, 
+    SELECT s.classification,
            COUNT(sc.id) as total,
            SUM(CASE WHEN sc.complianceStatus = 'compliant' THEN 1 ELSE 0 END) as compliant,
            SUM(CASE WHEN sc.complianceStatus = 'partially_compliant' THEN 1 ELSE 0 END) as partial,
@@ -3017,6 +3101,37 @@ export async function getBubbleChartData() {
 export async function getComplianceTrendData(months = 12) {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans table is empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT
+        DATE_FORMAT(pd_imported_at, '%Y-%m') as month,
+        COUNT(*) as total,
+        SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+        SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partial,
+        SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as nonCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as noPolicy,
+        ROUND(AVG(pd_compliance_score), 2) as avgScore
+      FROM privacy_domains
+      WHERE pd_imported_at >= DATE_SUB(NOW(), INTERVAL ${months} MONTH)
+      GROUP BY DATE_FORMAT(pd_imported_at, '%Y-%m')
+      ORDER BY month ASC
+    `);
+    return ((result[0] as unknown as any[]) || []).map(r => ({
+      month: r.month,
+      total: Number(r.total),
+      compliant: Number(r.compliant),
+      partial: Number(r.partial),
+      nonCompliant: Number(r.nonCompliant),
+      noPolicy: Number(r.noPolicy),
+      avgScore: Number(r.avgScore),
+      complianceRate: r.total > 0 ? Math.round((Number(r.compliant) / Number(r.total)) * 100) : 0,
+    }));
+  }
+
   // Monthly compliance trend from scan data
   const result = await db.execute(sql`
     SELECT
@@ -3417,7 +3532,41 @@ export async function markNotificationEmailSent(id: number, sentTo: string) {
 export async function getDashboardStatsFiltered(params: { sector?: string; timePeriod?: string }) {
   const db = await getDb();
   if (!db) return null;
-  
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans table is empty
+  if (scanCount.count === 0) {
+    let classFilter = sql`1=1`;
+    if (params.sector && params.sector !== 'all') {
+      classFilter = sql`pd_classification = ${params.sector}`;
+    }
+    const result = await db.execute(sql`
+      SELECT
+        COUNT(*) as totalSites,
+        SUM(CASE WHEN pd_status = 'يعمل' THEN 1 ELSE 0 END) as activeSites,
+        COUNT(*) as totalScans,
+        SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+        SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partiallyCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as nonCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as noPolicy,
+        ROUND(AVG(pd_compliance_score), 1) as averageScore
+      FROM privacy_domains
+      WHERE ${classFilter}
+    `);
+    const row = ((result as any)[0] as any[])?.[0] || {};
+    return {
+      totalSites: Number(row.totalSites) || 0,
+      activeSites: Number(row.activeSites) || 0,
+      totalScans: Number(row.totalScans) || 0,
+      compliant: Number(row.compliant) || 0,
+      partiallyCompliant: Number(row.partiallyCompliant) || 0,
+      nonCompliant: Number(row.nonCompliant) || 0,
+      noPolicy: Number(row.noPolicy) || 0,
+      averageScore: Number(row.averageScore) || 0,
+    };
+  }
+
   let dateFilter = sql`1=1`;
   if (params.timePeriod) {
     switch (params.timePeriod) {
@@ -3427,14 +3576,14 @@ export async function getDashboardStatsFiltered(params: { sector?: string; timeP
       case 'year': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 365 DAY)`; break;
     }
   }
-  
+
   let sectorFilter = sql`1=1`;
   if (params.sector && params.sector !== 'all') {
     sectorFilter = sql`s.classification = ${params.sector}`;
   }
-  
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COUNT(DISTINCT s.id) as totalSites,
       COUNT(DISTINCT CASE WHEN s.siteStatus = 'active' THEN s.id END) as activeSites,
       COUNT(sc.id) as totalScans,
@@ -3447,7 +3596,7 @@ export async function getDashboardStatsFiltered(params: { sector?: string; timeP
     LEFT JOIN scans sc ON s.id = sc.siteId AND ${dateFilter}
     WHERE ${sectorFilter}
   `);
-  
+
   const row = ((result as any)[0] as any[])?.[0] || {};
   return {
     totalSites: Number(row.totalSites) || 0,
@@ -3464,22 +3613,7 @@ export async function getDashboardStatsFiltered(params: { sector?: string; timeP
 export async function getClauseStatsFiltered(params: { sector?: string; timePeriod?: string }) {
   const db = await getDb();
   if (!db) return [];
-  
-  let dateFilter = sql`1=1`;
-  if (params.timePeriod) {
-    switch (params.timePeriod) {
-      case 'week': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 7 DAY)`; break;
-      case 'month': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)`; break;
-      case 'quarter': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 90 DAY)`; break;
-      case 'year': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 365 DAY)`; break;
-    }
-  }
-  
-  let sectorFilter = sql`1=1`;
-  if (params.sector && params.sector !== 'all') {
-    sectorFilter = sql`s.classification = ${params.sector}`;
-  }
-  
+
   const clauseNames = [
     'تحديد الغرض من جمع البيانات',
     'تحديد محتوى البيانات المطلوب جمعها',
@@ -3490,9 +3624,57 @@ export async function getClauseStatsFiltered(params: { sector?: string; timePeri
     'تحديد حقوق صاحب البيانات',
     'كيفية ممارسة الحقوق',
   ];
-  
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans table is empty
+  if (scanCount.count === 0) {
+    let classFilter = sql`1=1`;
+    if (params.sector && params.sector !== 'all') {
+      classFilter = sql`pd_classification = ${params.sector}`;
+    }
+    const result = await db.execute(sql`
+      SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN pd_mentions_purpose = 1 THEN 1 ELSE 0 END) as c1,
+        SUM(CASE WHEN pd_mentions_data_types = 1 THEN 1 ELSE 0 END) as c2,
+        SUM(CASE WHEN pd_mentions_cookies = 1 THEN 1 ELSE 0 END) as c3,
+        SUM(CASE WHEN pd_mentions_security = 1 THEN 1 ELSE 0 END) as c4,
+        SUM(CASE WHEN pd_mentions_legal_basis = 1 THEN 1 ELSE 0 END) as c5,
+        SUM(CASE WHEN pd_mentions_retention = 1 THEN 1 ELSE 0 END) as c6,
+        SUM(CASE WHEN pd_mentions_rights = 1 THEN 1 ELSE 0 END) as c7,
+        SUM(CASE WHEN pd_mentions_third_parties = 1 THEN 1 ELSE 0 END) as c8
+      FROM privacy_domains
+      WHERE ${classFilter}
+    `);
+    const row = ((result as any)[0] as any[])?.[0] || {};
+    const totalCount = Number(row.total) || 1;
+    return clauseNames.map((name, i) => ({
+      clause: i + 1,
+      name,
+      compliant: Number(row[`c${i + 1}`]) || 0,
+      total: totalCount,
+      percentage: Math.round(((Number(row[`c${i + 1}`]) || 0) / totalCount) * 100),
+    }));
+  }
+
+  let dateFilter = sql`1=1`;
+  if (params.timePeriod) {
+    switch (params.timePeriod) {
+      case 'week': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 7 DAY)`; break;
+      case 'month': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 30 DAY)`; break;
+      case 'quarter': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 90 DAY)`; break;
+      case 'year': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 365 DAY)`; break;
+    }
+  }
+
+  let sectorFilter = sql`1=1`;
+  if (params.sector && params.sector !== 'all') {
+    sectorFilter = sql`s.classification = ${params.sector}`;
+  }
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       COUNT(sc.id) as total,
       SUM(CASE WHEN sc.clause1Compliant = 1 THEN 1 ELSE 0 END) as c1,
       SUM(CASE WHEN sc.clause2Compliant = 1 THEN 1 ELSE 0 END) as c2,
@@ -3506,10 +3688,10 @@ export async function getClauseStatsFiltered(params: { sector?: string; timePeri
     JOIN sites s ON sc.siteId = s.id
     WHERE ${dateFilter} AND ${sectorFilter}
   `);
-  
+
   const row = ((result as any)[0] as any[])?.[0] || {};
   const totalCount = Number(row.total) || 1;
-  
+
   return clauseNames.map((name, i) => ({
     clause: i + 1,
     name,
@@ -3522,7 +3704,31 @@ export async function getClauseStatsFiltered(params: { sector?: string; timePeri
 export async function getSectorComplianceFiltered(params: { sector?: string; timePeriod?: string }) {
   const db = await getDb();
   if (!db) return [];
-  
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans table is empty
+  if (scanCount.count === 0) {
+    let classFilter = sql`1=1`;
+    if (params.sector && params.sector !== 'all') {
+      classFilter = sql`pd_classification = ${params.sector}`;
+    }
+    const result = await db.execute(sql`
+      SELECT pd_classification as classification,
+             COUNT(*) as total,
+             SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+             SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partial,
+             SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as non_compliant,
+             SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as no_policy,
+             ROUND(AVG(pd_compliance_score), 1) as avg_score
+      FROM privacy_domains
+      WHERE pd_classification IS NOT NULL AND pd_classification != '' AND ${classFilter}
+      GROUP BY pd_classification
+      ORDER BY total DESC
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   let dateFilter = sql`1=1`;
   if (params.timePeriod) {
     switch (params.timePeriod) {
@@ -3532,14 +3738,14 @@ export async function getSectorComplianceFiltered(params: { sector?: string; tim
       case 'year': dateFilter = sql`sc.scanDate >= DATE_SUB(NOW(), INTERVAL 365 DAY)`; break;
     }
   }
-  
+
   let sectorFilter = sql`1=1`;
   if (params.sector && params.sector !== 'all') {
     sectorFilter = sql`s.classification = ${params.sector}`;
   }
-  
+
   const result = await db.execute(sql`
-    SELECT s.classification, 
+    SELECT s.classification,
            COUNT(sc.id) as total,
            SUM(CASE WHEN sc.complianceStatus = 'compliant' THEN 1 ELSE 0 END) as compliant,
            SUM(CASE WHEN sc.complianceStatus = 'partially_compliant' THEN 1 ELSE 0 END) as partial,
@@ -3559,6 +3765,19 @@ export async function getSectorComplianceFiltered(params: { sector?: string; tim
 export async function getAllSectors() {
   const db = await getDb();
   if (!db) return [];
+
+  const [siteCount] = await db.select({ count: count() }).from(sites);
+
+  // Fall back to privacyDomains when sites table is empty
+  if (siteCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT DISTINCT pd_classification as classification FROM privacy_domains
+      WHERE pd_classification IS NOT NULL AND pd_classification != ''
+      ORDER BY classification
+    `);
+    return (((result as any)[0] as any[]) || []).map((r: any) => r.classification);
+  }
+
   const result = await db.execute(sql`
     SELECT DISTINCT classification FROM sites WHERE classification IS NOT NULL AND classification != '' ORDER BY classification
   `);
@@ -3570,8 +3789,30 @@ export async function getAllSectors() {
 export async function getDashboardStatsBySectorType() {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains grouped by category when scans are empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT
+        pd_category as sectorType,
+        COUNT(*) as totalSites,
+        COUNT(*) as totalScans,
+        SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+        SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partiallyCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as nonCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as noPolicy,
+        ROUND(AVG(pd_compliance_score), 1) as averageScore
+      FROM privacy_domains
+      WHERE pd_category IS NOT NULL AND pd_category != ''
+      GROUP BY pd_category
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       s.sectorType,
       COUNT(DISTINCT s.id) as totalSites,
       COUNT(sc.id) as totalScans,
@@ -3583,7 +3824,7 @@ export async function getDashboardStatsBySectorType() {
     FROM sites s
     LEFT JOIN (
       SELECT sc1.* FROM scans sc1
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 
+      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2
       ON sc1.id = sc2.maxId
     ) sc ON s.id = sc.siteId
     WHERE s.siteStatus = 'active'
@@ -3596,8 +3837,32 @@ export async function getDashboardStatsBySectorType() {
 export async function getClauseStatsBySectorType() {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans are empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT
+        pd_category as sectorType,
+        COUNT(*) as total,
+        SUM(CASE WHEN pd_mentions_purpose = 1 THEN 1 ELSE 0 END) as c1,
+        SUM(CASE WHEN pd_mentions_data_types = 1 THEN 1 ELSE 0 END) as c2,
+        SUM(CASE WHEN pd_mentions_cookies = 1 THEN 1 ELSE 0 END) as c3,
+        SUM(CASE WHEN pd_mentions_security = 1 THEN 1 ELSE 0 END) as c4,
+        SUM(CASE WHEN pd_mentions_legal_basis = 1 THEN 1 ELSE 0 END) as c5,
+        SUM(CASE WHEN pd_mentions_retention = 1 THEN 1 ELSE 0 END) as c6,
+        SUM(CASE WHEN pd_mentions_rights = 1 THEN 1 ELSE 0 END) as c7,
+        SUM(CASE WHEN pd_mentions_third_parties = 1 THEN 1 ELSE 0 END) as c8
+      FROM privacy_domains
+      WHERE pd_category IS NOT NULL AND pd_category != ''
+      GROUP BY pd_category
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       s.sectorType,
       COUNT(sc.id) as total,
       SUM(CASE WHEN sc.clause1Compliant = 1 THEN 1 ELSE 0 END) as c1,
@@ -3620,8 +3885,32 @@ export async function getClauseStatsBySectorType() {
 export async function getDashboardStatsBySectorAndCategory() {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans are empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT
+        pd_category as sectorType,
+        pd_classification as category,
+        COUNT(*) as totalSites,
+        COUNT(*) as totalScans,
+        SUM(CASE WHEN pd_compliance_status = 'compliant' THEN 1 ELSE 0 END) as compliant,
+        SUM(CASE WHEN pd_compliance_status = 'partially_compliant' THEN 1 ELSE 0 END) as partiallyCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'non_compliant' THEN 1 ELSE 0 END) as nonCompliant,
+        SUM(CASE WHEN pd_compliance_status = 'no_policy' THEN 1 ELSE 0 END) as noPolicy,
+        ROUND(AVG(pd_compliance_score), 1) as averageScore
+      FROM privacy_domains
+      WHERE pd_classification IS NOT NULL AND pd_classification != ''
+      GROUP BY pd_category, pd_classification
+      ORDER BY pd_category, totalSites DESC
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       s.sectorType,
       s.classification as category,
       COUNT(DISTINCT s.id) as totalSites,
@@ -3634,7 +3923,7 @@ export async function getDashboardStatsBySectorAndCategory() {
     FROM sites s
     LEFT JOIN (
       SELECT sc1.* FROM scans sc1
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 
+      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2
       ON sc1.id = sc2.maxId
     ) sc ON s.id = sc.siteId
     WHERE s.siteStatus = 'active'
@@ -3648,8 +3937,34 @@ export async function getDashboardStatsBySectorAndCategory() {
 export async function getClauseStatsBySectorAndCategory() {
   const db = await getDb();
   if (!db) return [];
+
+  const [scanCount] = await db.select({ count: count() }).from(scans);
+
+  // Fall back to privacyDomains when scans are empty
+  if (scanCount.count === 0) {
+    const result = await db.execute(sql`
+      SELECT
+        pd_category as sectorType,
+        pd_classification as category,
+        COUNT(*) as total,
+        SUM(CASE WHEN pd_mentions_purpose = 1 THEN 1 ELSE 0 END) as c1,
+        SUM(CASE WHEN pd_mentions_data_types = 1 THEN 1 ELSE 0 END) as c2,
+        SUM(CASE WHEN pd_mentions_cookies = 1 THEN 1 ELSE 0 END) as c3,
+        SUM(CASE WHEN pd_mentions_security = 1 THEN 1 ELSE 0 END) as c4,
+        SUM(CASE WHEN pd_mentions_legal_basis = 1 THEN 1 ELSE 0 END) as c5,
+        SUM(CASE WHEN pd_mentions_retention = 1 THEN 1 ELSE 0 END) as c6,
+        SUM(CASE WHEN pd_mentions_rights = 1 THEN 1 ELSE 0 END) as c7,
+        SUM(CASE WHEN pd_mentions_third_parties = 1 THEN 1 ELSE 0 END) as c8
+      FROM privacy_domains
+      WHERE pd_classification IS NOT NULL AND pd_classification != ''
+      GROUP BY pd_category, pd_classification
+      ORDER BY pd_category, total DESC
+    `);
+    return ((result as any)[0] as any[]) || [];
+  }
+
   const result = await db.execute(sql`
-    SELECT 
+    SELECT
       s.sectorType,
       s.classification as category,
       COUNT(sc.id) as total,
