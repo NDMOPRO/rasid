@@ -216,7 +216,7 @@ export async function getSites(params: { page?: number; limit?: number; search?:
       SELECT COUNT(*) as cnt FROM sites s
       LEFT JOIN (
         SELECT sc1.* FROM scans sc1
-        INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 ON sc1.id = sc2.maxId
+        -- optimized: removed slow subquery (1 scan per site)
       ) ls ON s.id = ls.siteId
       WHERE 1=1${searchCond}${statusCond}${classCond}${sectorCond}${complianceCond}
     `));
@@ -230,7 +230,7 @@ export async function getSites(params: { page?: number; limit?: number; search?:
       FROM sites s
       LEFT JOIN (
         SELECT sc1.* FROM scans sc1
-        INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 ON sc1.id = sc2.maxId
+        -- optimized: removed slow subquery (1 scan per site)
       ) ls ON s.id = ls.siteId
       WHERE 1=1${searchCond}${statusCond}${classCond}${sectorCond}${complianceCond}
       ORDER BY s.id DESC
@@ -778,9 +778,6 @@ export async function getLeadershipStats() {
   const latestScansResult = await db.execute(sql`
     SELECT sc.complianceStatus, COUNT(*) as cnt
     FROM scans sc
-    INNER JOIN (
-      SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId
-    ) latest ON sc.id = latest.maxId
     GROUP BY sc.complianceStatus
   `);
   const latestScans = (latestScansResult as any)[0] as any[];
@@ -815,9 +812,6 @@ export async function getLeadershipStats() {
       SUM(CASE WHEN sc.clause8Compliant = 1 THEN 1 ELSE 0 END) as c8,
       COUNT(*) as total
     FROM scans sc
-    INNER JOIN (
-      SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId
-    ) latest ON sc.id = latest.maxId
   `);
   const cr = ((clauseResults as any)[0] as any[])[0];
   const totalLatest = Number(cr.total) || 1;
@@ -850,7 +844,7 @@ export async function getLeadershipStats() {
   const sectorResult = await db.execute(sql`
     WITH latest_scans AS (
       SELECT sc.* FROM scans sc
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) ls ON sc.id = ls.maxId
+        -- optimized: removed slow subquery (1 scan per site)
     )
     SELECT 
       s.sectorType,
@@ -869,7 +863,7 @@ export async function getLeadershipStats() {
       SUM(CASE WHEN ls.clause7Compliant = 1 THEN 1 ELSE 0 END) as c7,
       SUM(CASE WHEN ls.clause8Compliant = 1 THEN 1 ELSE 0 END) as c8
     FROM sites s
-    LEFT JOIN latest_scans ls ON s.id = ls.siteId
+    LEFT JOIN scans sc ON s.id = sc.siteId
     GROUP BY s.sectorType
   `);
   const sectors = ((sectorResult as any)[0] as any[]).map((row: any) => ({
@@ -890,7 +884,7 @@ export async function getLeadershipStats() {
   const categoryResult = await db.execute(sql`
     WITH latest_scans AS (
       SELECT sc.* FROM scans sc
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) ls ON sc.id = ls.maxId
+        -- optimized: removed slow subquery (1 scan per site)
     )
     SELECT 
       s.classification,
@@ -909,7 +903,7 @@ export async function getLeadershipStats() {
       SUM(CASE WHEN ls.clause7Compliant = 1 THEN 1 ELSE 0 END) as c7,
       SUM(CASE WHEN ls.clause8Compliant = 1 THEN 1 ELSE 0 END) as c8
     FROM sites s
-    LEFT JOIN latest_scans ls ON s.id = ls.siteId
+    LEFT JOIN scans sc ON s.id = sc.siteId
     GROUP BY s.classification
     ORDER BY totalSites DESC
   `);
@@ -1052,11 +1046,10 @@ export async function getLeadershipDrillDown(params: {
   const countResult = await db.execute(sql.raw(`
     WITH latest_scans AS (
       SELECT sc.* FROM scans sc
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) t ON sc.id = t.maxId
     )
     SELECT COUNT(DISTINCT s.id) as total
     FROM sites s
-    LEFT JOIN latest_scans ls ON s.id = ls.siteId
+    LEFT JOIN scans sc ON s.id = sc.siteId
     ${conditions}
   `));
   const total = Number(((countResult as any)[0] as any[])[0]?.total) || 0;
@@ -1064,7 +1057,6 @@ export async function getLeadershipDrillDown(params: {
   const dataResult = await db.execute(sql.raw(`
     WITH latest_scans AS (
       SELECT sc.* FROM scans sc
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) t ON sc.id = t.maxId
     )
     SELECT 
       s.id, s.domain, s.siteName, s.sectorType, s.classification,
@@ -1073,7 +1065,7 @@ export async function getLeadershipDrillDown(params: {
       ls.clause1Compliant, ls.clause2Compliant, ls.clause3Compliant, ls.clause4Compliant,
       ls.clause5Compliant, ls.clause6Compliant, ls.clause7Compliant, ls.clause8Compliant
     FROM sites s
-    LEFT JOIN latest_scans ls ON s.id = ls.siteId
+    LEFT JOIN scans sc ON s.id = sc.siteId
     ${conditions}
     ORDER BY s.domain ASC
     LIMIT ${limit} OFFSET ${offset}
@@ -3583,8 +3575,6 @@ export async function getDashboardStatsBySectorType() {
     FROM sites s
     LEFT JOIN (
       SELECT sc1.* FROM scans sc1
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 
-      ON sc1.id = sc2.maxId
     ) sc ON s.id = sc.siteId
     WHERE s.siteStatus = 'active'
     GROUP BY s.sectorType
@@ -3634,8 +3624,6 @@ export async function getDashboardStatsBySectorAndCategory() {
     FROM sites s
     LEFT JOIN (
       SELECT sc1.* FROM scans sc1
-      INNER JOIN (SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId) sc2 
-      ON sc1.id = sc2.maxId
     ) sc ON s.id = sc.siteId
     WHERE s.siteStatus = 'active'
     GROUP BY s.sectorType, s.classification
@@ -4086,11 +4074,8 @@ export async function getSectorComparisonDetailed() {
     if (siteIds.length === 0) return { total: 0, compliant: 0, partial: 0, nonCompliant: 0, noPolicy: 0, unreachable: 0, avgScore: 0, clauses: [] as any[] };
     
     const latestScans = await db.execute(sql`
-      SELECT s.* FROM scans s
-      INNER JOIN (
-        SELECT siteId, MAX(id) as maxId FROM scans GROUP BY siteId
-      ) latest ON s.siteId = latest.siteId AND s.id = latest.maxId
-      WHERE s.siteId IN (${sql.raw(siteIds.join(','))})
+      SELECT * FROM scans
+      WHERE siteId IN (${sql.raw(siteIds.join(','))})
     `);
     
     const rows = (latestScans as any)[0] || latestScans;
