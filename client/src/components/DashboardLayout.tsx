@@ -295,14 +295,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const allCurrentGroups = wsNavGroups;
   const activeGroupId = allCurrentGroups.find((g) => g.items.some((item) => item.path === location))?.id;
 
-  useEffect(() => {
-    if (activeGroupId) {
-      setExpandedGroups((prev) => {
-        if (prev[activeGroupId]) return prev;
-        return { ...prev, [activeGroupId]: true };
-      });
-    }
-  }, [activeGroupId]);
+  // Groups stay collapsed by default — user must click to expand
+  // No auto-expand on route match
 
   const currentPage = allNavItems.find((item) => item.path === location);
 

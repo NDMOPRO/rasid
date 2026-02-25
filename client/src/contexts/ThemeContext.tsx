@@ -4,7 +4,7 @@ type Theme = "light" | "dark";
 type ThemeMode = "light" | "dark" | "auto";
 
 /** Dynamic color themes that can be applied on top of light/dark mode */
-type ColorTheme = "default" | "ocean" | "emerald" | "sunset" | "royal" | "crimson";
+type ColorTheme = "default" | "ocean" | "emerald" | "sunset" | "royal" | "crimson" | "ultra-premium";
 
 interface ThemeContextType {
   theme: Theme;
@@ -34,6 +34,7 @@ const COLOR_THEMES: ThemeContextType["colorThemes"] = [
   { id: "sunset", name: "Sunset", nameAr: "الغروب", primary: "#f59e0b", accent: "#ef4444" },
   { id: "royal", name: "Royal", nameAr: "الملكي", primary: "#8b5cf6", accent: "#6366f1" },
   { id: "crimson", name: "Crimson", nameAr: "القرمزي", primary: "#ef4444", accent: "#ec4899" },
+  { id: "ultra-premium", name: "Ultra Premium", nameAr: "الذهبي الفاخر", primary: "#D4A017", accent: "#FFD700" },
 ];
 
 function getSystemTheme(): Theme {
