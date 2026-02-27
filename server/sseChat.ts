@@ -1,15 +1,24 @@
 /**
  * SSE Chat Endpoint — Streams Rasid AI responses token-by-token
- * 
+ * Supports domain isolation (GOV-01), naming policy (NAME-07), and page context pack (UI-06)
+ *
  * POST /api/rasid/stream
- * Body: { message: string, history: Array<{ role: "user" | "assistant", content: string }>, pageContext?: object }
+ * Body: {
+ *   message: string,
+ *   domain?: "leaks" | "privacy",
+ *   conversationId?: string,
+ *   history: Array<{ role: "user" | "assistant", content: string }>,
+ *   pageContext?: PageContextPack
+ * }
  * Response: Server-Sent Events stream with typed events:
+ *   - event: status     → { phase: string, message: string }
  *   - event: token      → { text: string }
  *   - event: thinking   → ThinkingStep
- *   - event: tool       → { name: string, status: string }
+ *   - event: tool       → { name: string, status: string, domain: string }
  *   - event: toolResult → { type: string, data: any }
- *   - event: meta       → { toolsUsed, followUpSuggestions, processingMeta }
- *   - event: done       → { response: string }
+ *   - event: navigation → { targetPage: string, reason: string, requiresConsent: true }
+ *   - event: meta       → { toolsUsed, followUpSuggestions, processingMeta, domain }
+ *   - event: done       → { response: string, domain: string }
  *   - event: error      → { message: string }
  *   - event: heartbeat  → { ts: number }
  */
@@ -19,6 +28,7 @@ import { jwtVerify } from "jose";
 import { ENV } from "./_core/env";
 import { getPlatformUserById } from "./db";
 import { rasidAIChatStreaming } from "./rasidAI";
+import { type Domain, getDomainFromRoute, validatePageContext, enforceNamingPolicy } from "./domainIsolation";
 
 const PLATFORM_COOKIE = "platform_session";
 
@@ -50,11 +60,15 @@ export function registerSSERoutes(app: Express) {
       return;
     }
 
-    const { message, history, pageContext } = req.body;
+    const { message, history, pageContext, domain: requestedDomain, conversationId } = req.body;
     if (!message || typeof message !== "string") {
       res.status(400).json({ error: "Message is required" });
       return;
     }
+
+    // Determine domain from request or page context (GOV-01, API-01)
+    const domain: Domain = requestedDomain ||
+      (pageContext?.route ? getDomainFromRoute(pageContext.route) : 'leaks');
 
     // Set SSE headers with reconnection support
     res.writeHead(200, {
@@ -90,22 +104,26 @@ export function registerSSERoutes(app: Express) {
       }
     }, 15000);
 
-    // Build enhanced message with page context if available
+    // Build enhanced Page Context Pack (UI-06, UI-07, PR-12)
     let enhancedMessage = message;
     if (pageContext && typeof pageContext === "object") {
-      const ctx = pageContext as Record<string, any>;
+      const ctx = validatePageContext(pageContext);
       const contextParts: string[] = [];
-      if (ctx.pageName) contextParts.push(`الصفحة الحالية: ${ctx.pageName}`);
-      if (ctx.pageUrl) contextParts.push(`الرابط: ${ctx.pageUrl}`);
-      if (ctx.selectedData) contextParts.push(`البيانات المحددة: ${JSON.stringify(ctx.selectedData)}`);
-      if (ctx.filters) contextParts.push(`الفلاتر النشطة: ${JSON.stringify(ctx.filters)}`);
-      if (contextParts.length > 0) {
-        enhancedMessage = `[سياق الصفحة: ${contextParts.join(" | ")}]\n\n${message}`;
-      }
+      contextParts.push(`المجال: ${domain === 'leaks' ? 'التسربات' : 'الخصوصية'}`);
+      if (ctx.route) contextParts.push(`المسار: ${ctx.route}`);
+      if (ctx.pageId) contextParts.push(`الصفحة: ${ctx.pageId}`);
+      if (ctx.userRole) contextParts.push(`الدور: ${ctx.userRole}`);
+      if (ctx.currentEntityId) contextParts.push(`الكيان: ${ctx.currentEntityType}#${ctx.currentEntityId}`);
+      if (Object.keys(ctx.activeFilters).length > 0) contextParts.push(`الفلاتر: ${JSON.stringify(ctx.activeFilters)}`);
+      if (ctx.availableActions.length > 0) contextParts.push(`الإجراءات: ${ctx.availableActions.join(', ')}`);
+      enhancedMessage = `[سياق الصفحة: ${contextParts.join(" | ")}]\n\n${message}`;
     }
 
     try {
       const startTime = Date.now();
+
+      // Send initial status (API-04)
+      sendEvent("status", { phase: "understanding", message: "جارٍ فهم السؤال..." });
 
       await rasidAIChatStreaming(
         enhancedMessage,
@@ -114,32 +132,50 @@ export function registerSSERoutes(app: Express) {
         user.id,
         {
           onToken: (text: string) => {
-            sendEvent("token", { text });
+            // Enforce naming policy on streamed tokens for leaks domain (NAME-07)
+            const safeText = domain === 'leaks' ? enforceNamingPolicy(text) : text;
+            sendEvent("token", { text: safeText });
           },
           onThinkingStep: (step: any) => {
             sendEvent("thinking", step);
           },
           onToolStart: (name: string) => {
-            sendEvent("tool", { name, status: "running" });
+            sendEvent("status", { phase: "fetching", message: "جارٍ جلب البيانات..." });
+            sendEvent("tool", { name, status: "running", domain });
           },
           onToolEnd: (name: string, result: any) => {
-            sendEvent("tool", { name, status: "completed" });
+            sendEvent("tool", { name, status: "completed", domain });
             if (result?.__type === "chart" || result?.__type === "dashboard") {
               sendEvent("toolResult", result);
             }
+            // Handle navigation suggestion (CHAT-03, PR-11)
+            if (result?.__type === "navigation") {
+              sendEvent("navigation", {
+                targetPage: result.targetPage,
+                reason: result.reason,
+                requiresConsent: true,
+              });
+            }
           },
           onFollowUp: (suggestions: string[]) => {
-            sendEvent("meta", { followUpSuggestions: suggestions });
+            sendEvent("meta", { followUpSuggestions: suggestions, domain });
           },
           onDone: (result: any) => {
             const processingTime = Date.now() - startTime;
+            // Enforce naming policy on final response (NAME-07)
+            const safeResponse = domain === 'leaks'
+              ? enforceNamingPolicy(result.response)
+              : result.response;
             sendEvent("done", {
-              response: result.response,
+              response: safeResponse,
+              domain,
+              conversationId,
               toolsUsed: result.toolsUsed,
               thinkingSteps: result.thinkingSteps,
               followUpSuggestions: result.followUpSuggestions,
               processingMeta: {
                 ...result.processingMeta,
+                domain,
                 totalProcessingTimeMs: processingTime,
                 streamedAt: new Date().toISOString(),
               },
@@ -147,7 +183,7 @@ export function registerSSERoutes(app: Express) {
             });
           },
           onError: (error: string) => {
-            sendEvent("error", { message: error, recoverable: true });
+            sendEvent("error", { message: error, recoverable: true, domain });
           },
         }
       );

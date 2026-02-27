@@ -181,6 +181,7 @@ export const aiChatMessages = mysqlTable("ai_chat_messages", {
 	tokensUsed: int(),
 	durationMs: int(),
 	model: varchar({ length: 100 }),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -194,6 +195,9 @@ export const aiChatSessions = mysqlTable("ai_chat_sessions", {
 	totalTokens: int().default(0),
 	totalDurationMs: int().default(0),
 	sessionStatus: mysqlEnum(['active','archived','exported']).default('active').notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	tags: json(),
+	summary: text(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
@@ -204,6 +208,10 @@ export const aiConversations = mysqlTable("ai_conversations", {
 	title: varchar({ length: 500 }),
 	pageContext: varchar({ length: 500 }),
 	isActive: tinyint().default(1),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	tags: json(),
+	linkedEntityType: varchar({ length: 100 }),
+	linkedEntityId: int(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
@@ -216,6 +224,7 @@ export const aiCustomCommands = mysqlTable("ai_custom_commands", {
 	parameters: json(),
 	exampleUsage: text(),
 	isEnabled: tinyint().default(1).notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -226,6 +235,9 @@ export const aiFeedback = mysqlTable("ai_feedback", {
 	rating: mysqlEnum(['good','bad']).notNull(),
 	category: mysqlEnum(['accuracy','relevance','completeness','tone','other']),
 	notes: text(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	toolName: varchar({ length: 100 }),
+	conversationId: int(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -236,6 +248,7 @@ export const aiMessages = mysqlTable("ai_messages", {
 	content: text().notNull(),
 	metadata: json(),
 	toolCalls: json(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -272,6 +285,7 @@ export const aiScenarios = mysqlTable("ai_scenarios", {
 	conditions: json(),
 	priority: int().default(0),
 	isEnabled: tinyint().default(1).notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdBy: int(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
@@ -282,6 +296,8 @@ export const aiSearchLog = mysqlTable("ai_search_log", {
 	resultsCount: int().default(0),
 	topScore: float(),
 	wasHelpful: tinyint(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	userId: int(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -293,6 +309,9 @@ export const aiTaskState = mysqlTable("ai_task_state", {
 	lastEntityType: varchar({ length: 100 }),
 	lastEntityId: int(),
 	currentStep: varchar({ length: 200 }),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	lastActivity: timestamp("last_activity", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	expiresAt: timestamp("expires_at", { mode: 'string' }),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
@@ -304,16 +323,17 @@ export const aiTrainingLogs = mysqlTable("ai_training_logs", {
 	entityId: int(),
 	details: text(),
 	performedBy: int(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
 export const aiUserSessions = mysqlTable("ai_user_sessions", {
 	id: int().autoincrement().primaryKey().notNull(),
 	userId: int().notNull(),
-	// you can use { mode: 'date' }, if you want to have Date as type for this column
 	sessionDate: date({ mode: 'string' }).notNull(),
 	visitCount: int().default(1).notNull(),
 	lastGreetingId: int(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -1205,6 +1225,7 @@ export const knowledgeBase = mysqlTable("knowledge_base", {
 	viewCount: int().default(0),
 	useCount: int().default(0),
 	createdBy: int(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 });
 
 export const knowledgeGraphEdges = mysqlTable("knowledge_graph_edges", {
@@ -2674,6 +2695,7 @@ export const aiSessionMemory = mysqlTable("ai_session_memory", {
 	memoryType: varchar("memory_type", { length: 50 }).notNull().default("context"),
 	content: text("content").notNull(),
 	importance: int("importance").notNull().default(5),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	expiresAt: timestamp("expires_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
@@ -2687,6 +2709,8 @@ export const aiToolUsage = mysqlTable("ai_tool_usage", {
 	success: tinyint("success").notNull().default(1),
 	errorMessage: text("error_message"),
 	inputSummary: text("input_summary"),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	conversationId: int("conversation_id"),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -2709,6 +2733,8 @@ export const aiConfirmationRequests = mysqlTable("ai_confirmation_requests", {
 	actionDescription: text("action_description").notNull(),
 	params: text("params"),
 	status: varchar("status", { length: 20 }).notNull().default("pending"),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	conversationId: int("conversation_id"),
 	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
 	confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
@@ -2771,6 +2797,9 @@ export const aiNavigationHistory = mysqlTable("ai_navigation_history", {
 	toPage: varchar("to_page", { length: 255 }).notNull(),
 	reason: text("reason"),
 	triggeredBy: varchar("triggered_by", { length: 50 }).notNull().default("ai"),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	conversationId: int("conversation_id"),
+	consentStatus: mysqlEnum("consent_status", ['pending','approved','denied']).default('pending').notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -2790,6 +2819,7 @@ export const aiKeywordTaskMap = mysqlTable("ai_keyword_task_map", {
 	targetAction: text("target_action").notNull(),
 	priority: int("priority").notNull().default(5),
 	isActive: tinyint("is_active").notNull().default(1),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -2806,6 +2836,7 @@ export const sseStreamSessions = mysqlTable("sse_stream_sessions", {
 
 export const aiGuideSteps = mysqlTable("ai_guide_steps", {
 	id: int().autoincrement().primaryKey().notNull(),
+	guideId: int("guide_id"),
 	stepOrder: int("step_order").notNull(),
 	titleAr: varchar("title_ar", { length: 255 }).notNull(),
 	titleEn: varchar("title_en", { length: 255 }).notNull(),
@@ -2813,7 +2844,10 @@ export const aiGuideSteps = mysqlTable("ai_guide_steps", {
 	descriptionEn: text("description_en"),
 	targetSelector: varchar("target_selector", { length: 255 }),
 	targetPage: varchar("target_page", { length: 255 }),
+	actionType: mysqlEnum("action_type", ['click','type','select','scroll','wait','highlight']).default('highlight').notNull(),
+	highlightType: mysqlEnum("highlight_type", ['border','overlay','pulse','tooltip']).default('border').notNull(),
 	category: varchar("category", { length: 50 }).notNull().default("general"),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	isActive: tinyint("is_active").notNull().default(1),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
@@ -2827,6 +2861,7 @@ export const aiAutoLearning = mysqlTable("ai_auto_learning", {
 	usageCount: int("usage_count").notNull().default(0),
 	isApproved: tinyint("is_approved").notNull().default(0),
 	source: varchar("source", { length: 50 }).notNull().default("auto"),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
 });
@@ -2930,3 +2965,256 @@ export type PrivacyScreenshot = typeof privacyScreenshots.$inferSelect;
 export type InsertPrivacyScreenshot = typeof privacyScreenshots.$inferInsert;
 export type PrivacyScanRun = typeof privacyScanRuns.$inferSelect;
 export type InsertPrivacyScanRun = typeof privacyScanRuns.$inferInsert;
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SMART MONITOR REQUIREMENTS — New Tables (DB-03 to DB-15, API-08)
+   متطلبات راصد الذكي - الجداول الجديدة
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══ DB-03: Glossary Terms (قاموس المصطلحات) ═══ */
+export const glossaryTerms = mysqlTable("glossary_terms", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	term: varchar("term", { length: 255 }).notNull(),
+	termEn: varchar("term_en", { length: 255 }),
+	synonyms: json("synonyms"),
+	definition: text("definition").notNull(),
+	definitionEn: text("definition_en"),
+	relatedPage: varchar("related_page", { length: 255 }),
+	relatedEntity: varchar("related_entity", { length: 100 }),
+	exampleQuestions: json("example_questions"),
+	isForbidden: tinyint("is_forbidden").notNull().default(0),
+	correctAlternative: varchar("correct_alternative", { length: 255 }),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("glossary_terms_domain_idx").on(table.domain),
+	index("glossary_terms_term_idx").on(table.term),
+]);
+export type GlossaryTerm = typeof glossaryTerms.$inferSelect;
+export type InsertGlossaryTerm = typeof glossaryTerms.$inferInsert;
+
+/* ═══ DB-04: Page Descriptors (أوصاف الصفحات) ═══ */
+export const pageDescriptors = mysqlTable("page_descriptors", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	pageId: varchar("page_id", { length: 100 }).notNull(),
+	route: varchar("route", { length: 500 }).notNull(),
+	titleAr: varchar("title_ar", { length: 255 }).notNull(),
+	titleEn: varchar("title_en", { length: 255 }),
+	purpose: text("purpose").notNull(),
+	purposeEn: text("purpose_en"),
+	mainElements: json("main_elements"),
+	commonTasks: json("common_tasks"),
+	availableActions: json("available_actions"),
+	drillthroughLinks: json("drillthrough_links"),
+	suggestedQuestions: json("suggested_questions"),
+	roleBasedQuestions: json("role_based_questions"),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("page_descriptors_domain_idx").on(table.domain),
+	index("page_descriptors_pageId_idx").on(table.pageId),
+]);
+export type PageDescriptor = typeof pageDescriptors.$inferSelect;
+export type InsertPageDescriptor = typeof pageDescriptors.$inferInsert;
+
+/* ═══ DB-05: Guide Catalog (كتالوج الأدلة) ═══ */
+export const guideCatalog = mysqlTable("guide_catalog", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	titleAr: varchar("title_ar", { length: 255 }).notNull(),
+	titleEn: varchar("title_en", { length: 255 }),
+	descriptionAr: text("description_ar"),
+	descriptionEn: text("description_en"),
+	objective: text("objective"),
+	category: varchar("category", { length: 100 }).notNull().default("general"),
+	visibilityRoles: json("visibility_roles"),
+	visibilityConditions: json("visibility_conditions"),
+	stepCount: int("step_count").notNull().default(0),
+	estimatedMinutes: int("estimated_minutes"),
+	sortOrder: int("sort_order").notNull().default(0),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("guide_catalog_domain_idx").on(table.domain),
+]);
+export type GuideCatalogEntry = typeof guideCatalog.$inferSelect;
+export type InsertGuideCatalogEntry = typeof guideCatalog.$inferInsert;
+
+/* ═══ DB-07: Guide Sessions (جلسات الدليل) ═══ */
+export const guideSessions = mysqlTable("guide_sessions", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	guideId: int("guide_id").notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	currentStepOrder: int("current_step_order").notNull().default(1),
+	totalSteps: int("total_steps").notNull(),
+	status: mysqlEnum("status", ['active','completed','abandoned','paused']).default('active').notNull(),
+	startedAt: timestamp("started_at", { mode: 'string' }).defaultNow().notNull(),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	lastActivityAt: timestamp("last_activity_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("guide_sessions_user_idx").on(table.userId),
+	index("guide_sessions_domain_idx").on(table.domain),
+]);
+export type GuideSession = typeof guideSessions.$inferSelect;
+export type InsertGuideSession = typeof guideSessions.$inferInsert;
+
+/* ═══ DB-10: Session Summaries (ملخصات الجلسات) ═══ */
+export const sessionSummaries = mysqlTable("session_summaries", {
+	id: int().autoincrement().primaryKey().notNull(),
+	userId: int("user_id").notNull(),
+	sessionId: varchar("session_id", { length: 64 }).notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	summary: text("summary").notNull(),
+	keyTopics: json("key_topics"),
+	entitiesDiscussed: json("entities_discussed"),
+	actionsPerformed: json("actions_performed"),
+	messageCount: int("message_count").notNull().default(0),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("session_summaries_user_domain_idx").on(table.userId, table.domain),
+]);
+export type SessionSummary = typeof sessionSummaries.$inferSelect;
+export type InsertSessionSummary = typeof sessionSummaries.$inferInsert;
+
+/* ═══ DB-13: Letter Templates (قوالب الرسائل الرسمية) ═══ */
+export const letterTemplates = mysqlTable("letter_templates", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	templateType: mysqlEnum("template_type", ['notification','warning','compliance','report','followup','response','custom']).notNull(),
+	titleAr: varchar("title_ar", { length: 255 }).notNull(),
+	titleEn: varchar("title_en", { length: 255 }),
+	contentAr: text("content_ar").notNull(),
+	contentEn: text("content_en"),
+	placeholders: json("placeholders"),
+	exampleInput: json("example_input"),
+	exampleOutput: text("example_output"),
+	toneLevel: mysqlEnum("tone_level", ['brief','balanced','formal']).default('balanced').notNull(),
+	version: int("version").notNull().default(1),
+	parentId: int("parent_id"),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("letter_templates_domain_idx").on(table.domain),
+	index("letter_templates_type_idx").on(table.templateType),
+]);
+export type LetterTemplate = typeof letterTemplates.$inferSelect;
+export type InsertLetterTemplate = typeof letterTemplates.$inferInsert;
+
+/* ═══ DB-14: System Events (أحداث النظام) ═══ */
+export const systemEvents = mysqlTable("system_events", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).default('leaks').notNull(),
+	eventType: mysqlEnum("event_type", [
+		'page_created','page_updated','page_deleted',
+		'template_created','template_updated','template_deleted',
+		'column_added','column_removed','column_updated',
+		'category_created','category_updated','category_deleted',
+		'setting_changed','requirement_added','requirement_updated',
+		'knowledge_refreshed','glossary_updated','guide_updated',
+	]).notNull(),
+	entityType: varchar("entity_type", { length: 100 }).notNull(),
+	entityId: varchar("entity_id", { length: 100 }),
+	entityName: varchar("entity_name", { length: 500 }),
+	oldValue: json("old_value"),
+	newValue: json("new_value"),
+	triggeredBy: int("triggered_by"),
+	isProcessed: tinyint("is_processed").notNull().default(0),
+	processedAt: timestamp("processed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("system_events_domain_idx").on(table.domain),
+	index("system_events_type_idx").on(table.eventType),
+	index("system_events_processed_idx").on(table.isProcessed),
+]);
+export type SystemEvent = typeof systemEvents.$inferSelect;
+export type InsertSystemEvent = typeof systemEvents.$inferInsert;
+
+/* ═══ DB-15: Knowledge Refresh Status (حالة تحديث المعرفة) ═══ */
+export const knowledgeRefreshStatus = mysqlTable("knowledge_refresh_status", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	sourceName: varchar("source_name", { length: 255 }).notNull(),
+	sourceType: mysqlEnum("source_type", ['glossary','page_descriptors','knowledge_base','training_docs','rag_index','guide_catalog']).notNull(),
+	status: mysqlEnum("status", ['idle','running','completed','error']).default('idle').notNull(),
+	lastRunAt: timestamp("last_run_at", { mode: 'string' }),
+	lastSuccessAt: timestamp("last_success_at", { mode: 'string' }),
+	recordsProcessed: int("records_processed").default(0),
+	errorMessage: text("error_message"),
+	nextScheduledAt: timestamp("next_scheduled_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("knowledge_refresh_domain_idx").on(table.domain),
+]);
+export type KnowledgeRefreshStatusEntry = typeof knowledgeRefreshStatus.$inferSelect;
+export type InsertKnowledgeRefreshStatusEntry = typeof knowledgeRefreshStatus.$inferInsert;
+
+/* ═══ API-08: Action Runs (سجل الإجراءات التنفيذية) ═══ */
+export const actionRuns = mysqlTable("action_runs", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	userId: int("user_id").notNull(),
+	conversationId: int("conversation_id"),
+	toolName: varchar("tool_name", { length: 100 }).notNull(),
+	actionType: mysqlEnum("action_type", ['create','update','delete','export','import','scan','notify']).notNull(),
+	status: mysqlEnum("status", ['planned','previewed','confirmed','executing','completed','failed','rolled_back']).default('planned').notNull(),
+	planDescription: text("plan_description"),
+	previewData: json("preview_data"),
+	inputParams: json("input_params"),
+	resultData: json("result_data"),
+	rollbackData: json("rollback_data"),
+	isRollbackable: tinyint("is_rollbackable").notNull().default(0),
+	confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	rolledBackAt: timestamp("rolled_back_at", { mode: 'string' }),
+	rolledBackBy: int("rolled_back_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("action_runs_domain_idx").on(table.domain),
+	index("action_runs_user_idx").on(table.userId),
+	index("action_runs_conversation_idx").on(table.conversationId),
+]);
+export type ActionRun = typeof actionRuns.$inferSelect;
+export type InsertActionRun = typeof actionRuns.$inferInsert;
+
+/* ═══ Evaluation Sets (مجموعات التقييم لكل مجال) ═══ */
+export const aiEvaluationSets = mysqlTable("ai_evaluation_sets", {
+	id: int().autoincrement().primaryKey().notNull(),
+	domain: mysqlEnum("domain", ['leaks','privacy']).notNull(),
+	question: text("question").notNull(),
+	expectedAnswer: text("expected_answer").notNull(),
+	expectedTools: json("expected_tools"),
+	category: varchar("category", { length: 100 }),
+	difficulty: mysqlEnum("difficulty", ['easy','medium','hard']).default('medium').notNull(),
+	lastTestedAt: timestamp("last_tested_at", { mode: 'string' }),
+	lastResult: mysqlEnum("last_result", ['pass','fail','partial']),
+	isActive: tinyint("is_active").notNull().default(1),
+	createdBy: int("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+},
+(table) => [
+	index("ai_evaluation_sets_domain_idx").on(table.domain),
+]);
+export type AiEvaluationSet = typeof aiEvaluationSets.$inferSelect;
+export type InsertAiEvaluationSet = typeof aiEvaluationSets.$inferInsert;

@@ -38,6 +38,7 @@ import { cmsRouter } from "./cmsRouter";
 import { controlPanelRouter } from "./controlPanelRouter";
 import { settingsRouter } from "./settingsRouter";
 import { operationsRouter } from "./operationsRouter";
+import { smartMonitorRouter } from "./smartMonitorRouter";
 import {
   aiChatSessions, aiChatMessages, aiRatings, aiSearchLog,
   aiScenarios, aiCustomCommands, knowledgeBase,
@@ -94,6 +95,7 @@ export const appRouter = router({
   controlPanel: controlPanelRouter,
   adminSettings: settingsRouter,
   operations: operationsRouter,
+  smartMonitor: smartMonitorRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(async ({ ctx }) => {

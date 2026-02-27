@@ -161,9 +161,9 @@ async function createFullPlatformZip(jobId: string): Promise<{ filePath: string;
   totalRecords += leaksData.length;
   const leaksDir = path.join(tempDir, "01_حالات_الرصد");
   fs.mkdirSync(leaksDir, { recursive: true });
-  writeJson(path.join(leaksDir, "all_incidents.json"), leaksData);
-  writeCsv(path.join(leaksDir, "all_incidents.csv"), leaksData);
-  await writeXlsx(path.join(leaksDir, "all_incidents.xlsx"), leaksData, "حالات الرصد");
+  writeJson(path.join(leaksDir, "monitoring_cases.json"), leaksData);
+  writeCsv(path.join(leaksDir, "monitoring_cases.csv"), leaksData);
+  await writeXlsx(path.join(leaksDir, "monitoring_cases.xlsx"), leaksData, "حالات الرصد");
 
   // 2. Users
   const usersData = await fetchUsers();
