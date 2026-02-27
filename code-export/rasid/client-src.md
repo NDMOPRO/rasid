@@ -1,0 +1,2560 @@
+# rasid - client-src
+
+> Auto-extracted source code documentation
+
+---
+
+## `client/src/App.tsx`
+
+```tsx
+import { Suspense, lazy, useState, useCallback } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Route, Switch } from "wouter";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { FilterProvider } from "./contexts/FilterContext";
+import { PlatformSettingsProvider } from "./contexts/PlatformSettingsContext";
+import DashboardLayout from "./components/DashboardLayout";
+import TopProgressBar from "./components/TopProgressBar";
+import RasidLoadingScreen from "./components/RasidLoadingScreen";
+import { PageSkeleton } from "./components/Skeletons";
+import CommandPalette from "./components/CommandPalette";
+import ScrollToTop from "./components/ScrollToTop";
+
+// Lazy-loaded pages
+const Home = lazy(() => import("./pages/Home"));
+const Sites = lazy(() => import("./pages/Sites"));
+const SiteDetail = lazy(() => import("./pages/SiteDetail"));
+const Clauses = lazy(() => import("./pages/Clauses"));
+const ClauseDetail = lazy(() => import("./pages/ClauseDetail"));
+const Scan = lazy(() => import("./pages/Scan"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Letters = lazy(() => import("./pages/Letters"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Members = lazy(() => import("./pages/Members"));
+const Login = lazy(() => import("./pages/Login"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const ActivityLogs = lazy(() => import("./pages/ActivityLogs"));
+const LeadershipDashboard = lazy(() => import("./pages/LeadershipDashboard"));
+const ScanLibrary = lazy(() => import("./pages/ScanLibrary"));
+const MobileApps = lazy(() => import("./pages/MobileApps"));
+const BatchScan = lazy(() => import("./pages/BatchScan"));
+const Cases = lazy(() => import("./pages/Cases"));
+const MessageTemplates = lazy(() => import("./pages/MessageTemplates"));
+const ScanSchedules = lazy(() => import("./pages/ScanSchedules"));
+const RoleDashboard = lazy(() => import("./pages/RoleDashboard"));
+const EscalationRules = lazy(() => import("./pages/EscalationRules"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const ChangeDetection = lazy(() => import("./pages/ChangeDetection"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const AdvancedAnalytics = lazy(() => import("./pages/AdvancedAnalytics"));
+const ApiKeys = lazy(() => import("./pages/ApiKeys"));
+const SystemHealth = lazy(() => import("./pages/SystemHealth"));
+const ScheduledReports = lazy(() => import("./pages/ScheduledReports"));
+const ComplianceComparison = lazy(() => import("./pages/ComplianceComparison"));
+const CustomReports = lazy(() => import("./pages/CustomReports"));
+const KpiDashboard = lazy(() => import("./pages/KpiDashboard"));
+const SmartAlerts = lazy(() => import("./pages/SmartAlerts"));
+const AdvancedSearch = lazy(() => import("./pages/AdvancedSearch"));
+const Profile = lazy(() => import("./pages/Profile"));
+const TimeComparison = lazy(() => import("./pages/TimeComparison"));
+const MyCustomDashboard = lazy(() => import("./pages/MyDashboard"));
+const VisualAlerts = lazy(() => import("./pages/VisualAlerts"));
+const SectorComparison = lazy(() => import("./pages/SectorComparison"));
+const EmailNotifications = lazy(() => import("./pages/EmailNotifications"));
+const PdfReports = lazy(() => import("./pages/PdfReports"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const ComplianceHeatmap = lazy(() => import("./pages/ComplianceHeatmap"));
+const RealTimeDashboard = lazy(() => import("./pages/RealTimeDashboard"));
+const ExecutiveReport = lazy(() => import("./pages/ExecutiveReport"));
+const AdvancedScan = lazy(() => import("./pages/AdvancedScan"));
+const ScanExecution = lazy(() => import("./pages/ScanExecution"));
+const ScanHistory = lazy(() => import("./pages/ScanHistory"));
+const ExportData = lazy(() => import("./pages/ExportData"));
+const ImprovementTracker = lazy(() => import("./pages/ImprovementTracker"));
+const InteractiveComparison = lazy(() => import("./pages/InteractiveComparison"));
+const EmailManagement = lazy(() => import("./pages/EmailManagement"));
+const VerifyDocument = lazy(() => import("./pages/VerifyDocument"));
+const PublicVerify = lazy(() => import("./pages/PublicVerify"));
+const DocumentsRegistry = lazy(() => import("./pages/DocumentsRegistry"));
+const DocumentStats = lazy(() => import("./pages/DocumentStats"));
+const PresentationMode = lazy(() => import("./pages/PresentationMode"));
+const PresentationBuilder = lazy(() => import("./pages/PresentationBuilder"));
+const SmartRasid = lazy(() => import("./pages/SmartRasid"));
+const ScenarioManagement = lazy(() => import("./pages/ScenarioManagement"));
+const TrainingCenter = lazy(() => import("./pages/TrainingCenter"));
+const AiManagement = lazy(() => import("./pages/AiManagement"));
+const BulkAnalysis = lazy(() => import("./pages/BulkAnalysis"));
+const DeepScan = lazy(() => import("./pages/DeepScan"));
+const UsageAnalytics = lazy(() => import("./pages/UsageAnalytics"));
+const SuperAdminPanel = lazy(() => import("./pages/SuperAdminPanel"));
+const StrategyCoverage = lazy(() => import("./pages/StrategyCoverage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Hub Pages — Platform Separation
+const BreachDashboardsHub = lazy(() => import("./pages/BreachDashboardsHub"));
+const PrivacyDashboardsHub = lazy(() => import("./pages/PrivacyDashboardsHub"));
+const BreachOperationsHub = lazy(() => import("./pages/BreachOperationsHub"));
+const PrivacyOperationsHub = lazy(() => import("./pages/PrivacyOperationsHub"));
+
+// Import Pages
+const BreachImport = lazy(() => import("./pages/BreachImport"));
+const PrivacyImport = lazy(() => import("./pages/PrivacyImport"));
+
+// Platform 2 unique pages
+const TelegramMonitor = lazy(() => import("./pages/TelegramMonitor"));
+const DarkWebMonitor = lazy(() => import("./pages/DarkWebMonitor"));
+const PasteSites = lazy(() => import("./pages/PasteSites"));
+const PIIClassifier = lazy(() => import("./pages/PIIClassifier"));
+const Leaks = lazy(() => import("./pages/Leaks"));
+const ReportApproval = lazy(() => import("./pages/ReportApproval"));
+const MonitoringJobs = lazy(() => import("./pages/MonitoringJobs"));
+const ThreatMap = lazy(() => import("./pages/ThreatMap"));
+const AlertChannels = lazy(() => import("./pages/AlertChannels"));
+const DataRetention = lazy(() => import("./pages/DataRetention"));
+const AuditLog = lazy(() => import("./pages/AuditLog"));
+const ThreatRules = lazy(() => import("./pages/ThreatRules"));
+const EvidenceChain = lazy(() => import("./pages/EvidenceChain"));
+const SellerProfiles = lazy(() => import("./pages/SellerProfiles"));
+const OsintTools = lazy(() => import("./pages/OsintTools"));
+const FeedbackAccuracy = lazy(() => import("./pages/FeedbackAccuracy"));
+const KnowledgeGraph = lazy(() => import("./pages/KnowledgeGraph"));
+const PIIAtlas = lazy(() => import("./pages/PIIAtlas"));
+const UserManagement = lazy(() => import("./pages/UserManagement"));
+const LiveScan = lazy(() => import("./pages/LiveScan"));
+const KnowledgeBaseAdmin = lazy(() => import("./pages/KnowledgeBaseAdmin"));
+const PersonalityScenarios = lazy(() => import("./pages/PersonalityScenarios"));
+const NationalOverview = lazy(() => import("./pages/NationalOverview"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const LeakAnatomy = lazy(() => import("./pages/LeakAnatomy"));
+const SectorAnalysis = lazy(() => import("./pages/SectorAnalysis"));
+const LeakTimeline = lazy(() => import("./pages/LeakTimeline"));
+const ThreatActorsAnalysis = lazy(() => import("./pages/ThreatActorsAnalysis"));
+const ImpactAssessment = lazy(() => import("./pages/ImpactAssessment"));
+const SourceIntelligence = lazy(() => import("./pages/SourceIntelligence"));
+const GeoAnalysis = lazy(() => import("./pages/GeoAnalysis"));
+const IncidentCompare = lazy(() => import("./pages/IncidentCompare"));
+const PdplCompliance = lazy(() => import("./pages/PdplCompliance"));
+const CampaignTracker = lazy(() => import("./pages/CampaignTracker"));
+const RecommendationsHub = lazy(() => import("./pages/RecommendationsHub"));
+const ExecutiveBrief = lazy(() => import("./pages/ExecutiveBrief"));
+const IncidentsRegistry = lazy(() => import("./pages/IncidentsRegistry"));
+const PlatformLogin = lazy(() => import("./pages/PlatformLogin"));
+
+// Admin sub-pages
+const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
+const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
+const AdminGroups = lazy(() => import("./pages/admin/AdminGroups"));
+const AdminFeatureFlags = lazy(() => import("./pages/admin/AdminFeatureFlags"));
+const AdminTheme = lazy(() => import("./pages/admin/AdminTheme"));
+const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminControlPanel = lazy(() => import("./pages/AdminControlPanel"));
+const AdminCMSPage = lazy(() => import("./pages/AdminCMS"));
+const AdminOperationsPage = lazy(() => import("./pages/AdminOperations"));
+const AdminSettingsPage = lazy(() => import("./pages/AdminSettings"));
+
+// Additional missing pages
+const PrivacyDashboard = lazy(() => import("./pages/PrivacyDashboard"));
+const PrivacySites = lazy(() => import("./pages/PrivacySites"));
+const IncidentsDashboard = lazy(() => import("./pages/IncidentsDashboard"));
+const IncidentsList = lazy(() => import("./pages/IncidentsList"));
+const IncidentDetails = lazy(() => import("./pages/IncidentDetails"));
+const FollowupsList = lazy(() => import("./pages/FollowupsList"));
+const Overview = lazy(() => import("./pages/Overview"));
+const ReportsList = lazy(() => import("./pages/ReportsList"));
+const SiteDetails = lazy(() => import("./pages/SiteDetails"));
+
+// Dynamic custom pages
+const DynamicDashboard = lazy(() => import("./pages/DynamicDashboard"));
+const DynamicTable = lazy(() => import("./pages/DynamicTable"));
+const DynamicReport = lazy(() => import("./pages/DynamicReport"));
+
+function Router() {
+  return (
+    <DashboardLayout>
+      <ScrollToTop />
+      <Suspense fallback={<PageSkeleton />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/leadership" component={LeadershipDashboard} />
+          <Route path="/scan-library" component={ScanLibrary} />
+          <Route path="/sites" component={Sites} />
+          <Route path="/sites/:id" component={SiteDetail} />
+          <Route path="/clauses" component={Clauses} />
+          <Route path="/clauses/:num" component={ClauseDetail} />
+          <Route path="/scan" component={Scan} />
+          <Route path="/reports" component={Reports} />
+          <Route path="/letters" component={Letters} />
+          <Route path="/notifications" component={Notifications} />
+          <Route path="/members" component={Members} />
+          <Route path="/change-password" component={ChangePassword} />
+          <Route path="/activity-logs" component={ActivityLogs} />
+          <Route path="/mobile-apps" component={MobileApps} />
+          <Route path="/batch-scan" component={BatchScan} />
+          <Route path="/cases" component={Cases} />
+          <Route path="/message-templates" component={MessageTemplates} />
+          <Route path="/scan-schedules" component={ScanSchedules} />
+          <Route path="/my-dashboard" component={RoleDashboard} />
+          <Route path="/escalation" component={EscalationRules} />
+          <Route path="/settings" component={SettingsPage} />
+          <Route path="/change-detection" component={ChangeDetection} />
+          <Route path="/advanced-analytics" component={AdvancedAnalytics} />
+          <Route path="/api-keys" component={ApiKeys} />
+          <Route path="/system-health" component={SystemHealth} />
+          <Route path="/scheduled-reports" component={ScheduledReports} />
+          <Route path="/compliance-comparison" component={ComplianceComparison} />
+          <Route path="/custom-reports" component={CustomReports} />
+          <Route path="/kpi-dashboard" component={KpiDashboard} />
+          <Route path="/smart-alerts" component={SmartAlerts} />
+          <Route path="/advanced-search" component={AdvancedSearch} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/time-comparison" component={TimeComparison} />
+          <Route path="/my-custom-dashboard" component={MyCustomDashboard} />
+          <Route path="/visual-alerts" component={VisualAlerts} />
+          <Route path="/sector-comparison" component={SectorComparison} />
+          <Route path="/email-notifications" component={EmailNotifications} />
+          <Route path="/pdf-reports" component={PdfReports} />
+          <Route path="/admin-panel" component={AdminPanel} />
+          <Route path="/compliance-heatmap" component={ComplianceHeatmap} />
+          <Route path="/real-time" component={RealTimeDashboard} />
+          <Route path="/executive-report" component={ExecutiveReport} />
+          <Route path="/advanced-scan" component={AdvancedScan} />
+          <Route path="/scan-history" component={ScanHistory} />
+          <Route path="/export-data" component={ExportData} />
+          <Route path="/improvement-tracker" component={ImprovementTracker} />
+          <Route path="/interactive-comparison" component={InteractiveComparison} />
+          <Route path="/email-management" component={EmailManagement} />
+          <Route path="/verify/:code?" component={VerifyDocument} />
+          <Route path="/documents-registry" component={DocumentsRegistry} />
+          <Route path="/document-stats" component={DocumentStats} />
+          <Route path="/presentation" component={PresentationMode} />
+          <Route path="/presentation-builder" component={PresentationBuilder} />
+          <Route path="/presentation-builder/:id" component={PresentationBuilder} />
+          <Route path="/smart-rasid" component={SmartRasid} />
+          <Route path="/scenario-management" component={ScenarioManagement} />
+          <Route path="/training-center" component={TrainingCenter} />
+          <Route path="/ai-management" component={AiManagement} />
+          <Route path="/bulk-analysis" component={BulkAnalysis} />
+          <Route path="/deep-scan" component={DeepScan} />
+          <Route path="/usage-analytics" component={UsageAnalytics} />
+          <Route path="/super-admin" component={SuperAdminPanel} />
+          <Route path="/strategy-coverage" component={StrategyCoverage} />
+          {/* Platform 2 unique routes */}
+          <Route path="/telegram" component={TelegramMonitor} />
+          <Route path="/darkweb" component={DarkWebMonitor} />
+          <Route path="/paste-sites" component={PasteSites} />
+          <Route path="/pii-classifier" component={PIIClassifier} />
+          <Route path="/leaks" component={Leaks} />
+          <Route path="/report-approval" component={ReportApproval} />
+          <Route path="/monitoring-jobs" component={MonitoringJobs} />
+          <Route path="/threat-map" component={ThreatMap} />
+          <Route path="/alert-channels" component={AlertChannels} />
+          <Route path="/data-retention" component={DataRetention} />
+          <Route path="/audit-log" component={AuditLog} />
+          <Route path="/threat-rules" component={ThreatRules} />
+          <Route path="/evidence-chain" component={EvidenceChain} />
+          <Route path="/seller-profiles" component={SellerProfiles} />
+          <Route path="/osint-tools" component={OsintTools} />
+          <Route path="/feedback-accuracy" component={FeedbackAccuracy} />
+          <Route path="/knowledge-graph" component={KnowledgeGraph} />
+          <Route path="/pii-atlas" component={PIIAtlas} />
+          <Route path="/user-management" component={UserManagement} />
+          <Route path="/live-scan" component={LiveScan} />
+          <Route path="/knowledge-base" component={KnowledgeBaseAdmin} />
+          <Route path="/personality-scenarios" component={PersonalityScenarios} />
+          <Route path="/national-overview" component={Dashboard} />
+          <Route path="/leak-anatomy" component={LeakAnatomy} />
+          <Route path="/sector-analysis" component={SectorAnalysis} />
+          <Route path="/leak-timeline" component={LeakTimeline} />
+          <Route path="/threat-actors-analysis" component={ThreatActorsAnalysis} />
+          <Route path="/impact-assessment" component={ImpactAssessment} />
+          <Route path="/source-intelligence" component={SourceIntelligence} />
+          <Route path="/geo-analysis" component={GeoAnalysis} />
+          <Route path="/incident-compare" component={IncidentCompare} />
+          <Route path="/pdpl-compliance" component={PdplCompliance} />
+          <Route path="/campaign-tracker" component={CampaignTracker} />
+          <Route path="/recommendations" component={RecommendationsHub} />
+          <Route path="/executive-brief" component={ExecutiveBrief} />
+          <Route path="/incidents-registry" component={IncidentsRegistry} />
+          {/* Admin sub-routes */}
+          <Route path="/admin" component={AdminOverview} />
+          <Route path="/admin/roles" component={AdminRoles} />
+          <Route path="/admin/groups" component={AdminGroups} />
+          <Route path="/admin/feature-flags" component={AdminFeatureFlags} />
+          <Route path="/admin/theme" component={AdminTheme} />
+          <Route path="/admin/menus" component={AdminMenus} />
+          <Route path="/admin/audit-log" component={AdminAuditLog} />
+          <Route path="/admin/control" component={AdminControlPanel} />
+          <Route path="/admin/cms" component={AdminCMSPage} />
+          <Route path="/admin/operations" component={AdminOperationsPage} />
+          <Route path="/admin/settings" component={AdminSettingsPage} />
+          {/* New structured routes per spec */}
+          <Route path="/app/overview" component={Overview} />
+          <Route path="/app/privacy" component={PrivacyDashboard} />
+          <Route path="/app/privacy/sites" component={PrivacySites} />
+          <Route path="/app/privacy/sites/:siteId" component={SiteDetails} />
+          <Route path="/app/incidents" component={IncidentsDashboard} />
+          <Route path="/app/incidents/list" component={IncidentsList} />
+          <Route path="/app/incidents/:incidentId" component={IncidentDetails} />
+          <Route path="/app/my" component={MyCustomDashboard} />
+          <Route path="/app/followups" component={FollowupsList} />
+          <Route path="/app/reports" component={ReportsList} />
+          <Route path="/recommendations-hub" component={RecommendationsHub} />
+          {/* Hub Pages — Platform Separation */}
+          <Route path="/breach-dashboards" component={BreachDashboardsHub} />
+          <Route path="/privacy-dashboards" component={PrivacyDashboardsHub} />
+          <Route path="/breach-operations" component={BreachOperationsHub} />
+          <Route path="/privacy-operations" component={PrivacyOperationsHub} />
+          {/* Import Pages */}
+          <Route path="/breach-import" component={BreachImport} />
+          <Route path="/privacy-import" component={PrivacyImport} />
+          {/* Dynamic Custom Pages */}
+          <Route path="/custom/dashboard/:id" component={DynamicDashboard} />
+          <Route path="/custom/table/:id" component={DynamicTable} />
+          <Route path="/custom/report/:id" component={DynamicReport} />
+          <Route path="/404" component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+    </DashboardLayout>
+  );
+}
+
+function App() {
+  const [appReady, setAppReady] = useState(false);
+  const handleLoadingFinish = useCallback(() => setAppReady(true), []);
+
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" switchable={true}>
+        <FilterProvider>
+        <PlatformSettingsProvider>
+        <TooltipProvider>
+          {/* Premium Loading Screen with Rasid Character */}
+          <RasidLoadingScreen show={!appReady} onFinish={handleLoadingFinish} minDuration={2200} />
+          <TopProgressBar />
+          <Toaster />
+          <CommandPalette />
+          <Switch>
+            <Route path="/login">
+              <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+                <Login />
+              </Suspense>
+            </Route>
+            <Route path="/forgot-password">
+              <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+                <ForgotPassword />
+              </Suspense>
+            </Route>
+            <Route path="/scan-execution/:jobId">
+              <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+                <ScanExecution />
+              </Suspense>
+            </Route>
+            <Route path="/public-verify">
+              <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+                <PublicVerify />
+              </Suspense>
+            </Route>
+            <Route>
+              <Router />
+            </Route>
+          </Switch>
+        </TooltipProvider>
+        </PlatformSettingsProvider>
+        </FilterProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
+
+```
+
+---
+
+## `client/src/const.ts`
+
+```typescript
+export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+
+// Local login — always redirect to /login page (no Manus OAuth)
+export const getLoginUrl = (returnPath?: string) => {
+  if (returnPath) {
+    return `/login?returnTo=${encodeURIComponent(returnPath)}`;
+  }
+  return "/login";
+};
+
+```
+
+---
+
+## `client/src/index.css`
+
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
+@import './styles/design-tokens.css';
+@import './styles/platform-theme.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: 'Tajawal', 'Cairo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  /* SDAIA Official Glow Colors */
+  --color-cyan-glow: #3DB1AC;
+  --color-amber-glow: #FFC107;
+  --color-red-glow: #EB3D63;
+  --color-emerald-glow: #10B981;
+  --color-violet-glow: #6459A7;
+  --color-purple-glow: #273470;
+}
+
+/* ═══════════════════════════════════════════════════
+   SDAIA OFFICIAL COLOR SYSTEM — Light Theme (Premium)
+   Matching design.rasid.vip quality
+   ═══════════════════════════════════════════════════ */
+:root {
+  --radius: 0.625rem;
+  /* ═══ LIGHT THEME — Exact 1:1 match with design.rasid.vip ═══ */
+  --background: #f0f3f8;
+  --foreground: #1c2833;
+  --card: #fff;
+  --card-foreground: #1c2833;
+  --popover: #fff;
+  --popover-foreground: #1c2833;
+  --primary: #1e3a8a;
+  --primary-foreground: #fff;
+  --secondary: #3b82f6;
+  --secondary-foreground: #fff;
+  --muted: #edf0f7;
+  --muted-foreground: #5a6478;
+  --accent: #2563eb;
+  --accent-foreground: #fff;
+  --destructive: #eb3d63;
+  --destructive-foreground: #fff;
+  --border: #d8dce8;
+  --input: #e0e3ee;
+  --ring: #1e3a8a;
+  /* Chart Colors */
+  --chart-1: #3DB1AC;
+  --chart-2: #6459A7;
+  --chart-3: #FFC107;
+  --chart-4: #EB3D63;
+  --chart-5: #1e3a8a;
+  /* ═══ Sidebar Light — WHITE (matching design.rasid.vip light sidebar) ═══ */
+  --sidebar: rgba(255, 255, 255, 0.97);
+  --sidebar-foreground: #1c2833;
+  --sidebar-primary: #1e3a8a;
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: rgba(39, 52, 112, 0.08);
+  --sidebar-accent-foreground: #1e3a8a;
+  --sidebar-border: rgba(39, 52, 112, 0.06);
+  --sidebar-ring: #1e3a8a;
+  /* Glassmorphism Light — Subtle as design.rasid.vip */
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(39, 52, 112, 0.08);
+  --glass-shadow: rgba(39, 52, 112, 0.05) 0px 2px 8px 0px, rgba(39, 52, 112, 0.06) 0px 8px 32px 0px, rgba(39, 52, 112, 0.03) 0px 1px 2px 0px, rgb(255, 255, 255) 0px 1px 0px 0px inset;
+  --glass-blur: blur(20px);
+  /* Glow Light */
+  --glow-primary: rgba(30, 58, 138, 0.12);
+  --glow-accent: rgba(37, 99, 235, 0.12);
+  --glow-danger: rgba(235, 61, 99, 0.12);
+}
+
+/* ═══════════════════════════════════════════════════
+   SDAIA OFFICIAL COLOR SYSTEM — Dark Theme
+   ═══════════════════════════════════════════════════ */
+.dark {
+  --background: #0D1529;
+  --foreground: #E1DEF5;
+  --card: #1A2550;
+  --card-foreground: #E1DEF5;
+  --popover: #1A2550;
+  --popover-foreground: #E1DEF5;
+  /* Teal primary in dark mode per SDAIA spec */
+  --primary: #3DB1AC;
+  --primary-foreground: #FFFFFF;
+  --secondary: #6459A7;
+  --secondary-foreground: #FFFFFF;
+  --muted: rgba(26, 37, 80, 0.5);
+  --muted-foreground: rgba(225, 222, 245, 0.5);
+  --accent: #3DB1AC;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EB3D63;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(61, 177, 172, 0.12);
+  --input: rgba(26, 37, 80, 0.5);
+  --ring: #3DB1AC;
+  /* SDAIA Chart Colors */
+  --chart-1: #3DB1AC;
+  --chart-2: #6459A7;
+  --chart-3: #FFC107;
+  --chart-4: #EB3D63;
+  --chart-5: #273470;
+  /* Sidebar Dark */
+  --sidebar: rgba(13, 21, 41, 0.95);
+  --sidebar-foreground: #E1DEF5;
+  --sidebar-primary: #3DB1AC;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(61, 177, 172, 0.12);
+  --sidebar-accent-foreground: #E1DEF5;
+  --sidebar-border: rgba(61, 177, 172, 0.08);
+  --sidebar-ring: #3DB1AC;
+  /* Glassmorphism Dark */
+  --glass-bg: rgba(39, 52, 112, 0.25);
+  --glass-border: rgba(61, 177, 172, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(20px);
+  /* Glow Dark */
+  --glow-primary: rgba(61, 177, 172, 0.4);
+  --glow-accent: rgba(61, 177, 172, 0.3);
+  --glow-danger: rgba(235, 61, 99, 0.3);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    direction: rtl;
+    font-size: 15px;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+  /* ═══ Mobile Responsive Global Fixes ═══ */
+  @media (max-width: 1024px) {
+    html, body, #root {
+      overflow-x: hidden !important;
+      max-width: 100vw !important;
+      width: 100% !important;
+    }
+    body {
+      overflow-y: auto !important;
+      min-height: 100vh;
+      min-height: 100dvh;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Make tables scrollable on mobile */
+    table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+    }
+    thead, tbody, tfoot, tr, th, td {
+      max-width: 100vw;
+    }
+    /* Fix text overflow on mobile */
+    h1, h2, h3, h4, h5, h6, p, span, a, label {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    /* Prevent any element from exceeding viewport */
+    * {
+      max-width: 100vw;
+    }
+    /* Fix fixed/absolute elements on mobile */
+    .fixed, [class*="fixed"] {
+      max-width: 100vw;
+    }
+  }
+  @media (max-width: 768px) {
+    /* Reduce padding on mobile */
+    .p-6 { padding: 0.75rem !important; }
+    .p-8 { padding: 1rem !important; }
+    .px-6 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .gap-6 { gap: 1rem !important; }
+    .gap-8 { gap: 1.25rem !important; }
+
+    /* ═══ Mobile Touch Targets ═══ */
+    button:not(.h-7):not(.h-6):not(.w-7):not(.w-6),
+    [role="button"]:not(.h-7):not(.h-6) {
+      min-height: 36px;
+    }
+
+    /* ═══ TabsList horizontal scroll on mobile ═══ */
+    [role="tablist"] {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap !important;
+      justify-content: flex-start !important;
+      width: 100% !important;
+    }
+    [role="tablist"]::-webkit-scrollbar {
+      display: none;
+    }
+    [role="tab"] {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      font-size: 0.75rem !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    /* ═══ Dialog/Modal mobile full-width ═══ */
+    [data-slot="dialog-content"] {
+      max-width: calc(100vw - 1rem) !important;
+      width: calc(100vw - 1rem) !important;
+      margin: 0.5rem !important;
+      max-height: 90vh !important;
+      max-height: 90dvh !important;
+      overflow-y: auto !important;
+    }
+
+    /* ═══ Card hover: disable translateY on mobile to prevent layout shifts ═══ */
+    [data-slot="card"]:hover {
+      transform: none !important;
+    }
+    .glass-card:hover {
+      transform: none !important;
+    }
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     GLASSMORPHISM CARDS — SDAIA Style
+     ═══════════════════════════════════════════ */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(39, 52, 112, 0.08);
+    box-shadow: var(--glass-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(39, 52, 112, 0.15);
+  }
+  .dark .glass-card {
+    background: rgba(39, 52, 112, 0.25);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border: 1px solid rgba(61, 177, 172, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 0.5px rgba(61, 177, 172, 0.1);
+  }
+  .dark .glass-card:hover {
+    border-color: rgba(61, 177, 172, 0.35);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 15px rgba(61, 177, 172, 0.08);
+  }
+
+  /* ═══ PREMIUM GLASS SIDEBAR ═══ */
+  .dark .glass-sidebar {
+    background: rgba(13, 21, 41, 0.95);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-left: 1px solid rgba(61, 177, 172, 0.08);
+  }
+
+  /* ═══════════════════════════════════════════
+     GLOW EFFECTS — SDAIA Colors
+     ═══════════════════════════════════════════ */
+  .dark .glow-teal {
+    box-shadow: 0 0 20px rgba(61, 177, 172, 0.25), 0 0 60px rgba(61, 177, 172, 0.1);
+  }
+  .glow-teal {
+    box-shadow: 0 1px 3px rgba(61, 177, 172, 0.08);
+  }
+
+  .dark .glow-purple {
+    box-shadow: 0 0 20px rgba(100, 89, 167, 0.25), 0 0 60px rgba(100, 89, 167, 0.1);
+  }
+  .glow-purple {
+    box-shadow: 0 1px 3px rgba(100, 89, 167, 0.08);
+  }
+
+  .dark .glow-navy {
+    box-shadow: 0 0 20px rgba(39, 52, 112, 0.25), 0 0 60px rgba(39, 52, 112, 0.1);
+  }
+
+  .dark .glow-cyan {
+    box-shadow: 0 0 20px rgba(61, 177, 172, 0.2), 0 0 40px rgba(61, 177, 172, 0.08);
+  }
+  .glow-cyan {
+    box-shadow: 0 1px 3px rgba(61, 177, 172, 0.08);
+  }
+
+  .dark .glow-amber {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.15), 0 0 40px rgba(255, 193, 7, 0.05);
+  }
+  .glow-amber {
+    box-shadow: 0 1px 3px rgba(255, 193, 7, 0.08);
+  }
+
+  .dark .glow-red {
+    box-shadow: 0 0 20px rgba(235, 61, 99, 0.15), 0 0 40px rgba(235, 61, 99, 0.05);
+  }
+  .glow-red {
+    box-shadow: 0 1px 3px rgba(235, 61, 99, 0.08);
+  }
+
+  .dark .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 40px rgba(16, 185, 129, 0.05);
+  }
+  .glow-emerald {
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+  }
+
+  .dark .glow-violet {
+    box-shadow: 0 0 15px rgba(100, 89, 167, 0.2), 0 0 40px rgba(100, 89, 167, 0.08);
+  }
+
+  /* Dot grid background */
+  .dark .dot-grid {
+    background-image: radial-gradient(circle, rgba(61, 177, 172, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .dot-grid {
+    background-image: radial-gradient(circle, rgba(39, 52, 112, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ═══════════════════════════════════════════
+     AURORA BACKGROUND — SDAIA Navy/Teal
+     ═══════════════════════════════════════════ */
+  @keyframes aurora-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .dark .aurora-bg {
+    position: relative;
+    overflow: hidden;
+  }
+  .dark .aurora-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(61, 177, 172, 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(100, 89, 167, 0.08), transparent 50%),
+      radial-gradient(ellipse 50% 30% at 20% 80%, rgba(39, 52, 112, 0.1), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: aurora-shift 15s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+
+  /* ═══════════════════════════════════════════
+     ANIMATIONS — Ultra Premium
+     ═══════════════════════════════════════════ */
+  @keyframes stat-count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes icon-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes progress-fill {
+    from { width: 0; }
+  }
+
+  @keyframes badge-pop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes card-entrance {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes orbit-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  @keyframes orbit-spin-reverse {
+    from { transform: translate(-50%, -50%) rotate(360deg); }
+    to { transform: translate(-50%, -50%) rotate(0deg); }
+  }
+
+  @keyframes breathing-glow {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(61, 177, 172, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(61, 177, 172, 0.4); }
+  }
+
+  @keyframes border-glow {
+    0%, 100% { border-color: rgba(61, 177, 172, 0.15); }
+    50% { border-color: rgba(61, 177, 172, 0.35); }
+  }
+
+  @keyframes float-bubble {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-8px) rotate(2deg); }
+    66% { transform: translateY(4px) rotate(-1deg); }
+  }
+
+  @keyframes scan-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(400%); }
+  }
+
+  @keyframes data-flow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.5; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  @keyframes logo-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes orbit {
+    0% { transform: rotate(0deg) translateX(8px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(8px) rotate(-360deg); }
+  }
+
+  /* Animation utility classes */
+  .animate-stat-count-up {
+    animation: stat-count-up 0.6s ease-out forwards;
+  }
+
+  .animate-icon-bounce {
+    animation: icon-bounce 2s ease-in-out infinite;
+  }
+
+  .animate-card-entrance {
+    animation: card-entrance 0.6s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-orbit-spin {
+    animation: orbit-spin 8s linear infinite;
+  }
+
+  .animate-orbit-reverse {
+    animation: orbit-spin-reverse 12s linear infinite;
+  }
+
+  .animate-breathing-glow {
+    animation: breathing-glow 3s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float-bubble 6s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(61, 177, 172, 0.08), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .animate-border-glow {
+    animation: border-glow 3s ease-in-out infinite;
+  }
+
+  .animate-scan-line {
+    animation: scan-line 4s ease-in-out infinite;
+  }
+
+  /* ═══ SCAN EFFECT — Premium Card Effect ═══ */
+  .scan-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  .scan-effect::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgba(61, 177, 172, 0.04), transparent);
+    height: 30%;
+    animation: scan-line 4s ease-in-out infinite;
+  }
+
+  /* ═══ DATA FLOW LINE ═══ */
+  .data-flow-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3DB1AC, #6459A7, #3DB1AC, transparent);
+    background-size: 200% 100%;
+    animation: data-flow 3s linear infinite;
+  }
+
+  /* ═══ ACTIVE INDICATOR ═══ */
+  .active-indicator {
+    width: 3px;
+    height: 24px;
+    background: #3DB1AC;
+    border-radius: 4px;
+    animation: breathe 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(61, 177, 172, 0.4);
+  }
+
+  /* ═══ FOCUS GLOW ON INPUTS ═══ */
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #3DB1AC !important;
+    box-shadow: 0 0 0 3px rgba(61, 177, 172, 0.15) !important;
+    transition: all 0.3s ease;
+  }
+
+  /* ═══ GRADIENT TEXT — SDAIA ═══ */
+  .dark .gradient-text-teal {
+    background: linear-gradient(135deg, #E1DEF5, #3DB1AC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-teal {
+    background: linear-gradient(135deg, #1e3a8a, #3DB1AC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .gradient-text-purple {
+    background: linear-gradient(135deg, #E1DEF5, #6459A7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-purple {
+    background: linear-gradient(135deg, #1e3a8a, #6459A7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ═══ PREMIUM HOVER EFFECTS ═══ */
+  .dark .hover-glass:hover {
+    background: rgba(39, 52, 112, 0.35);
+    border-color: rgba(61, 177, 172, 0.25);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ═══ ACTIVE NAV INDICATOR ═══ */
+  .dark .nav-active-glow {
+    background: rgba(61, 177, 172, 0.12);
+    border: 1px solid rgba(61, 177, 172, 0.25);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR — SDAIA Theme
+   ═══════════════════════════════════════════ */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0D1529;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(61, 177, 172, 0.3);
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(61, 177, 172, 0.5);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f3f8;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(39, 52, 112, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(39, 52, 112, 0.3);
+}
+
+/* ═══════════════════════════════════════════
+   RECHARTS THEME — SDAIA Colors
+   ═══════════════════════════════════════════ */
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(61, 177, 172, 0.08) !important;
+}
+.dark .recharts-text {
+  fill: rgba(225, 222, 245, 0.5) !important;
+  font-family: 'Tajawal', 'Cairo', sans-serif !important;
+}
+.recharts-cartesian-grid line {
+  stroke: rgba(39, 52, 112, 0.08) !important;
+}
+.recharts-text {
+  fill: rgba(28, 40, 51, 0.6) !important;
+  font-family: 'Tajawal', 'Cairo', sans-serif !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL GLASSMORPHISM — Auto-applies to all shadcn/ui components
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Cards: frosted glass effect ─── */
+.dark [data-slot="card"] {
+  background: rgba(26, 37, 80, 0.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border-color: rgba(61, 177, 172, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.dark [data-slot="card"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(61, 177, 172, 0.03), transparent);
+  height: 30%;
+  animation: scan-line 5s ease-in-out infinite;
+}
+.dark [data-slot="card"]:hover {
+  border-color: rgba(61, 177, 172, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(61, 177, 172, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ─── Dialog/Modal: frosted glass overlay ─── */
+.dark [data-slot="dialog-overlay"] {
+  background: rgba(13, 21, 41, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.dark [data-slot="dialog-content"] {
+  background: rgba(26, 37, 80, 0.85);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-color: rgba(61, 177, 172, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Tables: glass rows with hover glow ─── */
+.dark table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.dark table thead tr {
+  background: rgba(13, 21, 41, 0.6);
+}
+.dark table thead th {
+  border-bottom: 1px solid rgba(61, 177, 172, 0.15);
+  font-weight: 600;
+}
+.dark table tbody tr {
+  transition: all 0.2s ease;
+}
+.dark table tbody tr:hover {
+  background: rgba(61, 177, 172, 0.06);
+}
+.dark table tbody td {
+  border-bottom: 1px solid rgba(61, 177, 172, 0.06);
+}
+
+/* ─── Inputs: glass input fields ─── */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background: rgba(26, 37, 80, 0.5) !important;
+  border-color: rgba(61, 177, 172, 0.15);
+  transition: all 0.2s ease;
+}
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: rgba(61, 177, 172, 0.4);
+  box-shadow: 0 0 0 2px rgba(61, 177, 172, 0.15), 0 0 20px rgba(61, 177, 172, 0.08);
+}
+
+/* ─── Buttons: subtle glass effect with hover glow ─── */
+.dark button[data-slot="button"] {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dark button[data-slot="button"]:hover:not(:disabled) {
+  box-shadow: 0 0 12px rgba(61, 177, 172, 0.15);
+}
+button[data-slot="button"]:hover:not(:disabled) {
+  box-shadow: 0 1px 4px rgba(39, 52, 112, 0.06);
+}
+
+/* ─── Badges/Tags: glass effect ─── */
+.dark [data-slot="badge"] {
+  backdrop-filter: blur(8px);
+  border-color: rgba(61, 177, 172, 0.15);
+}
+
+/* ─── Tabs: glass tab list ─── */
+.dark [role="tablist"] {
+  background: rgba(26, 37, 80, 0.5);
+  backdrop-filter: blur(12px);
+  border-color: rgba(61, 177, 172, 0.1);
+}
+.dark [role="tab"][data-state="active"] {
+  background: rgba(61, 177, 172, 0.15);
+  box-shadow: 0 2px 8px rgba(61, 177, 172, 0.1);
+}
+
+/* ─── Dropdown menus: glass popover ─── */
+.dark [data-slot="dropdown-menu-content"],
+.dark [data-slot="popover-content"],
+.dark [data-slot="select-content"] {
+  background: rgba(26, 37, 80, 0.9);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-color: rgba(61, 177, 172, 0.15);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Tooltips: glass tooltip ─── */
+.dark [data-slot="tooltip-content"] {
+  background: rgba(26, 37, 80, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(61, 177, 172, 0.15);
+}
+
+/* ─── Stat cards: subtle glow on value numbers ─── */
+.dark .stat-value {
+  text-shadow: 0 0 20px rgba(61, 177, 172, 0.3);
+}
+
+/* ─── Skeleton loaders: teal shimmer ─── */
+.dark [data-slot="skeleton"] {
+  background: linear-gradient(
+    90deg,
+    rgba(26, 37, 80, 0.4) 0%,
+    rgba(61, 177, 172, 0.1) 50%,
+    rgba(26, 37, 80, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ─── Toast notifications: glass effect ─── */
+.dark [data-sonner-toaster] [data-sonner-toast] {
+  background: rgba(26, 37, 80, 0.85);
+  backdrop-filter: blur(20px);
+  border-color: rgba(61, 177, 172, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Progress bars: teal gradient ─── */
+.dark [role="progressbar"] > div {
+  background: linear-gradient(90deg, #3DB1AC, #6459A7);
+}
+
+/* ─── Separator: subtle glass border ─── */
+.dark [data-slot="separator"] {
+  background: rgba(61, 177, 172, 0.1);
+}
+
+/* ─── Alert: glass alert ─── */
+.dark [data-slot="alert"] {
+  background: rgba(26, 37, 80, 0.5);
+  backdrop-filter: blur(12px);
+  border-color: rgba(61, 177, 172, 0.12);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME PREMIUM STYLES — Matching design.rasid.vip quality
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Light Cards: Clean white with subtle shadow (design.rasid.vip) ─── */
+[data-slot="card"] {
+  background: #fff;
+  border-color: #e2e5ef;
+  box-shadow: 0 1px 3px rgba(39, 52, 112, 0.04), 0 4px 16px rgba(39, 52, 112, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+[data-slot="card"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(30, 58, 138, 0.01), transparent);
+  height: 30%;
+  animation: scan-line 8s ease-in-out infinite;
+}
+[data-slot="card"]:hover {
+  border-color: rgba(30, 58, 138, 0.15);
+  box-shadow: 0 4px 20px rgba(39, 52, 112, 0.08), 0 1px 4px rgba(39, 52, 112, 0.04);
+  transform: translateY(-1px);
+}
+
+/* ─── Light Dialog/Modal — Clean white (design.rasid.vip) ─── */
+[data-slot="dialog-overlay"] {
+  background: rgba(15, 29, 50, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+[data-slot="dialog-content"] {
+  background: #fff;
+  border-color: #e2e5ef;
+  box-shadow: 0 16px 48px rgba(39, 52, 112, 0.12), 0 4px 12px rgba(39, 52, 112, 0.06);
+}
+
+/* ─── Light Tables — Clean (design.rasid.vip) ─── */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table thead tr {
+  background: #f5f7fb;
+}
+table thead th {
+  border-bottom: 1px solid #e2e5ef;
+  font-weight: 600;
+  color: #5a6478;
+}
+table tbody tr {
+  transition: all 0.2s ease;
+}
+table tbody tr:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+table tbody td {
+  border-bottom: 1px solid #edf0f7;
+}
+
+/* ─── Light Inputs — Clean (design.rasid.vip) ─── */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: #fff !important;
+  border-color: #d8dce8;
+  transition: all 0.2s ease;
+}
+
+/* ─── Light Badges ─── */
+[data-slot="badge"] {
+  border-color: #e2e5ef;
+}
+
+/* ─── Light Tabs ─── */
+[role="tablist"] {
+  background: #edf0f7;
+  border-color: #d8dce8;
+}
+[role="tab"][data-state="active"] {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(39, 52, 112, 0.06);
+}
+
+/* ─── Light Dropdowns ─── */
+[data-slot="dropdown-menu-content"],
+[data-slot="popover-content"],
+[data-slot="select-content"] {
+  background: #fff;
+  border-color: #e2e5ef;
+  box-shadow: 0 8px 32px rgba(39, 52, 112, 0.08), 0 2px 8px rgba(39, 52, 112, 0.04);
+}
+
+/* ─── Light Tooltips ─── */
+[data-slot="tooltip-content"] {
+  background: #1c2833;
+  border: 1px solid #1c2833;
+  color: #fff;
+}
+
+/* ─── Light Skeleton ─── */
+[data-slot="skeleton"] {
+  background: linear-gradient(
+    90deg,
+    #edf0f7 0%,
+    #e0e3ee 50%,
+    #edf0f7 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ─── Light Toast ─── */
+[data-sonner-toaster] [data-sonner-toast] {
+  background: #fff;
+  border-color: #e2e5ef;
+  box-shadow: 0 4px 16px rgba(39, 52, 112, 0.08);
+}
+
+/* ─── Light Progress bars ─── */
+[role="progressbar"] > div {
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+}
+
+/* ─── Light Separator ─── */
+[data-slot="separator"] {
+  background: #edf0f7;
+}
+
+/* ─── Light Alert ─── */
+[data-slot="alert"] {
+  background: #fff;
+  border-color: #e2e5ef;
+}
+
+/* ─── Light Glass Card — Clean white (design.rasid.vip) ─── */
+.glass-card {
+  background: #fff;
+  border: 1px solid #e2e5ef;
+  box-shadow: 0 1px 3px rgba(39, 52, 112, 0.04), 0 4px 16px rgba(39, 52, 112, 0.04);
+}
+.glass-card:hover {
+  border-color: rgba(30, 58, 138, 0.15);
+  box-shadow: 0 4px 20px rgba(39, 52, 112, 0.08), 0 1px 4px rgba(39, 52, 112, 0.04);
+}
+
+/* ─── Light Glass Sidebar — White frosted (matching design.rasid.vip) ─── */
+.glass-sidebar {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-left: 1px solid rgba(39, 52, 112, 0.06);
+  box-shadow: -2px 0 20px rgba(39, 52, 112, 0.04);
+}
+
+/* ─── Light Aurora Background — Very subtle (matching design.rasid.vip) ─── */
+.aurora-bg {
+  position: relative;
+  overflow: hidden;
+}
+.aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30, 58, 138, 0.03), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(37, 99, 235, 0.025), transparent 50%),
+    radial-gradient(ellipse 50% 30% at 20% 80%, rgba(100, 89, 167, 0.02), transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  animation: aurora-shift 20s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+/* ─── Light Dot Grid ─── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(39, 52, 112, 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ─── Light Hover Glass ─── */
+.hover-glass:hover {
+  background: rgba(37, 99, 235, 0.04);
+  border-color: rgba(30, 58, 138, 0.1);
+  box-shadow: 0 2px 8px rgba(39, 52, 112, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Light Nav Active ─── */
+.nav-active-glow {
+  background: rgba(30, 58, 138, 0.06);
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+/* ─── Light Stat Value ─── */
+.stat-value {
+  color: #1c2833;
+}
+
+/* ─── Light Shimmer Hover ─── */
+.shimmer-hover {
+  background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.02), transparent);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.dark .shimmer-hover {
+  background: linear-gradient(90deg, transparent, rgba(61, 177, 172, 0.05), transparent);
+  background-size: 200% 100%;
+}
+*:hover > .shimmer-hover {
+  opacity: 1;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ─── Premium Stat Enter Animation ─── */
+.premium-stat-enter {
+  animation: stat-count-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOTION ANIMATIONS — Enhanced for all cards & indicators
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-bottom {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes number-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow-border-pulse {
+  0%, 100% { border-color: rgba(61, 177, 172, 0.12); box-shadow: 0 0 0 0 rgba(61, 177, 172, 0); }
+  50% { border-color: rgba(61, 177, 172, 0.3); box-shadow: 0 0 16px rgba(61, 177, 172, 0.1); }
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in-right {
+  animation: fade-in-right 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in-left {
+  animation: fade-in-left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-number-pop {
+  animation: number-pop 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-subtle-float {
+  animation: subtle-float 4s ease-in-out infinite;
+}
+
+/* Staggered entrance delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   PHASE 74: ADVANCED MOTION EFFECTS — Ultra Premium Light Theme
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Shimmer Border Effect on Cards (Light Mode) ─── */
+@keyframes border-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+[data-slot="card"]::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(61, 177, 172, 0.2) 45%,
+    rgba(100, 89, 167, 0.15) 50%,
+    rgba(61, 177, 172, 0.2) 55%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+[data-slot="card"]:hover::before {
+  opacity: 1;
+  animation: border-shimmer 3s linear infinite;
+}
+.dark [data-slot="card"]::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(61, 177, 172, 0.3) 45%,
+    rgba(100, 89, 167, 0.2) 50%,
+    rgba(61, 177, 172, 0.3) 55%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* ─── Icon Hover Micro-Interactions ─── */
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes icon-rotate-bounce {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.1); }
+  50% { transform: rotate(0deg) scale(1.05); }
+  75% { transform: rotate(8deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes icon-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 8px rgba(61, 177, 172, 0.4)); }
+}
+
+.icon-hover-pulse:hover {
+  animation: icon-pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-hover-rotate:hover {
+  animation: icon-rotate-bounce 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-hover-glow:hover {
+  animation: icon-glow-pulse 1.2s ease-in-out infinite;
+}
+
+/* ─── Card Lift with 3D Perspective (Light Mode) ─── */
+.card-3d-lift {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+.card-3d-lift:hover {
+  transform: translateY(-6px) rotateX(2deg);
+  box-shadow: 
+    0 20px 40px rgba(22, 42, 84, 0.12),
+    0 8px 16px rgba(22, 42, 84, 0.06),
+    0 0 0 1px rgba(61, 177, 172, 0.08);
+}
+.dark .card-3d-lift:hover {
+  transform: translateY(-6px) rotateX(2deg);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(61, 177, 172, 0.1);
+}
+
+/* ─── Floating Particles Background (Light Mode) ─── */
+@keyframes float-particle-1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
+  25% { transform: translate(30px, -40px) rotate(90deg); opacity: 0.6; }
+  50% { transform: translate(-20px, -80px) rotate(180deg); opacity: 0.3; }
+  75% { transform: translate(40px, -40px) rotate(270deg); opacity: 0.5; }
+}
+
+@keyframes float-particle-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+  33% { transform: translate(-40px, -60px) scale(1.3); opacity: 0.5; }
+  66% { transform: translate(20px, -30px) scale(0.8); opacity: 0.3; }
+}
+
+@keyframes float-particle-3 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.15; }
+  50% { transform: translate(50px, -50px); opacity: 0.4; }
+}
+
+.light-particles::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    radial-gradient(2px 2px at 10% 20%, rgba(61, 177, 172, 0.25), transparent),
+    radial-gradient(2px 2px at 30% 60%, rgba(100, 89, 167, 0.2), transparent),
+    radial-gradient(3px 3px at 50% 30%, rgba(22, 42, 84, 0.15), transparent),
+    radial-gradient(2px 2px at 70% 70%, rgba(61, 177, 172, 0.2), transparent),
+    radial-gradient(2px 2px at 90% 40%, rgba(100, 89, 167, 0.15), transparent),
+    radial-gradient(3px 3px at 20% 80%, rgba(22, 42, 84, 0.12), transparent),
+    radial-gradient(2px 2px at 60% 10%, rgba(61, 177, 172, 0.18), transparent),
+    radial-gradient(2px 2px at 80% 90%, rgba(100, 89, 167, 0.15), transparent);
+  animation: float-particle-1 20s ease-in-out infinite;
+}
+.dark .light-particles::after {
+  background-image: 
+    radial-gradient(2px 2px at 10% 20%, rgba(61, 177, 172, 0.15), transparent),
+    radial-gradient(2px 2px at 30% 60%, rgba(100, 89, 167, 0.12), transparent),
+    radial-gradient(3px 3px at 50% 30%, rgba(61, 177, 172, 0.1), transparent),
+    radial-gradient(2px 2px at 70% 70%, rgba(61, 177, 172, 0.12), transparent),
+    radial-gradient(2px 2px at 90% 40%, rgba(100, 89, 167, 0.1), transparent),
+    radial-gradient(3px 3px at 20% 80%, rgba(61, 177, 172, 0.08), transparent),
+    radial-gradient(2px 2px at 60% 10%, rgba(61, 177, 172, 0.1), transparent),
+    radial-gradient(2px 2px at 80% 90%, rgba(100, 89, 167, 0.08), transparent);
+}
+
+/* ─── Parallax Scroll Effect ─── */
+.parallax-slow {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ─── Staggered Card Entrance with Bounce ─── */
+@keyframes card-entrance {
+  0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+  60% { opacity: 1; transform: translateY(-5px) scale(1.01); }
+  80% { transform: translateY(2px) scale(0.995); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-card-entrance {
+  animation: card-entrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+
+/* ─── Gradient Border Glow Animation ─── */
+@keyframes gradient-border-rotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-border-glow {
+  position: relative;
+}
+.gradient-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    270deg,
+    rgba(61, 177, 172, 0.3),
+    rgba(100, 89, 167, 0.2),
+    rgba(22, 42, 84, 0.3),
+    rgba(61, 177, 172, 0.3)
+  );
+  background-size: 300% 300%;
+  animation: gradient-border-rotate 4s ease infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.gradient-border-glow:hover::before {
+  opacity: 1;
+}
+
+/* ─── Ripple Click Effect ─── */
+@keyframes ripple-effect {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-container::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(61, 177, 172, 0.2);
+  transform: scale(0);
+  pointer-events: none;
+}
+.ripple-container:active::after {
+  animation: ripple-effect 0.6s ease-out;
+}
+
+/* ─── Breathing Glow for Active Status Indicators ─── */
+@keyframes breathing-status {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(61, 177, 172, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(61, 177, 172, 0); }
+}
+
+.status-breathing {
+  animation: breathing-status 2s ease-in-out infinite;
+}
+
+/* ─── Smooth Page Transitions ─── */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.page-transition-enter {
+  animation: page-enter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ─── Hover Shine Sweep Effect ─── */
+@keyframes shine-sweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.hover-shine {
+  position: relative;
+  overflow: hidden;
+}
+.hover-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: none;
+  pointer-events: none;
+}
+.hover-shine:hover::after {
+  animation: shine-sweep 0.8s ease-in-out;
+}
+.dark .hover-shine::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(61, 177, 172, 0.08),
+    transparent
+  );
+}
+
+/* ─── Character Float Animation ─── */
+@keyframes character-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(1deg); }
+  50% { transform: translateY(-4px) rotate(0deg); }
+  75% { transform: translateY(-10px) rotate(-1deg); }
+}
+
+@keyframes character-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.character-float {
+  animation: character-float 5s ease-in-out infinite;
+}
+
+.character-breathe {
+  animation: character-breathe 3s ease-in-out infinite;
+}
+
+/* ─── Presentation Mode Styles ─── */
+.presentation-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+@keyframes presentation-slide-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes presentation-slide-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.presentation-enter {
+  animation: presentation-slide-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.presentation-exit {
+  animation: presentation-slide-out 0.3s ease-in forwards;
+}
+
+/* Presentation mode progress bar */
+@keyframes presentation-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* ─── Stagger Delays Extended ─── */
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }
+.stagger-11 { animation-delay: 0.55s; }
+.stagger-12 { animation-delay: 0.6s; }
+
+
+/* ═══════════════════════════════════════════
+   SIDEBAR HOVER EFFECTS — design.rasid.vip 1:1
+   ═══════════════════════════════════════════ */
+
+/* Sidebar item hover - light mode */
+.sidebar-nav-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 60%;
+  background: linear-gradient(180deg, #1e3a8a, #273470);
+  border-radius: 4px 0 0 4px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item:hover::after {
+  width: 3px;
+}
+
+.sidebar-nav-item:hover {
+  padding-right: 16px;
+  background: rgba(39, 52, 112, 0.05);
+  color: #1c2833;
+}
+
+.sidebar-nav-item:hover .sidebar-nav-icon {
+  filter: drop-shadow(0 0 6px rgba(30, 58, 138, 0.3));
+  transform: scale(1.15) rotate(-8deg);
+  color: #1e3a8a;
+}
+
+.sidebar-nav-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sidebar active item - light mode */
+.sidebar-nav-item-active {
+  background: rgba(39, 52, 112, 0.08) !important;
+  color: #1e3a8a !important;
+}
+
+.sidebar-nav-item-active::after {
+  width: 3px !important;
+  background: linear-gradient(180deg, #1e3a8a, #3DB1AC) !important;
+}
+
+.sidebar-nav-item-active .sidebar-nav-icon {
+  color: #1e3a8a !important;
+  filter: drop-shadow(0 0 4px rgba(30, 58, 138, 0.2));
+}
+
+/* Sidebar group header hover - light mode */
+.sidebar-group-header {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.sidebar-group-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0%;
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.15), transparent);
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+.sidebar-group-header:hover {
+  background: rgba(61, 177, 172, 0.04);
+}
+
+.sidebar-group-header:hover::before {
+  width: 2px;
+  height: 50%;
+}
+
+/* Dark mode sidebar hover overrides */
+.dark .sidebar-nav-item::after {
+  background: linear-gradient(180deg, #3DB1AC, #6459A7);
+}
+
+.dark .sidebar-nav-item:hover {
+  background: rgba(61, 177, 172, 0.06);
+  color: #E1DEF5;
+}
+
+.dark .sidebar-nav-item:hover .sidebar-nav-icon {
+  filter: drop-shadow(0 0 6px rgba(61, 177, 172, 0.4));
+  color: #3DB1AC;
+}
+
+.dark .sidebar-nav-item-active {
+  background: rgba(61, 177, 172, 0.12) !important;
+  color: #3DB1AC !important;
+}
+
+.dark .sidebar-nav-item-active::after {
+  background: linear-gradient(180deg, #3DB1AC, #6459A7) !important;
+}
+
+.dark .sidebar-nav-item-active .sidebar-nav-icon {
+  color: #3DB1AC !important;
+  filter: drop-shadow(0 0 4px rgba(61, 177, 172, 0.3));
+}
+
+.dark .sidebar-group-header:hover {
+  background: rgba(61, 177, 172, 0.06);
+}
+
+.dark .sidebar-group-header:hover::before {
+  background: linear-gradient(180deg, rgba(61, 177, 172, 0.3), transparent);
+}
+
+/* Sidebar item count badge pulse */
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.sidebar-badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Sidebar tooltip enhancement */
+.sidebar-tooltip {
+  opacity: 0;
+  transform: translateX(8px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.sidebar-nav-item:hover .sidebar-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Responsive & Accessibility — Design System */
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px); z-index: 40;
+  }
+}
+
+button, a, [role="button"], select { min-height: 44px; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.375rem; }
+  h2 { font-size: 1.125rem; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ULTRA PREMIUM THEME — Gold & 3D Elevation
+   Applied via [data-color-theme="ultra-premium"]
+   Works with BOTH light and dark modes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Gold Color Variables ─── */
+[data-color-theme="ultra-premium"] {
+  --gold-50: #FFF9E6;
+  --gold-100: #FFF0B3;
+  --gold-200: #FFE680;
+  --gold-300: #FFD84D;
+  --gold-400: #FFCA1A;
+  --gold-500: #D4A017;
+  --gold-600: #B8860B;
+  --gold-700: #8B6914;
+  --gold-800: #6B4F10;
+  --gold-900: #4A3508;
+  --gold-gradient: linear-gradient(135deg, #D4A017, #FFD700, #B8860B, #FFD700, #D4A017);
+  --gold-gradient-subtle: linear-gradient(135deg, rgba(212,160,23,0.15), rgba(255,215,0,0.08), rgba(184,134,11,0.12));
+  --gold-border: rgba(212, 160, 23, 0.35);
+  --gold-border-subtle: rgba(212, 160, 23, 0.15);
+  --gold-glow: rgba(255, 215, 0, 0.25);
+  --gold-glow-strong: rgba(255, 215, 0, 0.5);
+  --gold-shimmer: linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 25%, rgba(255,215,0,0.3) 50%, rgba(255,215,0,0.15) 75%, transparent 100%);
+  /* 3D Elevation */
+  --elevation-1: 0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --elevation-2: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04), 0 0 0 1px var(--gold-border-subtle);
+  --elevation-3: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06), 0 0 0 1px var(--gold-border);
+  --elevation-hover: 0 12px 32px rgba(0,0,0,0.15), 0 6px 12px rgba(0,0,0,0.08), 0 0 20px var(--gold-glow), 0 0 0 1px var(--gold-border);
+}
+
+/* ─── LIGHT MODE — Ultra Premium ─── */
+[data-color-theme="ultra-premium"]:root:not(.dark),
+:root:not(.dark) [data-color-theme="ultra-premium"] {
+  --theme-primary: #B8860B;
+  --theme-accent: #D4A017;
+  --primary: #B8860B;
+  --primary-foreground: #FFFFFF;
+  --accent: #D4A017;
+  --accent-foreground: #FFFFFF;
+  --ring: #D4A017;
+  --sidebar-primary: #B8860B;
+  --sidebar-accent: rgba(212, 160, 23, 0.08);
+  --sidebar-accent-foreground: #8B6914;
+  --sidebar-ring: #D4A017;
+}
+
+/* ─── DARK MODE — Ultra Premium ─── */
+.dark[data-color-theme="ultra-premium"],
+.dark [data-color-theme="ultra-premium"] {
+  --theme-primary: #FFD700;
+  --theme-accent: #D4A017;
+  --primary: #FFD700;
+  --primary-foreground: #1A1500;
+  --accent: #D4A017;
+  --accent-foreground: #FFFFFF;
+  --ring: #FFD700;
+  --sidebar-primary: #FFD700;
+  --sidebar-accent: rgba(255, 215, 0, 0.12);
+  --sidebar-accent-foreground: #FFD700;
+  --sidebar-ring: #FFD700;
+  --border: rgba(212, 160, 23, 0.18);
+  --sidebar-border: rgba(212, 160, 23, 0.12);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD GLASS CARDS — Ultra Premium
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .glass-card,
+[data-color-theme="ultra-premium"] [data-slot="card"] {
+  border: 1px solid var(--gold-border-subtle);
+  box-shadow: var(--elevation-2);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-color-theme="ultra-premium"] .glass-card::before,
+[data-color-theme="ultra-premium"] [data-slot="card"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-gradient);
+  opacity: 0.6;
+  z-index: 1;
+}
+
+[data-color-theme="ultra-premium"] .glass-card:hover,
+[data-color-theme="ultra-premium"] [data-slot="card"]:hover {
+  border-color: var(--gold-border);
+  box-shadow: var(--elevation-hover);
+  transform: translateY(-4px) scale(1.005);
+}
+
+/* ─── Dark mode gold cards ─── */
+.dark [data-color-theme="ultra-premium"] .glass-card,
+.dark[data-color-theme="ultra-premium"] .glass-card,
+.dark [data-color-theme="ultra-premium"] [data-slot="card"],
+.dark[data-color-theme="ultra-premium"] [data-slot="card"] {
+  background: linear-gradient(145deg, rgba(39, 52, 112, 0.3), rgba(26, 37, 80, 0.5));
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 215, 0, 0.1), inset 0 1px 0 rgba(255, 215, 0, 0.05);
+}
+
+.dark [data-color-theme="ultra-premium"] .glass-card::before,
+.dark[data-color-theme="ultra-premium"] .glass-card::before,
+.dark [data-color-theme="ultra-premium"] [data-slot="card"]::before,
+.dark[data-color-theme="ultra-premium"] [data-slot="card"]::before {
+  background: linear-gradient(90deg, transparent, #FFD700, #D4A017, #FFD700, transparent);
+  opacity: 0.4;
+}
+
+.dark [data-color-theme="ultra-premium"] .glass-card:hover,
+.dark[data-color-theme="ultra-premium"] .glass-card:hover,
+.dark [data-color-theme="ultra-premium"] [data-slot="card"]:hover,
+.dark[data-color-theme="ultra-premium"] [data-slot="card"]:hover {
+  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.12), inset 0 1px 0 rgba(255, 215, 0, 0.1);
+  transform: translateY(-4px) scale(1.005);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD SHIMMER ANIMATION
+   ═══════════════════════════════════════════ */
+@keyframes gold-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gold-border-glow {
+  0%, 100% { border-color: rgba(212, 160, 23, 0.15); box-shadow: 0 0 8px rgba(255, 215, 0, 0.05); }
+  50% { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
+}
+
+@keyframes gold-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes gold-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes card-3d-float {
+  0%, 100% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0); }
+  25% { transform: perspective(1000px) rotateX(1deg) rotateY(-1deg) translateY(-2px); }
+  50% { transform: perspective(1000px) rotateX(0deg) rotateY(1deg) translateY(-4px); }
+  75% { transform: perspective(1000px) rotateX(-1deg) rotateY(0deg) translateY(-2px); }
+}
+
+@keyframes gold-line-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ─── Gold shimmer effect on cards ─── */
+[data-color-theme="ultra-premium"] .glass-card::after,
+[data-color-theme="ultra-premium"] [data-slot="card"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gold-shimmer);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-color-theme="ultra-premium"] .glass-card:hover::after,
+[data-color-theme="ultra-premium"] [data-slot="card"]:hover::after {
+  opacity: 1;
+  animation: gold-shimmer 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD SIDEBAR ENHANCEMENTS
+   ═══════════════════════════════════════════ */
+/* Active nav item gold indicator */
+[data-color-theme="ultra-premium"] .active-indicator {
+  background: linear-gradient(180deg, #FFD700, #D4A017);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* Sidebar group headers */
+[data-color-theme="ultra-premium"] .sidebar-group-header {
+  position: relative;
+}
+
+[data-color-theme="ultra-premium"] .sidebar-group-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD GLOW EFFECTS
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .glow-teal,
+[data-color-theme="ultra-premium"] .glow-cyan {
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), 0 0 40px rgba(212, 160, 23, 0.08);
+}
+
+.dark [data-color-theme="ultra-premium"] .glow-teal,
+.dark[data-color-theme="ultra-premium"] .glow-teal,
+.dark [data-color-theme="ultra-premium"] .glow-cyan,
+.dark[data-color-theme="ultra-premium"] .glow-cyan {
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), 0 0 60px rgba(212, 160, 23, 0.1);
+}
+
+[data-color-theme="ultra-premium"] .glow-purple,
+[data-color-theme="ultra-premium"] .glow-violet {
+  box-shadow: 0 0 15px rgba(184, 134, 11, 0.15), 0 0 40px rgba(184, 134, 11, 0.08);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD GRADIENT TEXT
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .gradient-text-teal,
+[data-color-theme="ultra-premium"] .gradient-text-purple {
+  background: linear-gradient(135deg, #D4A017, #FFD700, #B8860B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark [data-color-theme="ultra-premium"] .gradient-text-teal,
+.dark[data-color-theme="ultra-premium"] .gradient-text-teal,
+.dark [data-color-theme="ultra-premium"] .gradient-text-purple,
+.dark[data-color-theme="ultra-premium"] .gradient-text-purple {
+  background: linear-gradient(135deg, #FFD700, #FFF0B3, #D4A017);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD DATA FLOW LINE
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .data-flow-line {
+  background: linear-gradient(90deg, transparent, #D4A017, #FFD700, #D4A017, transparent);
+  background-size: 200% 100%;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD SCAN EFFECT
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .scan-effect::after {
+  background: linear-gradient(transparent, rgba(255, 215, 0, 0.04), transparent);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD AURORA BACKGROUND
+   ═══════════════════════════════════════════ */
+.dark [data-color-theme="ultra-premium"] .aurora-bg::before,
+.dark[data-color-theme="ultra-premium"] .aurora-bg::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 215, 0, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(212, 160, 23, 0.06), transparent 50%),
+    radial-gradient(ellipse 50% 30% at 20% 80%, rgba(184, 134, 11, 0.07), transparent 50%);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD FOCUS RING
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] input:focus,
+[data-color-theme="ultra-premium"] textarea:focus,
+[data-color-theme="ultra-premium"] select:focus {
+  border-color: #D4A017 !important;
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.2) !important;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD DOT GRID
+   ═══════════════════════════════════════════ */
+.dark [data-color-theme="ultra-premium"] .dot-grid,
+.dark[data-color-theme="ultra-premium"] .dot-grid {
+  background-image: radial-gradient(circle, rgba(255, 215, 0, 0.06) 1px, transparent 1px);
+}
+
+[data-color-theme="ultra-premium"] .dot-grid {
+  background-image: radial-gradient(circle, rgba(212, 160, 23, 0.04) 1px, transparent 1px);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD BADGES
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] [data-slot="badge"] {
+  border-color: var(--gold-border-subtle);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD BUTTONS — Primary
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .btn-primary,
+[data-color-theme="ultra-premium"] button[data-slot="button"]:not([data-variant]) {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD BORDER GLOW ANIMATION
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .animate-border-glow {
+  animation: gold-border-glow 3s ease-in-out infinite;
+}
+
+[data-color-theme="ultra-premium"] .animate-glow-pulse {
+  animation: gold-pulse 3s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   3D CARD ELEVATION UTILITY CLASSES
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-color-theme="ultra-premium"] .card-3d:hover {
+  animation: card-3d-float 4s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════
+   GOLD GLASSMORPHISM — Enhanced
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] .glass-sidebar {
+  border-left-color: rgba(212, 160, 23, 0.1) !important;
+}
+
+.dark [data-color-theme="ultra-premium"] .glass-sidebar,
+.dark[data-color-theme="ultra-premium"] .glass-sidebar {
+  border-left-color: rgba(255, 215, 0, 0.08) !important;
+  box-shadow: inset -1px 0 0 rgba(255, 215, 0, 0.05);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD TABLE HEADER
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] thead th {
+  border-bottom: 2px solid var(--gold-border-subtle);
+}
+
+[data-color-theme="ultra-premium"] tbody tr:hover {
+  background: rgba(212, 160, 23, 0.04);
+}
+
+.dark [data-color-theme="ultra-premium"] tbody tr:hover,
+.dark[data-color-theme="ultra-premium"] tbody tr:hover {
+  background: rgba(255, 215, 0, 0.04);
+}
+
+/* ═══════════════════════════════════════════
+   GOLD CHART COLORS OVERRIDE
+   ═══════════════════════════════════════════ */
+[data-color-theme="ultra-premium"] {
+  --chart-1: #FFD700;
+  --chart-2: #D4A017;
+  --chart-3: #B8860B;
+  --chart-4: #EB3D63;
+  --chart-5: #6459A7;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE: Disable 3D transforms
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  [data-color-theme="ultra-premium"] .glass-card:hover,
+  [data-color-theme="ultra-premium"] [data-slot="card"]:hover {
+    transform: none !important;
+  }
+  [data-color-theme="ultra-premium"] .card-3d:hover {
+    animation: none !important;
+  }
+}
+
+```
+
+---
+
+## `client/src/main.tsx`
+
+```tsx
+import { trpc } from "@/lib/trpc";
+import { UNAUTHED_ERR_MSG } from '@shared/const';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink, TRPCClientError } from "@trpc/client";
+import { createRoot } from "react-dom/client";
+import superjson from "superjson";
+import App from "./App";
+import "./index.css";
+
+const queryClient = new QueryClient();
+
+const redirectToLoginIfUnauthorized = (error: unknown) => {
+  if (!(error instanceof TRPCClientError)) return;
+  if (typeof window === "undefined") return;
+
+  const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
+
+  if (!isUnauthorized) return;
+
+  // Redirect to built-in login page
+  window.location.href = "/login";
+};
+
+queryClient.getQueryCache().subscribe(event => {
+  if (event.type === "updated" && event.action.type === "error") {
+    const error = event.query.state.error;
+    redirectToLoginIfUnauthorized(error);
+    console.error("[API Query Error]", error);
+  }
+});
+
+queryClient.getMutationCache().subscribe(event => {
+  if (event.type === "updated" && event.action.type === "error") {
+    const error = event.mutation.state.error;
+    redirectToLoginIfUnauthorized(error);
+    console.error("[API Mutation Error]", error);
+  }
+});
+
+const trpcClient = trpc.createClient({
+  links: [
+    httpBatchLink({
+      url: "/api/trpc",
+      transformer: superjson,
+      fetch(input, init) {
+        // Remove trpc-accept: application/jsonl header to disable streaming
+        // Streaming breaks cookie setting during login (Cannot set headers after they are sent)
+        const headers = new Headers(init?.headers);
+        headers.delete("trpc-accept");
+        return globalThis.fetch(input, {
+          ...(init ?? {}),
+          headers,
+          credentials: "include",
+        });
+      },
+    }),
+  ],
+});
+
+createRoot(document.getElementById("root")!).render(
+  <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  </trpc.Provider>
+);
+
+```
+
+---
+
