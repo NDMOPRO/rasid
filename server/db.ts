@@ -6452,9 +6452,9 @@ export async function getEvidenceChain(leakId?: string) {
   const db = await getDb();
   if (!db) return [];
   if (leakId) {
-    return db.select().from(evidenceChain).where(eq(evidenceChain.leakId, leakId)).orderBy(evidenceChain.blockIndex);
+    return db.select().from(evidenceChain).where(eq(evidenceChain.evidenceLeakId, leakId)).orderBy(evidenceChain.blockIndex);
   }
-  return db.select().from(evidenceChain).orderBy(desc(evidenceChain.createdAt));
+  return db.select().from(evidenceChain).orderBy(desc(evidenceChain.evidenceCreatedAt));
 }
 
 export async function createEvidenceEntry(entry: InsertEvidenceChainEntry) {

@@ -6790,7 +6790,12 @@ ${JSON.stringify(sitesWithScans.slice(0, 20), null, 2)}
       .query(async ({ input }) => {
         const leak = await getLeakById(input.leakId);
         if (!leak) return null;
-        const evidence = await getEvidenceChain(input.leakId);
+        let evidence: any[] = [];
+        try {
+          evidence = await getEvidenceChain(input.leakId);
+        } catch (e) {
+          console.error('[leaks.detail] Error fetching evidence chain:', e);
+        }
         return { ...leak, evidence };
       }),
 
