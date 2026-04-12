@@ -54,16 +54,16 @@ function useHoverLight(ref: React.RefObject<HTMLDivElement | null>) {
    §2  Floating Particles — ambient background decoration
    ═══════════════════════════════════════════════════════════════════ */
 function FloatingParticles() {
-  const particles = useMemo(() => Array.from({ length: 50 }, (_, i) => ({
+  const particles = useMemo(() => Array.from({ length: 60 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
-    size: 1 + Math.random() * 4,
-    dur: 6 + Math.random() * 16,
-    delay: Math.random() * 8,
-    isGold: Math.random() > 0.35,
-    drift: 10 + Math.random() * 30,
-    opacity: 0.3 + Math.random() * 0.5,
+    size: 1 + Math.random() * 3.5,
+    dur: 8 + Math.random() * 18,
+    delay: Math.random() * 10,
+    isGold: Math.random() > 0.3,
+    drift: 10 + Math.random() * 25,
+    opacity: 0.2 + Math.random() * 0.45,
   })), []);
   return (
     <div className="overflow-x-hidden max-w-full absolute inset-0 overflow-hidden pointer-events-none">
@@ -258,13 +258,14 @@ export default function Login() {
          MAIN CONTAINER — Two columns
          ═══════════════════════════════════════════════════════════════ */}
       <div
-        className={`relative z-10 w-full max-w-[1200px] mx-4 flex rounded-3xl overflow-hidden transition-all duration-1000 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        className={`relative z-10 w-full max-w-[1200px] mx-4 flex rounded-3xl overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-[0.98]"}`}
         style={{
           minHeight: "680px",
           boxShadow: `
-            0 0 0 1px rgba(197,165,90,0.08),
-            0 25px 60px -12px rgba(0,0,0,0.5),
-            0 12px 28px -8px rgba(0,0,0,0.3)
+            0 0 0 1px rgba(197,165,90,0.1),
+            0 30px 70px -15px rgba(0,0,0,0.55),
+            0 15px 35px -10px rgba(0,0,0,0.35),
+            0 0 40px rgba(197,165,90,0.03)
           `,
         }}
       >
@@ -330,8 +331,8 @@ export default function Login() {
               alt="شخصية راصد"
               className="relative h-[260px] object-contain"
               style={{ 
-                filter: "drop-shadow(0 20px 60px rgba(197,165,90,0.20)) drop-shadow(0 5px 15px rgba(0,0,0,0.3))",
-                animation: 'subtle-float 6s ease-in-out infinite',
+                filter: "drop-shadow(0 20px 60px rgba(197,165,90,0.22)) drop-shadow(0 8px 20px rgba(0,0,0,0.35)) drop-shadow(0 0 30px rgba(197,165,90,0.08))",
+                animation: 'subtle-float 7s ease-in-out infinite',
               }}
             />
           </div>
@@ -502,12 +503,14 @@ export default function Login() {
                     boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 0 rgba(245,230,163,0.04)",
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = "rgba(197,165,90,0.5)";
-                    e.target.style.boxShadow = `0 0 0 3px rgba(197,165,90,0.12), inset 0 1px 2px rgba(0,0,0,0.06), 0 0 12px rgba(197,165,90,0.08)`;
+                    e.target.style.borderColor = "rgba(197,165,90,0.55)";
+                    e.target.style.boxShadow = `0 0 0 3px rgba(197,165,90,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 0 16px rgba(197,165,90,0.06)`;
+                    e.target.style.transform = 'translateY(-1px)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = isDark ? "rgba(197,165,90,0.12)" : "rgba(197,165,90,0.15)";
                     e.target.style.boxShadow = "inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 0 rgba(245,230,163,0.04)";
+                    e.target.style.transform = 'translateY(0)';
                   }}
                   autoComplete="username"
                   dir="ltr"
@@ -539,12 +542,14 @@ export default function Login() {
                     boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 0 rgba(245,230,163,0.04)",
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = "rgba(197,165,90,0.5)";
-                    e.target.style.boxShadow = `0 0 0 3px rgba(197,165,90,0.12), inset 0 1px 2px rgba(0,0,0,0.06), 0 0 12px rgba(197,165,90,0.08)`;
+                    e.target.style.borderColor = "rgba(197,165,90,0.55)";
+                    e.target.style.boxShadow = `0 0 0 3px rgba(197,165,90,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 0 16px rgba(197,165,90,0.06)`;
+                    e.target.style.transform = 'translateY(-1px)';
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = isDark ? "rgba(197,165,90,0.12)" : "rgba(197,165,90,0.15)";
                     e.target.style.boxShadow = "inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 0 0 rgba(245,230,163,0.04)";
+                    e.target.style.transform = 'translateY(0)';
                   }}
                   autoComplete="current-password"
                   dir="ltr"
@@ -610,7 +615,7 @@ export default function Login() {
               <label className={`block text-sm font-medium mb-2 ${isDark ? "text-[#a8b2d1]" : "text-[#334155]"}`}>
                 اختر المنصة
               </label>
-              <div className={`flex rounded-xl overflow-hidden p-1 ${isDark ? "bg-white/[0.04] border border-[rgba(197,165,90,0.12)]" : "bg-gray-50 border border-[rgba(197,165,90,0.15)]"}`}>
+              <div className={`flex rounded-xl overflow-hidden p-1.5 ${isDark ? "bg-white/[0.04] border border-[rgba(197,165,90,0.12)]" : "bg-gray-50 border border-[rgba(197,165,90,0.15)]"}`}>
                 <button
                   type="button"
                   onClick={() => setSelectedWorkspace("leaks")}
@@ -653,7 +658,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loginMutation.isPending}
-                  className="w-full h-13 rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 relative overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="w-full h-13 rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 relative overflow-hidden transition-all duration-300 ease-out disabled:opacity-50 disabled:cursor-not-allowed group"
                   style={{
                     background: "linear-gradient(135deg, #0A192F 0%, #112240 40%, #1a3050 70%, #0A192F 100%)",
                     color: "#F5E6A3",
@@ -692,7 +697,7 @@ export default function Login() {
                   }}
                 >
                   {/* Shimmer sweep */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]" />
 
                   {loginMutation.isPending ? (
                     <span className="flex items-center gap-2.5 relative z-10">
@@ -721,10 +726,10 @@ export default function Login() {
           <div
             className="relative z-10"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <img src={QL_LOGO_MAIN} alt="راصد" className="h-7 object-contain opacity-50 hover:opacity-80 transition-opacity duration-200" />
-              <div className="w-[1px] h-5 bg-gradient-to-b from-transparent via-[#C5A55A]/20 to-transparent" />
-              <img src={QL_LOGO_OFFICE} alt="مكتب إدارة البيانات" className="h-7 object-contain opacity-50 hover:opacity-80 transition-opacity duration-200" />
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <img src={QL_LOGO_MAIN} alt="راصد" className="h-7 object-contain opacity-40 hover:opacity-75 transition-all duration-300 hover:scale-105" />
+              <div className="w-[1px] h-5 bg-gradient-to-b from-transparent via-[#C5A55A]/25 to-transparent" />
+              <img src={QL_LOGO_OFFICE} alt="مكتب إدارة البيانات" className="h-7 object-contain opacity-40 hover:opacity-75 transition-all duration-300 hover:scale-105" />
             </div>
             <p className={`text-center text-xs ${isDark ? "text-[#4a5568]" : "text-[#94a3b8]"}`}>
               منصة راصد الذكية - مكتب إدارة البيانات الوطنية

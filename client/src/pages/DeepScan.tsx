@@ -355,14 +355,22 @@ export default function DeepScan() {
                         <span className="font-mono font-bold text-lg">{progressPercent}%</span>
                       </div>
                       {/* Multi-segment progress bar */}
-                      <div className="relative h-4 rounded-full bg-muted overflow-hidden">
+                      <div className="relative h-5 rounded-full bg-muted/50 dark:bg-[rgba(26,37,80,0.5)] overflow-hidden border border-border/30">
                         <div className="absolute inset-0 flex">
-                          <div className="bg-emerald-500 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.completed / Math.max(stats.total, 1) * 100)}%` }} />
-                          <div className="bg-red-500/70 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.failed / Math.max(stats.total, 1) * 100)}%` }} />
-                          <div className="bg-blue-500 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.scanning / Math.max(stats.total, 1) * 100)}%` }} />
+                          <div className="bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.completed / Math.max(stats.total, 1) * 100)}%`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)' }} />
+                          <div className="bg-gradient-to-r from-red-500 to-red-400 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.failed / Math.max(stats.total, 1) * 100)}%`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)' }} />
+                          <div className="bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-1000 ease-out" style={{ width: `${Math.round(stats.scanning / Math.max(stats.total, 1) * 100)}%`, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)' }} />
                         </div>
                         {statusQuery.data?.isActive && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+                          <div className="absolute inset-0 overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent" style={{ animation: 'shimmer-sweep 2s ease-in-out infinite' }} />
+                          </div>
+                        )}
+                        {/* Percentage overlay */}
+                        {progressPercent > 5 && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-white drop-shadow-sm">{progressPercent}%</span>
+                          </div>
                         )}
                       </div>
                       <div className="flex gap-4 mt-2 text-xs">

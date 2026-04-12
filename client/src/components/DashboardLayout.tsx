@@ -430,14 +430,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <Link key={item.path} href={item.path} onClick={() => { handleNavClick(); playClick(); }}>
         <motion.div
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ x: -3, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+          whileTap={{ scale: 0.97 }}
           className={`
-            sidebar-nav-item flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer
-            group relative transition-colors duration-150
+            sidebar-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer
+            group relative transition-all duration-200 ease-out
             ${isActive
-              ? `sidebar-nav-item-active ${isDark ? 'border border-[rgba(61,177,172,0.25)]' : 'border border-[rgba(30,58,138,0.12)]'}`
-              : isDark ? 'text-sidebar-foreground/60 hover:text-sidebar-foreground/80 hover:bg-white/[0.03]' : 'text-[#5a6478] hover:text-[#1c2833] hover:bg-black/[0.02]'
+              ? `sidebar-nav-item-active ${isDark ? 'border border-[rgba(61,177,172,0.3)] shadow-[0_0_12px_rgba(61,177,172,0.08)]' : 'border border-[rgba(30,58,138,0.15)] shadow-[0_2px_8px_rgba(30,58,138,0.06)]'}`
+              : isDark ? 'text-sidebar-foreground/60 hover:text-sidebar-foreground/90 hover:bg-white/[0.04]' : 'text-[#5a6478] hover:text-[#1c2833] hover:bg-black/[0.03]'
             }
           `}
           style={isActive ? { backgroundColor: isDark ? ws.accentBg : ws.accentBgLight, borderColor: isDark ? ws.accentBorder : ws.accentBorderLight } : undefined}
@@ -445,21 +445,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {isActive && (
             <motion.div
               layoutId="activeNav"
-              className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-full"
-              style={{ backgroundColor: accent, boxShadow: `0 0 8px ${accent}66` }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-l-full"
+              style={{ backgroundColor: accent, boxShadow: `0 0 12px ${accent}80, 0 0 4px ${accent}40` }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           )}
-          <div className="sidebar-nav-icon">
-            <Icon className="w-4 h-4 flex-shrink-0" style={isActive ? { color: accent } : undefined} />
+          <div className={`sidebar-nav-icon transition-transform duration-200 ${isActive ? '' : 'group-hover:scale-110'}`}>
+            <Icon className="w-4 h-4 flex-shrink-0" style={isActive ? { color: accent, filter: `drop-shadow(0 0 4px ${accent}40)` } : undefined} />
           </div>
           {!collapsed && (
-            <span className="text-[13px] font-medium whitespace-nowrap">{item.label}</span>
+            <span className={`text-[13px] font-medium whitespace-nowrap transition-colors duration-200 ${isActive ? '' : ''}`}>{item.label}</span>
           )}
           {!collapsed && item.rootAdminOnly && (
-            <span className="text-[8px] px-1 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/20 mr-auto">ROOT</span>
+            <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/20 mr-auto font-semibold">ROOT</span>
           )}
           {collapsed && (
-            <div className={`absolute right-14 ${isDark ? 'bg-[rgba(26,37,80,0.95)] text-[#E1DEF5] border-[rgba(61,177,172,0.15)]' : 'bg-white text-[#1c2833] border-[#e2e5ef]'} backdrop-blur-xl text-xs py-1.5 px-3 rounded-md shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 border`}>
+            <div className={`absolute right-14 ${isDark ? 'bg-[rgba(20,30,65,0.97)] text-[#E1DEF5] border-[rgba(61,177,172,0.2)]' : 'bg-white text-[#1c2833] border-[#e2e5ef]'} backdrop-blur-2xl text-xs py-2 px-3.5 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 whitespace-nowrap z-50 border`}>
               {item.label}
             </div>
           )}
@@ -477,29 +478,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const GroupIcon = group.icon;
 
     return (
-      <div key={group.id} className="mb-1">
+      <div key={group.id} className="mb-1.5">
         {!collapsed ? (
           <button
             onClick={() => toggleGroup(group.id)}
             className={`
-              sidebar-group-header w-full flex items-center justify-between flex-wrap px-3 py-2 rounded-lg
-              text-xs font-semibold uppercase tracking-wider transition-colors duration-150
+              sidebar-group-header w-full flex items-center justify-between flex-wrap px-3 py-2.5 rounded-xl
+              text-xs font-semibold uppercase tracking-wider transition-all duration-200 ease-out
               ${isActive
-                ? isDark ? "text-[#3DB1AC] bg-[rgba(61,177,172,0.08)]" : "text-[#1e3a8a] bg-[rgba(30,58,138,0.06)]"
-                : isDark ? "text-[#D4DDEF]/60 hover:text-[#D4DDEF]/80" : "text-[#5a6478] hover:text-[#1c2833]"
+                ? isDark ? "text-[#3DB1AC] bg-[rgba(61,177,172,0.1)]" : "text-[#1e3a8a] bg-[rgba(30,58,138,0.07)]"
+                : isDark ? "text-[#D4DDEF]/50 hover:text-[#D4DDEF]/80 hover:bg-white/[0.02]" : "text-[#5a6478] hover:text-[#1c2833] hover:bg-black/[0.01]"
               }
             `}
             style={isActive ? { color: accent, backgroundColor: isDark ? ws.accentBg : ws.accentBgLight } : undefined}
           >
             <div className="flex items-center gap-2">
-              <GroupIcon className="w-3.5 h-3.5" />
+              <GroupIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'scale-110' : ''}`} />
               <span>{group.label}</span>
-              <span className="text-[9px] opacity-50 font-normal normal-case">{group.labelEn}</span>
+              <span className="text-[9px] opacity-40 font-normal normal-case">{group.labelEn}</span>
             </div>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`} />
+            <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2, ease: 'easeOut' }}>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </motion.div>
           </button>
         ) : (
-          <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.08)]' : 'bg-[#edf0f7]'} mx-2 my-2`} />
+          <div className={`h-px ${isDark ? 'bg-[rgba(61,177,172,0.1)]' : 'bg-[#edf0f7]'} mx-2 my-2.5`} />
         )}
 
         <AnimatePresence initial={false}>
@@ -508,7 +511,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               initial={collapsed ? false : { height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={collapsed ? undefined : { height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
               className="overflow-hidden"
             >
               <div className={`space-y-0.5 ${collapsed ? "" : "mt-1 mr-2"}`}>
@@ -542,11 +545,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ═══ SIDEBAR ═══ */}
       <aside
         className={`
-          fixed lg:relative z-50 h-full transition-all duration-300 ease-in-out flex flex-col
+          fixed lg:relative z-50 h-full transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] flex flex-col
           ${collapsed ? "w-[72px]" : "w-[270px]"}
           ${mobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
           right-0 lg:right-auto bg-sidebar backdrop-blur-2xl
-          ${isDark ? 'border-l border-[rgba(61,177,172,0.08)]' : 'border-l border-[#e2e5ef]'}
+          ${isDark ? 'border-l border-[rgba(61,177,172,0.1)] shadow-[2px_0_24px_rgba(0,0,0,0.15)]' : 'border-l border-[#e2e5ef] shadow-[2px_0_12px_rgba(0,0,0,0.03)]'}
         `}
       >
         {/* Logo area */}
@@ -835,20 +838,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto relative z-10" style={{ maxWidth: '100%' }}>
         {/* Top header with WORKSPACE SWITCHER */}
         <header
-          className="min-h-14 flex items-center justify-between flex-wrap gap-y-1 px-3 sm:px-4 lg:px-6 backdrop-blur-xl sticky top-0 z-30 transition-colors duration-300"
+          className="app-header min-h-14 flex items-center justify-between flex-wrap gap-y-1 px-3 sm:px-4 lg:px-6 backdrop-blur-2xl sticky top-0 z-30 transition-all duration-300"
           style={{
-            backgroundColor: isDark ? 'rgba(13,21,41,0.85)' : 'rgba(255,255,255,0.95)',
-            borderBottom: `1px solid ${isDark ? `${accent}14` : '#e2e5ef'}`,
+            backgroundColor: isDark ? 'rgba(13,21,41,0.92)' : 'rgba(255,255,255,0.97)',
+            borderBottom: `1px solid ${isDark ? `${accent}18` : '#e2e5ef'}`,
+            boxShadow: isDark ? `0 1px 12px rgba(0,0,0,0.2), 0 0 1px ${accent}10` : '0 1px 8px rgba(0,0,0,0.04)',
           }}
         >
           <div className="flex items-center gap-4">
-            <button className="lg:hidden text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(true)}>
+            <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors duration-200" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
 
             {/* Workspace title in header */}
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accent}1A` }}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200" style={{ backgroundColor: `${accent}1A`, boxShadow: `0 0 8px ${accent}10` }}>
                 {activeWorkspace === "privacy" ? <Shield className="w-4 h-4" style={{ color: accent }} /> : <ShieldAlert className="w-4 h-4" style={{ color: accent }} />}
               </div>
               <span className={`text-sm font-bold hidden sm:inline ${isDark ? 'text-[#D4DDEF]' : 'text-[#1c2833]'}`}>
@@ -857,11 +861,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
             {/* Live indicator */}
-            <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border`}
+            <div className={`hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-all duration-200`}
               style={{ backgroundColor: `${accent}0D`, borderColor: `${accent}26` }}>
-              <span className="w-2 h-2 rounded-full animate-pulse-glow" style={{ backgroundColor: accent, boxShadow: `0 0 6px ${accent}80` }} />
+              <span className="w-2 h-2 rounded-full animate-pulse-glow" style={{ backgroundColor: accent, boxShadow: `0 0 8px ${accent}90` }} />
               <span className="text-xs font-medium" style={{ color: accent }}>مباشر</span>
             </div>
 
@@ -908,9 +912,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <ParticleField count={30} className="z-0" />
           <motion.div
             key={location}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 12, filter: 'blur(3px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
             className="relative z-10"
           >
             {children}

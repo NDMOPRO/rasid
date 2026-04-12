@@ -55,8 +55,8 @@ export default function RasidLoadingScreen({ show = true, onFinish, minDuration 
       {show && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
+          exit={{ opacity: 0, scale: 1.08, filter: "blur(8px)" }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
           style={{
             background: "linear-gradient(135deg, #0B1D35 0%, #0F2847 40%, #132F5A 70%, #0B1D35 100%)",
@@ -64,59 +64,67 @@ export default function RasidLoadingScreen({ show = true, onFinish, minDuration 
         >
           {/* Animated background particles */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 30 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full"
-                style={{
-                  width: Math.random() * 4 + 1,
-                  height: Math.random() * 4 + 1,
-                  background: i % 3 === 0
-                    ? "rgba(197, 165, 90, 0.4)"
-                    : i % 3 === 1
-                    ? "rgba(61, 177, 172, 0.3)"
-                    : "rgba(100, 89, 167, 0.3)",
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -30, 0],
-                  opacity: [0.2, 0.8, 0.2],
-                  scale: [1, 1.5, 1],
-                }}
-                transition={{
-                  duration: Math.random() * 4 + 3,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
+            {Array.from({ length: 40 }).map((_, i) => {
+              const size = Math.random() * 4 + 1;
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: size,
+                    height: size,
+                    background: i % 4 === 0
+                      ? "rgba(197, 165, 90, 0.5)"
+                      : i % 4 === 1
+                      ? "rgba(61, 177, 172, 0.4)"
+                      : i % 4 === 2
+                      ? "rgba(100, 89, 167, 0.35)"
+                      : "rgba(255, 255, 255, 0.15)",
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    filter: size > 3 ? "blur(1px)" : "none",
+                  }}
+                  animate={{
+                    y: [0, -(Math.random() * 40 + 20), 0],
+                    x: [0, (Math.random() - 0.5) * 20, 0],
+                    opacity: [0.1, 0.7, 0.1],
+                    scale: [1, 1.3 + Math.random() * 0.5, 1],
+                  }}
+                  transition={{
+                    duration: Math.random() * 5 + 4,
+                    repeat: Infinity,
+                    delay: Math.random() * 3,
+                    ease: "easeInOut",
+                  }}
+                />
+              );
+            })}
           </div>
 
           {/* Radial glow behind character */}
           <motion.div
             className="absolute"
             style={{
-              width: 400,
-              height: 400,
+              width: 500,
+              height: 500,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(197,165,90,0.15) 0%, rgba(61,177,172,0.08) 40%, transparent 70%)",
-              filter: "blur(40px)",
+              background: "radial-gradient(circle, rgba(197,165,90,0.18) 0%, rgba(61,177,172,0.1) 35%, rgba(100,89,167,0.05) 55%, transparent 70%)",
+              filter: "blur(50px)",
             }}
             animate={{
-              scale: [1, 1.15, 1],
-              opacity: [0.5, 0.8, 0.5],
+              scale: [1, 1.2, 1],
+              opacity: [0.4, 0.75, 0.4],
+              rotate: [0, 5, 0],
             }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
 
           {/* Character with bounce animation */}
           <motion.div
             className="relative z-10 mb-6"
-            initial={{ y: 40, opacity: 0, scale: 0.8 }}
+            initial={{ y: 50, opacity: 0, scale: 0.7 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 120, damping: 12, delay: 0.2 }}
+            transition={{ type: "spring", stiffness: 100, damping: 14, delay: 0.15 }}
           >
             <motion.img
               src={CHARACTER_WAVING}
@@ -124,11 +132,11 @@ export default function RasidLoadingScreen({ show = true, onFinish, minDuration 
               className="h-44 w-auto drop-shadow-2xl select-none"
               draggable={false}
               animate={{
-                y: [0, -8, 0],
-                rotate: [0, 1, -1, 0],
+                y: [0, -10, 0],
+                rotate: [0, 1.5, -1.5, 0],
               }}
               transition={{
-                duration: 3,
+                duration: 3.5,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
@@ -141,10 +149,10 @@ export default function RasidLoadingScreen({ show = true, onFinish, minDuration 
                 boxShadow: "0 0 40px rgba(197, 165, 90, 0.1), inset 0 0 40px rgba(61, 177, 172, 0.05)",
               }}
               animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.3, 0.6, 0.3],
+                scale: [1, 1.08, 1],
+                opacity: [0.2, 0.5, 0.2],
               }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
           </motion.div>
 
@@ -192,9 +200,9 @@ export default function RasidLoadingScreen({ show = true, onFinish, minDuration 
               style={{
                 width: `${progress}%`,
                 background: "linear-gradient(90deg, #C5A55A, #3DB1AC, #6459A7, #C5A55A)",
-                backgroundSize: "200% 100%",
-                animation: "shimmer-gold 2s linear infinite",
-                boxShadow: "0 0 12px rgba(197, 165, 90, 0.4)",
+                backgroundSize: "300% 100%",
+                animation: "shimmer-gold 2.5s linear infinite",
+                boxShadow: "0 0 16px rgba(197, 165, 90, 0.5), 0 0 32px rgba(61, 177, 172, 0.2)",
                 transition: "width 0.1s ease-out",
               }}
             />

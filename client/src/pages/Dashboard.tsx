@@ -167,8 +167,9 @@ function RadarAnimation() {
       ))}
       <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-px bg-[rgba(61,177,172,0.1)]" /></div>
       <div className="absolute inset-0 flex items-center justify-center"><div className="w-px h-full bg-[rgba(61,177,172,0.1)]" /></div>
-      <motion.div className="absolute inset-0 m-auto" style={{ width: "100%", height: "100%" }} animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }}>
-        <div className="absolute top-1/2 right-1/2 h-px origin-right" style={{ width: "50%", background: "linear-gradient(to left, transparent, rgba(61, 177, 172, 0.6))" }} />
+      <motion.div className="absolute inset-0 m-auto" style={{ width: "100%", height: "100%" }} animate={{ rotate: 360 }} transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}>
+        <div className="absolute top-1/2 right-1/2 h-px origin-right" style={{ width: "50%", background: "linear-gradient(to left, transparent, rgba(61, 177, 172, 0.7))" }} />
+        <div className="absolute top-1/2 right-1/2 h-px origin-right rotate-[-5deg] opacity-40" style={{ width: "50%", background: "linear-gradient(to left, transparent, rgba(61, 177, 172, 0.3))" }} />
       </motion.div>
       {[
         { top: "25%", right: "30%", color: "#ef4444", delay: 0 },
@@ -187,9 +188,9 @@ function RadarAnimation() {
       <div className="absolute inset-0 flex items-center justify-center">
         <motion.div
           className="w-3 h-3 rounded-full bg-[#3DB1AC]"
-          style={{ boxShadow: "0 0 20px rgba(61, 177, 172, 0.5)" }}
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          style={{ boxShadow: "0 0 24px rgba(61, 177, 172, 0.6)" }}
+          animate={{ scale: [1, 1.4, 1], opacity: [1, 0.7, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
     </div>
@@ -687,10 +688,10 @@ function PresentationOverlay({
 function PremiumCard({ children, className = "", onClick, delay = 0, glow }: { children: React.ReactNode; className?: string; onClick?: () => void; delay?: number; glow?: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24, scale: 0.95 }}
+      initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-      whileHover={onClick ? { y: -4, scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } } : undefined}
+      transition={{ delay, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={onClick ? { y: -6, scale: 1.015, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } } : { y: -2, transition: { duration: 0.3, ease: "easeOut" } }}
       onClick={onClick}
       className={`
         relative rounded-2xl border overflow-hidden
@@ -1006,22 +1007,36 @@ export default function Dashboard() {
       <div className="space-y-6 p-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white dark:bg-[rgba(26,37,80,0.7)] rounded-2xl border border-[#e2e5ef] dark:border-[rgba(61,177,172,0.1)] p-6 animate-pulse">
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              className="bg-white dark:bg-[rgba(26,37,80,0.7)] rounded-2xl border border-[#e2e5ef] dark:border-[rgba(61,177,172,0.1)] p-6 skeleton-shimmer"
+            >
               <div className="flex items-center justify-between flex-wrap mb-4">
-                <div className="w-20 h-4 bg-muted/50 rounded-lg" />
-                <div className="w-11 h-11 bg-muted/30 rounded-xl" />
+                <div className="w-20 h-4 bg-muted/40 rounded-lg animate-pulse" />
+                <div className="w-11 h-11 bg-muted/20 rounded-xl animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
               </div>
-              <div className="w-28 h-9 bg-muted/40 rounded-lg mb-3" />
-              <div className="w-full h-10 bg-muted/20 rounded-lg" />
-            </div>
+              <div className="w-28 h-9 bg-muted/30 rounded-lg mb-3 animate-pulse" style={{ animationDelay: `${i * 200}ms` }} />
+              <div className="w-full h-10 bg-muted/15 rounded-lg animate-pulse" style={{ animationDelay: `${i * 250}ms` }} />
+            </motion.div>
           ))}
         </div>
-        <div className="flex items-center justify-center h-40 gap-3">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col items-center justify-center h-40 gap-3"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          >
             <Loader2 className="w-8 h-8 text-primary" />
           </motion.div>
-          <span className="text-sm text-muted-foreground">جاري تحميل المؤشرات...</span>
-        </div>
+          <span className="text-sm text-muted-foreground animate-pulse">جاري تحميل المؤشرات...</span>
+        </motion.div>
       </div>
     );
   }
@@ -1111,11 +1126,11 @@ export default function Dashboard() {
                   </div>
                   <motion.div
                     className={`w-14 h-14 sm:w-11 sm:h-11 rounded-xl ${card.iconBg} flex items-center justify-center`}
-                    style={{ boxShadow: `0 0 16px ${card.glowColor}` }}
-                    whileHover={{ rotate: -8, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    style={{ boxShadow: `0 0 20px ${card.glowColor}` }}
+                    whileHover={{ rotate: -10, scale: 1.15 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
                   >
-                    <Icon className={`w-7 h-7 sm:w-5 sm:h-5 ${card.iconColor}`} />
+                    <Icon className={`w-7 h-7 sm:w-5 sm:h-5 ${card.iconColor} drop-shadow-sm`} />
                   </motion.div>
                 </div>
 
