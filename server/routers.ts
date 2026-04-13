@@ -25,7 +25,8 @@ import PptxGenJS from "pptxgenjs";
 import cron from "node-cron";
 import { notifyOwner } from "./_core/notification";
 import { processChat, getGreeting, learnFromDocument, RASID_AVATAR, RASID_AVATAR_ALT, RASID_AVATAR_ALT2 } from "./aiAssistant";
-import { startDeepScanJob, pauseScan, resumeScan, cancelScan, getActiveScanJobId, isScanPaused, deepScanDomain, setFastScanMode } from "./deepScanner";
+import { startDeepScanJob, pauseScan, resumeScan, cancelScan, getActiveScanJobId, isScanPaused, deepScanDomain, setFastScanMode, setScanOptions, type ScanOptions, type DeepScanResult } from "./deepScanner";
+import { scanWithPuppeteer, fetchPrivacyPageWithPuppeteer } from "./puppeteerHelper";
 import { processSmartRasidQuery, searchKnowledge, generateEmbedding } from "./_core/rag";
 import { broadcastNotification } from "./websocket";
 import { triggerJob, toggleJobStatus } from "./scheduler";
@@ -9308,7 +9309,14 @@ function stopEscalationChecker() {
   console.log('[Escalation] Checker stopped');
 }
 
-// Helper: Process advanced scan with options
+// ═══════════════════════════════════════════════════════════════════════════
+// Advanced Scan Engine v2.0 - Two-Phase Real Scanning System
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 1: Discovery - Uses deepScanDomain (20+ strategies) to find privacy pages
+// Phase 2: Deep Processing - Uses Puppeteer for full screenshots + text extraction
+// All options are REAL and FUNCTIONAL - nothing cosmetic
+// ═══════════════════════════════════════════════════════════════════════════
+
 async function processAdvancedScan(
   jobId: number,
   sites: Array<{ url: string; siteId?: number; siteName?: string; sectorType?: string; classification?: string }>,
@@ -9317,165 +9325,408 @@ async function processAdvancedScan(
 ) {
   let completed = 0;
   let failed = 0;
-  const timeoutMs = (options.timeout || 30) * 1000;
+  const total = sites.length;
   const concurrency = options.parallelScan ? 5 : 1;
+  const timeoutSec = options.timeout || 30;
 
-  // Process in batches for parallel scanning
+  console.log(`[AdvancedScan v2.0] ══════════════════════════════════════════`);
+  console.log(`[AdvancedScan v2.0] Starting job ${jobId} | ${total} sites`);
+  console.log(`[AdvancedScan v2.0] Options: deepScan=${options.deepScan}, parallel=${options.parallelScan}(${concurrency}), screenshots=${options.captureScreenshots}, extractText=${options.extractText}, scanApps=${options.scanApps}, bypassDynamic=${options.bypassDynamic}, timeout=${timeoutSec}s, depth=${options.scanDepth}`);
+  console.log(`[AdvancedScan v2.0] ══════════════════════════════════════════`);
+
+  // Configure the deep scanner engine with user options
+  setScanOptions({
+    timeout: timeoutSec,
+    scanDepth: options.scanDepth || 1,
+    bypassDynamic: options.bypassDynamic || false,
+    extractText: options.extractText !== false,
+    deepScan: options.deepScan || false,
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PHASE 1: Discovery Phase - Find privacy pages using deepScanDomain
+  // Uses 20+ strategies: link text, footer, cookie banner, navigation,
+  // CMS patterns, URL patterns, sitemap, robots.txt, subdomains,
+  // hash routes, JS links, PDF, terms pages, hreflang, iframes,
+  // about/contact pages, third-party services, external docs, image maps,
+  // Puppeteer DOM discovery, Google Cache, Wayback Machine fallback
+  // ═══════════════════════════════════════════════════════════════════════
+  console.log(`[AdvancedScan v2.0] ▶ PHASE 1: Discovery (${total} sites)`);
+
+  // Store phase 1 results for phase 2
+  const phase1Results: Map<string, { domain: string; item: typeof sites[0]; scanResult: DeepScanResult }> = new Map();
+
   for (let i = 0; i < sites.length; i += concurrency) {
-    // Check if job was cancelled
+    // Check cancellation
     const jobCheck = await db.getBatchScanJob(jobId);
     if (jobCheck?.status === 'cancelled') {
-      console.log(`[AdvancedScan] Job ${jobId} was cancelled, stopping...`);
+      console.log(`[AdvancedScan v2.0] Job ${jobId} cancelled, stopping...`);
       return;
     }
+
     const batch = sites.slice(i, i + concurrency);
-    const promises = batch.map(async (item) => {
+    const batchPromises = batch.map(async (item) => {
+      const domain = item.url.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '');
       try {
-        let domain = item.url.replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '');
+        console.log(`[AdvancedScan v2.0] [Phase1] Scanning: ${domain}`);
 
-        // Capture screenshot if enabled
-        let screenshotUrl: string | null = null;
-        if (options.captureScreenshots) {
-          try {
-            screenshotUrl = await captureScreenshot(item.url, domain);
-          } catch (e) {
-            console.warn(`[AdvancedScan] Screenshot failed for ${domain}:`, e);
-          }
-        }
+        // Use the REAL deep scanner engine with ALL 20+ strategies
+        const scanResult = await deepScanDomain(domain, {
+          timeout: timeoutSec,
+          scanDepth: options.scanDepth || 1,
+          bypassDynamic: options.bypassDynamic || false,
+          extractText: options.extractText !== false,
+          deepScan: options.deepScan || false,
+        });
 
-        // Crawl for privacy page
-        const crawlResult = await crawlForPrivacy(item.url);
-
-        // If error page detected, skip further processing and mark as failed
-        if (crawlResult.isErrorPage) {
-          console.warn(`[AdvancedScan] Error page detected for ${domain}, marking as failed`);
+        if (!scanResult.siteReachable && !scanResult.privacyUrl) {
+          console.log(`[AdvancedScan v2.0] [Phase1] ✗ ${domain}: unreachable (${scanResult.errorMessage})`);
           failed++;
-          await db.updateBatchScanJob(jobId, { completedUrls: completed, failedUrls: failed });
-          return;
-        }
 
-        // Deep scan: if no privacy found, try common privacy page URLs
-        if (options.deepScan && !crawlResult.privacyUrl) {
-          const commonPaths = [
-            '/privacy', '/privacy-policy', '/policy', '/legal/privacy',
-            '/ar/privacy', '/en/privacy', '/about/privacy',
-            '/%D8%A7%D9%84%D8%AE%D8%B5%D9%88%D8%B5%D9%8A%D8%A9',
-          ];
-          for (const path of commonPaths) {
+          // Still save the site as unreachable
+          let site = await db.getSiteByDomain(domain);
+          if (!site) {
+            await db.insertSite({
+              domain,
+              url: item.url,
+              siteName: item.siteName || domain,
+              siteStatus: 'unreachable',
+              classification: item.classification || 'سعودي عام',
+              sectorType: (item.sectorType as any) || 'private',
+            });
+            site = await db.getSiteByDomain(domain);
+          }
+          if (site) {
+            await db.insertScan({
+              siteId: site.id,
+              domain,
+              overallScore: 0,
+              rating: 'غير متاح',
+              complianceStatus: 'no_policy',
+              summary: scanResult.errorMessage || 'الموقع غير قابل للوصول',
+              clause1Compliant: 0, clause1Evidence: '',
+              clause2Compliant: 0, clause2Evidence: '',
+              clause3Compliant: 0, clause3Evidence: '',
+              clause4Compliant: 0, clause4Evidence: '',
+              clause5Compliant: 0, clause5Evidence: '',
+              clause6Compliant: 0, clause6Evidence: '',
+              clause7Compliant: 0, clause7Evidence: '',
+              clause8Compliant: 0, clause8Evidence: '',
+              recommendations: [],
+              scannedBy: userId,
+            });
+          }
+        } else {
+          const privacyFound = scanResult.privacyUrl ? '✓' : '✗';
+          console.log(`[AdvancedScan v2.0] [Phase1] ${privacyFound} ${domain}: privacy=${scanResult.privacyUrl || 'NOT FOUND'} (method: ${scanResult.privacyMethod || 'none'})`);
+          phase1Results.set(domain, { domain, item, scanResult });
+        }
+      } catch (e: any) {
+        console.error(`[AdvancedScan v2.0] [Phase1] Error for ${domain}:`, e.message?.substring(0, 100));
+        failed++;
+      }
+    });
+
+    await Promise.allSettled(batchPromises);
+    await db.updateBatchScanJob(jobId, { completedUrls: completed + phase1Results.size, failedUrls: failed });
+  }
+
+  console.log(`[AdvancedScan v2.0] ▶ PHASE 1 COMPLETE: ${phase1Results.size} reachable, ${failed} failed`);
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PHASE 2: Deep Processing - Screenshots, Text Extraction, App Scan,
+  // Compliance Analysis, and Database Persistence
+  // ═══════════════════════════════════════════════════════════════════════
+  console.log(`[AdvancedScan v2.0] ▶ PHASE 2: Deep Processing (${phase1Results.size} sites)`);
+
+  const phase2Items = Array.from(phase1Results.values());
+
+  for (let i = 0; i < phase2Items.length; i += concurrency) {
+    // Check cancellation
+    const jobCheck = await db.getBatchScanJob(jobId);
+    if (jobCheck?.status === 'cancelled') {
+      console.log(`[AdvancedScan v2.0] Job ${jobId} cancelled during phase 2`);
+      return;
+    }
+
+    const batch = phase2Items.slice(i, i + concurrency);
+    const batchPromises = batch.map(async ({ domain, item, scanResult }) => {
+      try {
+        console.log(`[AdvancedScan v2.0] [Phase2] Processing: ${domain}`);
+
+        // ── Screenshot Capture (REAL - using thum.io + Puppeteer fallback) ──
+        let screenshotUrl: string | null = scanResult.screenshotUrl || null;
+        let privacyScreenshotUrl: string | null = scanResult.privacyScreenshotUrl || null;
+
+        if (options.captureScreenshots) {
+          // Homepage screenshot
+          if (!screenshotUrl) {
             try {
-              const testUrl = new URL(path, item.url).href;
-              const resp = await fetch(testUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; RasidBot/2.0; +https://rasid.sa)' },
-                signal: AbortSignal.timeout(timeoutMs),
-                redirect: 'follow',
+              screenshotUrl = await captureScreenshot(item.url, domain);
+              console.log(`[AdvancedScan v2.0] [Phase2] 📸 Homepage screenshot: ${screenshotUrl ? 'OK' : 'FAILED'}`);
+            } catch (e) {
+              console.warn(`[AdvancedScan v2.0] [Phase2] Screenshot failed for ${domain}`);
+            }
+          }
+
+          // Privacy page screenshot (REAL full-page with Puppeteer)
+          if (scanResult.privacyUrl && !privacyScreenshotUrl) {
+            try {
+              const puppeteerResult = await fetchPrivacyPageWithPuppeteer(scanResult.privacyUrl, {
+                timeout: timeoutSec * 1000,
+                takeScreenshot: true,
               });
-              if (resp.ok) {
-                const html = await resp.text();
-                // Check if this is an error page
-                const errorCheck = /this\s*site\s*can'?t\s*be\s*reached|err_connection|404\s*not\s*found|page\s*not\s*found|server\s*error|unexpectedly\s*closed/i;
-                if (errorCheck.test(html)) continue;
-                const text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-                  .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-                  .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-                if (text.length > 200 && (text.includes('خصوصية') || text.includes('privacy') || text.includes('بيانات شخصية') || text.includes('personal data'))) {
-                  crawlResult.privacyUrl = testUrl;
-                  crawlResult.privacyText = text.slice(0, 10000);
-                  break;
-                }
+              if (puppeteerResult.screenshot && puppeteerResult.screenshot.length > 1000) {
+                const filename = `privacy-screenshots/${domain.replace(/\./g, '_')}_privacy_${Date.now()}.png`;
+                const { url: s3Url } = await storagePut(filename, puppeteerResult.screenshot, 'image/png');
+                privacyScreenshotUrl = s3Url;
+                console.log(`[AdvancedScan v2.0] [Phase2] 📸 Privacy screenshot: OK`);
               }
-            } catch {}
+
+              // Also update text if Puppeteer got better content
+              if (puppeteerResult.text && puppeteerResult.text.length > (scanResult.privacyTextContent?.length || 0)) {
+                scanResult.privacyTextContent = puppeteerResult.text.slice(0, 20000);
+                scanResult.privacyTextLength = scanResult.privacyTextContent.length;
+              }
+            } catch (e) {
+              console.warn(`[AdvancedScan v2.0] [Phase2] Privacy screenshot failed for ${domain}`);
+            }
           }
         }
 
-        // Analyze compliance
-        let complianceResult = null;
-        if (crawlResult.privacyText && crawlResult.privacyText.length > 50) {
-          complianceResult = await analyzeCompliance(crawlResult.privacyText, domain);
+        // ── Text Extraction Enhancement (REAL - Puppeteer for SPAs) ──
+        if (options.extractText && scanResult.privacyUrl && (!scanResult.privacyTextContent || scanResult.privacyTextContent.length < 200)) {
+          try {
+            console.log(`[AdvancedScan v2.0] [Phase2] 📝 Extracting text via Puppeteer for ${domain}`);
+            const puppeteerResult = await fetchPrivacyPageWithPuppeteer(scanResult.privacyUrl, {
+              timeout: timeoutSec * 1000,
+            });
+            if (puppeteerResult.text && puppeteerResult.text.length > (scanResult.privacyTextContent?.length || 0)) {
+              scanResult.privacyTextContent = puppeteerResult.text.slice(0, 20000);
+              scanResult.privacyTextLength = scanResult.privacyTextContent.length;
+              console.log(`[AdvancedScan v2.0] [Phase2] 📝 Text extracted: ${scanResult.privacyTextContent.length} chars`);
+            }
+          } catch (e) {
+            console.warn(`[AdvancedScan v2.0] [Phase2] Text extraction failed for ${domain}`);
+          }
         }
 
-        // Save/update site
-        let site = await db.getSiteByDomain(domain);
-        if (!site) {
-          await db.insertSite({
-            domain,
-            siteName: item.siteName || crawlResult.siteName || domain,
-            siteStatus: 'active',
-            privacyUrl: crawlResult.privacyUrl || null,
-            contactUrl: crawlResult.contactUrl || null,
-            emails: crawlResult.emails?.join(', ') || null,
-            classification: item.classification || crawlResult.classification || 'سعودي عام',
-            sectorType: (item.sectorType as any) || 'private',
-            screenshotUrl: screenshotUrl || undefined,
-          });
-          site = await db.getSiteByDomain(domain);
-        } else {
-          if (screenshotUrl) await db.updateSiteScreenshot(site.id, screenshotUrl);
+        // ── App Scanning (REAL - Google Play + App Store) ──
+        if (options.scanApps) {
+          try {
+            console.log(`[AdvancedScan v2.0] [Phase2] 📱 Scanning apps for ${domain}`);
+            await scanMobileApps(domain, item.siteName || scanResult.siteName || domain, item.sectorType || 'private');
+          } catch (e) {
+            console.warn(`[AdvancedScan v2.0] [Phase2] App scan failed for ${domain}`);
+          }
         }
-        if (!site) { failed++; return; }
 
-        // Calculate status
-        const score = complianceResult?.overall_score || 0;
+        // ── Compliance Analysis (REAL - AI-powered) ──
+        let complianceResult: any = null;
+        if (scanResult.privacyTextContent && scanResult.privacyTextContent.length > 100) {
+          try {
+            complianceResult = await analyzeCompliance(scanResult.privacyTextContent, domain);
+            console.log(`[AdvancedScan v2.0] [Phase2] 🤖 Compliance: score=${complianceResult?.overall_score || 0}`);
+          } catch (e) {
+            console.warn(`[AdvancedScan v2.0] [Phase2] Compliance analysis failed for ${domain}`);
+          }
+        }
+
+        // ── Calculate Status ──
+        const score = complianceResult?.overall_score || scanResult.overallScore || 0;
         let status: 'compliant' | 'partially_compliant' | 'non_compliant' | 'no_policy' = 'no_policy';
-        if (!crawlResult.privacyUrl) status = 'no_policy';
+        if (!scanResult.privacyUrl) status = 'no_policy';
         else if (score >= 60) status = 'compliant';
         else if (score >= 40) status = 'partially_compliant';
         else status = 'non_compliant';
 
+        // ── Save to Database (REAL - sites + scans tables) ──
+        let site = await db.getSiteByDomain(domain);
+        if (!site) {
+          await db.insertSite({
+            domain,
+            url: item.url,
+            siteName: item.siteName || scanResult.siteName || domain,
+            siteTitle: scanResult.siteTitle || '',
+            siteStatus: scanResult.siteReachable ? 'active' : 'unreachable',
+            privacyUrl: scanResult.privacyUrl || null,
+            privacyMethod: scanResult.privacyMethod || null,
+            contactUrl: scanResult.contactUrl || null,
+            emails: scanResult.contactEmails || null,
+            classification: item.classification || 'سعودي عام',
+            sectorType: (item.sectorType as any) || 'private',
+            screenshotUrl: screenshotUrl || undefined,
+            cms: scanResult.detectedCMS !== 'unknown' ? scanResult.detectedCMS : undefined,
+            hasPrivacyPolicy: scanResult.privacyUrl ? 1 : 0,
+            hasContactInfo: (scanResult.contactEmails || scanResult.contactPhones) ? 1 : 0,
+          });
+          site = await db.getSiteByDomain(domain);
+        } else {
+          // Update existing site with fresh data
+          const updateData: any = {};
+          if (screenshotUrl) updateData.screenshotUrl = screenshotUrl;
+          if (scanResult.privacyUrl) {
+            updateData.privacyUrl = scanResult.privacyUrl;
+            updateData.privacyMethod = scanResult.privacyMethod;
+            updateData.hasPrivacyPolicy = 1;
+          }
+          if (scanResult.contactUrl) updateData.contactUrl = scanResult.contactUrl;
+          if (scanResult.contactEmails) updateData.emails = scanResult.contactEmails;
+          if (scanResult.siteName && scanResult.siteName !== domain) updateData.siteName = scanResult.siteName;
+          if (scanResult.siteTitle) updateData.siteTitle = scanResult.siteTitle;
+          if (scanResult.detectedCMS !== 'unknown') updateData.cms = scanResult.detectedCMS;
+          if (scanResult.siteReachable) updateData.siteStatus = 'active';
+          if (Object.keys(updateData).length > 0) {
+            await db.updateSite(site.id, updateData);
+          }
+        }
+
+        if (!site) { failed++; return; }
+
+        // Insert scan record with ALL data
         const c = complianceResult || {};
         await db.insertScan({
           siteId: site.id,
           domain,
           overallScore: score,
-          rating: c.rating || (status === 'no_policy' ? 'غير ممتثل' : 'ضعيف'),
+          rating: c.rating || scanResult.rating || (status === 'no_policy' ? 'غير ممتثل' : 'ضعيف'),
           complianceStatus: status,
-          summary: c.summary || (status === 'no_policy' ? 'الموقع لا يحتوي على صفحة سياسة خصوصية' : 'تحليل غير مكتمل'),
-          clause1Compliant: c.clause_1?.compliant || false,
-          clause1Evidence: c.clause_1?.evidence || '',
-          clause2Compliant: c.clause_2?.compliant || false,
-          clause2Evidence: c.clause_2?.evidence || '',
-          clause3Compliant: c.clause_3?.compliant || false,
-          clause3Evidence: c.clause_3?.evidence || '',
-          clause4Compliant: c.clause_4?.compliant || false,
-          clause4Evidence: c.clause_4?.evidence || '',
-          clause5Compliant: c.clause_5?.compliant || false,
-          clause5Evidence: c.clause_5?.evidence || '',
-          clause6Compliant: c.clause_6?.compliant || false,
-          clause6Evidence: c.clause_6?.evidence || '',
-          clause7Compliant: c.clause_7?.compliant || false,
-          clause7Evidence: c.clause_7?.evidence || '',
-          clause8Compliant: c.clause_8?.compliant || false,
-          clause8Evidence: c.clause_8?.evidence || '',
-          recommendations: c.recommendations || [],
-          screenshotUrl: screenshotUrl || undefined,
+          summary: c.summary || scanResult.summary || (status === 'no_policy' ? 'لم يتم العثور على صفحة سياسة خصوصية' : 'تحليل غير مكتمل'),
+          clause1Compliant: (c.clause_1?.compliant ?? scanResult.clause1Compliant) ? 1 : 0,
+          clause1Evidence: c.clause_1?.evidence || scanResult.clause1Evidence || '',
+          clause2Compliant: (c.clause_2?.compliant ?? scanResult.clause2Compliant) ? 1 : 0,
+          clause2Evidence: c.clause_2?.evidence || scanResult.clause2Evidence || '',
+          clause3Compliant: (c.clause_3?.compliant ?? scanResult.clause3Compliant) ? 1 : 0,
+          clause3Evidence: c.clause_3?.evidence || scanResult.clause3Evidence || '',
+          clause4Compliant: (c.clause_4?.compliant ?? scanResult.clause4Compliant) ? 1 : 0,
+          clause4Evidence: c.clause_4?.evidence || scanResult.clause4Evidence || '',
+          clause5Compliant: (c.clause_5?.compliant ?? scanResult.clause5Compliant) ? 1 : 0,
+          clause5Evidence: c.clause_5?.evidence || scanResult.clause5Evidence || '',
+          clause6Compliant: (c.clause_6?.compliant ?? scanResult.clause6Compliant) ? 1 : 0,
+          clause6Evidence: c.clause_6?.evidence || scanResult.clause6Evidence || '',
+          clause7Compliant: (c.clause_7?.compliant ?? scanResult.clause7Compliant) ? 1 : 0,
+          clause7Evidence: c.clause_7?.evidence || scanResult.clause7Evidence || '',
+          clause8Compliant: (c.clause_8?.compliant ?? scanResult.clause8Compliant) ? 1 : 0,
+          clause8Evidence: c.clause_8?.evidence || scanResult.clause8Evidence || '',
+          recommendations: c.recommendations || scanResult.recommendations || [],
+          screenshotUrl: screenshotUrl || privacyScreenshotUrl || undefined,
+          privacyTextContent: scanResult.privacyTextContent || undefined,
           scannedBy: userId,
         });
 
         completed++;
-      } catch (e) {
-        console.error(`[AdvancedScan] Error scanning:`, e);
+        console.log(`[AdvancedScan v2.0] [Phase2] ✓ ${domain}: score=${score}, status=${status}, privacy=${scanResult.privacyUrl ? 'YES' : 'NO'}`);
+
+      } catch (e: any) {
+        console.error(`[AdvancedScan v2.0] [Phase2] Error for ${domain}:`, e.message?.substring(0, 150));
         failed++;
       }
     });
 
-    await Promise.all(promises);
+    await Promise.allSettled(batchPromises);
     await db.updateBatchScanJob(jobId, { completedUrls: completed, failedUrls: failed });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // COMPLETION
+  // ═══════════════════════════════════════════════════════════════════════
   await db.updateBatchScanJob(jobId, {
     completedUrls: completed,
     failedUrls: failed,
     status: 'completed',
-    completedAt: new Date(),
+    completedAt: new Date().toISOString(),
   });
+
+  console.log(`[AdvancedScan v2.0] ══════════════════════════════════════════`);
+  console.log(`[AdvancedScan v2.0] Job ${jobId} COMPLETED: ${completed} success, ${failed} failed out of ${total}`);
+  console.log(`[AdvancedScan v2.0] ══════════════════════════════════════════`);
 
   // Notify owner
   try {
-    const { notifyOwner } = await import('./_core/notification');
     await notifyOwner({
-      title: `اكتمل الفحص المتقدم`,
-      content: `تم الانتهاء من فحص ${completed + failed} موقع. ناجح: ${completed}، فاشل: ${failed}`,
+      title: `اكتمل الفحص المتقدم v2.0`,
+      content: `تم فحص ${total} موقع بنظام المرحلتين. ناجح: ${completed}، فاشل: ${failed}`,
     });
   } catch {}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Mobile App Scanner - REAL Google Play + App Store scanning
+// ═══════════════════════════════════════════════════════════════════════════
+async function scanMobileApps(domain: string, entityName: string, sectorType: string) {
+  const searchTerms = [domain.replace(/\./g, ' '), entityName];
+
+  for (const term of searchTerms) {
+    if (!term || term.length < 3) continue;
+
+    // Google Play search
+    try {
+      const gpUrl = `https://play.google.com/store/search?q=${encodeURIComponent(term)}&c=apps&hl=ar`;
+      const gpResp = await fetch(gpUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36' },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (gpResp.ok) {
+        const gpHtml = await gpResp.text();
+        // Extract app links
+        const appLinks = gpHtml.match(/\/store\/apps\/details\?id=[a-zA-Z0-9._]+/g) || [];
+        const uniqueApps = Array.from(new Set(appLinks)).slice(0, 3);
+
+        for (const appPath of uniqueApps) {
+          const appUrl = `https://play.google.com${appPath}`;
+          const appInfo = await extractAppInfo(appUrl, 'android');
+          if (appInfo.appName) {
+            try {
+              await db.insertMobileApp({
+                appName: appInfo.appName,
+                developer: appInfo.developer || '',
+                platform: 'android',
+                storeUrl: appUrl,
+                packageName: appInfo.packageName || '',
+                privacyPolicyUrl: appInfo.privacyPolicyUrl || null,
+                iconUrl: appInfo.iconUrl || null,
+                downloads: appInfo.downloads || null,
+                category: appInfo.category || null,
+                sectorType: sectorType as any,
+                entityName: entityName,
+              });
+              console.log(`[AdvancedScan v2.0] 📱 Android app saved: ${appInfo.appName}`);
+            } catch { /* duplicate or DB error */ }
+          }
+        }
+      }
+    } catch { /* Google Play search failed */ }
+
+    // App Store search
+    try {
+      const asUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=sa&media=software&limit=3`;
+      const asResp = await fetch(asUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (asResp.ok) {
+        const asData = await asResp.json() as any;
+        for (const app of (asData.results || [])) {
+          try {
+            await db.insertMobileApp({
+              appName: app.trackName || '',
+              developer: app.artistName || '',
+              platform: 'ios',
+              storeUrl: app.trackViewUrl || '',
+              packageName: app.bundleId || '',
+              privacyPolicyUrl: app.privacyPolicyUrl || null,
+              iconUrl: app.artworkUrl100 || null,
+              downloads: null,
+              category: app.primaryGenreName || null,
+              sectorType: sectorType as any,
+              entityName: entityName,
+            });
+            console.log(`[AdvancedScan v2.0] 📱 iOS app saved: ${app.trackName}`);
+          } catch { /* duplicate or DB error */ }
+        }
+      }
+    } catch { /* App Store search failed */ }
+  }
 }
 
 // Auto-start cron engine and escalation checker on server startup

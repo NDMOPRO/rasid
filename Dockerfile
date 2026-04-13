@@ -24,6 +24,24 @@ RUN pnpm run build
 FROM node:20-slim AS production
 WORKDIR /app
 
+# Install Chromium and required dependencies for Puppeteer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    fonts-ipafont-gothic \
+    fonts-wqy-zenhei \
+    fonts-thai-tlwg \
+    fonts-kacst \
+    fonts-noto-color-emoji \
+    fonts-noto-cjk \
+    fonts-freefont-ttf \
+    ca-certificates \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Chromium path for Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV CHROMIUM_PATH=/usr/bin/chromium
+
 # Copy built artifacts and production dependencies
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/node_modules ./node_modules

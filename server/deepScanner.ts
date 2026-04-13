@@ -673,11 +673,29 @@ export interface DeepScanResult {
 let fastScanMode = true;
 export function setFastScanMode(enabled: boolean) { fastScanMode = enabled; }
 
-export async function deepScanDomain(domain: string): Promise<DeepScanResult> {
+// ===== Scan Options Interface =====
+export interface ScanOptions {
+  timeout?: number;        // مهلة الاتصال بالثواني (الافتراضي 30)
+  scanDepth?: number;      // عمق الفحص - عدد المستويات (الافتراضي 1)
+  bypassDynamic?: boolean; // تجاوز الديناميكي - استخدام Puppeteer دائماً
+  extractText?: boolean;   // استخراج النصوص (الافتراضي true)
+  deepScan?: boolean;      // فحص عميق - بحث في مسارات إضافية
+}
+
+// خيارات الفحص الحالية (تُمرر من processAdvancedScan)
+let currentScanOptions: ScanOptions = {};
+export function setScanOptions(opts: ScanOptions) { currentScanOptions = opts; }
+export function getScanOptions(): ScanOptions { return currentScanOptions; }
+
+export async function deepScanDomain(domain: string, options?: ScanOptions): Promise<DeepScanResult> {
+  // تطبيق الخيارات المحلية أو العامة
+  const opts = options || currentScanOptions;
+  const timeoutMs = (opts.timeout && opts.timeout > 0) ? opts.timeout * 1000 : GLOBAL_SCAN_TIMEOUT;
+  
   return Promise.race([
-    _deepScanDomainImpl(domain),
+    _deepScanDomainImpl(domain, opts),
     new Promise<DeepScanResult>((_, reject) =>
-      setTimeout(() => reject(new Error('Global scan timeout')), GLOBAL_SCAN_TIMEOUT)
+      setTimeout(() => reject(new Error('Global scan timeout')), timeoutMs)
     )
   ]).catch(e => createErrorResult(e.message || 'timeout'));
 }
@@ -706,7 +724,7 @@ function createErrorResult(errorMessage: string): DeepScanResult {
   };
 }
 
-async function _deepScanDomainImpl(domain: string): Promise<DeepScanResult> {
+async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promise<DeepScanResult> {
   const startTime = Date.now();
   const result: DeepScanResult = {
     ...createErrorResult(''),
@@ -725,8 +743,9 @@ async function _deepScanDomainImpl(domain: string): Promise<DeepScanResult> {
     const httpUrl = `http://${domain}`;
 
     try {
-      const httpsPromise = fetchWithRetry(httpsUrl, { timeout: FETCH_TIMEOUT, ua }).then(r => ({ response: r, protocol: 'https' }));
-      const httpPromise = fetchWithRetry(httpUrl, { timeout: FETCH_TIMEOUT, ua }).then(r => ({ response: r, protocol: 'http' }));
+      const fetchTimeout = (options?.timeout && options.timeout > 0) ? options.timeout * 1000 : FETCH_TIMEOUT;
+      const httpsPromise = fetchWithRetry(httpsUrl, { timeout: fetchTimeout, ua }).then(r => ({ response: r, protocol: 'https' }));
+      const httpPromise = fetchWithRetry(httpUrl, { timeout: fetchTimeout, ua }).then(r => ({ response: r, protocol: 'http' }));
 
       const results = await Promise.allSettled([httpsPromise, httpPromise]);
       let successResult: { response: Response; protocol: string } | null = null;
@@ -865,8 +884,9 @@ async function _deepScanDomainImpl(domain: string): Promise<DeepScanResult> {
       } catch {}
     }
 
-    // ===== Step 2.7: SPA Detection - Use Puppeteer if HTML is too thin =====
-    if (likelyNeedsPuppeteer(html) || (html.length < 2000 && !isErrorPage(html) && !isParkingPage(html))) {
+    // ===== Step 2.7: SPA Detection / Dynamic Bypass - Use Puppeteer =====
+    const forcePuppeteer = options?.bypassDynamic === true;
+    if (forcePuppeteer || likelyNeedsPuppeteer(html) || (html.length < 2000 && !isErrorPage(html) && !isParkingPage(html))) {
       try {
         const puppeteerResult = await scanWithPuppeteer(finalUrl, { takeScreenshot: false, extractPrivacyLinks: true });
         if (puppeteerResult.html.length > html.length) {
@@ -903,8 +923,32 @@ async function _deepScanDomainImpl(domain: string): Promise<DeepScanResult> {
     result.socialLinks = contactInfo.socialLinks;
     result.contactUrl = contactInfo.contactUrl;
 
-    // ===== Step 7: Multi-Strategy Privacy Discovery (20 strategies) =====
+    // ===== Step 7: Multi-Strategy Privacy Discovery (20+ strategies) =====
+    // deepScan: يبحث في مسارات إضافية ومستويات أعمق
+    const isDeepScan = options?.deepScan === true;
     const privacyDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
+    
+    // Deep Scan: محاولات إضافية إذا لم يُعثر على صفحة خصوصية
+    if (isDeepScan && !privacyDiscovery.url) {
+      console.log('[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية...');
+      // محاولة البحث في صفحات فرعية إضافية
+      const deepPaths = ['/legal', '/terms', '/about', '/contact', '/ar/privacy', '/en/privacy', '/ar/privacy-policy', '/en/privacy-policy', '/pages/privacy', '/page/privacy-policy', '/info/privacy'];
+      for (const path of deepPaths) {
+        if (privacyDiscovery.url) break;
+        try {
+          const deepUrl = new URL(path, resolvedBaseUrl).href;
+          const deepResp = await fetchWithRetry(deepUrl, { timeout: (options?.timeout || 12) * 1000, ua });
+          if (deepResp.ok) {
+            const deepHtml = await readResponseWithEncoding(deepResp);
+            if (deepHtml.length > 500 && /خصوصية|privacy|سياسة|policy/i.test(deepHtml)) {
+              privacyDiscovery.url = deepUrl;
+              privacyDiscovery.method = 'deep_scan_path_discovery';
+              console.log('[DeepScan] وُجدت صفحة خصوصية في:', deepUrl);
+            }
+          }
+        } catch {}
+      }
+    }
     result.privacyUrl = privacyDiscovery.url ? normalizeUrl(privacyDiscovery.url) : '';
     result.privacyMethod = privacyDiscovery.method;
 
@@ -919,8 +963,9 @@ async function _deepScanDomainImpl(domain: string): Promise<DeepScanResult> {
       } catch { /* Puppeteer discovery failed */ }
     }
 
-    // ===== Step 8: Extract privacy text =====
-    if (result.privacyUrl) {
+    // ===== Step 8: Extract privacy text (controlled by extractText option) =====
+    const shouldExtractText = options?.extractText !== false; // الافتراضي true
+    if (result.privacyUrl && shouldExtractText) {
       const privacyContent = await extractPrivacyText(result.privacyUrl, ua);
       result.privacyTextContent = privacyContent.text;
       result.privacyTextLength = privacyContent.text.length;
