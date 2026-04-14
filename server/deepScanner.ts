@@ -801,14 +801,18 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
             finalUrl = retryResult.url;
             result.siteReachable = true;
           } else {
-            result.errorMessage = `HTTP ${successResult.response.status} - الموقع يرفض الوصول`;
-            result.scanDuration = Date.now() - startTime;
-            return result;
+            // DO NOT return early! Puppeteer in Step 2.7 might still work.
+            // The privacy page might be accessible even if homepage returns 403.
+            result.errorMessage = `HTTP ${successResult.response.status} - الموقع يرفض الوصول عبر fetch - سيتم المحاولة عبر المتصفح`;
+            html = ''; // Empty HTML, Puppeteer will try to get it
+            console.log(`[DeepScan] Homepage returned ${successResult.response.status} but continuing scan with Puppeteer`);
           }
         } else {
-          result.errorMessage = `HTTP ${successResult.response.status}`;
-          result.scanDuration = Date.now() - startTime;
-          return result;
+          // DO NOT return early for other HTTP errors either!
+          // The privacy page might still be accessible at a different path.
+          result.errorMessage = `HTTP ${successResult.response.status} - سيتم البحث عن صفحة الخصوصية رغم ذلك`;
+          html = '';
+          console.log(`[DeepScan] Homepage returned ${successResult.response.status} but continuing scan`);
         }
       } else {
         // Try Google Cache / Wayback Machine fallback (Challenge 18.x)
@@ -821,10 +825,11 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
             ? 'تم الوصول عبر Google Cache (الموقع الأصلي غير متاح)'
             : 'تم الوصول عبر Wayback Machine (الموقع الأصلي غير متاح)';
         } else {
+          // DO NOT return early! Puppeteer might still work.
           const firstErr = results.find(r => r.status === 'rejected');
-          result.errorMessage = `الموقع غير قابل للوصول: ${(firstErr as any)?.reason?.message || 'timeout'}`;
-          result.scanDuration = Date.now() - startTime;
-          return result;
+          result.errorMessage = `الموقع غير قابل للوصول عبر fetch - سيتم المحاولة عبر المتصفح: ${(firstErr as any)?.reason?.message || 'timeout'}`;
+          html = '';
+          console.log(`[DeepScan] All fetch attempts failed but continuing scan with Puppeteer`);
         }
       }
     } catch (e: any) {
@@ -838,9 +843,10 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
           ? 'تم الوصول عبر Google Cache (الموقع الأصلي غير متاح)'
           : 'تم الوصول عبر Wayback Machine (الموقع الأصلي غير متاح)';
       } else {
-        result.errorMessage = `الموقع غير قابل للوصول: ${e.message}`;
-        result.scanDuration = Date.now() - startTime;
-        return result;
+        // DO NOT return early! Puppeteer might still work.
+        result.errorMessage = `الموقع غير قابل للوصول عبر fetch - سيتم المحاولة عبر المتصفح: ${e.message}`;
+        html = '';
+        console.log(`[DeepScan] Exception in fetch but continuing scan with Puppeteer: ${e.message?.substring(0, 80)}`);
       }
     }
 
@@ -901,29 +907,38 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     // Most Saudi sites are SPAs that return the same HTML shell for all paths.
     // fetch gets empty shells; only Puppeteer renders the actual content.
     // We ALWAYS run Puppeteer to get rendered HTML and discover privacy links in the DOM.
+    // RETRY LOGIC: Try twice with increasing timeout for heavy sites (banks, government)
     let puppeteerPrivacyLinks: Array<{ url: string; text: string; strategy: string }> = [];
-    try {
-      console.log(`[DeepScan] Running Puppeteer for rendered DOM: ${finalUrl}`);
-      const puppeteerResult = await scanWithPuppeteer(finalUrl, {
-        takeScreenshot: false,
-        extractPrivacyLinks: true,
-        timeout: 25000,
-        waitForNetworkIdle: true,
-        simulateHuman: true,
-      });
-      // Always use Puppeteer HTML if it's substantial (rendered content)
-      if (puppeteerResult.html && puppeteerResult.html.length > 500) {
-        // For SPA sites, Puppeteer HTML is always better
-        html = puppeteerResult.html;
-        result.detectedCMS = puppeteerResult.jsFramework || result.detectedCMS;
+    const puppeteerAttempts = [
+      { timeout: 35000, label: 'attempt 1' },
+      { timeout: 50000, label: 'attempt 2 (extended)' },
+    ];
+    for (const attempt of puppeteerAttempts) {
+      if (puppeteerPrivacyLinks.length > 0) break; // Already found links
+      try {
+        console.log(`[DeepScan] Running Puppeteer ${attempt.label} for rendered DOM: ${finalUrl}`);
+        const puppeteerResult = await scanWithPuppeteer(finalUrl, {
+          takeScreenshot: false,
+          extractPrivacyLinks: true,
+          timeout: attempt.timeout,
+          waitForNetworkIdle: true,
+          simulateHuman: true,
+        });
+        // Always use Puppeteer HTML if it's substantial (rendered content)
+        if (puppeteerResult.html && puppeteerResult.html.length > 500) {
+          // For SPA sites, Puppeteer HTML is always better
+          html = puppeteerResult.html;
+          result.detectedCMS = puppeteerResult.jsFramework || result.detectedCMS;
+          result.siteReachable = true; // Mark as reachable since Puppeteer succeeded
+        }
+        // Save ALL privacy links found by Puppeteer for later use
+        if (puppeteerResult.privacyLinks && puppeteerResult.privacyLinks.length > 0) {
+          puppeteerPrivacyLinks = puppeteerResult.privacyLinks;
+          console.log(`[DeepScan] Puppeteer found ${puppeteerPrivacyLinks.length} privacy links: ${puppeteerPrivacyLinks.map(l => l.url).join(', ')}`);
+        }
+      } catch (e: any) {
+        console.warn(`[DeepScan] Puppeteer ${attempt.label} failed for ${finalUrl}: ${e.message?.substring(0, 100)}`);
       }
-      // Save ALL privacy links found by Puppeteer for later use
-      if (puppeteerResult.privacyLinks && puppeteerResult.privacyLinks.length > 0) {
-        puppeteerPrivacyLinks = puppeteerResult.privacyLinks;
-        console.log(`[DeepScan] Puppeteer found ${puppeteerPrivacyLinks.length} privacy links: ${puppeteerPrivacyLinks.map(l => l.url).join(', ')}`);
-      }
-    } catch (e: any) {
-      console.warn(`[DeepScan] Puppeteer failed for ${finalUrl}: ${e.message?.substring(0, 100)}`);
     }
 
     // ===== Step 2.6: Resolve base URL for relative links =====
@@ -988,21 +1003,40 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
       console.log('[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية باستخدام Puppeteer...');
       // محاولة البحث في صفحات فرعية إضافية باستخدام Puppeteer (لأن fetch لا يعمل مع SPA)
       const deepPaths = [
+        // Standard paths
         '/privacy-policy', '/privacy', '/en/privacy-policy', '/ar/privacy-policy',
         '/en/privacy', '/ar/privacy', '/legal/privacy', '/legal/privacy-policy',
         '/pages/privacy-policy', '/pages/privacy', '/policies/privacy-policy',
         '/about/privacy', '/info/privacy', '/help/privacy',
+        // Regional paths (Saudi, UAE, etc.)
         '/saudi-en/privacy-policy', '/saudi-ar/privacy-policy',
         '/sa/privacy-policy', '/sa-en/privacy-policy',
+        '/uae-en/privacy-policy', '/uae-ar/privacy-policy',
+        // E-commerce paths
         '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
-        '/legal', '/terms', '/about', '/contact',
+        '/customer-service/privacy-policy', '/customer/privacy',
+        // Banking/Financial paths
+        '/privacy-notice', '/data-privacy', '/data-protection',
+        '/personal/privacy-policy', '/retail/privacy-policy',
+        '/en/personal/privacy-policy', '/ar/personal/privacy-policy',
+        '/about-us/privacy-policy', '/about-us/privacy',
+        '/corporate/privacy-policy', '/governance/privacy',
+        '/compliance/privacy', '/security/privacy',
+        // Government paths
+        '/open-data/privacy', '/services/privacy',
+        // Arabic paths
+        '/سياسة-الخصوصية', '/الخصوصية',
+        // Fallback general pages that might contain privacy links
+        '/legal', '/terms', '/about', '/contact', '/help',
+        '/terms-and-conditions', '/terms-of-service', '/terms-of-use',
+        '/sitemap', '/footer', '/links',
       ];
       for (const path of deepPaths) {
         if (privacyDiscovery.url) break;
         try {
           const deepUrl = new URL(path, resolvedBaseUrl).href;
           console.log(`[DeepScan] Trying Puppeteer for: ${deepUrl}`);
-          const puppeteerResult = await fetchPrivacyPageWithPuppeteer(deepUrl, { timeout: 15000 });
+          const puppeteerResult = await fetchPrivacyPageWithPuppeteer(deepUrl, { timeout: 25000 });
           if (puppeteerResult.text && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
             privacyDiscovery.url = deepUrl;
             privacyDiscovery.method = 'deep_scan_puppeteer_path';
@@ -1335,27 +1369,59 @@ async function discoverPrivacyPageEnhanced(
   if (imageMapResult) return { url: imageMapResult, method: 'image_map_svg' };
 
   // Strategy 22: Puppeteer-based URL pattern testing (for sites that block fetch)
+  // This is critical for SPA sites and sites with anti-bot protection
   try {
     const puppeteerPatterns = [
+      // Standard paths
       '/privacy-policy', '/privacy', '/en/privacy-policy', '/ar/privacy-policy',
+      '/en/privacy', '/ar/privacy',
+      // Regional paths
       '/saudi-en/privacy-policy', '/saudi-ar/privacy-policy',
       '/uae-en/privacy-policy', '/uae-ar/privacy-policy',
       '/sa/privacy-policy', '/sa-en/privacy-policy',
+      // E-commerce
       '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
+      '/customer-service/privacy-policy',
+      // CMS paths
       '/pages/privacy-policy', '/policies/privacy-policy',
       '/legal/privacy', '/legal/privacy-policy',
       '/policy/privacy', '/about/privacy',
       '/help/privacy', '/support/privacy',
       '/customer/privacy', '/info/privacy-policy',
+      // Banking/Financial paths
+      '/privacy-notice', '/data-privacy', '/data-protection',
+      '/personal/privacy-policy', '/retail/privacy-policy',
+      '/en/personal/privacy-policy', '/ar/personal/privacy-policy',
+      '/about-us/privacy-policy', '/about-us/privacy',
+      '/corporate/privacy-policy', '/governance/privacy',
+      '/compliance/privacy', '/security/privacy',
+      // Government paths
+      '/open-data/privacy', '/services/privacy',
+      // Arabic paths
+      '/سياسة-الخصوصية', '/الخصوصية',
+      // Terms pages that might contain privacy
+      '/terms-and-conditions', '/terms-of-service', '/terms',
     ];
-    for (const pattern of puppeteerPatterns) {
-      try {
-        const testUrl = new URL(pattern, baseUrl).href;
-        const puppeteerResult = await fetchPrivacyPageWithPuppeteer(testUrl, { timeout: 15000 });
-        if (!puppeteerResult.error && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
-          return { url: testUrl, method: 'strategy_22_puppeteer_url_pattern' };
+    // Process in batches of 5 for speed
+    for (let i = 0; i < puppeteerPatterns.length; i += 5) {
+      const batch = puppeteerPatterns.slice(i, i + 5);
+      const results = await Promise.allSettled(
+        batch.map(async (pattern) => {
+          try {
+            const testUrl = new URL(pattern, baseUrl).href;
+            const puppeteerResult = await fetchPrivacyPageWithPuppeteer(testUrl, { timeout: 20000 });
+            if (!puppeteerResult.error && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
+              return testUrl;
+            }
+          } catch {}
+          return null;
+        })
+      );
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value) {
+          return { url: r.value, method: 'strategy_22_puppeteer_url_pattern' };
         }
-      } catch { /* skip this pattern */ }
+      }
     }
   } catch { /* Puppeteer URL pattern strategy failed */ }
 
@@ -1395,6 +1461,62 @@ async function discoverPrivacyPageEnhanced(
       }
     }
   } catch { /* Google Search fallback failed */ }
+
+  // Strategy 24: Puppeteer DOM Discovery on sub-pages
+  // Open common sub-pages with Puppeteer and search for privacy links in rendered DOM
+  try {
+    const subPages = ['/legal', '/terms', '/about', '/about-us', '/help', '/contact', '/sitemap'];
+    for (const subPage of subPages) {
+      try {
+        const subUrl = new URL(subPage, baseUrl).href;
+        console.log(`[DeepScan] Strategy 24: Scanning sub-page for privacy links: ${subUrl}`);
+        const subResult = await scanWithPuppeteer(subUrl, {
+          takeScreenshot: false,
+          extractPrivacyLinks: true,
+          timeout: 20000,
+          waitForNetworkIdle: true,
+          simulateHuman: false,
+        });
+        if (subResult.privacyLinks && subResult.privacyLinks.length > 0) {
+          // Validate the found link
+          for (const pLink of subResult.privacyLinks) {
+            try {
+              const testResult = await fetchPrivacyPageWithPuppeteer(pLink.url, { timeout: 15000 });
+              if (testResult.text && testResult.text.length > 300 && isPrivacyContent(testResult.text)) {
+                console.log(`[DeepScan] Strategy 24: Found privacy link in sub-page ${subPage}: ${pLink.url}`);
+                return { url: pLink.url, method: `strategy_24_subpage_${subPage.replace('/', '')}` };
+              }
+            } catch {}
+          }
+          // Use first link even if validation failed
+          return { url: subResult.privacyLinks[0].url, method: `strategy_24_subpage_unvalidated` };
+        }
+      } catch {}
+    }
+  } catch { /* Sub-page scanning failed */ }
+
+  // Strategy 25: Google Search with Puppeteer (when fetch-based Google Search fails)
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const searchQuery = `site:${searchDomain} سياسة الخصوصية OR privacy policy`;
+    console.log(`[DeepScan] Strategy 25: Google Search with Puppeteer: ${searchQuery}`);
+    const googleResult = await fetchPrivacyPageWithPuppeteer(
+      `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&num=5&hl=ar`,
+      { timeout: 15000 }
+    );
+    if (googleResult.html) {
+      // Extract URLs from rendered Google results
+      const urlRegex = /href="(https?:\/\/[^"]*(?:privacy|خصوصية|حماية|سياسة)[^"]*)"/gi;
+      let urlMatch;
+      while ((urlMatch = urlRegex.exec(googleResult.html)) !== null) {
+        const foundUrl = urlMatch[1];
+        if (foundUrl.includes(searchDomain) && !foundUrl.includes('google.com')) {
+          console.log(`[DeepScan] Strategy 25: Google Puppeteer found: ${foundUrl}`);
+          return { url: foundUrl, method: 'google_search_puppeteer' };
+        }
+      }
+    }
+  } catch { /* Google Puppeteer search failed */ }
 
   return { url: '', method: '' };
 }
