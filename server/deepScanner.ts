@@ -435,6 +435,18 @@ const FAST_PRIVACY_PATTERNS = [
   '/legal/privacy-policy', '/about/privacy',
   '/privacy-notice', '/data-privacy',
   '/policy/privacy', '/legal',
+  // Regional/locale-based patterns (noon, amazon, etc.)
+  '/saudi-en/privacy-policy', '/saudi-ar/privacy-policy',
+  '/uae-en/privacy-policy', '/uae-ar/privacy-policy',
+  '/sa/privacy-policy', '/sa/en/privacy-policy', '/sa/ar/privacy-policy',
+  '/sa-en/privacy-policy', '/sa-ar/privacy-policy',
+  // Amazon-specific patterns
+  '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
+  '/gp/help/customer/display.html?nodeId=201909010',
+  '/help/privacy', '/help/privacy-policy',
+  // Common e-commerce patterns
+  '/info/privacy-policy', '/customer/privacy',
+  '/support/privacy-policy', '/terms/privacy-policy',
 ];
 
 // ===== Privacy Link Text Patterns (Challenge 9.1-9.3, 17.10) =====
@@ -1229,6 +1241,28 @@ async function discoverPrivacyPageEnhanced(
   const imageMapResult = findImageMapPrivacyLinks(html, baseUrl);
   if (imageMapResult) return { url: imageMapResult, method: 'image_map_svg' };
 
+  // Strategy 22: Puppeteer-based URL pattern testing (for sites that block fetch)
+  try {
+    const puppeteerPatterns = [
+      '/privacy-policy', '/privacy', '/en/privacy-policy', '/ar/privacy-policy',
+      '/saudi-en/privacy-policy', '/saudi-ar/privacy-policy',
+      '/uae-en/privacy-policy', '/uae-ar/privacy-policy',
+      '/sa/privacy-policy', '/sa-en/privacy-policy',
+      '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
+      '/pages/privacy-policy', '/policies/privacy-policy',
+      '/legal/privacy', '/legal/privacy-policy',
+    ];
+    for (const pattern of puppeteerPatterns) {
+      try {
+        const testUrl = new URL(pattern, baseUrl).href;
+        const puppeteerResult = await fetchPrivacyPageWithPuppeteer(testUrl, { timeout: 15000 });
+        if (!puppeteerResult.error && puppeteerResult.text.length > 500 && isPrivacyContent(puppeteerResult.text)) {
+          return { url: testUrl, method: 'strategy_22_puppeteer_url_pattern' };
+        }
+      } catch { /* skip this pattern */ }
+    }
+  } catch { /* Puppeteer URL pattern strategy failed */ }
+
   return { url: '', method: '' };
 }
 
@@ -1556,7 +1590,16 @@ async function checkPDFPrivacy(html: string, baseUrl: string): Promise<string | 
 async function extractPrivacyText(privacyUrl: string, ua?: string): Promise<{ text: string; html: string }> {
   try {
     const resp = await fetchWithRetry(privacyUrl, { timeout: PRIVACY_FETCH_TIMEOUT, ua });
-    if (!resp.ok) return { text: '', html: '' };
+    if (!resp.ok) {
+      // If fetch returns 403/503, try Puppeteer immediately (sites like noon.com, amazon.sa block fetch)
+      try {
+        const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl, { timeout: 20000 });
+        if (puppeteerResult.text.length > 200) {
+          return { text: puppeteerResult.text.slice(0, 20000), html: puppeteerResult.html };
+        }
+      } catch { /* Puppeteer fallback for blocked fetch failed */ }
+      return { text: '', html: '' };
+    }
     
     const contentType = resp.headers.get('content-type') || '';
     
