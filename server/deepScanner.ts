@@ -783,6 +783,10 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
       if (successResult && successResult.response.ok) {
         // Handle encoding (Challenge 16.x)
         html = await readResponseWithEncoding(successResult.response);
+        console.log(`[DeepScan] Step 1 SUCCESS for ${domain}: HTTP ${successResult.response.status}, HTML length: ${html.length}, protocol: ${successResult.protocol}`);
+        // Quick check: does HTML contain privacy links?
+        const hasPrivacyLink = /privacy|خصوصية|سياسة/i.test(html);
+        console.log(`[DeepScan] Step 1 HTML contains privacy keywords: ${hasPrivacyLink}`);
         result.httpStatus = successResult.response.status;
         finalUrl = successResult.response.url;
         if (finalUrl !== httpsUrl && finalUrl !== httpUrl) result.redirectUrl = finalUrl;
@@ -993,6 +997,7 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     
     // If Puppeteer didn't find anything, fall back to all other strategies
     if (!privacyDiscovery.url) {
+      console.log(`[DeepScan] Puppeteer found NO privacy links for ${domain}. Falling back to discoverPrivacyPageEnhanced with HTML length: ${html.length}`);
       const fallbackDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
       privacyDiscovery.url = fallbackDiscovery.url;
       privacyDiscovery.method = fallbackDiscovery.method;
@@ -1523,6 +1528,7 @@ async function discoverPrivacyPageEnhanced(
 
 // ===== Strategy 1: Find Privacy Links in HTML =====
 function findPrivacyLinks(html: string, baseUrl: string): string | null {
+  console.log(`[findPrivacyLinks] Searching in HTML of length ${html.length} with baseUrl ${baseUrl}`);
   const linkRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   let match;
   const candidates: Array<{ url: string; score: number }> = [];
@@ -1561,9 +1567,13 @@ function findPrivacyLinks(html: string, baseUrl: string): string | null {
     }
   }
 
-  if (candidates.length === 0) return null;
-  candidates.sort((a, b) => b.score - a.score);
-  return candidates[0].url;
+  console.log(`[findPrivacyLinks] Found ${candidates.length} candidates`);
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => b.score - a.score);
+    console.log(`[findPrivacyLinks] Top candidate: ${candidates[0].url} (score: ${candidates[0].score})`);
+    return candidates[0].url;
+  }
+  return null;
 }
 
 // ===== Strategy 2: Footer-specific search =====
