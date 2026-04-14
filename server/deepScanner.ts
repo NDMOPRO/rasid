@@ -423,6 +423,51 @@ const PRIVACY_URL_PATTERNS_FULL = [
   // Additional PDF
   '/downloads/privacy-policy.pdf', '/resources/privacy-policy.pdf',
   '/content/privacy-policy.pdf', '/doc/privacy-policy.pdf',
+  // Banking/Financial sector specific
+  '/about-bank/privacy-policy', '/About-alrajhi-bank/privacy-policy',
+  '/about-bank/privacy', '/about-us/privacy-policy',
+  '/en/about-bank/privacy-policy', '/ar/about-bank/privacy-policy',
+  '/personal/en/privacy-policy', '/personal/ar/privacy-policy',
+  '/retail/en/privacy-policy', '/retail/ar/privacy-policy',
+  '/corporate/en/privacy-policy', '/corporate/ar/privacy-policy',
+  '/wealth/privacy-policy', '/business/privacy-policy',
+  '/investor-relations/privacy', '/governance/privacy-policy',
+  // Telecom sector specific
+  '/personal/privacy', '/business/privacy', '/enterprise/privacy',
+  '/en/personal/privacy', '/ar/personal/privacy',
+  '/en/business/privacy', '/ar/business/privacy',
+  // Saudi-specific deep paths
+  '/sa/en/privacy', '/sa/ar/privacy', '/sa/privacy',
+  '/ksa/en/privacy', '/ksa/ar/privacy',
+  '/gcc/privacy', '/mena/privacy',
+  '/middle-east/privacy', '/saudi-arabia/privacy',
+  // CMS deep paths
+  '/wp/privacy-policy', '/cms/privacy-policy',
+  '/content/privacy', '/node/privacy',
+  '/post/privacy-policy', '/article/privacy-policy',
+  // Government deep paths
+  '/ar/Pages/Privacy.aspx', '/en/Pages/Privacy.aspx',
+  '/ar/SitePages/PrivacyPolicy.aspx', '/en/SitePages/PrivacyPolicy.aspx',
+  '/Pages/privacy.aspx', '/SitePages/privacy.aspx',
+  // Healthcare
+  '/patients/privacy', '/en/patients/privacy',
+  '/health/privacy', '/medical/privacy',
+  // Education
+  '/students/privacy', '/admissions/privacy',
+  '/academic/privacy', '/university/privacy',
+  // E-commerce deeper
+  '/shop/pages/privacy-policy', '/store/pages/privacy-policy',
+  '/marketplace/privacy-policy', '/seller/privacy',
+  // Insurance
+  '/motor/privacy', '/health-insurance/privacy', '/travel/privacy',
+  '/insurance/privacy', '/claims/privacy',
+  // Real estate
+  '/properties/privacy', '/listings/privacy',
+  '/real-estate/privacy', '/rent/privacy',
+  // Hospitality
+  '/hotel/privacy', '/booking/privacy', '/reservations/privacy',
+  // Transport
+  '/flights/privacy', '/travel/privacy-policy', '/transport/privacy',
 ];
 
 // ===== Fast URL patterns (top 15 most common) =====
@@ -447,6 +492,15 @@ const FAST_PRIVACY_PATTERNS = [
   // Common e-commerce patterns
   '/info/privacy-policy', '/customer/privacy',
   '/support/privacy-policy', '/terms/privacy-policy',
+  // Banking/Financial fast patterns
+  '/about-bank/privacy-policy', '/about-us/privacy-policy',
+  '/about-us/privacy', '/personal/privacy-policy',
+  '/retail/privacy-policy', '/corporate/privacy-policy',
+  '/governance/privacy', '/compliance/privacy',
+  '/privacy-notice', '/data-privacy', '/data-protection',
+  // Government fast patterns
+  '/Pages/PrivacyPolicy.aspx', '/SitePages/Privacy.aspx',
+  '/ar/Pages/PrivacyPolicy.aspx', '/en/Pages/PrivacyPolicy.aspx',
 ];
 
 // ===== Privacy Link Text Patterns (Challenge 9.1-9.3, 17.10) =====
@@ -911,8 +965,9 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     // Most Saudi sites are SPAs that return the same HTML shell for all paths.
     // fetch gets empty shells; only Puppeteer renders the actual content.
     // We ALWAYS run Puppeteer to get rendered HTML and discover privacy links in the DOM.
-    // RETRY LOGIC: Try twice with increasing timeout for heavy sites (banks, government)
+    // IMPORTANT: Keep original HTML as fallback - Puppeteer might return different/worse HTML
     let puppeteerPrivacyLinks: Array<{ url: string; text: string; strategy: string }> = [];
+    const originalFetchHtml = html; // PRESERVE original fetch HTML
     const puppeteerAttempts = [
       { timeout: 35000, label: 'attempt 1' },
       { timeout: 50000, label: 'attempt 2 (extended)' },
@@ -928,12 +983,11 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
           waitForNetworkIdle: true,
           simulateHuman: true,
         });
-        // Always use Puppeteer HTML if it's substantial (rendered content)
+        // Use Puppeteer HTML if it's substantial AND has more content than fetch HTML
         if (puppeteerResult.html && puppeteerResult.html.length > 500) {
-          // For SPA sites, Puppeteer HTML is always better
           html = puppeteerResult.html;
           result.detectedCMS = puppeteerResult.jsFramework || result.detectedCMS;
-          result.siteReachable = true; // Mark as reachable since Puppeteer succeeded
+          result.siteReachable = true;
         }
         // Save ALL privacy links found by Puppeteer for later use
         if (puppeteerResult.privacyLinks && puppeteerResult.privacyLinks.length > 0) {
@@ -970,6 +1024,11 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     // ===== Step 7: Multi-Strategy Privacy Discovery (20+ strategies) =====
     // deepScan: يبحث في مسارات إضافية ومستويات أعمق
     const isDeepScan = options?.deepScan === true;
+    const isBypassDynamic = options?.bypassDynamic === true;
+    const scanDepth = options?.scanDepth || 1;
+    const userTimeout = (options?.timeout && options.timeout > 0) ? options.timeout * 1000 : FETCH_TIMEOUT;
+    
+    console.log(`[DeepScan] Options active: deepScan=${isDeepScan}, bypassDynamic=${isBypassDynamic}, scanDepth=${scanDepth}, timeout=${userTimeout}ms`);
     
     // Strategy 0 (HIGHEST PRIORITY): Use Puppeteer-discovered privacy links from Step 2.7
     // These are links found in the RENDERED DOM by a real browser - most reliable method
@@ -996,16 +1055,44 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     }
     
     // If Puppeteer didn't find anything, fall back to all other strategies
+    // CRITICAL FIX: Try BOTH Puppeteer HTML AND original fetch HTML for link discovery
     if (!privacyDiscovery.url) {
-      console.log(`[DeepScan] Puppeteer found NO privacy links for ${domain}. Falling back to discoverPrivacyPageEnhanced with HTML length: ${html.length}`);
-      const fallbackDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
-      privacyDiscovery.url = fallbackDiscovery.url;
-      privacyDiscovery.method = fallbackDiscovery.method;
+      console.log(`[DeepScan] Puppeteer found NO privacy links for ${domain}. Falling back to discoverPrivacyPageEnhanced`);
+      console.log(`[DeepScan] Puppeteer HTML length: ${html.length}, Original fetch HTML length: ${originalFetchHtml.length}`);
+      
+      // Strategy 0.5: Direct href scan on BOTH HTML versions before full discovery
+      // This catches cases like alrajhibank where href contains "privacy" but link text doesn't match patterns
+      const directHrefResult = findPrivacyHrefDirect(html, resolvedBaseUrl) || findPrivacyHrefDirect(originalFetchHtml, resolvedBaseUrl);
+      if (directHrefResult) {
+        privacyDiscovery.url = directHrefResult;
+        privacyDiscovery.method = 'direct_href_scan';
+        console.log(`[DeepScan] ✓ Direct href scan found: ${directHrefResult}`);
+      }
+      
+      // Try with Puppeteer HTML first (rendered DOM)
+      if (!privacyDiscovery.url) {
+        const fallbackDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
+        privacyDiscovery.url = fallbackDiscovery.url;
+        privacyDiscovery.method = fallbackDiscovery.method;
+      }
+      
+      // If still not found and original fetch HTML is different, try with original HTML too
+      if (!privacyDiscovery.url && originalFetchHtml && originalFetchHtml !== html && originalFetchHtml.length > 500) {
+        console.log(`[DeepScan] Trying with original fetch HTML (length: ${originalFetchHtml.length})`);
+        const originalBaseUrl = resolveBaseUrl(originalFetchHtml, finalUrl);
+        const originalDiscovery = await discoverPrivacyPageEnhanced(originalFetchHtml, originalBaseUrl, domain, cmsResult.cms);
+        if (originalDiscovery.url) {
+          privacyDiscovery.url = originalDiscovery.url;
+          privacyDiscovery.method = `original_html_${originalDiscovery.method}`;
+          console.log(`[DeepScan] ✓ Found in original fetch HTML: ${originalDiscovery.url}`);
+        }
+      }
     }
     
     // Deep Scan: محاولات إضافية إذا لم يُعثر على صفحة خصوصية
-    if (!privacyDiscovery.url) {
-      console.log('[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية باستخدام Puppeteer...');
+    // ACTIVATED: Deep scan Puppeteer paths - runs when deepScan=true OR bypassDynamic=true
+    if (!privacyDiscovery.url && (isDeepScan || isBypassDynamic)) {
+      console.log(`[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية باستخدام Puppeteer (deepScan=${isDeepScan}, bypassDynamic=${isBypassDynamic}, scanDepth=${scanDepth})...`);
       // محاولة البحث في صفحات فرعية إضافية باستخدام Puppeteer (لأن fetch لا يعمل مع SPA)
       const deepPaths = [
         // Standard paths
@@ -1036,18 +1123,140 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
         '/terms-and-conditions', '/terms-of-service', '/terms-of-use',
         '/sitemap', '/footer', '/links',
       ];
-      for (const path of deepPaths) {
+      
+      // scanDepth >= 2: Add deeper paths (more sub-directories, regional, sector-specific)
+      if (scanDepth >= 2) {
+        deepPaths.push(
+          // Deeper nested paths
+          '/en/legal/privacy-policy', '/ar/legal/privacy-policy',
+          '/en/about/privacy-policy', '/ar/about/privacy-policy',
+          '/en/pages/privacy-policy', '/ar/pages/privacy-policy',
+          '/en/info/privacy', '/ar/info/privacy',
+          // Banking deeper paths
+          '/personal/en/privacy-policy', '/personal/ar/privacy-policy',
+          '/retail/en/privacy-policy', '/retail/ar/privacy-policy',
+          '/corporate/en/privacy-policy', '/corporate/ar/privacy-policy',
+          '/wealth/privacy-policy', '/business/privacy-policy',
+          '/en/about-bank/privacy-policy', '/ar/about-bank/privacy-policy',
+          '/about-bank/privacy-policy', '/about-us/en/privacy-policy',
+          // Government deeper paths
+          '/ar/Pages/PrivacyPolicy.aspx', '/en/Pages/PrivacyPolicy.aspx',
+          '/ar/SitePages/Privacy.aspx', '/en/SitePages/Privacy.aspx',
+          '/ar/Pages/DataProtection.aspx', '/en/Pages/DataProtection.aspx',
+          // Telecom paths
+          '/personal/privacy', '/business/privacy', '/enterprise/privacy',
+          '/en/personal/privacy', '/ar/personal/privacy',
+          // Healthcare paths
+          '/patients/privacy', '/en/patients/privacy',
+          // Education paths
+          '/students/privacy', '/admissions/privacy',
+          // E-commerce deeper
+          '/shop/pages/privacy-policy', '/store/pages/privacy-policy',
+          '/marketplace/privacy-policy',
+          // Insurance
+          '/motor/privacy', '/health-insurance/privacy', '/travel/privacy',
+          // Real estate
+          '/properties/privacy', '/listings/privacy',
+        );
+      }
+      
+      // scanDepth >= 3: Add even more exotic paths
+      if (scanDepth >= 3) {
+        deepPaths.push(
+          '/investor-relations/privacy', '/media-center/privacy',
+          '/careers/privacy', '/sustainability/privacy',
+          '/csr/privacy', '/innovation/privacy',
+          '/digital/privacy', '/online/privacy',
+          '/mobile/privacy', '/app/privacy',
+          '/api/privacy', '/docs/privacy',
+          '/resources/privacy', '/downloads/privacy',
+          '/faq/privacy', '/knowledge-base/privacy',
+          '/community/privacy', '/forum/privacy',
+          '/blog/privacy', '/news/privacy',
+          '/press/privacy', '/events/privacy',
+        );
+      }
+      // Process deep paths in batches of 5 for speed with Puppeteer
+      const deepTimeout = Math.max(userTimeout, 25000);
+      for (let di = 0; di < deepPaths.length; di += 5) {
         if (privacyDiscovery.url) break;
-        try {
-          const deepUrl = new URL(path, resolvedBaseUrl).href;
-          console.log(`[DeepScan] Trying Puppeteer for: ${deepUrl}`);
-          const puppeteerResult = await fetchPrivacyPageWithPuppeteer(deepUrl, { timeout: 25000 });
-          if (puppeteerResult.text && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
-            privacyDiscovery.url = deepUrl;
+        const deepBatch = deepPaths.slice(di, di + 5);
+        const deepResults = await Promise.allSettled(
+          deepBatch.map(async (path) => {
+            try {
+              const deepUrl = new URL(path, resolvedBaseUrl).href;
+              console.log(`[DeepScan] Trying Puppeteer for: ${deepUrl}`);
+              const puppeteerResult = await fetchPrivacyPageWithPuppeteer(deepUrl, { timeout: deepTimeout });
+              if (puppeteerResult.text && puppeteerResult.text.length > 200) {
+                // Relaxed check: if URL contains "privacy" we trust it more
+                const urlHasPrivacy = /privacy|خصوصية/i.test(deepUrl);
+                if (urlHasPrivacy && puppeteerResult.text.length > 200) {
+                  return deepUrl;
+                }
+                if (isPrivacyContent(puppeteerResult.text)) {
+                  return deepUrl;
+                }
+              }
+              // Also check if this page contains links TO a privacy page
+              if (puppeteerResult.html && puppeteerResult.html.length > 500) {
+                const subLink = findPrivacyLinks(puppeteerResult.html, deepUrl) || findPrivacyHrefDirect(puppeteerResult.html, deepUrl);
+                if (subLink) return subLink;
+              }
+            } catch {}
+            return null;
+          })
+        );
+        for (const r of deepResults) {
+          if (r.status === 'fulfilled' && r.value) {
+            privacyDiscovery.url = r.value;
             privacyDiscovery.method = 'deep_scan_puppeteer_path';
-            console.log(`[DeepScan] ✓ وُجدت صفحة خصوصية في: ${deepUrl}`);
+            console.log(`[DeepScan] ✓ وُجدت صفحة خصوصية في: ${r.value}`);
+            break;
           }
-        } catch {}
+        }
+      }
+    }
+    
+    // bypassDynamic: Force Puppeteer re-scan of homepage with extended wait + scroll
+    // This catches SPAs that load privacy links after JavaScript execution
+    if (!privacyDiscovery.url && isBypassDynamic) {
+      console.log(`[DeepScan] bypassDynamic: Force Puppeteer re-scan with extended wait for ${finalUrl}`);
+      try {
+        const dynamicResult = await scanWithPuppeteer(finalUrl, {
+          takeScreenshot: false,
+          extractPrivacyLinks: true,
+          timeout: Math.max(userTimeout, 40000),
+          waitForNetworkIdle: true,
+          simulateHuman: true,
+        });
+        if (dynamicResult.privacyLinks && dynamicResult.privacyLinks.length > 0) {
+          for (const pLink of dynamicResult.privacyLinks) {
+            try {
+              const testResult = await fetchPrivacyPageWithPuppeteer(pLink.url, { timeout: 20000 });
+              if (testResult.text && testResult.text.length > 200) {
+                privacyDiscovery.url = pLink.url;
+                privacyDiscovery.method = `bypass_dynamic_puppeteer_${pLink.strategy}`;
+                console.log(`[DeepScan] ✓ bypassDynamic found: ${pLink.url}`);
+                break;
+              }
+            } catch {}
+          }
+          if (!privacyDiscovery.url) {
+            privacyDiscovery.url = dynamicResult.privacyLinks[0].url;
+            privacyDiscovery.method = 'bypass_dynamic_puppeteer_unvalidated';
+          }
+        }
+        // Also search in rendered HTML
+        if (!privacyDiscovery.url && dynamicResult.html && dynamicResult.html.length > 500) {
+          const dynamicLink = findPrivacyLinks(dynamicResult.html, finalUrl) || findPrivacyHrefDirect(dynamicResult.html, finalUrl);
+          if (dynamicLink) {
+            privacyDiscovery.url = dynamicLink;
+            privacyDiscovery.method = 'bypass_dynamic_html_scan';
+            console.log(`[DeepScan] ✓ bypassDynamic HTML scan found: ${dynamicLink}`);
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[DeepScan] bypassDynamic failed: ${e.message?.substring(0, 100)}`);
       }
     }
     result.privacyUrl = privacyDiscovery.url ? normalizeUrl(privacyDiscovery.url) : '';
@@ -1091,7 +1300,7 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     // ===== Step 8: Extract privacy text (controlled by extractText option) =====
     const shouldExtractText = options?.extractText !== false; // الافتراضي true
     if (result.privacyUrl && shouldExtractText) {
-      const privacyContent = await extractPrivacyText(result.privacyUrl, ua);
+      const privacyContent = await extractPrivacyText(result.privacyUrl, ua, userTimeout);
       result.privacyTextContent = privacyContent.text;
       result.privacyTextLength = privacyContent.text.length;
       result.privacyLanguage = detectLanguage(privacyContent.text);
@@ -1523,12 +1732,164 @@ async function discoverPrivacyPageEnhanced(
     }
   } catch { /* Google Puppeteer search failed */ }
 
+  // Strategy 26: Bing Search fallback
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const bingQuery = encodeURIComponent(`site:${searchDomain} privacy policy`);
+    const bingUrl = `https://www.bing.com/search?q=${bingQuery}&count=5`;
+    console.log(`[DeepScan] Strategy 26: Bing Search for ${searchDomain}`);
+    const bingResp = await fetch(bingUrl, {
+      headers: { 'User-Agent': getRandomUA(), 'Accept-Language': 'ar,en;q=0.9' },
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+    });
+    if (bingResp.ok) {
+      const bingHtml = await bingResp.text();
+      const bingUrlRegex = /href="(https?:\/\/[^"]*(?:privacy|خصوصية)[^"]*)"/gi;
+      let bingMatch;
+      while ((bingMatch = bingUrlRegex.exec(bingHtml)) !== null) {
+        const foundUrl = bingMatch[1];
+        if (foundUrl.includes(searchDomain) && !foundUrl.includes('bing.com')) {
+          console.log(`[DeepScan] Strategy 26: Bing found: ${foundUrl}`);
+          return { url: foundUrl, method: 'bing_search' };
+        }
+      }
+    }
+  } catch { /* Bing search failed */ }
+
+  // Strategy 27: Wayback Machine CDX API - find archived privacy pages
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const cdxUrl = `https://web.archive.org/cdx/search/cdx?url=${searchDomain}/*privacy*&output=json&limit=5&fl=original&filter=statuscode:200`;
+    console.log(`[DeepScan] Strategy 27: Wayback Machine CDX for ${searchDomain}`);
+    const cdxResp = await fetch(cdxUrl, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (cdxResp.ok) {
+      const cdxData = await cdxResp.json() as any[];
+      if (cdxData && cdxData.length > 1) {
+        // Skip header row
+        for (let ci = 1; ci < cdxData.length; ci++) {
+          const originalUrl = cdxData[ci][0];
+          if (originalUrl && /privacy/i.test(originalUrl)) {
+            // Try the live URL first
+            try {
+              const liveResp = await fetch(originalUrl, {
+                headers: { 'User-Agent': getRandomUA() },
+                signal: AbortSignal.timeout(8000),
+                redirect: 'follow',
+              });
+              if (liveResp.ok) {
+                const liveHtml = await liveResp.text();
+                const liveText = stripHtml(liveHtml);
+                if (liveText.length > 200 && isPrivacyContent(liveText)) {
+                  console.log(`[DeepScan] Strategy 27: Wayback CDX found live URL: ${originalUrl}`);
+                  return { url: originalUrl, method: 'wayback_cdx_live' };
+                }
+              }
+            } catch {}
+            // If live URL fails, return the archived version
+            const archiveUrl = `https://web.archive.org/web/2024/${originalUrl}`;
+            console.log(`[DeepScan] Strategy 27: Wayback CDX archived: ${archiveUrl}`);
+            return { url: archiveUrl, method: 'wayback_cdx_archive' };
+          }
+        }
+      }
+    }
+  } catch { /* Wayback CDX failed */ }
+
+  // Strategy 28: DuckDuckGo Search fallback
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const ddgQuery = encodeURIComponent(`site:${searchDomain} privacy policy`);
+    const ddgUrl = `https://html.duckduckgo.com/html/?q=${ddgQuery}`;
+    console.log(`[DeepScan] Strategy 28: DuckDuckGo Search for ${searchDomain}`);
+    const ddgResp = await fetch(ddgUrl, {
+      headers: { 'User-Agent': getRandomUA() },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (ddgResp.ok) {
+      const ddgHtml = await ddgResp.text();
+      const ddgUrlRegex = /href="(https?:\/\/[^"]*(?:privacy|خصوصية)[^"]*)"/gi;
+      let ddgMatch;
+      while ((ddgMatch = ddgUrlRegex.exec(ddgHtml)) !== null) {
+        const foundUrl = ddgMatch[1];
+        if (foundUrl.includes(searchDomain)) {
+          console.log(`[DeepScan] Strategy 28: DuckDuckGo found: ${foundUrl}`);
+          return { url: foundUrl, method: 'duckduckgo_search' };
+        }
+      }
+    }
+  } catch { /* DuckDuckGo search failed */ }
+
+  // Strategy 29: Check common CDN/external privacy policy hosts
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const domainBase = searchDomain.replace(/^www\./, '').split('.')[0];
+    console.log(`[DeepScan] Strategy 29: Checking external privacy hosts for ${domainBase}`);
+    const externalHosts = [
+      `https://privacy.${searchDomain}`,
+      `https://legal.${searchDomain}`,
+      `https://${searchDomain}/privacy`,
+      `https://app.termly.io/document/privacy-policy/${domainBase}`,
+      `https://www.iubenda.com/privacy-policy/${domainBase}`,
+    ];
+    for (const extUrl of externalHosts) {
+      try {
+        const extResp = await fetch(extUrl, {
+          headers: { 'User-Agent': getRandomUA() },
+          signal: AbortSignal.timeout(6000),
+          redirect: 'follow',
+        });
+        if (extResp.ok) {
+          const extHtml = await extResp.text();
+          const extText = stripHtml(extHtml);
+          if (extText.length > 200 && isPrivacyContent(extText)) {
+            console.log(`[DeepScan] Strategy 29: External host found: ${extUrl}`);
+            return { url: extUrl, method: 'external_privacy_host' };
+          }
+        }
+      } catch {}
+    }
+  } catch { /* External host check failed */ }
+
+  // Strategy 30: Brute-force common page IDs (WordPress, Drupal, etc.)
+  try {
+    console.log(`[DeepScan] Strategy 30: Brute-force page IDs for ${baseUrl}`);
+    const pageIdPatterns = [
+      '/?page_id=3', '/?page_id=privacy', '/?p=privacy',
+      '/index.php/privacy-policy', '/index.php/privacy',
+      '/index.php?option=com_content&view=article&id=privacy',
+      '/?page=privacy', '/?page=privacy-policy',
+      '/default.aspx?page=privacy', '/home/privacy',
+    ];
+    for (const pattern of pageIdPatterns) {
+      try {
+        const testUrl = new URL(pattern, baseUrl).href;
+        const resp = await fetch(testUrl, {
+          headers: { 'User-Agent': getRandomUA() },
+          signal: AbortSignal.timeout(6000),
+          redirect: 'follow',
+        });
+        if (resp.ok) {
+          const html = await resp.text();
+          const text = stripHtml(html);
+          if (text.length > 300 && isPrivacyContent(text)) {
+            console.log(`[DeepScan] Strategy 30: Page ID found: ${testUrl}`);
+            return { url: testUrl, method: 'brute_force_page_id' };
+          }
+        }
+      } catch {}
+    }
+  } catch { /* Brute-force page ID failed */ }
+
   return { url: '', method: '' };
 }
 
 // ===== Strategy 1: Find Privacy Links in HTML =====
 function findPrivacyLinks(html: string, baseUrl: string): string | null {
   console.log(`[findPrivacyLinks] Searching in HTML of length ${html.length} with baseUrl ${baseUrl}`);
+  // Match <a> tags - handle both href before and after other attributes
   const linkRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   let match;
   const candidates: Array<{ url: string; score: number }> = [];
@@ -1536,6 +1897,7 @@ function findPrivacyLinks(html: string, baseUrl: string): string | null {
   while ((match = linkRegex.exec(html)) !== null) {
     const href = match[1];
     const linkText = match[2].replace(/<[^>]+>/g, '').trim();
+    const fullTag = match[0].toLowerCase(); // Full <a> tag for aria-label, title checks
     const fullText = (href + ' ' + linkText).toLowerCase();
 
     let score = 0;
@@ -1549,7 +1911,21 @@ function findPrivacyLinks(html: string, baseUrl: string): string | null {
     if (/سياسة.?الخصوصية/i.test(fullText)) score += 20;
     if (/بيان.?الخصوصية/i.test(fullText)) score += 18;
     if (/حماية.?البيانات.?الشخصية/i.test(fullText)) score += 18;
-    if (/privacy/i.test(href) && href.length < 100) score += 15;
+    if (/privacy/i.test(href) && href.length < 150) score += 15;
+    
+    // NEW: Check aria-label, title attributes for privacy keywords
+    const ariaLabel = fullTag.match(/aria-label=["']([^"']+)["']/i);
+    const titleAttr = fullTag.match(/title=["']([^"']+)["']/i);
+    if (ariaLabel && /privacy|خصوصية|سياسة/i.test(ariaLabel[1])) score += 15;
+    if (titleAttr && /privacy|خصوصية|سياسة/i.test(titleAttr[1])) score += 15;
+    
+    // NEW: Boost for href containing privacy-policy in path (even with non-standard prefix)
+    if (/\/[^/]*privacy[^/]*policy/i.test(href)) score += 25;
+    if (/\/privacy-policy/i.test(href)) score += 25;
+    
+    // NEW: Boost for href path segments containing "privacy" (handles /About-bank/privacy-policy)
+    const hrefPath = href.replace(/^https?:\/\/[^/]+/i, '');
+    if (/privacy/i.test(hrefPath)) score += 12;
 
     // Penalize non-privacy links
     if (/cookie/i.test(fullText) && !/privacy/i.test(fullText)) score -= 5;
@@ -1572,6 +1948,75 @@ function findPrivacyLinks(html: string, baseUrl: string): string | null {
     candidates.sort((a, b) => b.score - a.score);
     console.log(`[findPrivacyLinks] Top candidate: ${candidates[0].url} (score: ${candidates[0].score})`);
     return candidates[0].url;
+  }
+  return null;
+}
+
+// ===== Strategy 0.5: Direct href scan for privacy URLs =====
+// Scans ALL href attributes in HTML for any URL containing "privacy" in the path
+// This is a fallback for when link text doesn't match but href clearly points to privacy page
+function findPrivacyHrefDirect(html: string, baseUrl: string): string | null {
+  if (!html || html.length < 100) return null;
+  
+  // Extract ALL href values from the HTML
+  const hrefRegex = /href=["']([^"']{5,200})["']/gi;
+  let match;
+  const privacyCandidates: Array<{ url: string; score: number }> = [];
+  
+  while ((match = hrefRegex.exec(html)) !== null) {
+    const href = match[1];
+    if (href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:') || href === '#') continue;
+    
+    const hrefLower = href.toLowerCase();
+    // Must contain privacy-related keywords in the path
+    // Enhanced: Added more Arabic encoded patterns and data-protection
+    if (!/privacy|data.?protect|%D8%AE%D8%B5%D9%88%D8%B5%D9%8A%D8%A9|%D8%AD%D9%85%D8%A7%D9%8A%D8%A9|%D8%B3%D9%8A%D8%A7%D8%B3%D8%A9|خصوصية|حماية|سياسة|سرية/i.test(hrefLower)) continue;
+    
+    let score = 0;
+    
+    // Strong: path contains "privacy-policy" or "privacy_policy"
+    if (/privacy[_-]?policy/i.test(hrefLower)) score += 30;
+    // Strong: path segment is exactly "privacy"
+    if (/\/privacy(\/|$|\?|#)/i.test(hrefLower)) score += 25;
+    // Medium: contains "privacy" anywhere in path
+    if (/privacy/i.test(hrefLower)) score += 15;
+    // Arabic privacy
+    if (/سياسة.*خصوصية|خصوصية/i.test(hrefLower)) score += 25;
+    // Data protection
+    if (/data[_-]?protect/i.test(hrefLower)) score += 20;
+    // Arabic data protection
+    if (/حماية.*بيانات|سرية.*معلومات/i.test(hrefLower)) score += 20;
+    // PDPL
+    if (/pdpl/i.test(hrefLower)) score += 15;
+    
+    // Penalize external links (different domain)
+    if (href.startsWith('http')) {
+      try {
+        const hrefHost = new URL(href).hostname;
+        const baseHost = new URL(baseUrl).hostname;
+        if (hrefHost !== baseHost && !hrefHost.endsWith('.' + baseHost) && !baseHost.endsWith('.' + hrefHost)) {
+          score -= 20; // External link penalty
+        }
+      } catch {}
+    }
+    
+    // Penalize if it's clearly not a privacy page
+    if (/cookie-?policy|cookie-?notice/i.test(hrefLower) && !/privacy/i.test(hrefLower)) score -= 10;
+    if (/\.(?:png|jpg|jpeg|gif|svg|ico|css|js|woff|ttf)$/i.test(hrefLower)) score = 0;
+    
+    if (score > 10) {
+      let resolvedUrl = href;
+      if (!href.startsWith('http')) {
+        try { resolvedUrl = new URL(href, baseUrl).href; } catch { continue; }
+      }
+      privacyCandidates.push({ url: resolvedUrl, score });
+    }
+  }
+  
+  if (privacyCandidates.length > 0) {
+    privacyCandidates.sort((a, b) => b.score - a.score);
+    console.log(`[findPrivacyHrefDirect] Found ${privacyCandidates.length} candidates. Top: ${privacyCandidates[0].url} (score: ${privacyCandidates[0].score})`);
+    return privacyCandidates[0].url;
   }
   return null;
 }
@@ -1686,11 +2131,24 @@ async function tryUrlPatternsBatch(baseUrl: string, patterns: string[]): Promise
             
             // SPA Detection: If the HTML is nearly identical to homepage, it's a SPA shell
             // SPA sites return the same shell for ALL paths - we can't trust fetch content
+            // EXCEPTION: If the URL path contains "privacy", don't skip - it might be a real SPA route
             if (homepageHtml && html.length > 1000) {
               const similarity = Math.abs(html.length - homepageHtml.length) / Math.max(html.length, homepageHtml.length);
               if (similarity < 0.05) {
                 // Less than 5% size difference = likely same SPA shell
-                // Skip this result - need Puppeteer to render actual content
+                // But if path contains "privacy", mark it as a candidate for Puppeteer verification
+                const pathHasPrivacy = /privacy|خصوصية|سياسة/i.test(path);
+                if (!pathHasPrivacy) {
+                  return null; // Skip non-privacy SPA shells
+                }
+                // For privacy paths on SPA sites, try Puppeteer to verify
+                try {
+                  const testUrl = new URL(path, baseUrl).href;
+                  const puppeteerCheck = await fetchPrivacyPageWithPuppeteer(testUrl, { timeout: 20000 });
+                  if (puppeteerCheck.text && puppeteerCheck.text.length > 200 && isPrivacyContent(puppeteerCheck.text)) {
+                    return testUrl;
+                  }
+                } catch {}
                 return null;
               }
             }
@@ -1876,17 +2334,18 @@ async function checkPDFPrivacy(html: string, baseUrl: string): Promise<string | 
 }
 
 // ===== Privacy Text Extraction (Enhanced) =====
-async function extractPrivacyText(privacyUrl: string, ua?: string): Promise<{ text: string; html: string }> {
+async function extractPrivacyText(privacyUrl: string, ua?: string, customTimeout?: number): Promise<{ text: string; html: string }> {
   // STRATEGY: Try Puppeteer FIRST (most reliable for SPAs and protected sites),
   // then fall back to fetch for simple static sites.
+  const effectiveTimeout = customTimeout ? Math.max(customTimeout, 25000) : 25000;
   
   let bestText = '';
   let bestHtml = '';
   
   // Method 1: Puppeteer (PRIMARY - works with SPAs, protected sites, JS-rendered content)
   try {
-    console.log(`[extractPrivacyText] Trying Puppeteer first for: ${privacyUrl}`);
-    const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl, { timeout: 25000 });
+    console.log(`[extractPrivacyText] Trying Puppeteer first for: ${privacyUrl} (timeout: ${effectiveTimeout}ms)`);
+    const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl, { timeout: effectiveTimeout });
     if (puppeteerResult.text && puppeteerResult.text.length > 200) {
       bestText = puppeteerResult.text;
       bestHtml = puppeteerResult.html;
@@ -2231,17 +2690,20 @@ function isPrivacyContent(text: string): boolean {
     if (textLower.includes(keyword.toLowerCase())) mediumCount++;
   }
 
-  // If text is very short (< 300 chars), it's likely NOT a real privacy policy page
-  if (textLen < 300) return false;
+  // If text is very short (< 100 chars), it's likely NOT a real privacy policy page
+  if (textLen < 100) return false;
 
-  // Strong indicator found + at least 1 medium = definitely privacy content
-  if (strongCount >= 1 && mediumCount >= 1) return true;
+  // Strong indicator found = definitely privacy content (even alone)
+  if (strongCount >= 1) return true;
 
   // Multiple medium indicators with sufficient text length
-  if (mediumCount >= 3 && textLen >= 500) return true;
+  if (mediumCount >= 2 && textLen >= 300) return true;
 
   // Many medium indicators even with shorter text
-  if (mediumCount >= 4) return true;
+  if (mediumCount >= 3) return true;
+  
+  // Single medium indicator with substantial text
+  if (mediumCount >= 1 && textLen >= 1000) return true;
 
   return false;
 }
