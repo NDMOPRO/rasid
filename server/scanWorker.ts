@@ -1023,8 +1023,8 @@ async function fetchDomain(domain: string): Promise<{ html: string; status: numb
     };
   }
 
-  // 403 handling - try different UAs (Challenge 1.21)
-  if ((httpsResult && httpsResult.response.status === 403) || (httpResult && httpResult.response.status === 403)) {
+  // 403/405 handling - try different UAs (Challenge 1.21)
+  if ((httpsResult && (httpsResult.response.status === 403 || httpsResult.response.status === 405)) || (httpResult && (httpResult.response.status === 403 || httpResult.response.status === 405))) {
     const retryUAs = [GOOGLEBOT_UA, MOBILE_UA, 'curl/8.0'];
     for (const retryUA of retryUAs) {
       const retryResult = await safeFetch(`https://${domain}`, FETCH_TIMEOUT, retryUA);

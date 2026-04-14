@@ -792,8 +792,8 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
         result.sslValid = successResult.protocol === 'https';
       } else if (successResult) {
         result.httpStatus = successResult.response.status;
-        // Try with different UA on 403 (Challenge 1.21)
-        if (successResult.response.status === 403) {
+        // Try with different UA on 403/405 (Challenge 1.21)
+        if (successResult.response.status === 403 || successResult.response.status === 405) {
           const retryResult = await retryWith403Handling(domain, ua);
           if (retryResult) {
             html = retryResult.html;
@@ -801,7 +801,7 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
             finalUrl = retryResult.url;
             result.siteReachable = true;
           } else {
-            result.errorMessage = `HTTP 403 - الموقع يرفض الوصول`;
+            result.errorMessage = `HTTP ${successResult.response.status} - الموقع يرفض الوصول`;
             result.scanDuration = Date.now() - startTime;
             return result;
           }
@@ -1113,6 +1113,25 @@ async function retryWith403Handling(domain: string, originalUA: string): Promise
       }
     } catch { /* try next UA */ }
   }
+
+  // Puppeteer fallback for sites that block all fetch attempts (e.g., amazon.sa)
+  try {
+    const puppeteerResult = await scanWithPuppeteer(`https://${domain}`, {
+      timeout: 25000,
+      takeScreenshot: false,
+      extractPrivacyLinks: true,
+      waitForNetworkIdle: true,
+      simulateHuman: true,
+    });
+    if (puppeteerResult.html && puppeteerResult.html.length > 500 && !puppeteerResult.error) {
+      return {
+        html: puppeteerResult.html,
+        status: puppeteerResult.statusCode || 200,
+        url: puppeteerResult.finalUrl || `https://${domain}`,
+      };
+    }
+  } catch { /* Puppeteer fallback also failed */ }
+
   return null;
 }
 
