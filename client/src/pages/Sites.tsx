@@ -187,7 +187,7 @@ export default function Sites() {
                           ) : "-"}
                         </td>
                         <td className="py-3 px-4 text-muted-foreground truncate max-w-[150px] text-xs">
-                          {site.emails || "-"}
+                          {Array.isArray(site.emails) ? site.emails.join(', ') : (site.emails || "-")}
                         </td>
                         <td className="py-3 px-4">
                            <button onClick={(e) => { e.stopPropagation(); window.open(site.privacyUrl, '_blank'); }} className="text-primary hover:underline">

@@ -1366,13 +1366,20 @@ async function tryUrlPatternsBatch(baseUrl: string, patterns: string[]): Promise
             redirect: 'follow',
           });
           if (resp.ok) {
+            const ct = resp.headers.get('content-type') || '';
+            // Check if it's a PDF with privacy-related path
+            if (ct.includes('pdf') && /privacy|خصوصية|حماية|سياسة/i.test(path)) return testUrl;
+            if (!ct.includes('text/html') && !ct.includes('application/xhtml')) return null;
             const html = await resp.text();
             if (isErrorPage(html) || isSoft404(html)) return null;
+            // Check page title for privacy indicators
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const pageTitle = titleMatch ? titleMatch[1].toLowerCase() : '';
+            const hasPrivacyTitle = /privacy|خصوصية|حماية|سياسة.*خصوص|بيان.*خصوص/i.test(pageTitle);
             const text = stripHtml(html);
-            if (text.length > 200 && isPrivacyContent(text)) return testUrl;
-            // Check if it's a PDF
-            const ct = resp.headers.get('content-type') || '';
-            if (ct.includes('pdf')) return testUrl;
+            // Require stronger evidence: either privacy title + some content, or strong content match
+            if (hasPrivacyTitle && text.length > 300) return testUrl;
+            if (text.length > 500 && isPrivacyContent(text)) return testUrl;
           }
           return null;
         } catch { return null; }
@@ -1446,7 +1453,7 @@ async function checkPrivacySubdomains(domain: string): Promise<string | null> {
       if (resp.ok) {
         const html = await resp.text();
         const text = stripHtml(html);
-        if (text.length > 200 && isPrivacyContent(text)) {
+        if (text.length > 500 && isPrivacyContent(text)) {
           return resp.url;
         }
       }
@@ -1856,20 +1863,56 @@ function detectCookieConsent(html: string): boolean {
 }
 
 function isPrivacyContent(text: string): boolean {
-  const privacyKeywords = [
-    'خصوصية', 'privacy', 'بيانات شخصية', 'personal data',
-    'حماية البيانات', 'data protection', 'معلومات شخصية',
-    'جمع البيانات', 'data collection', 'ملفات تعريف الارتباط', 'cookies',
-    'سياسة الخصوصية', 'privacy policy', 'بيان الخصوصية',
-    'حماية المعلومات', 'سرية المعلومات', 'نظام حماية البيانات',
-    'PDPL', 'حقوق صاحب البيانات', 'data subject rights',
-    'الأطراف الثالثة', 'third parties', 'الاحتفاظ بالبيانات', 'data retention',
+  const textLower = text.toLowerCase();
+  const textLen = text.length;
+
+  // Strong indicators - phrases that almost certainly indicate a privacy policy
+  const strongIndicators = [
+    'سياسة الخصوصية', 'privacy policy', 'بيان الخصوصية', 'privacy notice',
+    'privacy statement', 'إشعار الخصوصية', 'حماية البيانات الشخصية',
+    'personal data protection', 'نظام حماية البيانات', 'data protection policy',
+    'سياسة حماية البيانات', 'PDPL',
   ];
-  let matchCount = 0;
-  for (const keyword of privacyKeywords) {
-    if (text.toLowerCase().includes(keyword.toLowerCase())) matchCount++;
+
+  // Medium indicators - common privacy-related terms
+  const mediumIndicators = [
+    'خصوصية', 'privacy', 'بيانات شخصية', 'personal data',
+    'حماية البيانات', 'data protection', 'معلومات شخصية', 'personal information',
+    'جمع البيانات', 'data collection', 'حقوق صاحب البيانات', 'data subject rights',
+    'الاحتفاظ بالبيانات', 'data retention', 'الأطراف الثالثة', 'third parties',
+    'حماية المعلومات', 'سرية المعلومات', 'information security',
+    'ملفات تعريف الارتباط', 'cookies',
+  ];
+
+  // Weak indicators - generic terms that need more context
+  const weakIndicators = [
+    'terms', 'الشروط', 'legal', 'قانوني',
+  ];
+
+  let strongCount = 0;
+  let mediumCount = 0;
+
+  for (const keyword of strongIndicators) {
+    if (textLower.includes(keyword.toLowerCase())) strongCount++;
   }
-  return matchCount >= 2;
+
+  for (const keyword of mediumIndicators) {
+    if (textLower.includes(keyword.toLowerCase())) mediumCount++;
+  }
+
+  // If text is very short (< 300 chars), it's likely NOT a real privacy policy page
+  if (textLen < 300) return false;
+
+  // Strong indicator found + at least 1 medium = definitely privacy content
+  if (strongCount >= 1 && mediumCount >= 1) return true;
+
+  // Multiple medium indicators with sufficient text length
+  if (mediumCount >= 3 && textLen >= 500) return true;
+
+  // Many medium indicators even with shorter text
+  if (mediumCount >= 4) return true;
+
+  return false;
 }
 
 function detectLanguage(text: string): string {
@@ -2157,12 +2200,90 @@ export function forceResetScanState() {
   activeWorkers = [];
 }
 
-// Save scan result to DB
+// Save scan result to DB (deepScanQueue + sites/scans tables)
 async function saveResultToDB(item: { id: number; domain: string }, result: DeepScanResult) {
   const validStatuses = ['compliant', 'partially_compliant', 'non_compliant', 'no_policy', 'error'];
   let safeStatus = result.complianceStatus;
   if (!validStatuses.includes(safeStatus)) safeStatus = 'no_policy';
 
+  // ── Also save to sites + scans tables for platform-wide visibility ──
+  try {
+    let site = await db.getSiteByDomain(item.domain);
+    if (!site) {
+      await db.insertSite({
+        domain: item.domain,
+        url: `https://${item.domain}`,
+        siteName: result.siteName || item.domain,
+        siteTitle: result.siteTitle || '',
+        siteStatus: result.siteReachable ? 'active' : 'unreachable',
+        privacyUrl: result.privacyUrl || null,
+        privacyMethod: result.privacyMethod || null,
+        contactUrl: result.contactUrl || null,
+        emails: result.contactEmails ? result.contactEmails.split(',').map(e => e.trim()).filter(Boolean) : null,
+        phones: result.contactPhones ? result.contactPhones.split(',').map(p => p.trim()).filter(Boolean) : null,
+        classification: 'سعودي عام',
+        sectorType: 'private',
+        screenshotUrl: result.screenshotUrl || undefined,
+        cms: result.detectedCMS !== 'unknown' ? result.detectedCMS : undefined,
+        hasPrivacyPolicy: result.privacyUrl ? 1 : 0,
+        hasContactInfo: (result.contactEmails || result.contactPhones) ? 1 : 0,
+      } as any);
+      site = await db.getSiteByDomain(item.domain);
+    } else {
+      const updateData: any = {};
+      if (result.screenshotUrl) updateData.screenshotUrl = result.screenshotUrl;
+      if (result.privacyUrl) {
+        updateData.privacyUrl = result.privacyUrl;
+        updateData.privacyMethod = result.privacyMethod;
+        updateData.hasPrivacyPolicy = 1;
+      }
+      if (result.contactUrl) updateData.contactUrl = result.contactUrl;
+      if (result.contactEmails) updateData.emails = result.contactEmails.split(',').map(e => e.trim()).filter(Boolean);
+      if (result.contactPhones) updateData.phones = result.contactPhones.split(',').map(p => p.trim()).filter(Boolean);
+      if (result.siteName && result.siteName !== item.domain) updateData.siteName = result.siteName;
+      if (result.siteTitle) updateData.siteTitle = result.siteTitle;
+      if (result.detectedCMS !== 'unknown') updateData.cms = result.detectedCMS;
+      if (result.siteReachable) updateData.siteStatus = 'active';
+      if (Object.keys(updateData).length > 0) {
+        await db.updateSite(site.id, updateData);
+      }
+    }
+
+    if (site) {
+      const score = result.overallScore || 0;
+      await db.insertScan({
+        siteId: site.id,
+        domain: item.domain,
+        overallScore: score,
+        rating: result.rating || (safeStatus === 'no_policy' ? 'غير ممتثل' : 'ضعيف'),
+        complianceStatus: safeStatus as any,
+        summary: result.summary || (safeStatus === 'no_policy' ? 'لم يتم العثور على صفحة سياسة خصوصية' : 'تحليل غير مكتمل'),
+        clause1Compliant: result.clause1Compliant ? 1 : 0,
+        clause1Evidence: result.clause1Evidence || '',
+        clause2Compliant: result.clause2Compliant ? 1 : 0,
+        clause2Evidence: result.clause2Evidence || '',
+        clause3Compliant: result.clause3Compliant ? 1 : 0,
+        clause3Evidence: result.clause3Evidence || '',
+        clause4Compliant: result.clause4Compliant ? 1 : 0,
+        clause4Evidence: result.clause4Evidence || '',
+        clause5Compliant: result.clause5Compliant ? 1 : 0,
+        clause5Evidence: result.clause5Evidence || '',
+        clause6Compliant: result.clause6Compliant ? 1 : 0,
+        clause6Evidence: result.clause6Evidence || '',
+        clause7Compliant: result.clause7Compliant ? 1 : 0,
+        clause7Evidence: result.clause7Evidence || '',
+        clause8Compliant: result.clause8Compliant ? 1 : 0,
+        clause8Evidence: result.clause8Evidence || '',
+        recommendations: result.recommendations || [],
+        screenshotUrl: result.screenshotUrl || result.privacyScreenshotUrl || undefined,
+        privacyTextContent: result.privacyTextContent || undefined,
+      } as any);
+    }
+  } catch (e: any) {
+    console.error(`[DeepScanner] Failed to save to sites/scans for ${item.domain}:`, e.message?.substring(0, 150));
+  }
+
+  // ── Save to deepScanQueue (original behavior) ──
   try {
     await db.updateDeepScanQueueItem(item.id, {
       status: result.siteReachable ? 'completed' : (result.errorMessage ? 'failed' : 'completed'),

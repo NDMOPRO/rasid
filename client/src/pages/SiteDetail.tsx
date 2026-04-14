@@ -307,13 +307,13 @@ export default function SiteDetail() {
               {site.emails && (
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{site.emails}</span>
+                  <span className="text-muted-foreground">{Array.isArray(site.emails) ? site.emails.join(', ') : site.emails}</span>
                 </div>
               )}
               {(site as any).phones && (
                 <div className="flex items-center gap-2 text-sm">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{(site as any).phones}</span>
+                  <span className="text-muted-foreground">{Array.isArray((site as any).phones) ? (site as any).phones.join(', ') : (site as any).phones}</span>
                 </div>
               )}
               {site.privacyUrl && (

@@ -754,25 +754,54 @@ function detectCookieConsent(html: string): boolean {
 }
 
 function isPrivacyContent(text: string): boolean {
-  const privacyKeywords = [
+  const textLower = text.toLowerCase();
+  const textLen = text.length;
+
+  // Strong indicators - phrases that almost certainly indicate a privacy policy
+  const strongIndicators = [
+    'سياسة الخصوصية', 'privacy policy', 'بيان الخصوصية', 'privacy notice',
+    'privacy statement', 'إشعار الخصوصية', 'حماية البيانات الشخصية',
+    'personal data protection', 'نظام حماية البيانات', 'data protection policy',
+    'سياسة حماية البيانات', 'PDPL', 'نظام حماية البيانات الشخصية',
+  ];
+
+  // Medium indicators - common privacy-related terms
+  const mediumIndicators = [
     'خصوصية', 'privacy', 'بيانات شخصية', 'personal data',
-    'حماية البيانات', 'data protection', 'معلومات شخصية',
-    'جمع البيانات', 'data collection', 'ملفات تعريف الارتباط', 'cookies',
-    'حماية البيانات الشخصية', 'نظام حماية', 'pdpl',
-    'سرية المعلومات', 'information security',
-    'الأطراف الثالثة', 'third parties',
-    'الاحتفاظ بالبيانات', 'data retention',
-    'حقوق صاحب البيانات', 'data subject rights',
+    'حماية البيانات', 'data protection', 'معلومات شخصية', 'personal information',
+    'جمع البيانات', 'data collection', 'حقوق صاحب البيانات', 'data subject rights',
+    'الاحتفاظ بالبيانات', 'data retention', 'الأطراف الثالثة', 'third parties',
+    'حماية المعلومات', 'سرية المعلومات', 'information security',
+    'ملفات تعريف الارتباط', 'cookies',
     'إفصاح', 'disclosure', 'معالجة البيانات', 'data processing',
     'الموافقة', 'consent', 'حق الوصول', 'right of access',
-    'sdaia', 'سدايا', 'نظام حماية البيانات الشخصية',
+    'sdaia', 'سدايا',
   ];
-  let matchCount = 0;
-  const textLower = text.toLowerCase();
-  for (const keyword of privacyKeywords) {
-    if (textLower.includes(keyword.toLowerCase())) matchCount++;
+
+  let strongCount = 0;
+  let mediumCount = 0;
+
+  for (const keyword of strongIndicators) {
+    if (textLower.includes(keyword.toLowerCase())) strongCount++;
   }
-  return matchCount >= 2;
+
+  for (const keyword of mediumIndicators) {
+    if (textLower.includes(keyword.toLowerCase())) mediumCount++;
+  }
+
+  // If text is very short (< 300 chars), it's likely NOT a real privacy policy page
+  if (textLen < 300) return false;
+
+  // Strong indicator found + at least 1 medium = definitely privacy content
+  if (strongCount >= 1 && mediumCount >= 1) return true;
+
+  // Multiple medium indicators with sufficient text length
+  if (mediumCount >= 3 && textLen >= 500) return true;
+
+  // Many medium indicators even with shorter text
+  if (mediumCount >= 4) return true;
+
+  return false;
 }
 
 // Enhanced: Check if text contains privacy content embedded in terms/legal page
@@ -1089,7 +1118,7 @@ async function extractIframePrivacy(html: string, baseUrl: string): Promise<stri
         const result = await safeFetch(iframeUrl, 8000);
         if (result && result.response.ok) {
           const text = stripHtml(result.html);
-          if (text.length > 200 && isPrivacyContent(text)) {
+          if (text.length > 500 && isPrivacyContent(text)) {
             return iframeUrl;
           }
         }
@@ -1300,11 +1329,18 @@ async function tryUrlPatternsBatch(baseUrl: string, patterns: string[]): Promise
         visitedUrls.add(testUrl);
         const result = await safeFetch(testUrl, 6000);
         if (result && result.response.ok && !isErrorPage(result.html) && !isSoft404(result.html)) {
-          const text = stripHtml(result.html);
-          if (text.length > 200 && isPrivacyContent(text)) return testUrl;
-          // Check if it's a PDF
           const ct = result.response.headers.get('content-type') || '';
-          if (ct.includes('pdf')) return testUrl;
+          // Check if it's a PDF with privacy-related path
+          if (ct.includes('pdf') && /privacy|خصوصية|حماية|سياسة/i.test(path)) return testUrl;
+          if (!ct.includes('text/html') && !ct.includes('application/xhtml')) return null;
+          // Check page title for privacy indicators
+          const titleMatch = result.html.match(/<title[^>]*>([^<]+)<\/title>/i);
+          const pageTitle = titleMatch ? titleMatch[1].toLowerCase() : '';
+          const hasPrivacyTitle = /privacy|خصوصية|حماية|سياسة.*خصوص|بيان.*خصوص/i.test(pageTitle);
+          const text = stripHtml(result.html);
+          // Require stronger evidence: either privacy title + some content, or strong content match
+          if (hasPrivacyTitle && text.length > 300) return testUrl;
+          if (text.length > 500 && isPrivacyContent(text)) return testUrl;
         }
       } catch {}
       return null;
@@ -1379,7 +1415,7 @@ async function checkRobotsTxt(baseUrl: string): Promise<string | null> {
         const testResult = await safeFetch(testUrl, 6000);
         if (testResult && testResult.response.ok) {
           const text = stripHtml(testResult.html);
-          if (text.length > 200 && isPrivacyContent(text)) return testUrl;
+          if (text.length > 500 && isPrivacyContent(text)) return testUrl;
         }
       } catch {}
     }
@@ -1400,7 +1436,7 @@ async function checkPrivacySubdomains(domain: string): Promise<string | null> {
         const result = await safeFetch(testUrl, 5000);
         if (result && result.response.ok) {
           const text = stripHtml(result.html);
-          if (text.length > 200 && isPrivacyContent(text)) return testUrl;
+          if (text.length > 500 && isPrivacyContent(text)) return testUrl;
         }
       } catch {}
     }
@@ -1552,7 +1588,7 @@ async function checkHreflangPrivacy(html: string, baseUrl: string): Promise<stri
         const result = await safeFetch(testUrl, 5000);
         if (result && result.response.ok) {
           const text = stripHtml(result.html);
-          if (text.length > 200 && isPrivacyContent(text)) return testUrl;
+          if (text.length > 500 && isPrivacyContent(text)) return testUrl;
         }
       }
     } catch {}

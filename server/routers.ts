@@ -522,7 +522,7 @@ export const appRouter = router({
           siteStatus: scanResult.siteReachable ? 'active' : 'inactive',
           privacyUrl: scanResult.privacyUrl || null,
           contactUrl: scanResult.contactUrl || null,
-          emails: scanResult.contactEmails || null,
+          emails: scanResult.contactEmails ? scanResult.contactEmails.split(',').map((e: string) => e.trim()).filter(Boolean) : null,
           classification: 'سعودي عام',
           screenshotUrl: screenshotUrl || scanResult.screenshotUrl || undefined,
         });
@@ -532,7 +532,7 @@ export const appRouter = router({
         await db.updateSite(site.id, {
           privacyUrl: scanResult.privacyUrl || site.privacyUrl || null,
           contactUrl: scanResult.contactUrl || site.contactUrl || null,
-          emails: scanResult.contactEmails || site.emails || null,
+          emails: scanResult.contactEmails ? scanResult.contactEmails.split(',').map((e: string) => e.trim()).filter(Boolean) : (site.emails || null),
           siteStatus: scanResult.siteReachable ? 'active' : site.siteStatus,
           screenshotUrl: screenshotUrl || scanResult.screenshotUrl || site.screenshotUrl || undefined,
         });
@@ -8850,8 +8850,8 @@ async function processBatchScan(jobId: number, urls: Array<{ url: string; entity
         await db.updateSite(siteId, {
           privacyUrl: scanResult.privacyUrl || undefined,
           privacyMethod: scanResult.privacyMethod || undefined,
-          emails: scanResult.contactEmails || undefined,
-          phones: scanResult.contactPhones || undefined,
+          emails: scanResult.contactEmails ? scanResult.contactEmails.split(',').map((e: string) => e.trim()).filter(Boolean) : undefined,
+          phones: scanResult.contactPhones ? scanResult.contactPhones.split(',').map((p: string) => p.trim()).filter(Boolean) : undefined,
           cms: scanResult.detectedCMS || undefined,
           siteStatus: scanResult.siteReachable ? 'active' : 'unreachable',
           siteTitle: scanResult.siteTitle || undefined,
@@ -9343,6 +9343,9 @@ async function processAdvancedScan(
     deepScan: options.deepScan || false,
   });
 
+  // Disable fast scan mode to enable full compliance analysis
+  setFastScanMode(false);
+
   // ═══════════════════════════════════════════════════════════════════════
   // PHASE 1: Discovery Phase - Find privacy pages using deepScanDomain
   // Uses 20+ strategies: link text, footer, cookie banner, navigation,
@@ -9552,7 +9555,8 @@ async function processAdvancedScan(
             privacyUrl: scanResult.privacyUrl || null,
             privacyMethod: scanResult.privacyMethod || null,
             contactUrl: scanResult.contactUrl || null,
-            emails: scanResult.contactEmails || null,
+            emails: scanResult.contactEmails ? scanResult.contactEmails.split(',').map((e: string) => e.trim()).filter(Boolean) : null,
+            phones: scanResult.contactPhones ? scanResult.contactPhones.split(',').map((p: string) => p.trim()).filter(Boolean) : null,
             classification: item.classification || 'سعودي عام',
             sectorType: (item.sectorType as any) || 'private',
             screenshotUrl: screenshotUrl || undefined,
@@ -9571,7 +9575,8 @@ async function processAdvancedScan(
             updateData.hasPrivacyPolicy = 1;
           }
           if (scanResult.contactUrl) updateData.contactUrl = scanResult.contactUrl;
-          if (scanResult.contactEmails) updateData.emails = scanResult.contactEmails;
+          if (scanResult.contactEmails) updateData.emails = scanResult.contactEmails.split(',').map((e: string) => e.trim()).filter(Boolean);
+          if (scanResult.contactPhones) updateData.phones = scanResult.contactPhones.split(',').map((p: string) => p.trim()).filter(Boolean);
           if (scanResult.siteName && scanResult.siteName !== domain) updateData.siteName = scanResult.siteName;
           if (scanResult.siteTitle) updateData.siteTitle = scanResult.siteTitle;
           if (scanResult.detectedCMS !== 'unknown') updateData.cms = scanResult.detectedCMS;
