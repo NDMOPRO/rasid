@@ -888,43 +888,126 @@ export async function scanWithPuppeteer(
       return body.innerText || '';
     });
 
-    // Discover privacy links in rendered DOM
+    // Discover privacy links in rendered DOM - COMPREHENSIVE search
     let privacyLinks: Array<{ url: string; text: string; strategy: string }> = [];
     if (extractPrivacyLinks) {
+      // First, scroll to bottom to trigger lazy-loaded footer content
+      try {
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for lazy content
+        await page.evaluate(() => window.scrollTo(0, 0)); // Scroll back to top
+      } catch {}
+
       privacyLinks = await page.evaluate(() => {
         const links: Array<{ url: string; text: string; strategy: string }> = [];
-        const allLinks = Array.from(document.querySelectorAll('a[href]'));
-        const privacyPatterns = [
+        const seen = new Set<string>();
+        
+        // Comprehensive text patterns for privacy links
+        const privacyTextPatterns = [
           /privacy/i, /خصوصية/i, /سياسة.*خصوصية/i, /حماية.*بيانات/i,
+          /بيان.*خصوص/i, /سرية.*معلومات/i, /حماية.*معلومات/i,
+          /إشعار.*خصوص/i, /نظام.*حماية/i, /pdpl/i,
           /data.*protect/i, /datenschutz/i, /privacidade/i, /confidentialit/i,
+          /privacy.*policy/i, /privacy.*notice/i, /privacy.*statement/i,
         ];
         const urlPatterns = [
-          /privacy/i, /datenschutz/i, /confidentialite/i, /privacidade/i,
-          /riservatezza/i, /privacidad/i, /pdpl/i, /data-protection/i,
+          /privacy/i, /خصوصية/i, /datenschutz/i, /confidentialite/i,
+          /privacidade/i, /riservatezza/i, /privacidad/i, /pdpl/i,
+          /data-protection/i, /data.privacy/i,
         ];
 
+        function addLink(href: string, text: string, strategy: string) {
+          if (!href || href === '#' || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+          if (seen.has(href)) return;
+          seen.add(href);
+          links.push({ url: href, text: text || href, strategy });
+        }
+
+        // 1. Search ALL links on the page
+        const allLinks = Array.from(document.querySelectorAll('a[href]'));
         for (const link of allLinks) {
           const href = (link as HTMLAnchorElement).href;
           const text = (link as HTMLElement).innerText?.trim() || '';
           const ariaLabel = link.getAttribute('aria-label') || '';
+          const title = link.getAttribute('title') || '';
+          const fullText = `${text} ${ariaLabel} ${title}`;
 
-          if (privacyPatterns.some(p => p.test(text) || p.test(ariaLabel))) {
-            links.push({ url: href, text, strategy: 'puppeteer-link-text' });
-            continue;
-          }
-          if (urlPatterns.some(p => p.test(href))) {
-            links.push({ url: href, text: text || href, strategy: 'puppeteer-url-pattern' });
+          if (privacyTextPatterns.some(p => p.test(fullText))) {
+            addLink(href, text, 'puppeteer-link-text');
+          } else if (urlPatterns.some(p => p.test(href))) {
+            addLink(href, text, 'puppeteer-url-pattern');
           }
         }
 
-        // Check footer specifically
-        const footerLinks = Array.from(document.querySelectorAll('footer a[href], [role="contentinfo"] a[href]'));
-        for (const link of footerLinks) {
-          const href = (link as HTMLAnchorElement).href;
-          const text = (link as HTMLElement).innerText?.trim() || '';
-          if (privacyPatterns.some(p => p.test(text)) || urlPatterns.some(p => p.test(href))) {
-            if (!links.some(l => l.url === href)) {
-              links.push({ url: href, text: text || href, strategy: 'puppeteer-footer' });
+        // 2. Check footer specifically (highest priority area)
+        const footerSelectors = [
+          'footer', '[role="contentinfo"]', '.footer', '#footer',
+          '.site-footer', '.page-footer', '.main-footer',
+          '[class*="footer"]', '[id*="footer"]',
+        ];
+        for (const sel of footerSelectors) {
+          const footerEls = document.querySelectorAll(sel);
+          footerEls.forEach(footer => {
+            const footerLinks = footer.querySelectorAll('a[href]');
+            footerLinks.forEach(link => {
+              const href = (link as HTMLAnchorElement).href;
+              const text = (link as HTMLElement).innerText?.trim() || '';
+              if (privacyTextPatterns.some(p => p.test(text)) || urlPatterns.some(p => p.test(href))) {
+                addLink(href, text, 'puppeteer-footer');
+              }
+            });
+          });
+        }
+
+        // 3. Check navigation menus (hamburger, mega, dropdown)
+        const navSelectors = [
+          'nav', '[role="navigation"]', '.nav', '.navbar',
+          '.menu', '.sidebar', '[class*="menu"]', '[class*="nav"]',
+        ];
+        for (const sel of navSelectors) {
+          const navEls = document.querySelectorAll(sel);
+          navEls.forEach(nav => {
+            const navLinks = nav.querySelectorAll('a[href]');
+            navLinks.forEach(link => {
+              const href = (link as HTMLAnchorElement).href;
+              const text = (link as HTMLElement).innerText?.trim() || '';
+              if (privacyTextPatterns.some(p => p.test(text)) || urlPatterns.some(p => p.test(href))) {
+                addLink(href, text, 'puppeteer-navigation');
+              }
+            });
+          });
+        }
+
+        // 4. Check cookie consent banners
+        const cookieSelectors = [
+          '[class*="cookie"]', '[id*="cookie"]', '[class*="consent"]',
+          '[id*="consent"]', '[class*="gdpr"]', '[class*="banner"]',
+        ];
+        for (const sel of cookieSelectors) {
+          const cookieEls = document.querySelectorAll(sel);
+          cookieEls.forEach(el => {
+            const cookieLinks = el.querySelectorAll('a[href]');
+            cookieLinks.forEach(link => {
+              const href = (link as HTMLAnchorElement).href;
+              const text = (link as HTMLElement).innerText?.trim() || '';
+              if (privacyTextPatterns.some(p => p.test(text)) || urlPatterns.some(p => p.test(href))) {
+                addLink(href, text, 'puppeteer-cookie-banner');
+              }
+            });
+          });
+        }
+
+        // 5. Check buttons that might be privacy links (some sites use buttons)
+        const buttons = Array.from(document.querySelectorAll('button[onclick], [role="button"]'));
+        for (const btn of buttons) {
+          const text = (btn as HTMLElement).innerText?.trim() || '';
+          const onclick = btn.getAttribute('onclick') || '';
+          if (privacyTextPatterns.some(p => p.test(text))) {
+            // Try to extract URL from onclick
+            const urlMatch = onclick.match(/(?:window\.location|location\.href)\s*=\s*['"]([^'"]+)/i)
+              || onclick.match(/(?:navigate|goto|open)\s*\(['"]([^'"]+)/i);
+            if (urlMatch) {
+              addLink(urlMatch[1], text, 'puppeteer-button-onclick');
             }
           }
         }

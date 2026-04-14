@@ -847,11 +847,12 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     if (!finalUrl) finalUrl = httpsUrl;
 
     // ===== Step 2: Error/Parking/Maintenance Detection (Challenge 11.x) =====
+    // NOTE: We do NOT return early anymore! Even if the homepage shows an error,
+    // the privacy page might still be accessible at a different path.
+    // We continue scanning and let the privacy discovery strategies handle it.
     if (isErrorPage(html)) {
-      result.siteReachable = false;
-      result.errorMessage = 'صفحة خطأ مكتشفة';
-      result.scanDuration = Date.now() - startTime;
-      return result;
+      result.errorMessage = 'صفحة خطأ مكتشفة - سيتم البحث عن صفحة الخصوصية رغم ذلك';
+      console.log(`[DeepScan] Homepage error detected but continuing scan for privacy page`);
     }
 
     if (isParkingPage(html)) {
@@ -859,7 +860,7 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
       result.siteReachable = false;
       result.errorMessage = 'صفحة إيقاف نطاق (Domain Parking)';
       result.scanDuration = Date.now() - startTime;
-      return result;
+      return result; // Parking pages genuinely don't have privacy policies
     }
 
     if (isMaintenancePage(html)) {
@@ -896,21 +897,33 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
       } catch {}
     }
 
-    // ===== Step 2.7: SPA Detection / Dynamic Bypass - Use Puppeteer =====
-    const forcePuppeteer = options?.bypassDynamic === true;
-    if (forcePuppeteer || likelyNeedsPuppeteer(html) || (html.length < 2000 && !isErrorPage(html) && !isParkingPage(html))) {
-      try {
-        const puppeteerResult = await scanWithPuppeteer(finalUrl, { takeScreenshot: false, extractPrivacyLinks: true });
-        if (puppeteerResult.html.length > html.length) {
-          html = puppeteerResult.html;
-          result.detectedCMS = puppeteerResult.jsFramework || result.detectedCMS;
-          // Merge any privacy links found by Puppeteer
-          if (puppeteerResult.privacyLinks.length > 0 && !result.privacyUrl) {
-            result.privacyUrl = puppeteerResult.privacyLinks[0].url;
-            result.privacyMethod = puppeteerResult.privacyLinks[0].strategy;
-          }
-        }
-      } catch { /* Puppeteer SPA fallback failed */ }
+    // ===== Step 2.7: ALWAYS use Puppeteer for rendered DOM + privacy link discovery =====
+    // Most Saudi sites are SPAs that return the same HTML shell for all paths.
+    // fetch gets empty shells; only Puppeteer renders the actual content.
+    // We ALWAYS run Puppeteer to get rendered HTML and discover privacy links in the DOM.
+    let puppeteerPrivacyLinks: Array<{ url: string; text: string; strategy: string }> = [];
+    try {
+      console.log(`[DeepScan] Running Puppeteer for rendered DOM: ${finalUrl}`);
+      const puppeteerResult = await scanWithPuppeteer(finalUrl, {
+        takeScreenshot: false,
+        extractPrivacyLinks: true,
+        timeout: 25000,
+        waitForNetworkIdle: true,
+        simulateHuman: true,
+      });
+      // Always use Puppeteer HTML if it's substantial (rendered content)
+      if (puppeteerResult.html && puppeteerResult.html.length > 500) {
+        // For SPA sites, Puppeteer HTML is always better
+        html = puppeteerResult.html;
+        result.detectedCMS = puppeteerResult.jsFramework || result.detectedCMS;
+      }
+      // Save ALL privacy links found by Puppeteer for later use
+      if (puppeteerResult.privacyLinks && puppeteerResult.privacyLinks.length > 0) {
+        puppeteerPrivacyLinks = puppeteerResult.privacyLinks;
+        console.log(`[DeepScan] Puppeteer found ${puppeteerPrivacyLinks.length} privacy links: ${puppeteerPrivacyLinks.map(l => l.url).join(', ')}`);
+      }
+    } catch (e: any) {
+      console.warn(`[DeepScan] Puppeteer failed for ${finalUrl}: ${e.message?.substring(0, 100)}`);
     }
 
     // ===== Step 2.6: Resolve base URL for relative links =====
@@ -938,25 +951,62 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     // ===== Step 7: Multi-Strategy Privacy Discovery (20+ strategies) =====
     // deepScan: يبحث في مسارات إضافية ومستويات أعمق
     const isDeepScan = options?.deepScan === true;
-    const privacyDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
+    
+    // Strategy 0 (HIGHEST PRIORITY): Use Puppeteer-discovered privacy links from Step 2.7
+    // These are links found in the RENDERED DOM by a real browser - most reliable method
+    const privacyDiscovery: { url: string; method: string } = { url: '', method: '' };
+    if (puppeteerPrivacyLinks.length > 0) {
+      // Validate each Puppeteer-found link by fetching it with Puppeteer
+      for (const pLink of puppeteerPrivacyLinks) {
+        try {
+          const testResult = await fetchPrivacyPageWithPuppeteer(pLink.url, { timeout: 15000 });
+          if (testResult.text && testResult.text.length > 300 && isPrivacyContent(testResult.text)) {
+            privacyDiscovery.url = pLink.url;
+            privacyDiscovery.method = `puppeteer_dom_${pLink.strategy}`;
+            console.log(`[DeepScan] ✓ Puppeteer privacy link validated: ${pLink.url}`);
+            break;
+          }
+        } catch {}
+      }
+      // If validation failed, still use the first link (it was found in rendered DOM)
+      if (!privacyDiscovery.url && puppeteerPrivacyLinks.length > 0) {
+        privacyDiscovery.url = puppeteerPrivacyLinks[0].url;
+        privacyDiscovery.method = `puppeteer_dom_unvalidated_${puppeteerPrivacyLinks[0].strategy}`;
+        console.log(`[DeepScan] Using unvalidated Puppeteer privacy link: ${puppeteerPrivacyLinks[0].url}`);
+      }
+    }
+    
+    // If Puppeteer didn't find anything, fall back to all other strategies
+    if (!privacyDiscovery.url) {
+      const fallbackDiscovery = await discoverPrivacyPageEnhanced(html, resolvedBaseUrl, domain, cmsResult.cms);
+      privacyDiscovery.url = fallbackDiscovery.url;
+      privacyDiscovery.method = fallbackDiscovery.method;
+    }
     
     // Deep Scan: محاولات إضافية إذا لم يُعثر على صفحة خصوصية
-    if (isDeepScan && !privacyDiscovery.url) {
-      console.log('[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية...');
-      // محاولة البحث في صفحات فرعية إضافية
-      const deepPaths = ['/legal', '/terms', '/about', '/contact', '/ar/privacy', '/en/privacy', '/ar/privacy-policy', '/en/privacy-policy', '/pages/privacy', '/page/privacy-policy', '/info/privacy'];
+    if (!privacyDiscovery.url) {
+      console.log('[DeepScan] تفعيل البحث العميق عن صفحة الخصوصية باستخدام Puppeteer...');
+      // محاولة البحث في صفحات فرعية إضافية باستخدام Puppeteer (لأن fetch لا يعمل مع SPA)
+      const deepPaths = [
+        '/privacy-policy', '/privacy', '/en/privacy-policy', '/ar/privacy-policy',
+        '/en/privacy', '/ar/privacy', '/legal/privacy', '/legal/privacy-policy',
+        '/pages/privacy-policy', '/pages/privacy', '/policies/privacy-policy',
+        '/about/privacy', '/info/privacy', '/help/privacy',
+        '/saudi-en/privacy-policy', '/saudi-ar/privacy-policy',
+        '/sa/privacy-policy', '/sa-en/privacy-policy',
+        '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
+        '/legal', '/terms', '/about', '/contact',
+      ];
       for (const path of deepPaths) {
         if (privacyDiscovery.url) break;
         try {
           const deepUrl = new URL(path, resolvedBaseUrl).href;
-          const deepResp = await fetchWithRetry(deepUrl, { timeout: (options?.timeout || 12) * 1000, ua });
-          if (deepResp.ok) {
-            const deepHtml = await readResponseWithEncoding(deepResp);
-            if (deepHtml.length > 500 && /خصوصية|privacy|سياسة|policy/i.test(deepHtml)) {
-              privacyDiscovery.url = deepUrl;
-              privacyDiscovery.method = 'deep_scan_path_discovery';
-              console.log('[DeepScan] وُجدت صفحة خصوصية في:', deepUrl);
-            }
+          console.log(`[DeepScan] Trying Puppeteer for: ${deepUrl}`);
+          const puppeteerResult = await fetchPrivacyPageWithPuppeteer(deepUrl, { timeout: 15000 });
+          if (puppeteerResult.text && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
+            privacyDiscovery.url = deepUrl;
+            privacyDiscovery.method = 'deep_scan_puppeteer_path';
+            console.log(`[DeepScan] ✓ وُجدت صفحة خصوصية في: ${deepUrl}`);
           }
         } catch {}
       }
@@ -964,13 +1014,37 @@ async function _deepScanDomainImpl(domain: string, options?: ScanOptions): Promi
     result.privacyUrl = privacyDiscovery.url ? normalizeUrl(privacyDiscovery.url) : '';
     result.privacyMethod = privacyDiscovery.method;
 
-    // ===== Step 7.5: Strategy 21 - Puppeteer DOM Discovery =====
+    // ===== Step 7.5: Strategy 21 - Puppeteer DOM Discovery (second attempt with fresh page) =====
     if (!result.privacyUrl) {
+      // Try a FRESH Puppeteer scan - the first one in Step 2.7 might have missed links
+      // that appear after user interaction or delayed loading
       try {
-        const puppeteerScan = await scanWithPuppeteer(finalUrl, { takeScreenshot: false, extractPrivacyLinks: true, timeout: 20000 });
+        console.log(`[DeepScan] Step 7.5: Fresh Puppeteer scan for privacy links on ${finalUrl}`);
+        const puppeteerScan = await scanWithPuppeteer(finalUrl, {
+          takeScreenshot: false,
+          extractPrivacyLinks: true,
+          timeout: 30000,
+          waitForNetworkIdle: true,
+          simulateHuman: true,
+        });
         if (puppeteerScan.privacyLinks.length > 0) {
-          result.privacyUrl = normalizeUrl(puppeteerScan.privacyLinks[0].url);
-          result.privacyMethod = 'strategy_21_puppeteer_dom';
+          // Validate the found link with Puppeteer
+          for (const pLink of puppeteerScan.privacyLinks) {
+            try {
+              const testResult = await fetchPrivacyPageWithPuppeteer(pLink.url, { timeout: 15000 });
+              if (testResult.text && testResult.text.length > 300 && isPrivacyContent(testResult.text)) {
+                result.privacyUrl = normalizeUrl(pLink.url);
+                result.privacyMethod = `strategy_21_puppeteer_dom_${pLink.strategy}`;
+                console.log(`[DeepScan] Step 7.5: Found and validated privacy link: ${pLink.url}`);
+                break;
+              }
+            } catch {}
+          }
+          // If validation failed, use first link anyway
+          if (!result.privacyUrl && puppeteerScan.privacyLinks.length > 0) {
+            result.privacyUrl = normalizeUrl(puppeteerScan.privacyLinks[0].url);
+            result.privacyMethod = 'strategy_21_puppeteer_dom_unvalidated';
+          }
         }
       } catch { /* Puppeteer discovery failed */ }
     }
@@ -1215,9 +1289,9 @@ async function discoverPrivacyPageEnhanced(
   const subdomainResult = await checkPrivacySubdomains(domain);
   if (subdomainResult) return { url: subdomainResult, method: 'subdomain' };
 
-  // Strategy 10: Try remaining URL patterns (extended set)
+  // Strategy 10: Try ALL remaining URL patterns (no limit)
   const remainingPatterns = PRIVACY_URL_PATTERNS_FULL.filter(p => !FAST_PRIVACY_PATTERNS.includes(p));
-  const extResult = await tryUrlPatternsBatch(baseUrl, remainingPatterns.slice(0, 20));
+  const extResult = await tryUrlPatternsBatch(baseUrl, remainingPatterns);
   if (extResult) return { url: extResult, method: 'extended_url_pattern' };
 
   // Strategy 11: Check for hash-based routing (Challenge 9.11-9.15)
@@ -1270,17 +1344,57 @@ async function discoverPrivacyPageEnhanced(
       '/gp/help/customer/display.html?nodeId=GX7NJQ4ZB8MHFRNJ',
       '/pages/privacy-policy', '/policies/privacy-policy',
       '/legal/privacy', '/legal/privacy-policy',
+      '/policy/privacy', '/about/privacy',
+      '/help/privacy', '/support/privacy',
+      '/customer/privacy', '/info/privacy-policy',
     ];
     for (const pattern of puppeteerPatterns) {
       try {
         const testUrl = new URL(pattern, baseUrl).href;
         const puppeteerResult = await fetchPrivacyPageWithPuppeteer(testUrl, { timeout: 15000 });
-        if (!puppeteerResult.error && puppeteerResult.text.length > 500 && isPrivacyContent(puppeteerResult.text)) {
+        if (!puppeteerResult.error && puppeteerResult.text.length > 300 && isPrivacyContent(puppeteerResult.text)) {
           return { url: testUrl, method: 'strategy_22_puppeteer_url_pattern' };
         }
       } catch { /* skip this pattern */ }
     }
   } catch { /* Puppeteer URL pattern strategy failed */ }
+
+  // Strategy 23: Google Search fallback - search for "site:domain privacy policy"
+  try {
+    const searchDomain = new URL(baseUrl).hostname;
+    const searchQuery = encodeURIComponent(`site:${searchDomain} privacy policy OR سياسة الخصوصية`);
+    const googleUrl = `https://www.google.com/search?q=${searchQuery}&num=5`;
+    const searchResp = await fetch(googleUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept-Language': 'ar,en;q=0.9',
+      },
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+    });
+    if (searchResp.ok) {
+      const searchHtml = await searchResp.text();
+      // Extract URLs from Google search results
+      const urlRegex = /href="\/url\?q=([^&"]+)/g;
+      let urlMatch;
+      while ((urlMatch = urlRegex.exec(searchHtml)) !== null) {
+        const foundUrl = decodeURIComponent(urlMatch[1]);
+        if (foundUrl.includes(searchDomain) && /privacy|خصوصية|حماية|سياسة/i.test(foundUrl)) {
+          console.log(`[DeepScan] Google Search found privacy URL: ${foundUrl}`);
+          return { url: foundUrl, method: 'google_search' };
+        }
+      }
+      // Also try extracting from direct links
+      const directUrlRegex = /href="(https?:\/\/[^"]*(?:privacy|خصوصية|حماية|سياسة)[^"]*)"/gi;
+      while ((urlMatch = directUrlRegex.exec(searchHtml)) !== null) {
+        const foundUrl = urlMatch[1];
+        if (foundUrl.includes(searchDomain)) {
+          console.log(`[DeepScan] Google Search found privacy URL (direct): ${foundUrl}`);
+          return { url: foundUrl, method: 'google_search_direct' };
+        }
+      }
+    }
+  } catch { /* Google Search fallback failed */ }
 
   return { url: '', method: '' };
 }
@@ -1406,16 +1520,28 @@ function findPrivacyInNavigation(html: string, baseUrl: string): string | null {
 // ===== Strategy 5: Try URL Patterns in Batch =====
 async function tryUrlPatternsBatch(baseUrl: string, patterns: string[]): Promise<string | null> {
   const ua = getRandomUA();
-  // Process in batches of 5 for speed
-  for (let i = 0; i < patterns.length; i += 5) {
-    const batch = patterns.slice(i, i + 5);
+  
+  // First, get the homepage HTML to detect SPA behavior
+  let homepageHtml = '';
+  try {
+    const homeResp = await fetch(baseUrl, {
+      headers: { 'User-Agent': ua },
+      signal: AbortSignal.timeout(8000),
+      redirect: 'follow',
+    });
+    if (homeResp.ok) homepageHtml = await homeResp.text();
+  } catch {}
+  
+  // Process in batches of 8 for speed (increased from 5)
+  for (let i = 0; i < patterns.length; i += 8) {
+    const batch = patterns.slice(i, i + 8);
     const results = await Promise.allSettled(
       batch.map(async (path) => {
         try {
           const testUrl = new URL(path, baseUrl).href;
           const resp = await fetch(testUrl, {
             headers: { 'User-Agent': ua, 'Accept-Language': 'ar,en;q=0.9' },
-            signal: AbortSignal.timeout(6000),
+            signal: AbortSignal.timeout(10000), // Increased from 6s to 10s
             redirect: 'follow',
           });
           if (resp.ok) {
@@ -1425,6 +1551,18 @@ async function tryUrlPatternsBatch(baseUrl: string, patterns: string[]): Promise
             if (!ct.includes('text/html') && !ct.includes('application/xhtml')) return null;
             const html = await resp.text();
             if (isErrorPage(html) || isSoft404(html)) return null;
+            
+            // SPA Detection: If the HTML is nearly identical to homepage, it's a SPA shell
+            // SPA sites return the same shell for ALL paths - we can't trust fetch content
+            if (homepageHtml && html.length > 1000) {
+              const similarity = Math.abs(html.length - homepageHtml.length) / Math.max(html.length, homepageHtml.length);
+              if (similarity < 0.05) {
+                // Less than 5% size difference = likely same SPA shell
+                // Skip this result - need Puppeteer to render actual content
+                return null;
+              }
+            }
+            
             // Check page title for privacy indicators
             const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
             const pageTitle = titleMatch ? titleMatch[1].toLowerCase() : '';
@@ -1607,76 +1745,75 @@ async function checkPDFPrivacy(html: string, baseUrl: string): Promise<string | 
 
 // ===== Privacy Text Extraction (Enhanced) =====
 async function extractPrivacyText(privacyUrl: string, ua?: string): Promise<{ text: string; html: string }> {
+  // STRATEGY: Try Puppeteer FIRST (most reliable for SPAs and protected sites),
+  // then fall back to fetch for simple static sites.
+  
+  let bestText = '';
+  let bestHtml = '';
+  
+  // Method 1: Puppeteer (PRIMARY - works with SPAs, protected sites, JS-rendered content)
+  try {
+    console.log(`[extractPrivacyText] Trying Puppeteer first for: ${privacyUrl}`);
+    const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl, { timeout: 25000 });
+    if (puppeteerResult.text && puppeteerResult.text.length > 200) {
+      bestText = puppeteerResult.text;
+      bestHtml = puppeteerResult.html;
+      console.log(`[extractPrivacyText] Puppeteer extracted ${bestText.length} chars`);
+    }
+  } catch (e: any) {
+    console.warn(`[extractPrivacyText] Puppeteer failed: ${e.message?.substring(0, 80)}`);
+  }
+  
+  // Method 2: fetch (FALLBACK - for simple static sites, may get more complete text)
   try {
     const resp = await fetchWithRetry(privacyUrl, { timeout: PRIVACY_FETCH_TIMEOUT, ua });
-    if (!resp.ok) {
-      // If fetch returns 403/503, try Puppeteer immediately (sites like noon.com, amazon.sa block fetch)
-      try {
-        const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl, { timeout: 20000 });
-        if (puppeteerResult.text.length > 200) {
-          return { text: puppeteerResult.text.slice(0, 20000), html: puppeteerResult.html };
+    if (resp.ok) {
+      const contentType = resp.headers.get('content-type') || '';
+      
+      // Handle PDF responses (Challenge 17.19)
+      if (contentType.includes('pdf')) {
+        if (!bestText) {
+          return { text: '[PDF Privacy Policy detected - requires PDF extraction]', html: '' };
         }
-      } catch { /* Puppeteer fallback for blocked fetch failed */ }
-      return { text: '', html: '' };
-    }
-    
-    const contentType = resp.headers.get('content-type') || '';
-    
-    // Handle PDF responses (Challenge 17.19)
-    if (contentType.includes('pdf')) {
-      // Can't extract PDF text server-side without extra libs, but mark it
-      return { text: '[PDF Privacy Policy detected - requires PDF extraction]', html: '' };
-    }
-
-    const html = await readResponseWithEncoding(resp);
-    
-    // Decode HTML entities (Challenge 16.4-16.6)
-    let text = stripHtml(html);
-    text = decodeHTMLEntities(text);
-    
-    // Handle paginated content (Challenge 13.5-13.8)
-    // Check for "next page" or pagination links
-    const nextPageUrl = findNextPageLink(html, privacyUrl);
-    if (nextPageUrl) {
-      try {
-        const nextResp = await fetchWithRetry(nextPageUrl, { timeout: 8000, ua });
-        if (nextResp.ok) {
-          const nextHtml = await readResponseWithEncoding(nextResp);
-          const nextText = stripHtml(nextHtml);
-          text += '\n\n' + nextText;
-        }
-      } catch { /* pagination fetch failed */ }
-    }
-
-    // Handle accordion/tab content (Challenge 13.9-13.12)
-    // Extract content from data attributes that might contain hidden content
-    const hiddenContent = extractHiddenContent(html);
-    if (hiddenContent) {
-      text += '\n\n' + hiddenContent;
-    }
-
-    // If text is too short, it might be a SPA - try Puppeteer
-    if (text.length < 100 && likelyNeedsPuppeteer(html)) {
-      try {
-        const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl);
-        if (puppeteerResult.text.length > text.length) {
-          return { text: puppeteerResult.text.slice(0, 20000), html: puppeteerResult.html };
-        }
-      } catch { /* Puppeteer fallback failed */ }
-    }
-
-    // Limit to 20000 chars for LLM analysis
-    return { text: text.slice(0, 20000), html };
-  } catch {
-    // Try Puppeteer as last resort
-    try {
-      const puppeteerResult = await fetchPrivacyPageWithPuppeteer(privacyUrl);
-      if (puppeteerResult.text.length > 100) {
-        return { text: puppeteerResult.text.slice(0, 20000), html: puppeteerResult.html };
+        return { text: bestText.slice(0, 20000), html: bestHtml };
       }
-    } catch { /* Puppeteer fallback also failed */ }
-    return { text: '', html: '' };
-  }
+
+      const html = await readResponseWithEncoding(resp);
+      
+      // Decode HTML entities (Challenge 16.4-16.6)
+      let text = stripHtml(html);
+      text = decodeHTMLEntities(text);
+      
+      // Handle paginated content (Challenge 13.5-13.8)
+      const nextPageUrl = findNextPageLink(html, privacyUrl);
+      if (nextPageUrl) {
+        try {
+          const nextResp = await fetchWithRetry(nextPageUrl, { timeout: 8000, ua });
+          if (nextResp.ok) {
+            const nextHtml = await readResponseWithEncoding(nextResp);
+            const nextText = stripHtml(nextHtml);
+            text += '\n\n' + nextText;
+          }
+        } catch { /* pagination fetch failed */ }
+      }
+
+      // Handle accordion/tab content (Challenge 13.9-13.12)
+      const hiddenContent = extractHiddenContent(html);
+      if (hiddenContent) {
+        text += '\n\n' + hiddenContent;
+      }
+
+      // Use fetch result only if it's better than Puppeteer result
+      if (text.length > bestText.length && isPrivacyContent(text)) {
+        bestText = text;
+        bestHtml = html;
+        console.log(`[extractPrivacyText] fetch got better result: ${bestText.length} chars`);
+      }
+    }
+  } catch { /* fetch failed, Puppeteer result (if any) will be used */ }
+
+  // Limit to 20000 chars for LLM analysis
+  return { text: bestText.slice(0, 20000), html: bestHtml };
 }
 
 // ===== Find Next Page Link (Challenge 13.5-13.8) =====
